@@ -12,8 +12,9 @@ for i in range(1, 21):
         print(i)
 
 # Exercise 3: While Loop - Countdown 10 to 1
-print("\nCountdown:")
+print("\nCountdown:")   
 count = 10
 while count >= 1:
     print(count)
     count = count - 1
+                                                    
