@@ -12,7 +12,7 @@
 | Day 1 | Variables, Data Types, f-strings, print | ✅ Done |
 | Day 2 | Lists, Dicts, Loops, if/else | ✅ Done |
 | Day 3 | Functions, *args, **kwargs | ✅ Done |
-| Day 4 | Data Structures | 📋 Ready |
+| Day 4 | Classes + OOP | ✅ Done |
 
 ---
 
@@ -337,5 +337,29 @@ if current_chunk:
 
 ---
 
-*Last Updated: Day 3 (Feb 27, 2026)*
+### Day 4: Classes + OOP
+
+**Q: "What is a class in Python?"**
+
+> "A class is a blueprint for creating objects. It defines what attributes and methods an object will have. Think of it like a movie script — you can cast unlimited actors from one script!"
+
+**Q: "What is __init__?"**
+
+> "__init__ is the constructor — it runs automatically when you create a new object. It's where you set up the initial state, like assigning self.title, self.content."
+
+**Q: "What is self?"**
+
+> "Self refers to the current object being operated on. Like 'me' in English — when I say 'my name', I'm referring to myself. self does the same for objects."
+
+**Q: "Difference between instance method and class method?"**
+
+> "Instance methods work on a specific object (self) — like doc.word_count(). Class methods work on the class itself (cls) — like Document.from_json(). Use @classmethod for alternative constructors."
+
+**Q: "What is to_dict() and why use it?"**
+
+> "to_dict() converts a Python object to a dictionary. Essential for RAG systems — you need to convert documents to JSON to send via APIs. Every document class should have this."
+
+---
+
+*Last Updated: Day 4 (Feb 27, 2026)*
 *Mantra: Thaggedhe Le — Relentless Execution* 💪🔥
