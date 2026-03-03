@@ -361,5 +361,66 @@ if current_chunk:
 
 ---
 
-*Last Updated: Day 4 (Feb 27, 2026)*
+### Day 4.1: @classmethod & from_json()
+
+**Q: "What is @classmethod?"**
+
+> "@classmethod is a decorator that creates objects from external data. It uses 'cls' instead of 'self'. I use it to create objects from JSON or API responses — like a factory machine that takes raw materials and builds the object."
+
+**Q: "How do you create an object from a JSON file?"**
+
+> "I use @classmethod with from_json(). First, read the file with json.load(), then pass the data to from_json() which extracts each field and calls the constructor using cls(). This is how I load document configs in production."
+
+```python
+import json
+
+# Read JSON file
+with open("document.json", "r") as f:
+    data = json.load(f)
+
+# Create Document from JSON
+doc = Document.from_json(data)
+```
+
+---
+
+### 🎯 Classes + OOP Interview Cheat Sheet
+
+| Question | One-Line Answer |
+|----------|----------------|
+| What is a class? | Blueprint for creating objects with shared attributes and methods |
+| What is `__init__`? | Constructor that runs when you create a new object |
+| What is `self`? | Reference to the current object instance |
+| What is `@classmethod`? | Method that creates objects — uses `cls` instead of `self` |
+| When use `@classmethod`? | When creating objects from external data (JSON, APIs, files) |
+| Difference self vs cls? | `self` = current object, `cls` = the class itself |
+| What does `.get()` do? | Returns value if key exists, otherwise returns default |
+| Why `metadata if metadata else {}`? | Prevents mutable default argument bug |
+
+---
+
+---
+
+### SQL: CTE Example (Day 4 Practice)
+
+```sql
+-- Find departments with high earners
+WITH high_earners AS (
+    SELECT name, salary, department
+    FROM employees
+    WHERE salary > 100000
+)
+SELECT department, COUNT(*) as count
+FROM high_earners
+GROUP BY department
+ORDER BY count DESC
+```
+
+**How it works:**
+1. CTE `high_earners` filters employees with salary > 100000
+2. Main query groups by department and counts
+
+---
+
+*Last Updated: Day 4 (March 3, 2026)*
 *Mantra: Thaggedhe Le — Relentless Execution* 💪🔥
