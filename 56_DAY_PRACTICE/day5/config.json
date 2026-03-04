@@ -1,0 +1,5 @@
+{
+  "model": "gemini-flash-2.5",
+  "temperature": 32,
+  "company": "google"
+}
