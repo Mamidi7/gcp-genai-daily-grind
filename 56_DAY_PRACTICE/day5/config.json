@@ -1,5 +1,5 @@
 {
-  "model": "gemini-flash-2.5",
-  "temperature": 32,
-  "company": "google"
+  "model": "claude-opus-2",
+  "temp": 34,
+  "provider": "anthropic"
 }
