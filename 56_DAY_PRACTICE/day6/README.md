@@ -1,4 +1,5 @@
 # 🎬 Day 6: pip, venv, and Your First Package Install
+## 🔥 HOT TOPIC: Async Python (Mentioned in Anthropic Jobs!)
 
 ## Mission
 Set up your Python environment professionally — install packages, manage dependencies!
@@ -26,6 +27,28 @@ venv = Your project's personal bubble 🎈
 
 ---
 
+## 🔥 BONUS: Why Async Python Matters
+
+**Anthropic Job Requirement:**
+> "Proficiency in Python and async/concurrent programming with frameworks like Trio"
+
+**What is async?**
+```python
+# Sync: Wait for each API call
+result1 = requests.get(url1)  # Wait...
+result2 = requests.get(url2)  # Wait...
+result3 = requests.get(url3)  # Wait...
+
+# Async: Fire all at once
+results = await asyncio.gather(
+    fetch(url1),
+    fetch(url2),
+    fetch(url3)
+)  # All at once!
+```
+
+---
+
 ## Hands-On Task
 
 **Set up venv and install required packages:**
@@ -43,11 +66,14 @@ pip install google-generativeai requests python-dotenv
 
 # 4. Save dependencies
 pip freeze > requirements.txt
+
+# 5. Install async packages (for AI agents!)
+pip install aiohttp asyncio
 ```
 
 ---
 
-## Required Packages for RAG
+## Required Packages for RAG + Agents
 
 | Package | Purpose |
 |---------|---------|
@@ -56,19 +82,30 @@ pip freeze > requirements.txt
 | `python-dotenv` | Load .env files |
 | `faiss-cpu` | Vector database |
 | `langchain` | RAG framework |
+| `aiohttp` | **Async HTTP (HOT!)** |
+| `langchain-openai` | OpenAI/Anthropic APIs |
 
 ---
 
 ## Interview Punch
 
-> "I use venv to isolate each project's dependencies. Before any deployment, I run pip freeze to lock versions in requirements.txt — this ensures reproducibility."
+> "I use venv to isolate each project's dependencies. Before any deployment, I run pip freeze to lock versions in requirements.txt — this ensures reproducibility. I'm also learning async Python because Anthropic lists it as a requirement for RL engineering roles."
 
 ---
 
 ## Resources
 - pip docs: pip.pypa.io
 - venv: docs.python.org/3/library/venv
+- Async Python: docs.python.org/3/library/asyncio
 
 ---
 
+## ⚡ Today's Hot Topic Checkbox
+
+- [ ] Set up venv
+- [ ] Install packages
+- [ ] Understand async vs sync
+- [ ] Know: "async = faster for multiple API calls"
+
+---
 *Mantra: Thaggedhe Le* 🔥
