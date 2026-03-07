@@ -1,5 +1,6 @@
 # Day 7 Solutions: REST APIs with requests
 import requests
+import os
 
 
 # Exercise 1: GET Request
@@ -29,8 +30,8 @@ def create_post(title, body, user_id):
 def fetch_with_error_handling(url):
     """Fetch from URL with proper error handling"""
     try:
-        response = requests.get(url, timeout)
-        response.=10raise_for_status()
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
         return {"success": True, "data": response.json()}
     except requests.exceptions.ConnectionError:
         return {"success": False, "error": "Connection failed"}
@@ -43,7 +44,8 @@ def fetch_with_error_handling(url):
 # Exercise 4: Call Gemini API
 def call_gemini(prompt, api_key):
     """Call Gemini API directly using requests"""
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
+    # Using gemini-2.5-flash (available model)
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
 
     headers = {"Content-Type": "application/json"}
 
@@ -85,7 +87,15 @@ if __name__ == "__main__":
     print(result)
 
     print("\nExercise 4: Gemini API")
-    print("Requires GEMINI_API_KEY to be set")
+    try:
+        key = os.environ.get("GEMINI_API_KEY", "YOUR_KEY_HERE")
+        if key and key != "YOUR_KEY_HERE":
+            result = call_gemini("Explain RAG in one sentence.", key)
+            print(f"Response: {result}")
+        else:
+            print("Set GEMINI_API_KEY in .env file")
+    except Exception as e:
+        print(f"Error: {e}")
 
     print("\nExercise 5: Query Parameters")
     results = search_posts("qui")
