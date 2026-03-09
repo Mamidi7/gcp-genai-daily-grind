@@ -424,3 +424,47 @@ ORDER BY count DESC
 
 *Last Updated: Day 4 (March 3, 2026)*
 *Mantra: Thaggedhe Le — Relentless Execution* 💪🔥
+
+---
+
+## 🚀 AUTORESEARCH (Karpathy)
+
+### What is autoresearch?
+
+> "Autoresearch is an AI system where the AI itself runs ML experiments autonomously. You give it a goal - minimize val_bpb - and it modifies training code, runs 5-minute experiments, evaluates results, and keeps improvements. One GPU can run 100+ experiments overnight while you sleep."
+
+### What is val_bpb?
+
+> "Validation bits per byte - lower is better. It's vocabulary-independent, so you can compare any model. Measures how well the model compresses text, essentially how good it is at predicting the next token."
+
+### Explain Muon optimizer
+
+> "Muon is a custom optimizer for 2D matrix parameters. It uses orthogonalization - keeps weight matrices diverse rather than converging to similar patterns. For non-matrix parameters like embeddings, it uses regular AdamW. Different parameter types need different optimization strategies."
+
+### What's sliding window attention?
+
+> "Instead of attending to all previous tokens (O(n²)), sliding window only looks at the last N tokens - typically half sequence length for 'short' windows. Reduces memory from O(n²) to O(n×w). Layer 0-2 might use short windows, final layer uses full attention."
+
+### How does RoPE work?
+
+> "RoPE - Rotary Position Embeddings - encodes position by rotating Q and K vectors. Instead of adding position embeddings, we multiply by rotation matrices. The beauty: naturally extends to any sequence length without training position embeddings up to max length."
+
+### What's the 5-minute time budget?
+
+> "Fixed 5-minute budget per experiment makes results comparable, forces efficiency, enables overnight runs. The AI doesn't need to converge - just show improvement direction within 5 minutes. You can always run longer later if needed."
+
+### "Arena is the product" - explain
+
+> "Karpathy's insight: design the right constraints and let the AI explore. The autoreloop IS the product - it generates discoveries. We don't pre-specify the best architecture; we let experimentation find it. Our role shifts from implementer to question-asker."
+
+### Build autoresearch on GCP?
+
+> "Use Vertex AI Training for each 5-minute experiment - it's serverless, only pay for compute. Cloud Scheduler triggers orchestrator at night. BigQuery stores results. Vertex AI Vizier does Bayesian hyperparameter optimization automatically - similar to what autoresearch does manually."
+
+### Future of ML engineering?
+
+> "More autonomous. Like autoresearch shows, AI can iterate on model architecture and hyperparameters faster than humans. Engineers will define what to optimize and constrain the search space. The bottleneck shifts from 'running experiments' to 'formulating good questions.'"
+
+---
+
+*Autoresearch Added: March 9, 2026*
