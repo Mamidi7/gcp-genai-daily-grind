@@ -1,0 +1,15 @@
+sequenceDiagram
+    participant User
+    participant State as AgentState
+    participant A as analyze
+    participant G as generate
+    participant I as improve
+
+    User->>State: question="What is AI?"
+    State->>A: Read question
+    A->>State: steps=["analyzed"]
+    State->>G: Read question
+    G->>State: answer="AI is..."
+    State->>I: Read answer
+    I->>State: answer="Detailed: AI is..."
+    State-->>User: Final answer
