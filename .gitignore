@@ -2,3 +2,10 @@
 __pycache__/
 .DS_Store
 *.ipynb_checkpoints/
+.venv/
+venv/
+*.pyc
+*.pyo
+.idea/
+.vscode/
+*.log
