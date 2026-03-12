@@ -2,38 +2,58 @@
 
 Structured 56-day preparation for GCP AI/ML Engineer role.
 
-## Why This Exists
+## The Story
 
-I'm transitioning from banking ETL to GCP AI/ML. After 1.5 years career gap, I needed a structured approach - not random tutorials. This repo documents my daily learning with real code, notes, and projects.
+Transitioning from banking ETL (Data Engineering) to GCP AI/ML after a career gap. This repository documents my hands-on learning path - not tutorials followed passively, but real projects built from scratch.
 
-## What It Covers
+## 56-Day Structure
 
-| Phase | Days | Topics |
-|-------|------|--------|
-| Foundation | 1-14 | Python, SQL, GCP Basics |
-| Project 1 | 15-28 | Self-Correcting RAG |
-| Project 2 | 29-42 | MLOps Pipeline |
-| Interview Prep | 43-56 | Mock interviews, system design |
+| Phase | Days | Focus |
+|-------|------|-------|
+| Foundation | 1-14 | Python, SQL, BigQuery, Vertex AI basics |
+| Project 1 | 15-28 | Self-Correcting RAG with LangChain + Vertex AI |
+| Project 2 | 29-42 | MLOps Pipeline with Vertex AI Endpoints |
+| Interview | 43-56 | System design, behavioral questions |
 
-## What Each Day Looks Like
+## Projects
 
+### Self-Correcting RAG
+- Built retrieval system with LangChain
+- Evaluation with RAGAs metrics
+- Deployed on Vertex AI
+
+### MLOps Pipeline
+- Training pipeline with Vertex AI Training
+- Model versioning with Vertex AI Model Registry
+- CI/CD with GitHub Actions to Cloud Run
+
+### Fine-Tuning
+- LoRA fine-tuning on custom datasets
+- Experiment tracking with Vertex AI Experiments
+
+## Daily Format
+
+Each day follows the same structure:
 ```
 dayX/
-├── script.py      # Code for the day
-├── notes.md       # Key learnings
+├── script.py      # Code I wrote
+├── notes.md       # What I learned
 ├── exercises.py   # Practice problems
-└── solution.py   # Answer key (when I solve it)
+└── solution.py    # When I solve it
 ```
-
-## Key Projects
-
-- **Self-Correcting RAG**: LangChain + Vertex AI + retrieval evaluation
-- **MLOps Pipeline**: Vertex AI endpoints, CI/CD with GitHub Actions
-- **Fine-tuning**: LoRA fine-tuning on custom datasets
 
 ## Tech Stack
 
-Python, SQL, BigQuery, Vertex AI, LangChain, LangGraph, Gemma, Docker, GitHub Actions
+- **Languages:** Python, SQL
+- **Cloud:** GCP (BigQuery, Vertex AI, Cloud Run, Cloud Functions)
+- **ML/AI:** LangChain, LangGraph, Hugging Face, Gemma
+- **MLOps:** Docker, GitHub Actions, Kubeflow Pipelines
+
+## Why This Matters
+
+1. **Consistency** - 56 days of daily commits shows commitment
+2. **End-to-end** - Not just snippets, but full projects
+3. **GCP-native** - Using Vertex AI the "real way", not just API calls
 
 ## Connect
 
@@ -41,5 +61,4 @@ Python, SQL, BigQuery, Vertex AI, LangChain, LangGraph, Gemma, Docker, GitHub Ac
 - LinkedIn: linkedin.com/in/krishnavardhan
 
 ---
-
 *Last updated: March 2026*
