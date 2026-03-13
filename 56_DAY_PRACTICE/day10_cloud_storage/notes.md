@@ -74,3 +74,77 @@ Day 11: Compute (Compute Engine, Cloud Run, Cloud Functions)
 - Storage classes: 15 min
 - SQL Window Functions: 30 min
 - Total: ~65 min
+
+---
+
+## FastAPI + Gemini Validation Run (Industry Upgrade)
+
+Test approach used:
+- Used FastAPI `TestClient` to run endpoint tests in-process.
+- Reason: local port bind was blocked in this environment, but request/response and middleware behavior were still fully testable.
+
+Endpoints tested:
+- `GET /healthz` -> `200`
+- `GET /readyz` -> `200`
+- `POST /chat` with empty prompt -> `422`
+- `POST /chat` with normal prompt -> `502` (upstream model call failed)
+- `POST /generate` with >6000 chars prompt -> `422`
+
+### Real Failure 1: Input Validation Failure (422)
+- Symptom: `/chat` returned `422 Unprocessable Entity`
+- Trigger: empty `prompt` string
+- Root cause: request schema enforces `prompt` min length = 1
+- Fix/Handling: kept strict validation; client now receives deterministic error before model call
+- Prevention: contract-first API design with pydantic constraints
+- Interview value: demonstrates defensive API design and reduced wasted upstream calls
+
+### Real Failure 2: Upstream Model Call Failure (502)
+- Symptom: `/chat` returned `502 Bad Gateway`
+- Trigger: normal prompt, upstream Gemini call failed
+- Root cause: upstream model invocation failure path
+- Fix/Handling: mapped generic upstream errors to safe `502` response with request ID
+- Prevention: retry wrapper + timeout + structured request logging already added in API layer
+- Interview value: shows reliability engineering and graceful degradation
+
+---
+
+## STAR Answers from Real Debugging
+
+### STAR 1 - Validation Contract
+- Situation: I was productionizing a FastAPI + Gemini endpoint.
+- Task: Prevent invalid requests from reaching model calls and causing unpredictable failures.
+- Action: Added strict pydantic constraints (`prompt` min/max length, token and temperature bounds) and validated via endpoint tests.
+- Result: Invalid payloads now fail fast with `422`, reducing unnecessary upstream calls and making error behavior deterministic.
+
+### STAR 2 - Upstream Resilience
+- Situation: During endpoint testing, model calls intermittently failed upstream.
+- Task: Make failures safe and diagnosable instead of returning raw stack traces.
+- Action: Implemented retry + timeout wrapper, mapped upstream failures to `502/504/429` style responses, and attached request IDs in middleware logs.
+- Result: API behavior became predictable under failure, and debugging became faster due to request-level traceability.
+
+---
+
+## Study Resume Log
+
+### Date
+- 2026-03-13
+
+### Where we paused
+- Krishna understood the big picture of FastAPI + Gemini.
+- Krishna explained:
+  - why validation matters
+  - why retries matter
+  - why request IDs matter
+  - why `healthz` and `readyz` are different
+
+### Corrected understanding to remember
+- validation is for input safety and predictability, not model selection
+- `/generate` is not a fallback for `/chat`; it is a separate, more creative endpoint
+- middleware does more than request ID; it also times and logs the request
+
+### Next exact step
+- learn `/chat` line by line
+- after that, learn `_generate_with_retry()` line by line
+
+### Restart prompt for next session
+- "Teach me `/chat` line by line in simple language with visuals."

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import time
 import uuid
 from typing import Optional
@@ -18,11 +19,14 @@ import google.genai as genai
 from google.genai import types
 
 MODEL_NAME = "gemini-2.0-flash-001"
-PROJECT_ID = "e2e-etl-project"
-LOCATION = "us-central1"
+PROJECT_ID = os.getenv("GCP_PROJECT_ID", "e2e-etl-project")
+LOCATION = os.getenv("GCP_LOCATION", "us-central1")
 MAX_PROMPT_CHARS = 6000
-DEFAULT_TIMEOUT_SECONDS = 20
-MAX_RETRIES = 2
+CHAT_TIMEOUT_SECONDS = 20
+CHAT_MAX_RETRIES = 2
+GENERATE_TIMEOUT_SECONDS = 45
+GENERATE_MAX_RETRIES = 1
+GENERATE_CONCURRENCY_LIMIT = 2
 
 logging.basicConfig(
     level=logging.INFO,
@@ -31,6 +35,7 @@ logging.basicConfig(
 logger = logging.getLogger("fastapi-gemini")
 
 app = FastAPI(title="Gemini API", version="1.1.0")
+generate_semaphore = asyncio.Semaphore(GENERATE_CONCURRENCY_LIMIT)
 
 
 class PromptRequest(BaseModel):
@@ -51,8 +56,14 @@ class ErrorResponse(BaseModel):
     request_id: str
 
 
-# Initialize Vertex AI client once at startup.
-client = genai.Client(vertexai=True, project=PROJECT_ID, location=LOCATION)
+client: Optional[genai.Client] = None
+
+
+def get_client() -> genai.Client:
+    global client
+    if client is None:
+        client = genai.Client(vertexai=True, project=PROJECT_ID, location=LOCATION)
+    return client
 
 
 @app.middleware("http")
@@ -105,15 +116,21 @@ def _map_upstream_error(err: Exception) -> tuple[int, str]:
     return 502, "Upstream model call failed"
 
 
-async def _generate_with_retry(payload: PromptRequest) -> tuple[str, int]:
+async def _generate_with_retry(
+    payload: PromptRequest,
+    *,
+    timeout_seconds: int,
+    max_retries: int,
+) -> tuple[str, int]:
     retries_used = 0
     last_error: Optional[Exception] = None
+    model_client = get_client()
 
-    for attempt in range(MAX_RETRIES + 1):
+    for attempt in range(max_retries + 1):
         try:
             response = await asyncio.wait_for(
                 asyncio.to_thread(
-                    client.models.generate_content,
+                    model_client.models.generate_content,
                     model=MODEL_NAME,
                     contents=payload.prompt,
                     config=types.GenerateContentConfig(
@@ -121,12 +138,12 @@ async def _generate_with_retry(payload: PromptRequest) -> tuple[str, int]:
                         max_output_tokens=payload.max_tokens,
                     ),
                 ),
-                timeout=DEFAULT_TIMEOUT_SECONDS,
+                timeout=timeout_seconds,
             )
             return (response.text or ""), retries_used
         except Exception as exc:
             last_error = exc
-            if attempt < MAX_RETRIES:
+            if attempt < max_retries:
                 retries_used += 1
                 await asyncio.sleep(0.6 * (attempt + 1))
                 continue
@@ -152,9 +169,10 @@ def healthz():
 @app.get("/readyz")
 def readyz():
     try:
-        # Lightweight readiness signal: client object exists and model string is configured.
-        if client is None or not MODEL_NAME:
+        # Readiness means model config is present and client can initialize.
+        if not MODEL_NAME:
             raise ValueError("Client not ready")
+        _ = get_client()
         return {"status": "ready", "model": MODEL_NAME, "project": PROJECT_ID}
     except Exception:
         raise HTTPException(status_code=503, detail="Service not ready")
@@ -163,7 +181,11 @@ def readyz():
 @app.post("/chat", response_model=PromptResponse)
 async def chat(request: Request, payload: PromptRequest):
     request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
-    text, retries_used = await _generate_with_retry(payload)
+    text, retries_used = await _generate_with_retry(
+        payload,
+        timeout_seconds=CHAT_TIMEOUT_SECONDS,
+        max_retries=CHAT_MAX_RETRIES,
+    )
     return PromptResponse(
         response=text,
         model=MODEL_NAME,
@@ -181,7 +203,19 @@ async def generate(request: Request, payload: PromptRequest):
         max_tokens=max(payload.max_tokens, 512),
     )
     request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
-    text, retries_used = await _generate_with_retry(creative_payload)
+    try:
+        await asyncio.wait_for(generate_semaphore.acquire(), timeout=2)
+    except TimeoutError:
+        raise HTTPException(status_code=503, detail="Generate endpoint is busy. Try again soon.")
+
+    try:
+        text, retries_used = await _generate_with_retry(
+            creative_payload,
+            timeout_seconds=GENERATE_TIMEOUT_SECONDS,
+            max_retries=GENERATE_MAX_RETRIES,
+        )
+    finally:
+        generate_semaphore.release()
     return PromptResponse(
         response=text,
         model=MODEL_NAME,
