@@ -42,6 +42,24 @@ dayX/
 └── solution.py    # When I solve it
 ```
 
+## Interview Delivery System (CODE-LENS)
+
+To avoid line-by-line memorization and improve interview explanation quality, this repo includes a standard process:
+
+1. Read [docs/CODE_LENS_STANDARD.md](docs/CODE_LENS_STANDARD.md)
+2. Use templates in `docs/templates/`
+3. Start a daily session with:
+
+```bash
+bash scripts/start_code_lens_session.sh
+```
+
+This generates `docs/code_lens_sessions/session_YYYY-MM-DD.md` with:
+- CodeCard
+- BugCard
+- InterviewPack (30s/90s/3min)
+- QuestionBank
+
 ## Tech Stack
 
 - **Languages:** Python, SQL
