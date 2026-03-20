@@ -11,7 +11,7 @@
 - learned storage class decision logic
 - connected GCS to an applied AI backend architecture
 - captured two real FastAPI/Gemini failure cases
-- completed SQL/BQ window-function practice pack (ROW_NUMBER, RANK, DENSE_RANK, LAG/LEAD)
+- prepared SQL/BQ window-function practice pack (ROW_NUMBER, RANK, DENSE_RANK, LAG/LEAD)
 - prepared manual-first packet, SQL/BQ track artifacts, and debug template
 
 ## What I Understood Well
@@ -22,16 +22,13 @@
 - why `healthz` and `readyz` are different
 
 ## What Is Still Confusing
-- no blocker for Day 10 closure
-- deeper line-by-line endpoint walkthrough can be done later as optional revision
+- no blocker in FastAPI + Gemini track
+- BigQuery window-function execution is still pending confirmation
 
 ## Exact Next Step
-- mark Day 10 as complete
-- move to Day 11 topic track as per course flow
-- carry forward one daily artifact habit:
-  - one build action
-  - one debugging artifact
-  - one interview answer
+- run and verify at least 2 queries from `DAY10_BIGQUERY_WINDOW_FUNCTIONS.sql`
+- capture one BigQuery result snapshot or query output note as evidence
+- then close Day 10 and move to Day 11 topic track
 
 ## Debug Summary
 - symptom: `/chat` returned `422` on empty prompt
@@ -59,12 +56,12 @@
 ## Day 10 Interview Insights (Final)
 - architecture insight: interviewers care that you connect storage, API, model, and analytics as one production story
 - reliability insight: showing real `422` and `502` with root cause and prevention gives stronger signal than only happy-path demo
-- data insight: BigQuery window functions are directly useful for request analytics, retry trends, and feedback ranking
+- data insight: BigQuery window functions are directly useful for request analytics, retry trends, and feedback ranking; execution proof should be shown before claiming completion
 - communication insight: explain in layers (30s, 90s STAR, 3min deep dive) instead of memorizing each line
 - judgment insight: move forward when objective is achieved; keep deep line-by-line review as optional revision, not a blocker
 
 ## Quality Score
-- `10/10` (Day 10 closed on 2026-03-20)
+- `9/10` (Day 10 closure pending BigQuery execution proof)
 
 Reason:
 - simple explanation exists
@@ -79,4 +76,4 @@ Reason:
 - today’s commit-ready artifacts exist
 
 ## Restart Prompt
-- Day 10 complete. Start Day 11 according to course track and capture one debug-to-interview artifact.
+- Execute 2 window-function queries from Day 10 SQL track, log outputs, then close Day 10 and move to Day 11.
