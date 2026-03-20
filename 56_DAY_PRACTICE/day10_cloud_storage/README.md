@@ -34,6 +34,15 @@ Master Google Cloud Storage - buckets, objects, and access control. Essential fo
 ## SQL Track
 Continue with: **BigQuery Window Functions** (ROW_NUMBER, RANK, LAG/LEAD)
 
+## Industry-Grade Continuation
+
+Use these files for the upgraded manual-first day flow:
+
+- `DAY10_MANUAL_FIRST_EXECUTION_PACKET_2026-03-15.md`
+- `DAY10_BIGQUERY_WINDOW_FUNCTIONS.sql`
+- `DAY10_DEBUG_LOG_TEMPLATE.md`
+- `DAY_CLOSEOUT.md`
+
 ---
 
 ## Resources
