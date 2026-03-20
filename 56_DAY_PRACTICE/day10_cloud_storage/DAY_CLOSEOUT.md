@@ -11,7 +11,8 @@
 - learned storage class decision logic
 - connected GCS to an applied AI backend architecture
 - captured two real FastAPI/Gemini failure cases
-- prepared manual-first packet, SQL/BQ track, and debug template
+- completed SQL/BQ window-function practice pack (ROW_NUMBER, RANK, DENSE_RANK, LAG/LEAD)
+- prepared manual-first packet, SQL/BQ track artifacts, and debug template
 
 ## What I Understood Well
 - bucket vs object
@@ -21,14 +22,16 @@
 - why `healthz` and `readyz` are different
 
 ## What Is Still Confusing
-- exact line-by-line behavior inside `/chat`
-- exact retry loop behavior inside `_generate_with_retry()`
+- no blocker for Day 10 closure
+- deeper line-by-line endpoint walkthrough can be done later as optional revision
 
 ## Exact Next Step
-- open `fastapi-gemini/main.py`
-- explain `/chat` from first line to return statement
-- then explain `_generate_with_retry()` line by line
-- then solve 2 queries from `DAY10_BIGQUERY_WINDOW_FUNCTIONS.sql`
+- mark Day 10 as complete
+- move to Day 11 topic track as per course flow
+- carry forward one daily artifact habit:
+  - one build action
+  - one debugging artifact
+  - one interview answer
 
 ## Debug Summary
 - symptom: `/chat` returned `422` on empty prompt
@@ -53,8 +56,15 @@
 - 3-minute technical walkthrough:
   Start with the user request. Files and supporting artifacts should live outside the app in Cloud Storage because the API container is ephemeral. FastAPI receives the request, validates the payload with schema rules, adds request-level tracing, and then calls Gemini through a retry wrapper. If the payload is invalid, the request fails early with a clear client error. If the upstream model fails, the app returns a safe mapped error like `502` instead of leaking raw failure details. BigQuery does not need to be fully integrated yet, but it is the right place to analyze request logs, retries, feedback, and later evaluation-style metrics. This makes the architecture useful for both learning and interviews because it shows storage, API flow, model integration, observability, and debugging in one system.
 
+## Day 10 Interview Insights (Final)
+- architecture insight: interviewers care that you connect storage, API, model, and analytics as one production story
+- reliability insight: showing real `422` and `502` with root cause and prevention gives stronger signal than only happy-path demo
+- data insight: BigQuery window functions are directly useful for request analytics, retry trends, and feedback ranking
+- communication insight: explain in layers (30s, 90s STAR, 3min deep dive) instead of memorizing each line
+- judgment insight: move forward when objective is achieved; keep deep line-by-line review as optional revision, not a blocker
+
 ## Quality Score
-- `10/10`
+- `10/10` (Day 10 closed on 2026-03-20)
 
 Reason:
 - simple explanation exists
@@ -69,4 +79,4 @@ Reason:
 - today’s commit-ready artifacts exist
 
 ## Restart Prompt
-- Teach me `/chat` line by line in simple English with visuals.
+- Day 10 complete. Start Day 11 according to course track and capture one debug-to-interview artifact.
