@@ -1,60 +1,45 @@
 # Session State
 
-Last updated: 2026-03-15
+Last updated: 2026-03-21
 
 ## Current Position
 
-- Current day: `day10_cloud_storage`
-- Current topic: `Cloud Storage + FastAPI + Gemini request flow`
-- Current block: `Understand /chat line by line`
+- Current day: `day11`
+- Current topic: `Files + JSON + environment variables`
+- Current block: `Topic 1 (.env fundamentals) in day11 notebook`
 - Status: `in progress`
 
-## Completed So Far
+## Single Source of Execution Memory
 
-- understood GCS bucket vs object basics
-- understood storage classes at interview level
-- understood why validation matters before model call
-- understood why retries matter
-- understood why request IDs matter
-- understood the difference between `healthz` and `readyz`
-- captured real FastAPI debug cases for `422` and `502`
-- created day-10 manual-first packet, SQL/BQ track, and debug template
+- Primary memory file: `DAYWISE_EXECUTION_MEMORY.md`
+- Day 11 primary file: `day11/day11_manual_practice_notebook.ipynb`
 
 ## Exact Next Step
 
-Study `fastapi-gemini/main.py` and explain `/chat` from first line to return statement.
-
-After that:
-- explain `_generate_with_retry()` line by line
-- solve at least 2 queries from `DAY10_BIGQUERY_WINDOW_FUNCTIONS.sql`
-- record one debug entry in `DAY10_DEBUG_LOG_TEMPLATE.md`
+Open `day11/day11_manual_practice_notebook.ipynb` and complete Topic 1 fully.
+After Topic 1, update the status row inside the same notebook (`in_progress` -> `finished`).
 
 ## Current Blocker
 
-- No blocker yet.
-- If confusion appears, reduce the topic to:
-  - request enters
-  - validation happens
-  - Gemini call happens
-  - safe response returns
+- No blocker.
+- If blocked for more than 30 minutes, mark that block as `blocked` in notebook log and move to next smallest step.
 
-## Latest Files To Open First
+## Resume Order (Any Agent Must Follow)
 
-- `day10_cloud_storage/DAY10_MANUAL_FIRST_EXECUTION_PACKET_2026-03-15.md`
-- `day10_cloud_storage/notes.md`
-- `day10_cloud_storage/fastapi-gemini/main.py`
-- `day10_cloud_storage/DAY_CLOSEOUT.md`
+1. `DAYWISE_EXECUTION_MEMORY.md`
+2. `SESSION_STATE.md`
+3. `day11/day11_manual_practice_notebook.ipynb`
 
-## Latest Debug Story
+## Current Day Artifacts
 
-- Empty prompt caused `422` due to schema validation.
-- Valid prompt caused upstream failure and safe `502` handling.
+- `day11/README.md`
+- `day11/notes.md`
+- `day11/exercises.py`
+- `day11/solution.py`
+- `day11/debug_journal_day11.md`
+- `day11/interview_pack_day11.md`
+- `day11/day11_checklist.md`
 
 ## Next Interview Question
 
-Why is it better to keep retry logic in a separate wrapper instead of writing retries directly inside `/chat`?
-
-## Green Streak Status
-
-- Today’s artifact set is ready.
-- Commit still pending.
+Why is fail-fast env validation better than discovering missing config during request-time model calls?

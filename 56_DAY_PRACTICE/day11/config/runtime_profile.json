@@ -1,0 +1,10 @@
+{
+  "runtime_profile": "day11-local",
+  "owner": "krishna",
+  "safe_logging": true,
+  "max_prompt_chars": 6000,
+  "feature_flags": {
+    "enable_debug_mode": false,
+    "enable_trace": true
+  }
+}
