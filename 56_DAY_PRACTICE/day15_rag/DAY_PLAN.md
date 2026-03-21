@@ -32,3 +32,13 @@ Complete this day manually with verified outputs only.
 - [ ] Debug artifact done
 - [ ] Interview artifact done
 - [ ] Progress files updated (`SESSION_STATE.md`, `DAILY_PROGRESS_LOG.md`, `DAYWISE_EXECUTION_MEMORY.md`)
+
+
+## Topic Completion Checkboxes
+
+- [ ] Step 1: Create minimal Python wrapper function
+- [ ] Step 2: Define structured output shape
+- [ ] Step 3: Handle parse failure path
+- [ ] Step 4: Add retry/timeout placeholders
+- [ ] Step 5: Prepare interview explanation: wrapper vs direct SDK
+- [ ] Day Closeout

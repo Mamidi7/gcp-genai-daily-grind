@@ -32,3 +32,13 @@ Complete this day manually with verified outputs only.
 - [ ] Debug artifact done
 - [ ] Interview artifact done
 - [ ] Progress files updated (`SESSION_STATE.md`, `DAILY_PROGRESS_LOG.md`, `DAYWISE_EXECUTION_MEMORY.md`)
+
+
+## Topic Completion Checkboxes
+
+- [ ] Step 1: Define input constraints (min/max length, required fields)
+- [ ] Step 2: Return clean error response format
+- [ ] Step 3: Add one custom exception path
+- [ ] Step 4: Reproduce blank input + oversized input failures
+- [ ] Step 5: Convert debug to STAR response
+- [ ] Day Closeout

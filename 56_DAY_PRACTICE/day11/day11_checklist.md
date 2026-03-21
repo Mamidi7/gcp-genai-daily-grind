@@ -1,24 +1,24 @@
 # Day 11 Checklist
 
-Date: 2026-03-21
+Date: 2026-03-22
 
 ## Build
-- [ ] Read `README.md`
-- [ ] Complete TODOs in `exercises.py`
-- [ ] Run `python3 exercises.py`
-- [ ] Run `python3 solution.py`
+- [x] Read `README.md`
+- [x] Complete TODOs in `exercises.py`
+- [x] Run `python3 exercises.py`
+- [x] Run `python3 solution.py`
 
 ## Debug
-- [ ] Reproduce missing `GCP_PROJECT_ID`
-- [ ] Fill `debug_journal_day11.md`
+- [x] Reproduce missing `GCP_PROJECT_ID`
+- [x] Fill `debug_journal_day11.md`
 
 ## Interview
-- [ ] Practice 30s answer
-- [ ] Practice 90s STAR
-- [ ] Practice 3-min walkthrough
-- [ ] Answer all follow-up questions in `interview_pack_day11.md`
+- [x] Practice 30s answer
+- [x] Practice 90s STAR
+- [x] Practice 3-min walkthrough
+- [x] Answer all follow-up questions in `interview_pack_day11.md`
 
 ## Proof of Work
-- [ ] Keep one screenshot or terminal output
-- [ ] Write 5-line day summary in personal notes
-- [ ] Commit all Day 11 files
+- [x] Keep one screenshot or terminal output
+- [x] Write 5-line day summary in personal notes
+- [x] Commit all Day 11 files

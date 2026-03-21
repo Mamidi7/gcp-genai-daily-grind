@@ -32,3 +32,13 @@ Complete this day manually with verified outputs only.
 - [ ] Debug artifact done
 - [ ] Interview artifact done
 - [ ] Progress files updated (`SESSION_STATE.md`, `DAILY_PROGRESS_LOG.md`, `DAYWISE_EXECUTION_MEMORY.md`)
+
+
+## Topic Completion Checkboxes
+
+- [ ] Step 1: Define one tool schema
+- [ ] Step 2: Validate tool input arguments
+- [ ] Step 3: Simulate malformed tool call
+- [ ] Step 4: Log model decision vs tool execution
+- [ ] Step 5: Write interview pack
+- [ ] Day Closeout

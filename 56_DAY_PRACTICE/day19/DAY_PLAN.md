@@ -32,3 +32,13 @@ Complete this day manually with verified outputs only.
 - [ ] Debug artifact done
 - [ ] Interview artifact done
 - [ ] Progress files updated (`SESSION_STATE.md`, `DAILY_PROGRESS_LOG.md`, `DAYWISE_EXECUTION_MEMORY.md`)
+
+
+## Topic Completion Checkboxes
+
+- [ ] Step 1: Create 10 test questions
+- [ ] Step 2: Add expected answer notes
+- [ ] Step 3: Build markdown eval table
+- [ ] Step 4: Flag one ambiguous test
+- [ ] Step 5: Explain why evals > demo quality
+- [ ] Day Closeout

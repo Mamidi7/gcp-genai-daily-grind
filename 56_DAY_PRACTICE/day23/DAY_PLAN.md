@@ -32,3 +32,13 @@ Complete this day manually with verified outputs only.
 - [ ] Debug artifact done
 - [ ] Interview artifact done
 - [ ] Progress files updated (`SESSION_STATE.md`, `DAILY_PROGRESS_LOG.md`, `DAYWISE_EXECUTION_MEMORY.md`)
+
+
+## Topic Completion Checkboxes
+
+- [ ] Step 1: Prepare Cloud Run deployable FastAPI service
+- [ ] Step 2: Separate local config from cloud config
+- [ ] Step 3: Reproduce one env-mapping bug
+- [ ] Step 4: Document deployment checklist
+- [ ] Step 5: Write interview answer: why Cloud Run
+- [ ] Day Closeout

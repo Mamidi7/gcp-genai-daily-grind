@@ -32,3 +32,13 @@ Complete this day manually with verified outputs only.
 - [ ] Debug artifact done
 - [ ] Interview artifact done
 - [ ] Progress files updated (`SESSION_STATE.md`, `DAILY_PROGRESS_LOG.md`, `DAYWISE_EXECUTION_MEMORY.md`)
+
+
+## Topic Completion Checkboxes
+
+- [ ] Step 1: Set max loop limit
+- [ ] Step 2: Set timeout/fallback behavior
+- [ ] Step 3: Trace each loop step
+- [ ] Step 4: Reproduce repeated loop bug
+- [ ] Step 5: Document guardrails
+- [ ] Day Closeout

@@ -32,3 +32,13 @@ Complete this day manually with verified outputs only.
 - [ ] Debug artifact done
 - [ ] Interview artifact done
 - [ ] Progress files updated (`SESSION_STATE.md`, `DAILY_PROGRESS_LOG.md`, `DAYWISE_EXECUTION_MEMORY.md`)
+
+
+## Topic Completion Checkboxes
+
+- [ ] Step 1: Integrate API + retrieval + eval + tool path
+- [ ] Step 2: Create one architecture diagram
+- [ ] Step 3: Update README with flow and tradeoffs
+- [ ] Step 4: Write one STAR story
+- [ ] Step 5: Practice 30s/90s/3-min final walkthrough
+- [ ] Day Closeout

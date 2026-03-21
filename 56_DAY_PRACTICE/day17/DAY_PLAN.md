@@ -32,3 +32,13 @@ Complete this day manually with verified outputs only.
 - [ ] Debug artifact done
 - [ ] Interview artifact done
 - [ ] Progress files updated (`SESSION_STATE.md`, `DAILY_PROGRESS_LOG.md`, `DAYWISE_EXECUTION_MEMORY.md`)
+
+
+## Topic Completion Checkboxes
+
+- [ ] Step 1: Implement baseline retrieval (keyword or vector)
+- [ ] Step 2: Return top-k snippets before final answer
+- [ ] Step 3: Log retrieval mismatch failure
+- [ ] Step 4: Separate retrieval quality vs generation quality
+- [ ] Step 5: Record interview artifact
+- [ ] Day Closeout

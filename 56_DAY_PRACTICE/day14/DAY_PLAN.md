@@ -32,3 +32,13 @@ Complete this day manually with verified outputs only.
 - [ ] Debug artifact done
 - [ ] Interview artifact done
 - [ ] Progress files updated (`SESSION_STATE.md`, `DAILY_PROGRESS_LOG.md`, `DAYWISE_EXECUTION_MEMORY.md`)
+
+
+## Topic Completion Checkboxes
+
+- [ ] Step 1: Write one aggregation query
+- [ ] Step 2: Write one join query
+- [ ] Step 3: Write one window function query
+- [ ] Step 4: Debug one duplicate-row issue from wrong join
+- [ ] Step 5: Explain where BigQuery fits in AI app architecture
+- [ ] Day Closeout

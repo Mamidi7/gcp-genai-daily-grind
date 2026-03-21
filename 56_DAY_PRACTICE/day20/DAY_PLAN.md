@@ -32,3 +32,13 @@ Complete this day manually with verified outputs only.
 - [ ] Debug artifact done
 - [ ] Interview artifact done
 - [ ] Progress files updated (`SESSION_STATE.md`, `DAILY_PROGRESS_LOG.md`, `DAYWISE_EXECUTION_MEMORY.md`)
+
+
+## Topic Completion Checkboxes
+
+- [ ] Step 1: Run all test cases
+- [ ] Step 2: Log pass/fail with reasons
+- [ ] Step 3: Group failures by category
+- [ ] Step 4: Detect one false-pass case
+- [ ] Step 5: Explain regression loop
+- [ ] Day Closeout

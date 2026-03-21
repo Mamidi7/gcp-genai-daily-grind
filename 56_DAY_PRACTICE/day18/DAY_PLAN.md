@@ -32,3 +32,13 @@ Complete this day manually with verified outputs only.
 - [ ] Debug artifact done
 - [ ] Interview artifact done
 - [ ] Progress files updated (`SESSION_STATE.md`, `DAILY_PROGRESS_LOG.md`, `DAYWISE_EXECUTION_MEMORY.md`)
+
+
+## Topic Completion Checkboxes
+
+- [ ] Step 1: Force citations from retrieved chunks
+- [ ] Step 2: Add abstain behavior when evidence is weak
+- [ ] Step 3: Reproduce hallucination-like answer and fix
+- [ ] Step 4: Document decision threshold
+- [ ] Step 5: Practice interview framing
+- [ ] Day Closeout

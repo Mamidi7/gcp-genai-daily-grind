@@ -32,3 +32,13 @@ Complete this day manually with verified outputs only.
 - [ ] Debug artifact done
 - [ ] Interview artifact done
 - [ ] Progress files updated (`SESSION_STATE.md`, `DAILY_PROGRESS_LOG.md`, `DAYWISE_EXECUTION_MEMORY.md`)
+
+
+## Topic Completion Checkboxes
+
+- [ ] Step 1: Split 3 docs into chunks manually
+- [ ] Step 2: Justify chunk size choice
+- [ ] Step 3: Capture one bad chunking example
+- [ ] Step 4: Explain chunk-size tradeoff
+- [ ] Step 5: Write interview notes
+- [ ] Day Closeout
