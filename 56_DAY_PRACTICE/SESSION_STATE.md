@@ -6,8 +6,8 @@ Last updated: 2026-03-22
 
 - Current day: `day12`
 - Current topic: `FastAPI basics`
-- Current block: `Step 1 - create /health endpoint`
-- Status: `in progress`
+- Current block: `Step 5 - write interview answers and debug artifact`
+- Status: `in_progress`
 
 ## Single Source of Execution Memory
 
@@ -16,8 +16,8 @@ Last updated: 2026-03-22
 
 ## Exact Next Step
 
-Open `day12/DAY_PLAN.md` and start Step 1.
-Mark checkbox after each completed step.
+Trigger the forced failure in `day12/main.py`, capture the symptom in `debug_journal_day12.md`, then practice the 30s/90s/3-min answers from `interview_pack_day12.md`.
+Mark Step 5 and Day Closeout only after the debug artifact is complete.
 
 ## Current Blocker
 
@@ -36,3 +36,7 @@ Mark checkbox after each completed step.
 ## Next Interview Question
 
 Explain FastAPI request flow: request -> validation -> handler -> response.
+
+## After Day12
+
+- Switch to `/Users/krishnavardhan/projects/GCP_GENAI/_INTERVIEW_PREP/applied ai/CODEX_SYSTEM_PROMPT_V3.md` for Day 13+.

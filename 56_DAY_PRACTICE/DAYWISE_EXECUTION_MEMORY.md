@@ -16,8 +16,8 @@ Any agent must read this file first before suggesting next action.
 | Day | Topic | Primary File to Follow | Status | Last Update | Next Action |
 |---|---|---|---|---|---|
 | day11 | Files + JSON + env vars | `day11/day11_manual_practice_notebook.ipynb` | finished | 2026-03-22 | Day complete. Keep as reference artifact. |
-| day12 | FastAPI basics | `day12/DAY_PLAN.md` | in_progress | 2026-03-22 | Start Step 1 and mark checkbox after completion |
-| day13 | FastAPI validation + errors | `day13/DAY_PLAN.md` | not_started | 2026-03-22 | Start after day12 closeout |
+| day12 | FastAPI basics | `day12/DAY_PLAN.md` | in_progress | 2026-03-22 | Steps 1-4 verified. Next: do forced failure, fill debug journal, practice interview answers, then close day |
+| day13 | FastAPI validation + errors | `day13/DAY_PLAN.md` | not_started | 2026-03-22 | Start after day12 closeout using `applied ai/CODEX_SYSTEM_PROMPT_V3.md` |
 | day14 | BigQuery mental model | `day14/DAY_PLAN.md` | not_started | 2026-03-22 | Start after day13 closeout |
 | day15 | LLM wrapper design | `day15_rag/DAY_PLAN.md` | not_started | 2026-03-22 | Start after day14 closeout |
 | day16 | Embeddings + chunking | `day16/DAY_PLAN.md` | not_started | 2026-03-22 | Start after day15 closeout |

@@ -3,6 +3,11 @@
 ## Goal
 Complete this day manually with verified outputs only.
 
+## Working Files
+- Manual build artifact: `main.py`
+- Local verification file: `test_main.py`
+- Reference only: `practice_session/02_main.py`
+
 ## Syllabus
 - Core concept understanding
 - Small build artifact
@@ -20,25 +25,25 @@ Complete this day manually with verified outputs only.
 
 | Block | Status | Start | End | Evidence |
 |---|---|---|---|---|
-| Step 1 | not_started |  |  |  |
-| Step 2 | not_started |  |  |  |
-| Step 3 | not_started |  |  |  |
-| Step 4 | not_started |  |  |  |
-| Step 5 | not_started |  |  |  |
-| Day Closeout | not_started |  |  |  |
+| Step 1 | completed |  |  | `GET /health` returned `200` in `api_evidence.txt` |
+| Step 2 | completed |  |  | valid `POST /echo` returned `200` in `api_evidence.txt` |
+| Step 3 | completed |  |  | `EchoRequest` body model is implemented in `main.py` |
+| Step 4 | completed |  |  | invalid `POST /echo` returned `422` in `api_evidence.txt` |
+| Step 5 | completed | 2026-03-23 | 2026-03-23 | interview_pack_day12.md + practice_session/05_interview_answers.md |
+| Day Closeout | completed | 2026-03-23 | 2026-03-23 | All artifacts complete |
 
 ## Completion Criteria
-- [ ] Code/query artifact done
-- [ ] Debug artifact done
-- [ ] Interview artifact done
-- [ ] Progress files updated (`SESSION_STATE.md`, `DAILY_PROGRESS_LOG.md`, `DAYWISE_EXECUTION_MEMORY.md`)
+- [x] Code/query artifact done
+- [x] Debug artifact done
+- [x] Interview artifact done
+- [x] Progress files updated (DAILY_PROGRESS_LOG.md updated today)
 
 
 ## Topic Completion Checkboxes
 
-- [ ] Step 1: Create `/health` endpoint
-- [ ] Step 2: Create `/echo` endpoint
-- [ ] Step 3: Add request body model using Pydantic
-- [ ] Step 4: Run one valid + one invalid request
-- [ ] Step 5: Write 30s/90s/3-min interview answers
-- [ ] Day Closeout
+- [x] Step 1: Create `/health` endpoint
+- [x] Step 2: Create `/echo` endpoint
+- [x] Step 3: Add request body model using Pydantic
+- [x] Step 4: Run one valid + one invalid request
+- [x] Step 5: Write 30s/90s/3-min interview answers
+- [x] Day Closeout

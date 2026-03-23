@@ -1,0 +1,63 @@
+Day12 API Evidence
+==================
+
+Run date: 2026-03-22
+
+Terminal 1 startup log
+----------------------
+INFO:     Started server process [73037]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8012 (Press CTRL+C to quit)
+
+GET /health
+-----------
+Command:
+curl -i http://127.0.0.1:8012/health
+
+Response:
+HTTP/1.1 200 OK
+date: Sun, 22 Mar 2026 12:22:25 GMT
+server: uvicorn
+content-length: 15
+content-type: application/json
+
+{"status":"ok"}
+
+POST /echo valid
+----------------
+Command:
+curl -i -X POST http://127.0.0.1:8012/echo \
+  -H "content-type: application/json" \
+  -d '{"message":"hello fastapi"}'
+
+Response:
+HTTP/1.1 200 OK
+date: Sun, 22 Mar 2026 12:23:08 GMT
+server: uvicorn
+content-length: 24
+content-type: application/json
+
+{"echo":"hello fastapi"}
+
+POST /echo invalid
+------------------
+Command:
+curl -i -X POST http://127.0.0.1:8012/echo \
+  -H "content-type: application/json" \
+  -d '{}'
+
+Response:
+HTTP/1.1 422 Unprocessable Content
+date: Sun, 22 Mar 2026 12:23:53 GMT
+server: uvicorn
+content-length: 90
+content-type: application/json
+
+{"detail":[{"type":"missing","loc":["body","message"],"msg":"Field required","input":{}}]}
+
+Optional unit test
+------------------
+Command:
+
+Output:
