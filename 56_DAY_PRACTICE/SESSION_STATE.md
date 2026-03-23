@@ -1,23 +1,27 @@
 # Session State
 
-Last updated: 2026-03-22
+Last updated: 2026-03-23
 
 ## Current Position
 
-- Current day: `day12`
-- Current topic: `FastAPI basics`
-- Current block: `Step 5 - write interview answers and debug artifact`
+- Current day: `day13`
+- Current topic: `FastAPI Errors and Validation`
+- Current block: `Step 1 - Define input constraints with Pydantic Field`
 - Status: `in_progress`
 
 ## Single Source of Execution Memory
 
 - Primary memory file: `DAYWISE_EXECUTION_MEMORY.md`
-- Current day primary file: `day12/DAY_PLAN.md`
+- Current day primary file: `day13/DAY_PLAN.md`
 
 ## Exact Next Step
 
-Trigger the forced failure in `day12/main.py`, capture the symptom in `debug_journal_day12.md`, then practice the 30s/90s/3-min answers from `interview_pack_day12.md`.
-Mark Step 5 and Day Closeout only after the debug artifact is complete.
+Follow the 5-step DAY_PLAN.md:
+1. Define input constraints (min/max length, required fields)
+2. Return clean error response format
+3. Add one custom exception path
+4. Reproduce blank input + oversized input failures
+5. Convert debug to STAR response
 
 ## Current Blocker
 
@@ -31,12 +35,12 @@ Mark Step 5 and Day Closeout only after the debug artifact is complete.
 
 ## Latest Completed Day
 
-- Day 11 completed with topic-wise checkbox tracking and interview artifacts.
+- Day 12 completed with FastAPI basics, /health, /echo, Pydantic validation, debug journal, interview pack, PDF notes generated.
 
 ## Next Interview Question
 
-Explain FastAPI request flow: request -> validation -> handler -> response.
+Explain fail-fast validation and how clean error responses improve API reliability.
 
-## After Day12
+## After Day13
 
-- Switch to `/Users/krishnavardhan/projects/GCP_GENAI/_INTERVIEW_PREP/applied ai/CODEX_SYSTEM_PROMPT_V3.md` for Day 13+.
+- Switch to Day 14 — BigQuery mental model (SQL queries).
