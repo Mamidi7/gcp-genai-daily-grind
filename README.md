@@ -42,23 +42,27 @@ dayX/
 └── solution.py    # When I solve it
 ```
 
-## Interview Delivery System (CODE-LENS)
+## Interview Signal Engine
 
-To avoid line-by-line memorization and improve interview explanation quality, this repo includes a standard process:
+To convert daily work into hiring evidence, use:
 
-1. Read [docs/CODE_LENS_STANDARD.md](docs/CODE_LENS_STANDARD.md)
-2. Use templates in `docs/templates/`
-3. Start a daily session with:
+`56_DAY_PRACTICE/interview_signal/`
 
-```bash
-bash scripts/start_code_lens_session.sh
-```
+Daily execution source of truth:
 
-This generates `docs/code_lens_sessions/session_YYYY-MM-DD.md` with:
-- CodeCard
-- BugCard
-- InterviewPack (30s/90s/3min)
-- QuestionBank
+`56_DAY_PRACTICE/DAILY_PREP_MAIN.md`
+
+Primary external directive source:
+
+`/Users/krishnavardhan/projects/GCP_GENAI/_INTERVIEW_PREP/OPENAI_ANTHROPIC_APPLIED_AI_DIRECTIVES_2026-03-15/00_COREST_CORE_FILE.md`
+
+This includes:
+
+- 14-day execution tracker (30-min tool block)
+- Daily artifact template (build + fail + fix + STAR)
+- Debug journal template (symptom -> root cause -> prevention)
+- Interview pack template (30s, 90s STAR, 3-min walkthrough)
+- Tool usage matrix for roadmap/debug/API/portfolio/speaking tools
 
 ## Tech Stack
 

@@ -8,6 +8,9 @@
 
 Based on OpenClaw's USER.md - Both agents use this:
 
+Primary directive override:
+`/Users/krishnavardhan/projects/GCP_GENAI/_INTERVIEW_PREP/OPENAI_ANTHROPIC_APPLIED_AI_DIRECTIVES_2026-03-15/00_COREST_CORE_FILE.md`
+
 | Phase | Days | Topic | Status |
 |-------|------|-------|--------|
 | **Phase 1** | Days 1-10 | Python + ML Basics | 📋 In Progress |
@@ -58,7 +61,7 @@ Based on OpenClaw's USER.md - Both agents use this:
 
 ## 📁 FILES STRUCTURE
 
-Both agents work in: `/Users/krishnavardhan/projects/GCP_GENAI/gcp-genai-daily-grind/56_DAY_PRACTICE/`
+Both agents work in: `/Users/krishnavardhan/gcp-genai-daily-grind/56_DAY_PRACTICE/`
 
 | File | Purpose |
 |------|---------|
@@ -68,6 +71,8 @@ Both agents work in: `/Users/krishnavardhan/projects/GCP_GENAI/gcp-genai-daily-g
 | `day{N}/solution.py` | Answer key |
 | `day{N}/notes.md` | Personal learnings |
 | `INTERVIEW_PUNCH_DIALOGUES.md` | Interview cheat sheet |
+| `DAILY_PREP_MAIN.md` | Primary daily execution guide |
+| `interview_signal/` | 14-day tool-driven interview artifact system |
 
 ---
 
@@ -86,10 +91,12 @@ Format per topic:
 ## ✅ DAILY WORKFLOW (Same for Both)
 
 1. **Morning Check-in** → OpenClaw or Claude Code
-2. **Review current day** → Same topic explanation
-3. **Practice** → Run code / SQL queries
-4. **Add punch dialogues** → Update cheat sheet
-5. **Commit to GitHub** → Green streak
+2. **Read core directive first** → `00_COREST_CORE_FILE.md`
+3. **Load `DAILY_PREP_MAIN.md`** → local execution guide
+4. **Practice** → run code / SQL queries
+5. **Interview Signal block (30 min)** → update `interview_signal` artifacts
+6. **Add punch dialogues** → update cheat sheet
+7. **Commit to GitHub** → green streak
 
 ---
 

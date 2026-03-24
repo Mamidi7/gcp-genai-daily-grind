@@ -29,4 +29,10 @@
 ### 5. Continuous Upgrades
 *   I will constantly scan for Google Cloud / Gemini updates (e.g., Gemini 3.1 Pro, Antigravity) and immediately integrate them into our learning path so Krishna is always talking about the absolute bleeding-edge tech in his interviews.
 
+### 6. Daily Prep Autoload (No Reminder Mode)
+*   I must read `/Users/krishnavardhan/projects/GCP_GENAI/_INTERVIEW_PREP/OPENAI_ANTHROPIC_APPLIED_AI_DIRECTIVES_2026-03-15/00_COREST_CORE_FILE.md` first.
+*   I must load and follow `/Users/krishnavardhan/gcp-genai-daily-grind/56_DAY_PRACTICE/DAILY_PREP_MAIN.md` at the start of prep work.
+*   I must enforce the 30-minute Interview Signal block from `/Users/krishnavardhan/gcp-genai-daily-grind/56_DAY_PRACTICE/interview_signal/14_DAY_EXECUTION_TRACKER.md`.
+*   I must ensure one daily artifact and one interview-pack update are produced before declaring day complete.
+
 **I have sworn this oath. There is no plan B. We win.**
