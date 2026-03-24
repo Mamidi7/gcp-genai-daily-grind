@@ -6,21 +6,29 @@ Run: uvicorn main:app --reload --port 8080
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
 import time
 import uuid
+from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+from dotenv import load_dotenv
 import google.genai as genai
 from google.genai import types
+
+load_dotenv()
 
 MODEL_NAME = "gemini-2.0-flash-001"
 PROJECT_ID = os.getenv("GCP_PROJECT_ID", "e2e-etl-project")
 LOCATION = os.getenv("GCP_LOCATION", "us-central1")
+GCP_CREDENTIALS_PATH = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
+BASE_DIR = Path(__file__).resolve().parent
+RUNTIME_CONFIG_PATH = Path(os.getenv("APP_RUNTIME_CONFIG", BASE_DIR / "config/runtime_profile.json"))
 MAX_PROMPT_CHARS = 6000
 CHAT_TIMEOUT_SECONDS = 20
 CHAT_MAX_RETRIES = 2
@@ -116,6 +124,30 @@ def _map_upstream_error(err: Exception) -> tuple[int, str]:
     return 502, "Upstream model call failed"
 
 
+def _mask_path(value: str) -> str:
+    if not value:
+        return "not-set"
+    # Keep only basename to avoid leaking local machine paths in logs/API.
+    return f".../{os.path.basename(value)}"
+
+
+def _required_env_issues() -> list[str]:
+    issues: list[str] = []
+    if "GCP_PROJECT_ID" not in os.environ:
+        issues.append("GCP_PROJECT_ID is missing from environment")
+    return issues
+
+
+def _load_runtime_config() -> dict:
+    if not RUNTIME_CONFIG_PATH.exists():
+        return {}
+    with RUNTIME_CONFIG_PATH.open("r", encoding="utf-8") as fh:
+        payload = json.load(fh)
+    if not isinstance(payload, dict):
+        raise ValueError("Runtime config must be a JSON object")
+    return payload
+
+
 async def _generate_with_retry(
     payload: PromptRequest,
     *,
@@ -176,6 +208,32 @@ def readyz():
         return {"status": "ready", "model": MODEL_NAME, "project": PROJECT_ID}
     except Exception:
         raise HTTPException(status_code=503, detail="Service not ready")
+
+
+@app.get("/config-summary")
+def config_summary():
+    runtime_config = _load_runtime_config()
+    env_issues = _required_env_issues()
+    return {
+        "project_id": PROJECT_ID,
+        "location": LOCATION,
+        "model": MODEL_NAME,
+        "has_google_credentials_path": bool(GCP_CREDENTIALS_PATH),
+        "google_credentials_path": _mask_path(GCP_CREDENTIALS_PATH),
+        "runtime_config_path": _mask_path(str(RUNTIME_CONFIG_PATH)),
+        "runtime_config_loaded": bool(runtime_config),
+        "runtime_config_keys": sorted(runtime_config.keys()),
+        "runtime_profile": runtime_config.get("runtime_profile", "unknown"),
+        "env_issues": env_issues,
+    }
+
+
+@app.get("/config-validate")
+def config_validate():
+    env_issues = _required_env_issues()
+    if env_issues:
+        raise HTTPException(status_code=503, detail=env_issues[0])
+    return {"status": "valid"}
 
 
 @app.post("/chat", response_model=PromptResponse)

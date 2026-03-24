@@ -1,0 +1,6 @@
+{
+  "runtime_profile": "day11-local",
+  "owner": "krishna",
+  "safe_logging": true,
+  "max_prompt_chars": 6000
+}

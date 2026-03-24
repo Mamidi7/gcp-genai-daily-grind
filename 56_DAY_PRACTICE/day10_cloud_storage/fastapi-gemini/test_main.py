@@ -40,6 +40,28 @@ class FastAPIGeminiTests(unittest.TestCase):
         response = self.client.post("/chat", json={"prompt": ""})
         self.assertEqual(response.status_code, 422)
 
+    def test_config_summary_is_safe(self):
+        response = self.client.get("/config-summary")
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn("project_id", payload)
+        self.assertIn("location", payload)
+        self.assertIn("model", payload)
+        self.assertIn("has_google_credentials_path", payload)
+        self.assertIn("google_credentials_path", payload)
+        self.assertIn("runtime_config_loaded", payload)
+        self.assertIn("runtime_config_keys", payload)
+        self.assertIn("runtime_profile", payload)
+        self.assertIn("env_issues", payload)
+        self.assertEqual(payload["runtime_profile"], "day11-local")
+
+    def test_config_validate_fails_when_project_id_missing(self):
+        with patch.dict(main.os.environ, {}, clear=True):
+            response = self.client.get("/config-validate")
+        self.assertEqual(response.status_code, 503)
+        payload = response.json()
+        self.assertEqual(payload["error"], "GCP_PROJECT_ID is missing from environment")
+
     def test_chat_success_without_retry(self):
         fake = _FakeClient([_FakeResponse("hello")])
         with patch("main.get_client", return_value=fake):
