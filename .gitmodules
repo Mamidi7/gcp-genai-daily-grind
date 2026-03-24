@@ -1,0 +1,3 @@
+[submodule "_EXTERNAL_REPOS/ai-engineering-interview-questions"]
+	path = _EXTERNAL_REPOS/ai-engineering-interview-questions
+	url = https://github.com/amitshekhariitbhu/ai-engineering-interview-questions.git
