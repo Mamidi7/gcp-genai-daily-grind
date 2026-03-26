@@ -16,7 +16,7 @@ Use one row per day alongside your normal coding practice.
 | 10 | jsoncrack.com + carbon.now.sh | Updated architecture visual + code card | [ ] |
 | 11 | explainshell.com + shortcuts.design | Terminal productivity sheet | [ ] |
 | 12 | bundlephobia.com + caniuse.com | Portfolio quality/performance check | [ ] |
-| 13 | getfluently.app (free) + overapi.com | Mock interview speaking improvement log | [ ] |
+| 13 | getfluently.app (free) + overapi.com | Mock interview speaking improvement log | [x] |
 | 14 | Any highest ROI tools | Final weekly summary + best artifact highlight | [ ] |
 
 ## Mandatory End-of-Day Checks
