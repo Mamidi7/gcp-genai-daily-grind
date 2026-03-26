@@ -252,3 +252,26 @@ chunks = text.split('. ')  # By sentences
 ---
 
 *Last Updated: Feb 26, 2026*
+
+---
+
+## Day 13 — FastAPI Validation & Error Handling (2026-03-25)
+
+### Fail-Fast Validation
+Reject bad input BEFORE it reaches business logic.
+1. Pydantic `Field()` constraints — min/max length, required fields
+2. `@field_validator` — custom logic (e.g., stripped length >= 3)
+3. Custom `RequestValidationError` handler — normalize all 422s to clean JSON
+4. `HTTPException` — business rule violations (e.g., reserved keywords → 400)
+
+### Common FastAPI Error Gotchas
+- `exc.errors()` contains raw Python objects in `ctx` — always sanitize before JSON serialization
+- Return type hints like `-> dict[str, str]` trigger RESPONSE validation, not just documentation
+- Business rule string checks should usually be case-insensitive
+
+### Error Codes
+- `422 Unprocessable Entity` — Pydantic validation failed
+- `400 Bad Request` — passed validation but violates business rule
+- `503 Service Unavailable` — missing required config at startup
+
+*Last Updated: Mar 25, 2026*
