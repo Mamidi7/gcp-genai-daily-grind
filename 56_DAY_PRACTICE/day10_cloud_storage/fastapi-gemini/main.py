@@ -210,6 +210,15 @@ def readyz():
         raise HTTPException(status_code=503, detail="Service not ready")
 
 
+@app.get("/.well-known/agent.json")
+def agent_manifest():
+    return {
+        "name": "applied-ai-gateway",
+        "description": "Gemini generation gateway",
+        "tools": [{"name": "generate", "endpoint": "/generate"}],
+    }
+
+
 @app.get("/config-summary")
 def config_summary():
     runtime_config = _load_runtime_config()
