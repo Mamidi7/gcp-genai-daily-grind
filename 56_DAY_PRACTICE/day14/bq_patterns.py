@@ -1,6 +1,13 @@
 """
 Day 14 BigQuery artifact: 5 real SQL patterns on Stack Overflow public data.
 
+Each query is mapped to a realistic AI-system purpose:
+- aggregation -> usage and trend analysis
+- join/CTE -> relational enrichment
+- window function -> ranking and temporal analysis
+- subquery -> threshold and anomaly logic
+- vector schema preview -> retrieval foundation
+
 Usage:
   export GOOGLE_CLOUD_PROJECT=<your-project>
   python bq_patterns.py
@@ -19,6 +26,14 @@ from typing import Iterable
 from google.cloud import bigquery
 
 PROJECT = os.getenv("GOOGLE_CLOUD_PROJECT", "")
+
+QUERY_PURPOSES: dict[str, str] = {
+    "1_aggregation": "usage and trend analysis",
+    "2_join_cte": "relational enrichment",
+    "3_window_function": "ranking and temporal analysis",
+    "4_subquery": "threshold and anomaly logic",
+    "5_vector_schema_preview": "retrieval foundation",
+}
 
 QUERIES: dict[str, str] = {
     "1_aggregation": """
@@ -104,6 +119,7 @@ def _print_rows(rows: Iterable[bigquery.table.Row], limit: int = 3) -> None:
 
 async def run_query(client: bigquery.Client, name: str, sql: str) -> None:
     print(f"\n=== {name} ===")
+    print(f"purpose: {QUERY_PURPOSES[name]}")
     job = await asyncio.to_thread(client.query, _format(sql))
     rows = await asyncio.to_thread(job.result)
     _print_rows(rows)

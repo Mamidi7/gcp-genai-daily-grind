@@ -3,6 +3,18 @@
 ## 30-Second Answer
 "For Day 14, I built five real BigQuery SQL patterns on public Stack Overflow data: aggregation, join with CTE, window function, subquery, and VECTOR_SEARCH schema preview. I also debugged a duplicate-row issue caused by incorrect join cardinality. This gave me a practical mental model of how BigQuery stores and serves analytics plus retrieval-ready data for AI systems."
 
+## ASCII Architecture
+```text
+App logs / docs / embeddings / eval results
+                 |
+                 v
+              BigQuery
+     raw -> transformed -> analytics
+                 |
+                 v
+ retrieval prep / offline eval / debugging
+```
+
 ## 90-Second STAR
 **Situation:** I had BigQuery basics from earlier SQL practice, but no production-style query set tied to AI architecture.
 
@@ -25,6 +37,7 @@
 - **Preparation layer:** SQL transforms normalize content, compute metrics, and enrich metadata.
 - **Retrieval layer:** embeddings and chunk metadata can be stored in BigQuery tables to support vector retrieval workflows.
 - **Evaluation layer:** model outputs, pass/fail signals, and latency metrics can be logged for offline evaluation.
+- **Audit layer:** teams can inspect historical behavior without depending on live application memory.
 
 ### What I built on Day 14
 - Aggregation for trend discovery (`COUNT`, `AVG` by tag)
@@ -40,3 +53,15 @@
 
 ### Interview line
 "I treat SQL correctness as model-quality infrastructure. If retrieval or analytics queries are wrong, AI outputs become unreliable even when the model is good."
+
+## Common Interview Questions
+**Why BigQuery over a separate vector DB in some enterprise setups?**
+Because BigQuery is already trusted for analytics, access control, scheduled queries, and joins with business data. For many enterprise teams, that reduces operational overhead for offline retrieval workflows and evaluation analysis.
+
+**What belongs in BigQuery vs object storage vs online serving layer?**
+- BigQuery: structured analytics, chunk metadata, embeddings metadata, eval logs
+- Object storage: raw files, PDFs, large blobs
+- Online serving layer: low-latency session state and live request handling
+
+**How does BigQuery support offline eval loops for LLM systems?**
+It stores prompts, retrieved chunks, model outputs, scores, and failure labels so teams can run batch analysis, compare versions, and spot regressions over time.
