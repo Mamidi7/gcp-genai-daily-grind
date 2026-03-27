@@ -20,25 +20,25 @@ Complete this day manually with verified outputs only.
 
 | Block | Status | Start | End | Evidence |
 |---|---|---|---|---|
-| Step 1 | not_started |  |  |  |
-| Step 2 | not_started |  |  |  |
-| Step 3 | not_started |  |  |  |
-| Step 4 | not_started |  |  |  |
-| Step 5 | not_started |  |  |  |
-| Day Closeout | not_started |  |  |  |
+| Step 1 | completed | 2026-03-27 | 2026-03-27 | `day15_rag/llm_api_wrapper.py` |
+| Step 2 | completed | 2026-03-27 | 2026-03-27 | `WrapperResponse(answer, confidence, source)` |
+| Step 3 | completed | 2026-03-27 | 2026-03-27 | `ParseError` path + `debug_journal_day15.md` |
+| Step 4 | completed | 2026-03-27 | 2026-03-27 | timeout + retry logic in `SimpleLLMWrapper.ask` |
+| Step 5 | completed | 2026-03-27 | 2026-03-27 | `interview_pack_day15.md` |
+| Day Closeout | completed | 2026-03-27 | 2026-03-27 | README + code + debug + interview artifacts added |
 
 ## Completion Criteria
-- [ ] Code/query artifact done
-- [ ] Debug artifact done
-- [ ] Interview artifact done
-- [ ] Progress files updated (`SESSION_STATE.md`, `DAILY_PROGRESS_LOG.md`, `DAYWISE_EXECUTION_MEMORY.md`)
+- [x] Code/query artifact done
+- [x] Debug artifact done
+- [x] Interview artifact done
+- [x] Progress files updated (`SESSION_STATE.md`, `DAILY_PROGRESS_LOG.md`, `DAYWISE_EXECUTION_MEMORY.md`)
 
 
 ## Topic Completion Checkboxes
 
-- [ ] Step 1: Create minimal Python wrapper function
-- [ ] Step 2: Define structured output shape
-- [ ] Step 3: Handle parse failure path
-- [ ] Step 4: Add retry/timeout placeholders
-- [ ] Step 5: Prepare interview explanation: wrapper vs direct SDK
-- [ ] Day Closeout
+- [x] Step 1: Create minimal Python wrapper function
+- [x] Step 2: Define structured output shape
+- [x] Step 3: Handle parse failure path
+- [x] Step 4: Add retry/timeout placeholders
+- [x] Step 5: Prepare interview explanation: wrapper vs direct SDK
+- [x] Day Closeout
