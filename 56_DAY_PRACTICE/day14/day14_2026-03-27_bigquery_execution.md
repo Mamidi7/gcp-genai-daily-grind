@@ -9,7 +9,7 @@
   - subquery
   - vector-search schema preview
 - `day14/debug_journal_day14.md` for duplicate-row join bug and fix
-- `interview_packs/day14_bigquery_interview_pack.md` with 30s/90s/3-min conversion
+- `day14/day14_bigquery_interview_pack.md` with 30s/90s/3-min conversion
 
 ## A2A Transition (Carry-over)
 A short transition update was applied in Day 10 FastAPI app:

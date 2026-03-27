@@ -24,7 +24,7 @@ Complete this day manually with verified outputs only.
 | Step 2 | completed | 2026-03-27 | 2026-03-27 | `day14/bq_patterns.py` query `2_join_cte` |
 | Step 3 | completed | 2026-03-27 | 2026-03-27 | `day14/bq_patterns.py` query `3_window_function` |
 | Step 4 | completed | 2026-03-27 | 2026-03-27 | `day14/debug_journal_day14.md` |
-| Step 5 | completed | 2026-03-27 | 2026-03-27 | `interview_signal/interview_packs/day14_bigquery_interview_pack.md` |
+| Step 5 | completed | 2026-03-27 | 2026-03-27 | `day14/day14_bigquery_interview_pack.md` |
 | Day Closeout | completed | 2026-03-27 | 2026-03-27 | tracker + weekly wrap marked supporting |
 
 ## Completion Criteria
