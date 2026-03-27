@@ -17,7 +17,7 @@ Use one row per day alongside your normal coding practice.
 | 11 | explainshell.com + shortcuts.design | Terminal productivity sheet | [ ] |
 | 12 | bundlephobia.com + caniuse.com | Portfolio quality/performance check | [ ] |
 | 13 | getfluently.app (free) + overapi.com | Mock interview speaking improvement log | [x] |
-| 14 | Any highest ROI tools | Final weekly summary + best artifact highlight | [x] |
+| 14 | BigQuery public dataset + SQL tooling | BigQuery SQL artifact (5 patterns) + join-debug journal + interview conversion (weekly summary is supporting evidence) | [x] |
 
 ## Mandatory End-of-Day Checks
 

@@ -1,4 +1,7 @@
-# Best Interview Story — Week of March 21–26
+# Best Interview Story — Week of March 21–26 (Supporting Weekly Wrap)
+
+> Note: This is a weekly summary pack.
+> The primary Day 14 execution interview artifact is `day14_bigquery_interview_pack.md`.
 
 ## The Pick: Day 13 — FastAPI Exception Handler Bug
 
