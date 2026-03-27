@@ -20,25 +20,25 @@ Complete this day manually with verified outputs only.
 
 | Block | Status | Start | End | Evidence |
 |---|---|---|---|---|
-| Step 1 | not_started |  |  |  |
-| Step 2 | not_started |  |  |  |
-| Step 3 | not_started |  |  |  |
-| Step 4 | not_started |  |  |  |
-| Step 5 | not_started |  |  |  |
-| Day Closeout | not_started |  |  |  |
+| Step 1 | completed | 2026-03-27 | 2026-03-27 | `day14/bq_patterns.py` query `1_aggregation` |
+| Step 2 | completed | 2026-03-27 | 2026-03-27 | `day14/bq_patterns.py` query `2_join_cte` |
+| Step 3 | completed | 2026-03-27 | 2026-03-27 | `day14/bq_patterns.py` query `3_window_function` |
+| Step 4 | completed | 2026-03-27 | 2026-03-27 | `day14/debug_journal_day14.md` |
+| Step 5 | completed | 2026-03-27 | 2026-03-27 | `interview_signal/interview_packs/day14_bigquery_interview_pack.md` |
+| Day Closeout | completed | 2026-03-27 | 2026-03-27 | tracker + weekly wrap marked supporting |
 
 ## Completion Criteria
-- [ ] Code/query artifact done
-- [ ] Debug artifact done
-- [ ] Interview artifact done
-- [ ] Progress files updated (`SESSION_STATE.md`, `DAILY_PROGRESS_LOG.md`, `DAYWISE_EXECUTION_MEMORY.md`)
+- [x] Code/query artifact done
+- [x] Debug artifact done
+- [x] Interview artifact done
+- [x] Progress files updated (`SESSION_STATE.md`, `DAILY_PROGRESS_LOG.md`, `DAYWISE_EXECUTION_MEMORY.md`)
 
 
 ## Topic Completion Checkboxes
 
-- [ ] Step 1: Write one aggregation query
-- [ ] Step 2: Write one join query
-- [ ] Step 3: Write one window function query
-- [ ] Step 4: Debug one duplicate-row issue from wrong join
-- [ ] Step 5: Explain where BigQuery fits in AI app architecture
-- [ ] Day Closeout
+- [x] Step 1: Write one aggregation query
+- [x] Step 2: Write one join query
+- [x] Step 3: Write one window function query
+- [x] Step 4: Debug one duplicate-row issue from wrong join
+- [x] Step 5: Explain where BigQuery fits in AI app architecture
+- [x] Day Closeout
