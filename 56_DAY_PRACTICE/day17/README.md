@@ -1,24 +1,49 @@
-# Day 17 - Industry Practice Module
+# Day 17 — Embeddings Intro: text-embedding-004 + Similarity Search
 
 ## Objective
-Implement structured logging and classify errors for faster debugging.
+Build an embedding pipeline that converts text to vectors and performs similarity search. This is the foundation for all RAG systems.
 
-## Real-World Scenario
-You are the ML engineer responsible for shipping a reliable AI feature to production. Your goal is not just to make it work, but to make it debuggable and maintainable.
+## Why This Matters
+- Embeddings are how machines "understand" text meaning
+- Every RAG pipeline (Day 21-24) depends on this
+- Interview question: "Explain embeddings in 60 seconds" — you WILL be asked this
+- Directly connects to BigQuery Vector Search (Shock Topic #2)
 
-## Tasks
-1. Build one concrete component for today's objective.
-2. Trigger at least one controlled failure and debug it.
-3. Record what changed in notes.
+## Architecture
+```
+Text Documents
+     │
+     ▼
+┌──────────────┐
+│ Embedding API│  ← text-embedding-004 (768 dimensions)
+│ Batch Call   │     5 texts per call, with rate limiting
+└──────┬───────┘
+       │ list of float vectors
+       ▼
+┌──────────────┐
+│ Similarity   │  ← cosine similarity between all pairs
+│ Matrix       │     finds most similar documents
+└──────┬───────┘
+       │ ranked results
+       ▼
+┌──────────────┐
+│ Retrieval    │  ← given a query, find top-k most similar
+│ Function     │     this IS the R in RAG
+└──────────────┘
+```
 
-## Debug Drill
-- Capture: error message, root cause, fix, prevention.
+## Files
+- `solution.py` — Full working embedding pipeline (mock + real modes)
+- `exercises.py` — Practice challenges
+- `notes.md` — Concepts and interview prep
+- `debug_journal_day17.md` — Error artifacts
+- `interview_pack_day17.md` — STAR answers
 
-## Interview Leverage
-Prepare a 90-second answer:
-- "Today I implemented X, hit failure Y, diagnosed using Z, fixed by A, and prevented recurrence with B."
+## Prerequisites
+- `numpy` installed
+- Real Gemini: set `GOOGLE_CLOUD_PROJECT` + Vertex AI enabled
+- Mock mode: works with zero dependencies beyond numpy
 
-## Deliverables
-- `exercises.py` updated
-- `notes.md` updated
-- one runnable result or query output
+## Interview Conversion
+- **30s**: "I built an embedding pipeline using text-embedding-004 that converts documents to 768-dimensional vectors and performs cosine similarity retrieval. This is the retrieval layer for my RAG system."
+- **90s STAR**: "My RAG system needed semantic search, not keyword search. I built an embedding pipeline that batch-calls the text-embedding-004 model, stores vectors, and retrieves top-k results by cosine similarity. The key learning: embedding model choice and batch size both affect retrieval quality and cost significantly."
