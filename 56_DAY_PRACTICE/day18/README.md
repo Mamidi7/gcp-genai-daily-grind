@@ -1,24 +1,38 @@
-# Day 18 - Industry Practice Module
+# Day 18 — Chunking Strategies: 3 Approaches + Recall Comparison
 
 ## Objective
-Add input/output data contracts and validation to reduce silent failures.
+Implement and compare 3 text chunking strategies for RAG pipelines. Understand how chunk size, overlap, and strategy affect retrieval quality.
 
-## Real-World Scenario
-You are the ML engineer responsible for shipping a reliable AI feature to production. Your goal is not just to make it work, but to make it debuggable and maintainable.
+## Why This Matters
+- Chunking is the MOST underrated part of RAG
+- Bad chunking = bad retrieval = bad answers, no matter how good your LLM is
+- Interview differentiator: "I compared fixed, sentence, and semantic chunking and measured recall"
 
-## Tasks
-1. Build one concrete component for today's objective.
-2. Trigger at least one controlled failure and debug it.
-3. Record what changed in notes.
+## The 3 Strategies
+```
+┌───────────────────────────────────────────────────────────┐
+│ 1. FIXED-SIZE CHUNKING                                    │
+│    Split every N characters with overlap                  │
+│    ✅ Simple, predictable size                            │
+│    ❌ Cuts sentences in half, loses context               │
+│                                                           │
+│ 2. SENTENCE-BASED CHUNKING                                │
+│    Split on sentence boundaries, group into chunks        │
+│    ✅ Respects sentence boundaries                        │
+│    ❌ Variable size, may be too short or too long         │
+│                                                           │
+│ 3. SEMANTIC CHUNKING                                      │
+│    Group sentences by embedding similarity                │
+│    ✅ Keeps related content together                      │
+│    ❌ Requires embedding calls (cost + latency)           │
+└───────────────────────────────────────────────────────────┘
+```
 
-## Debug Drill
-- Capture: error message, root cause, fix, prevention.
+## Files
+- `solution.py` — All 3 chunking strategies + comparison
+- `exercises.py` — Practice challenges
+- `notes.md` — Debug journal and interview prep
 
-## Interview Leverage
-Prepare a 90-second answer:
-- "Today I implemented X, hit failure Y, diagnosed using Z, fixed by A, and prevented recurrence with B."
-
-## Deliverables
-- `exercises.py` updated
-- `notes.md` updated
-- one runnable result or query output
+## Interview Conversion
+- **30s**: "I compared 3 chunking strategies for RAG — fixed-size, sentence-based, and semantic. Semantic chunking had the best recall but costs more. Fixed-size is the production default because it's predictable."
+- **90s STAR**: See interview_pack_day18.md
