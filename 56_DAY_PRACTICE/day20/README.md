@@ -1,24 +1,45 @@
-# Day 20 - Industry Practice Module
+# Day 20 — Eval Harness v1: Automated Evaluation Pipeline
 
 ## Objective
-Implement incremental load using watermark + late data window.
+Build an automated eval harness that runs all test cases, scores LLM outputs, logs results, and produces a summary report. This ties together Days 16-19 into a production eval system.
 
-## Real-World Scenario
-You are the ML engineer responsible for shipping a reliable AI feature to production. Your goal is not just to make it work, but to make it debuggable and maintainable.
+## Why This Matters
+- This is THE artifact: "I built an eval harness that runs 10 cases and logs pass/fail"
+- Anthropic role: "Build eval pipelines for model training/deployment"
+- OpenAI role: "Build evals + harnesses that capture real-world quality"
+- Every hiring manager wants to see that you MEASURE, not just build
 
-## Tasks
-1. Build one concrete component for today's objective.
-2. Trigger at least one controlled failure and debug it.
-3. Record what changed in notes.
+## Architecture
+```
+┌─────────────────┐
+│ Test Suite      │  Day 19's 10 test cases
+│ (10 cases)      │  question + ground_truth + rubric
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Eval Harness    │  THIS DAY
+│ Runner          │  1. Send question to LLM
+│                 │  2. Get response
+│                 │  3. Score against rubric
+│                 │  4. Log result
+└────────┬────────┘
+         │
+    ┌────┴────┐
+    ▼         ▼
+┌────────┐ ┌────────┐
+│Results │ │Summary │
+│Log JSON│ │Report  │
+│per case│ │+ trend │
+└────────┘ └────────┘
+```
 
-## Debug Drill
-- Capture: error message, root cause, fix, prevention.
+## Files
+- `solution.py` — Full eval harness with runner, logger, reporter
+- `exercises.py` — Practice challenges
+- `notes.md` — Debug journal and interview prep
+- `eval_results.json` — Sample output (created on run)
 
-## Interview Leverage
-Prepare a 90-second answer:
-- "Today I implemented X, hit failure Y, diagnosed using Z, fixed by A, and prevented recurrence with B."
-
-## Deliverables
-- `exercises.py` updated
-- `notes.md` updated
-- one runnable result or query output
+## Interview Conversion
+- **30s**: "I built an automated eval harness that runs 10 test cases against the LLM, scores each on correctness/completeness/safety, and produces a pass/fail report. I can track eval scores over time as I improve the system."
+- **90s STAR**: See interview_pack_day20.md
