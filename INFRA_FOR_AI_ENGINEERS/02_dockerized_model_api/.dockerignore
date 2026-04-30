@@ -1,0 +1,12 @@
+.git
+__pycache__
+*.pyc
+.pytest_cache
+.env
+.env.*
+*.egg-info
+tests/
+*.md
+.vscode
+.idea
+.DS_Store

@@ -1,0 +1,86 @@
+name: Model API CI
+
+# Trigger on push to main or any PR
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'INFRA_FOR_AI_ENGINEERS/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'INFRA_FOR_AI_ENGINEERS/**'
+
+jobs:
+  # ─── Job 1: Lint ────────────────────────────────────────────
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install linter
+        run: pip install ruff
+      - name: Lint
+        run: ruff check INFRA_FOR_AI_ENGINEERS/01_model_serving_api/solution/
+        # Non-blocking for now — remove '--exit-zero' to make it blocking
+        continue-on-error: true
+
+  # ─── Job 2: Test ────────────────────────────────────────────
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install deps
+        run: |
+          pip install fastapi uvicorn httpx pytest pytest-asyncio pydantic
+      - name: Run tests
+        run: |
+          cd INFRA_FOR_AI_ENGINEERS/01_model_serving_api
+          python -m pytest test_model_api.py -v --tb=short
+
+  # ─── Job 3: Build Docker Image ──────────────────────────────
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: |
+          cd INFRA_FOR_AI_ENGINEERS/02_dockerized_model_api
+          docker build -t model-api:ci-test .
+      - name: Smoke test — healthz
+        run: |
+          docker run -d --name test-container -p 8000:8000 model-api:ci-test
+          sleep 5
+          curl -f http://localhost:8000/healthz || (docker logs test-container && exit 1)
+          curl -f -X POST http://localhost:8000/chat \
+            -H "Content-Type: application/json" \
+            -d '{"prompt":"test"}' || (docker logs test-container && exit 1)
+          docker stop test-container
+          docker rm test-container
+
+  # ─── Job 4: Deploy (only on main branch push) ──────────────
+  # Uncomment and configure when ready to deploy for real.
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Auth to GCP
+  #       uses: google-github-actions/auth@v2
+  #       with:
+  #         workload_identity_provider: 'projects/.../locations/global/workloadIdentityPools/.../providers/...'
+  #         service_account: 'github-actions@....iam.gserviceaccount.com'
+  #     - name: Deploy to Cloud Run
+  #       run: |
+  #         gcloud run deploy model-api \
+  #           --source INFRA_FOR_AI_ENGINEERS/02_dockerized_model_api \
+  #           --region us-central1 \
+  #           --allow-unauthenticated
