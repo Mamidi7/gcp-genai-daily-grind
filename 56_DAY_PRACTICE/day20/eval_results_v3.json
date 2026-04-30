@@ -1,0 +1,92 @@
+{
+  "timestamp": "2026-04-30T16:29:42.975529",
+  "total": 6,
+  "passed": 3,
+  "failed": 3,
+  "pass_rate": 0.5,
+  "results": [
+    {
+      "case_name": "rag_definition",
+      "passed": true,
+      "keyword_score": 1.0,
+      "citation_ok": true,
+      "faithfulness_ok": true,
+      "relevance_ok": true,
+      "length_ok": true,
+      "no_answer_correct": true,
+      "failure_reasons": [
+        "-"
+      ]
+    },
+    {
+      "case_name": "chunking_reason",
+      "passed": false,
+      "keyword_score": 1.0,
+      "citation_ok": true,
+      "faithfulness_ok": false,
+      "relevance_ok": true,
+      "length_ok": true,
+      "no_answer_correct": true,
+      "failure_reasons": [
+        "possible hallucination (entities not in source)"
+      ]
+    },
+    {
+      "case_name": "hallucination_control",
+      "passed": true,
+      "keyword_score": 0.67,
+      "citation_ok": true,
+      "faithfulness_ok": true,
+      "relevance_ok": true,
+      "length_ok": true,
+      "no_answer_correct": true,
+      "failure_reasons": [
+        "-"
+      ]
+    },
+    {
+      "case_name": "off_topic_france",
+      "passed": false,
+      "keyword_score": 1.0,
+      "citation_ok": true,
+      "faithfulness_ok": true,
+      "relevance_ok": true,
+      "length_ok": true,
+      "no_answer_correct": false,
+      "failure_reasons": [
+        "said 'I don't know' for an answerable question"
+      ]
+    },
+    {
+      "case_name": "unanswerable_unicorn",
+      "passed": true,
+      "keyword_score": 1.0,
+      "citation_ok": true,
+      "faithfulness_ok": false,
+      "relevance_ok": false,
+      "length_ok": true,
+      "no_answer_correct": true,
+      "failure_reasons": [
+        "possible hallucination (entities not in source)",
+        "answer doesn't address question"
+      ]
+    },
+    {
+      "case_name": "edge_case_empty",
+      "passed": false,
+      "keyword_score": 0.0,
+      "citation_ok": false,
+      "faithfulness_ok": false,
+      "relevance_ok": false,
+      "length_ok": true,
+      "no_answer_correct": false,
+      "failure_reasons": [
+        "low keyword score (0.0)",
+        "missing citation",
+        "possible hallucination (entities not in source)",
+        "answer doesn't address question",
+        "said 'I don't know' for an answerable question"
+      ]
+    }
+  ]
+}
