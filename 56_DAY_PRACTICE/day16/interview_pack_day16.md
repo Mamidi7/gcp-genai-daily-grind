@@ -1,93 +1,45 @@
-# Day 16 Interview Pack — Structured Output
+# Interview Pack — Day 16
 
-## 30-Second Version
-"I built a structured output layer for LLM responses using Gemini's JSON mode and Pydantic validation. It extracts JSON from messy LLM output, validates against typed schemas, and retries with error feedback on failure. Parse failure rate dropped from 15% to under 1%."
+## 30-second pitch
+I built three chunking strategies — fixed-size, recursive sentence-aware, and semantic paragraph-aware — for a RAG ingestion pipeline, with Pydantic V2 validation and a cosine-similarity retrieval baseline. I debugged and fixed a character-position drift bug caused by regex whitespace consumption.
 
----
+## 90-second STAR answer
+**Situation:** Building a RAG pipeline, needed to split documents into chunks before embedding and retrieval.
+**Task:** Implement chunking that preserves meaning boundaries and produces verifiable metadata (char positions).
+**Action:**
+- Built fixed-size for speed, recursive for sentence preservation, semantic for paragraph preservation.
+- Added Pydantic V2 models with field validators.
+- Discovered char positions were drifting in recursive chunks because `re.split` consumed whitespace and my cursor math assumed 1 space.
+- Fixed by replacing manual arithmetic with `text.find()`.
+- Wrote pytest tests that assert every chunk exists exactly in the source text.
+**Result:** Retrieval baseline runs locally with deterministic fake embeddings, chunk metadata is trustworthy, and tests guard against regression.
 
-## 90-Second STAR Answer
+## 3-minute deep dive
+**Tradeoffs:**
+- Fixed-size is O(n) and cache-friendly but cuts mid-sentence. Use when speed matters more than boundary preservation.
+- Recursive is better for meaning but variable chunk size complicates batch embedding.
+- Semantic is ideal for structured docs but fails if paragraphs are missing or oversized; we added recursive fallback.
 
-**Situation:** In my AI pipeline project, LLM outputs were randomly breaking downstream processing because responses weren't consistently parseable.
+**Why cosine similarity:**
+- Embeddings from the same model live on the unit hypersphere (normalized).
+- Cosine measures direction, not magnitude, so document length doesn't skew scores.
+- For positive-only embeddings, cosine range is [0, 1], which is intuitive.
 
-**Task:** I needed to guarantee that every LLM response could be converted into a typed Python object for agent routing and data extraction.
+**Why Pydantic V2:**
+- `Field(min_length=1, pattern=...)` validates at instantiation, catching bad data before it reaches the vector DB.
+- `@field_validator` with `@classmethod` is the V2 pattern; V1 `@validator` is deprecated.
 
-**Action:** I built a 3-layer validation pipeline:
-1. **Extraction layer**: Regex-based JSON extractor that handles markdown fences, preamble text, and trailing characters
-2. **Parse layer**: json.loads with clear error messages showing exact failure position
-3. **Validation layer**: Pydantic models with Field constraints (confidence 0-1, non-empty strings, min/max lengths)
-On failure, the error message is fed back into a retry with the JSON schema included.
+**Production next step:**
+- Replace `embed_fake` with Vertex AI `text-embedding-004`.
+- Store chunks in BigQuery with `VECTOR_SEARCH()` for retrieval.
+- Add token counting with `tiktoken` or model-specific tokenizer instead of `len/4` estimate.
 
-**Result:** Parse failure rate dropped from ~15% to under 1%. The retry logic means the system self-heals — most failures resolve in 1 retry. The Pydantic schemas also serve as living documentation of our data contracts.
+## Anticipated questions
+Q: What happens if a chunk is larger than the embedding model's context window?
+A: We validate `token_estimate` at chunk time and can reject or re-split. Currently using a rough `len/4` estimate; production would use the exact tokenizer.
 
----
+Q: How do you handle duplicate text in `find()`?
+A: For duplicate snippets, `find()` returns the first match. In production I'd assign a unique chunk ID at split time rather than relying on char positions for identity.
 
-## 3-Minute Technical Deep Dive
-
-### The Problem Space
-LLMs are text generators, not JSON APIs. Even with JSON mode enabled, you get:
-- Markdown-wrapped output: ` ```json {...} ``` `
-- Schema violations: `confidence: 1.5` when max is 1.0
-- Missing fields: omitting `reasoning` when the prompt was vague
-- Empty responses: timeouts, rate limits
-
-### The Architecture
-```
-Prompt + Schema Description
-         │
-         ▼
-    ┌─────────┐
-    │  Gemini  │  ← response_mime_type="application/json"
-    └────┬────┘
-         │ raw text
-         ▼
-    ┌──────────────┐
-    │ extract_json │  ← regex: strip fences, find { } blocks
-    └────┬─────────┘
-         │ clean JSON string
-         ▼
-    ┌──────────────┐
-    │ json.loads   │  ← first gate: syntactic validity
-    └────┬─────────┘
-         │ dict
-         ▼
-    ┌──────────────┐
-    │ Pydantic     │  ← second gate: semantic validity
-    │ validate     │     field types, ranges, required fields
-    └────┬─────────┘
-         │ typed BaseModel object
-         ▼
-    Application Code ✓
-```
-
-### Why Two Validation Gates?
-- json.loads catches SYNTAX errors (missing quotes, trailing commas)
-- Pydantic catches SEMANTIC errors (wrong type, out of range, missing required)
-- You need both because valid JSON ≠ valid data
-
-### The Retry Loop
-On parse failure, the retry adds the error to the prompt:
-```
-"Your previous response failed validation: 
- confidence: Input should be less than or equal to 1.0
- You MUST return valid JSON matching this schema: {...}"
-```
-This works because LLMs are good at fixing specific errors when told what went wrong.
-
-### Production Considerations
-- **Token cost**: Each retry costs tokens. Max 3 retries is the sweet spot.
-- **Latency**: Retries add 1-3 seconds each. Track `attempts` metric.
-- **Monitoring**: Log `metadata.attempts` — if average > 1.5, your prompt needs improvement.
-- **Fallback**: If all retries fail, return a default safe response, never crash.
-
----
-
-## Common Interview Questions
-
-**Q: What if Gemini doesn't support JSON mode?**
-A: The extract_json() function handles non-JSON-mode output. It finds JSON in mixed text. JSON mode is a preference, not a requirement.
-
-**Q: How do you handle schema changes?**
-A: Version your Pydantic models (V1, V2). Write migration functions. Store raw LLM output alongside parsed output so you can re-parse later.
-
-**Q: What about performance?**
-A: The extract + parse + validate pipeline adds <1ms. Retries are the expensive part — each adds one API call. Track retry rate as a health metric.
+Q: Why not use LangChain's text splitters?
+A: For interview depth, I want to own the logic and tradeoffs. Built-in splitters hide the boundary rules, which makes debugging harder when retrieval quality drops.

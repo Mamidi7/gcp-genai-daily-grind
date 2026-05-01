@@ -1,39 +1,28 @@
-# Day 16 Notes
+# Day 16 — Chunking Strategies + Cosine Similarity Baseline
 
-## What I built today
-- Structured output pipeline: Gemini JSON mode → extract_json() → json.loads → Pydantic validation
-- Retry wrapper that feeds parse errors back into the LLM prompt
-- 3 real schemas: SentimentResult, EntityExtraction, ToolCall (agent routing)
-- Parse failure gallery: 6 common failure modes with correct handling
+## What we built
+Three chunking strategies for RAG text preprocessing, plus a local cosine-similarity retrieval baseline.
 
-## Key concepts learned
-1. **Two validation gates**: json.loads for syntax, Pydantic for semantics
-2. **extract_json()**: Must handle markdown fences, preamble text, trailing garbage
-3. **Retry with context**: Don't just retry — tell the LLM exactly what went wrong
-4. **Monitor retry rate**: If avg attempts > 1.5, fix the prompt, don't add more retries
+## 3 Strategies
 
-## Error I hit
-- Mock responses returning plain text instead of JSON (simulated real Gemini behavior)
-- Pydantic rejecting `"confidence": 1.5` even though JSON was valid — this is the semantic layer working correctly
+| Strategy | How | Best for | Risk |
+|----------|-----|----------|------|
+| Fixed-size | Sliding window by char count | Speed, uniform size | Cuts mid-sentence, loses context |
+| Recursive | Sentence-aware group | Preserves meaning boundaries | Slightly slower, variable size |
+| Semantic | Paragraph-aware + recursive fallback | Documents with clear sections | Needs clean paragraph breaks |
 
-## Root cause
-- LLMs are text generators first — JSON is not their native format
-- Schema constraints in prompts are "suggestions" to the model, not guarantees
+## Cosine Similarity
+- Measures angle between two vectors, not magnitude.
+- Range: -1 (opposite) to 1 (identical).
+- For embeddings, usually 0 to 1 because all values are positive.
 
-## Fix applied
-- Force JSON mode at API level (response_mime_type)
-- Post-process with extract_json() for belt-and-suspenders reliability
-- Pydantic as the hard gate — if it fails, it fails, retry with the error
+## Key Validation
+- TextChunk uses Pydantic V2: min_length, ge, pattern regex.
+- char_start/char_end validated so end >= start.
+- Tests verify chunks actually exist inside the original text.
 
-## Prevention added
-- Every LLM call goes through structured_llm_call(), never raw text
-- Metadata tracking (attempts, errors) for monitoring
+## Debug story (captured in debug_journal_day16.md)
+Recursive chunk char positions drifted because manual cursor increment didn't account for regex-consumed whitespace. Fixed by using text.find().
 
-## 90-second interview version
-"In my AI pipeline, LLM outputs were randomly breaking downstream code. I built a 3-layer structured output handler: regex extraction for messy text, JSON parsing for syntax, and Pydantic validation for schema correctness. On failure, I feed the exact error back into a retry. This dropped parse failures from 15% to under 1%, and the retry rate itself became a prompt quality metric."
-
-## How this connects to the sprint
-- Day 16 = structured output foundation
-- Day 17 = embeddings (next layer in the RAG stack)
-- Day 19-20 = eval harness uses these same Pydantic models for test case validation
-- Day 31+ = agent tool calls will use ToolCall schema for routing
+## Interview 30-second pitch
+"I built three chunking strategies for a RAG pipeline — fixed, recursive sentence-aware, and semantic paragraph-aware — with Pydantic validation and a cosine-similarity retrieval baseline. I caught a metadata drift bug where character positions became invalid because whitespace consumption wasn't tracked, and I fixed it with source-text lookup plus tests."
