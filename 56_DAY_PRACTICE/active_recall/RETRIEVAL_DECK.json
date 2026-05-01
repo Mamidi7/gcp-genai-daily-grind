@@ -1,0 +1,596 @@
+[
+  {
+    "id": "d01_q01",
+    "day": 1,
+    "topic": "Gemini API",
+    "level": 1,
+    "type": "recall",
+    "question": "Name two reasons to use the official SDK instead of raw HTTP for calling Gemini.",
+    "answer": "1) SDK handles auth, retries, and serialization automatically. 2) SDK updates when API changes \u2014 less breakage."
+  },
+  {
+    "id": "d01_q02",
+    "day": 1,
+    "topic": "Gemini API",
+    "level": 1,
+    "type": "recall",
+    "question": "What is the difference between gemini-2.0-flash and gemini-2.0-flash-001?",
+    "answer": "flash = latest unstable. flash-001 = pinned stable version. Production should use pinned versions."
+  },
+  {
+    "id": "d01_q03",
+    "day": 1,
+    "topic": "Gemini API",
+    "level": 2,
+    "type": "application",
+    "question": "Write the 4-line Python code to call Gemini using google.genai SDK (include env var loading).",
+    "answer": "from google import genai\nclient = genai.Client(api_key=os.getenv('GEMINI_API_KEY'))\nresponse = client.models.generate_content(model='gemini-2.0-flash', contents='Explain RAG')\nprint(response.text)"
+  },
+  {
+    "id": "d01_q04",
+    "day": 1,
+    "topic": "Gemini API",
+    "level": 2,
+    "type": "debug",
+    "question": "You pushed code with a hardcoded API key to a public GitHub repo. What is the immediate consequence and the fix?",
+    "answer": "Consequence: key is exposed, attackers can abuse quota. Fix: revoke the key immediately in Google Cloud Console, rotate to a new key, load from env vars, add .env to .gitignore."
+  },
+  {
+    "id": "d01_q05",
+    "day": 1,
+    "topic": "Gemini API",
+    "level": 3,
+    "type": "comparison",
+    "question": "When would you use raw HTTP (requests) over the SDK for Gemini?",
+    "answer": "When you need fine-grained control: custom timeouts, custom retry logic, streaming parsing, or when SDK adds overhead/bloat in a constrained environment."
+  },
+  {
+    "id": "d02_q01",
+    "day": 2,
+    "topic": "Python Types",
+    "level": 1,
+    "type": "recall",
+    "question": "What is dynamic typing in Python?",
+    "answer": "Python determines the type of a variable at runtime, not at compile time. You can reassign a variable to a different type."
+  },
+  {
+    "id": "d02_q02",
+    "day": 2,
+    "topic": "Python Types",
+    "level": 2,
+    "type": "debug",
+    "question": "This fails: print('Age: ' + 25). Fix it using an f-string.",
+    "answer": "print(f'Age: {25}') \u2014 f-strings coerce non-string types to string automatically."
+  },
+  {
+    "id": "d02_q03",
+    "day": 2,
+    "topic": "Python Types",
+    "level": 2,
+    "type": "application",
+    "question": "Write a one-line f-string that prints 'Krishna has 3 years experience' using variables name and years.",
+    "answer": "print(f'{name} has {years} years experience')"
+  },
+  {
+    "id": "d02_q04",
+    "day": 2,
+    "topic": "Python Types",
+    "level": 3,
+    "type": "comparison",
+    "question": "Compare f-strings, .format(), and % formatting for readability and performance.",
+    "answer": "f-strings: most readable, fastest (evaluated at runtime). .format(): readable, slightly slower. %: old style, least readable, avoid in new code."
+  },
+  {
+    "id": "d03_q01",
+    "day": 3,
+    "topic": "Functions",
+    "level": 1,
+    "type": "recall",
+    "question": "What Python data structure does *args become? What does **kwargs become?",
+    "answer": "*args becomes a tuple. **kwargs becomes a dictionary."
+  },
+  {
+    "id": "d03_q02",
+    "day": 3,
+    "topic": "Functions",
+    "level": 2,
+    "type": "application",
+    "question": "Write a function sum_all that accepts any number of arguments and returns their sum.",
+    "answer": "def sum_all(*args):\n    return sum(args)"
+  },
+  {
+    "id": "d03_q03",
+    "day": 3,
+    "topic": "Functions",
+    "level": 2,
+    "type": "debug",
+    "question": "This function accumulates items unexpectedly. Find the bug:\ndef add_item(item, items=[]):\n    items.append(item)\n    return items",
+    "answer": "Mutable default argument. The list is created once at definition time and reused. Fix: def add_item(item, items=None): if items is None: items = []"
+  },
+  {
+    "id": "d03_q04",
+    "day": 3,
+    "topic": "Functions",
+    "level": 3,
+    "type": "comparison",
+    "question": "*args vs **kwargs \u2014 when should you use each? Give one real example from a FastAPI handler.",
+    "answer": "*args: variable positional arguments (e.g., logging format strings). **kwargs: variable keyword arguments (e.g., passing query parameters to a DB client). In FastAPI, you rarely use *args/**kwargs directly \u2014 Pydantic models define the shape explicitly."
+  },
+  {
+    "id": "d03_q05",
+    "day": 3,
+    "topic": "Functions",
+    "level": 3,
+    "type": "application",
+    "question": "Write a function that accepts both positional and keyword args, prints them, and returns a dict.",
+    "answer": "def log_call(*args, **kwargs):\n    print(f'args={args}, kwargs={kwargs}')\n    return {'args': args, 'kwargs': kwargs}"
+  },
+  {
+    "id": "d04_q01",
+    "day": 4,
+    "topic": "OOP",
+    "level": 1,
+    "type": "recall",
+    "question": "What does self refer to inside a Python class method?",
+    "answer": "self refers to the current instance of the class. It is the first parameter of instance methods."
+  },
+  {
+    "id": "d04_q02",
+    "day": 4,
+    "topic": "OOP",
+    "level": 1,
+    "type": "recall",
+    "question": "When do you use @classmethod instead of a regular instance method?",
+    "answer": "When you need an alternative constructor or a method that operates on the class itself, not a specific instance. Receives cls instead of self."
+  },
+  {
+    "id": "d04_q03",
+    "day": 4,
+    "topic": "OOP",
+    "level": 2,
+    "type": "application",
+    "question": "Write a Document class with __init__(title, content), to_dict(), and @classmethod from_json(data).",
+    "answer": "class Document:\n    def __init__(self, title, content):\n        self.title = title\n        self.content = content\n    def to_dict(self):\n        return {'title': self.title, 'content': self.content}\n    @classmethod\n    def from_json(cls, data):\n        return cls(title=data.get('title'), content=data.get('content'))"
+  },
+  {
+    "id": "d04_q04",
+    "day": 4,
+    "topic": "OOP",
+    "level": 2,
+    "type": "debug",
+    "question": "Inside a method you write title = title instead of self.title = title. What happens?",
+    "answer": "You create a local variable instead of setting the instance attribute. Other methods won't see it. Fix: always use self.title = title."
+  },
+  {
+    "id": "d04_q05",
+    "day": 4,
+    "topic": "OOP",
+    "level": 3,
+    "type": "comparison",
+    "question": "Compare @classmethod, @staticmethod, and instance method. When to use each?",
+    "answer": "Instance method: needs instance data (self). @classmethod: needs class data or alternative constructor (cls). @staticmethod: utility function related to class but needs neither self nor cls."
+  },
+  {
+    "id": "d05_q01",
+    "day": 5,
+    "topic": "File I/O",
+    "level": 1,
+    "type": "recall",
+    "question": "What is the difference between json.dump() and json.dumps()?",
+    "answer": "json.dump() writes to a file object. json.dumps() returns a JSON string."
+  },
+  {
+    "id": "d05_q02",
+    "day": 5,
+    "topic": "File I/O",
+    "level": 2,
+    "type": "application",
+    "question": "Write Python code to write a dict to data.json and read it back, using with statements.",
+    "answer": "import json\ndata = {'x': 1}\nwith open('data.json', 'w') as f:\n    json.dump(data, f, indent=2)\nwith open('data.json', 'r') as f:\n    loaded = json.load(f)"
+  },
+  {
+    "id": "d05_q03",
+    "day": 5,
+    "topic": "File I/O",
+    "level": 2,
+    "type": "debug",
+    "question": "You open a file with f = open('data.txt') but never call f.close(). What can go wrong?",
+    "answer": "File descriptor leak. On Windows, file stays locked. Data may not be flushed to disk. Fix: use with open(...) as f."
+  },
+  {
+    "id": "d05_q04",
+    "day": 5,
+    "topic": "File I/O",
+    "level": 3,
+    "type": "comparison",
+    "question": "os.path.exists() vs pathlib.Path.exists() \u2014 which to prefer and why?",
+    "answer": "pathlib.Path.exists() is preferred in modern Python. pathlib is object-oriented, handles paths cleanly across OSes, and is the standard since Python 3.6+."
+  },
+  {
+    "id": "d05_q05",
+    "day": 5,
+    "topic": "SQL",
+    "level": 1,
+    "type": "recall",
+    "question": "What is the difference between ROW_NUMBER() and RANK() in SQL window functions?",
+    "answer": "ROW_NUMBER(): unique sequential number, no ties. RANK(): same value gets same rank, next rank skips numbers (1,1,3)."
+  },
+  {
+    "id": "d06_q01",
+    "day": 6,
+    "topic": "Environment",
+    "level": 1,
+    "type": "recall",
+    "question": "What command creates a Python virtual environment named venv?",
+    "answer": "python -m venv venv"
+  },
+  {
+    "id": "d06_q02",
+    "day": 6,
+    "topic": "Environment",
+    "level": 2,
+    "type": "application",
+    "question": "Write the sequence: create venv, activate it, install from requirements.txt, freeze dependencies.",
+    "answer": "python -m venv venv\nsource venv/bin/activate\npip install -r requirements.txt\npip freeze > requirements.txt"
+  },
+  {
+    "id": "d06_q03",
+    "day": 6,
+    "topic": "Environment",
+    "level": 2,
+    "type": "debug",
+    "question": "Your code works on your machine but fails on a colleague's with ModuleNotFoundError. Likely cause?",
+    "answer": "Package installed globally instead of in venv, or requirements.txt not updated. Fix: always work inside venv and pin versions with pip freeze."
+  },
+  {
+    "id": "d06_q04",
+    "day": 6,
+    "topic": "Environment",
+    "level": 3,
+    "type": "comparison",
+    "question": "pip install package vs pip install -r requirements.txt \u2014 when to use each?",
+    "answer": "pip install package: quick experiment, one-off. pip install -r requirements.txt: reproducible setup for projects, CI, and teammates."
+  },
+  {
+    "id": "d07_q01",
+    "day": 7,
+    "topic": "REST APIs",
+    "level": 1,
+    "type": "recall",
+    "question": "What is the core difference between HTTP GET and POST?",
+    "answer": "GET: fetch data, idempotent, parameters in URL. POST: send data to create/process, body contains payload."
+  },
+  {
+    "id": "d07_q02",
+    "day": 7,
+    "topic": "REST APIs",
+    "level": 2,
+    "type": "application",
+    "question": "Write a requests.post call with JSON body, Content-Type header, and 30-second timeout.",
+    "answer": "import requests\nresponse = requests.post(url, headers={'Content-Type': 'application/json'}, json={'key': 'value'}, timeout=30)"
+  },
+  {
+    "id": "d07_q03",
+    "day": 7,
+    "topic": "REST APIs",
+    "level": 2,
+    "type": "debug",
+    "question": "You call response.json() but get JSONDecodeError. What are two likely causes?",
+    "answer": "1) Response is not JSON (maybe HTML error page). 2) Status code is 4xx/5xx and body contains error text. Fix: call response.raise_for_status() before .json()."
+  },
+  {
+    "id": "d07_q04",
+    "day": 7,
+    "topic": "REST APIs",
+    "level": 3,
+    "type": "comparison",
+    "question": "requests library vs urllib from standard library \u2014 tradeoffs?",
+    "answer": "requests: simpler API, handles cookies/sessions, better errors, de facto standard. urllib: no external dependency, built-in, but verbose and harder to use correctly."
+  },
+  {
+    "id": "d07_q05",
+    "day": 7,
+    "topic": "REST APIs",
+    "level": 3,
+    "type": "comparison",
+    "question": "HTTP 200 vs 201 vs 204 \u2014 when does each appear?",
+    "answer": "200: OK, generic success. 201: Created, resource was created. 204: No Content, success but nothing to return (e.g., DELETE)."
+  },
+  {
+    "id": "d08_q01",
+    "day": 8,
+    "topic": "GCP Deploy",
+    "level": 1,
+    "type": "recall",
+    "question": "What is Cloud Run and why is it useful for FastAPI apps?",
+    "answer": "Cloud Run is a serverless container platform. Auto-scales 0 to 1000+. Pay per request. Good for FastAPI because you deploy a container, not manage servers."
+  },
+  {
+    "id": "d08_q02",
+    "day": 8,
+    "topic": "GCP Deploy",
+    "level": 2,
+    "type": "application",
+    "question": "Write the gcloud command to deploy a service from source to Cloud Run in us-central1.",
+    "answer": "gcloud run deploy my-service --source . --region=us-central1 --allow-unauthenticated"
+  },
+  {
+    "id": "d08_q03",
+    "day": 8,
+    "topic": "GCP Deploy",
+    "level": 2,
+    "type": "debug",
+    "question": "You deployed but the service is in the wrong project. What gcloud command fixes the default project?",
+    "answer": "gcloud config set project PROJECT_ID"
+  },
+  {
+    "id": "d08_q04",
+    "day": 8,
+    "topic": "GCP Deploy",
+    "level": 3,
+    "type": "comparison",
+    "question": "Cloud Run vs Cloud Functions vs GKE \u2014 which for what?",
+    "answer": "Cloud Functions: single-purpose event-driven functions, quick. Cloud Run: containerized HTTP services, flexible. GKE: long-running complex apps, need cluster control."
+  },
+  {
+    "id": "d08_q05",
+    "day": 8,
+    "topic": "GCS",
+    "level": 1,
+    "type": "recall",
+    "question": "What is the retention mnemonic for GCS storage classes?",
+    "answer": "Standard = hot (no minimum). Nearline = N-30 (30-day min). Coldline = C-90 (90-day min). Archive = A-365 (365-day min)."
+  },
+  {
+    "id": "d09_q01",
+    "day": 9,
+    "topic": "IAM",
+    "level": 1,
+    "type": "recall",
+    "question": "What is the difference between Editor and Owner roles in GCP?",
+    "answer": "Editor: read + write + delete resources, but CANNOT manage IAM. Owner: full control including IAM and billing."
+  },
+  {
+    "id": "d09_q02",
+    "day": 9,
+    "topic": "IAM",
+    "level": 2,
+    "type": "application",
+    "question": "Which predefined role gives read-only access to BigQuery datasets and tables?",
+    "answer": "roles/bigquery.dataViewer"
+  },
+  {
+    "id": "d09_q03",
+    "day": 9,
+    "topic": "IAM",
+    "level": 2,
+    "type": "debug",
+    "question": "You gave a user Editor role but they cannot add new team members. Why?",
+    "answer": "Only Owner can manage IAM bindings. Editor cannot add/remove users."
+  },
+  {
+    "id": "d09_q04",
+    "day": 9,
+    "topic": "IAM",
+    "level": 3,
+    "type": "comparison",
+    "question": "Primitive vs Predefined vs Custom roles \u2014 when to use each?",
+    "answer": "Primitive: quick start, broad (Viewer/Editor/Owner). Predefined: granular, Google-managed, preferred for production. Custom: when predefined doesn't fit exactly, combine specific permissions."
+  },
+  {
+    "id": "d10_q01",
+    "day": 10,
+    "topic": "GCS",
+    "level": 1,
+    "type": "recall",
+    "question": "Name the 4 GCS storage classes and their minimum retention periods.",
+    "answer": "Standard: 0 days. Nearline: 30 days. Coldline: 90 days. Archive: 365 days."
+  },
+  {
+    "id": "d10_q02",
+    "day": 10,
+    "topic": "FastAPI",
+    "level": 2,
+    "type": "application",
+    "question": "Write a FastAPI /health GET endpoint that returns {\"status\": \"ok\"}.",
+    "answer": "from fastapi import FastAPI\napp = FastAPI()\n@app.get('/health')\ndef health():\n    return {'status': 'ok'}"
+  },
+  {
+    "id": "d10_q03",
+    "day": 10,
+    "topic": "FastAPI",
+    "level": 2,
+    "type": "application",
+    "question": "Write a Pydantic BaseModel with message: str, min_length=1, max_length=200.",
+    "answer": "from pydantic import BaseModel, Field\nclass EchoRequest(BaseModel):\n    message: str = Field(..., min_length=1, max_length=200)"
+  },
+  {
+    "id": "d10_q04",
+    "day": 10,
+    "topic": "GCS",
+    "level": 2,
+    "type": "debug",
+    "question": "You stored data in Nearline but deleted it after 10 days. What happens?",
+    "answer": "Early deletion fee. You are charged for the remaining 20 days of the 30-day minimum."
+  },
+  {
+    "id": "d10_q05",
+    "day": 10,
+    "topic": "GCS",
+    "level": 3,
+    "type": "comparison",
+    "question": "Match use cases: daily analytics dashboard, monthly backups, yearly compliance archives.",
+    "answer": "Daily analytics \u2192 Standard. Monthly backups \u2192 Nearline. Yearly compliance \u2192 Archive (or Coldline if quarterly)."
+  },
+  {
+    "id": "d10_q06",
+    "day": 10,
+    "topic": "GCP",
+    "level": 3,
+    "type": "comparison",
+    "question": "Why Cloud Run over Compute Engine for a stateless FastAPI service?",
+    "answer": "Cloud Run: auto-scales to zero, pay per request, no server management. Compute Engine: full VM control, but you manage OS, scaling, and pay for uptime. Stateless APIs favor Cloud Run."
+  },
+  {
+    "id": "d11_q01",
+    "day": 11,
+    "topic": "Config",
+    "level": 1,
+    "type": "recall",
+    "question": "Why should configuration be separated from code?",
+    "answer": "Same code runs in dev/staging/prod with different configs. Secrets should not be in source control. Easier to change without redeploying code."
+  },
+  {
+    "id": "d11_q02",
+    "day": 11,
+    "topic": "Config",
+    "level": 2,
+    "type": "application",
+    "question": "Write a function get_project_id() that loads from env and raises if missing.",
+    "answer": "import os\ndef get_project_id():\n    val = os.getenv('GOOGLE_CLOUD_PROJECT')\n    if not val:\n        raise ValueError('GOOGLE_CLOUD_PROJECT not set')\n    return val"
+  },
+  {
+    "id": "d11_q03",
+    "day": 11,
+    "topic": "Config",
+    "level": 2,
+    "type": "debug",
+    "question": ".env file was committed to Git. What is the consequence and immediate fix?",
+    "answer": "Consequence: secrets exposed publicly. Fix: rotate all exposed secrets immediately, add .env to .gitignore, consider git-filter-repo to scrub history."
+  },
+  {
+    "id": "d11_q04",
+    "day": 11,
+    "topic": "Config",
+    "level": 3,
+    "type": "comparison",
+    "question": ".env file vs JSON config vs k8s ConfigMap \u2014 when to use each?",
+    "answer": ".env: local dev secrets and env vars. JSON config: structured non-secret settings (feature flags, limits). ConfigMap: Kubernetes-native config injection for containerized apps."
+  },
+  {
+    "id": "d12_q01",
+    "day": 12,
+    "topic": "FastAPI",
+    "level": 1,
+    "type": "recall",
+    "question": "What is the difference between HTTP 422 and 500 in FastAPI?",
+    "answer": "422: validation failed (Pydantic rejected input before handler ran). 500: handler crashed during execution."
+  },
+  {
+    "id": "d12_q02",
+    "day": 12,
+    "topic": "FastAPI",
+    "level": 2,
+    "type": "application",
+    "question": "Write a POST /echo endpoint that accepts EchoRequest and returns the message.",
+    "answer": "@app.post('/echo')\ndef echo(req: EchoRequest):\n    return {'message': req.message}"
+  },
+  {
+    "id": "d12_q03",
+    "day": 12,
+    "topic": "FastAPI",
+    "level": 2,
+    "type": "debug",
+    "question": "A POST request returns 422 but the handler logic looks correct. Where should you look first?",
+    "answer": "The Pydantic model. Check Field constraints, types, and required fields. 422 means validation failed before the handler executed."
+  },
+  {
+    "id": "d12_q04",
+    "day": 12,
+    "topic": "FastAPI",
+    "level": 3,
+    "type": "comparison",
+    "question": "FastAPI vs Flask vs Django for ML API backends \u2014 tradeoffs?",
+    "answer": "FastAPI: automatic validation, async native, OpenAPI docs, best for modern ML APIs. Flask: minimal, flexible, manual validation. Django: batteries-included, heavy, good for full apps with admin."
+  },
+  {
+    "id": "d13_q01",
+    "day": 13,
+    "topic": "Pydantic",
+    "level": 1,
+    "type": "recall",
+    "question": "What is the Pydantic V2 syntax for a custom validator?",
+    "answer": "@field_validator('field_name')\n@classmethod\ndef check_field(cls, v):\n    ...\n    return v"
+  },
+  {
+    "id": "d13_q02",
+    "day": 13,
+    "topic": "Pydantic",
+    "level": 2,
+    "type": "application",
+    "question": "Write a @field_validator that rejects a string if stripped length is zero.",
+    "answer": "@field_validator('message')\n@classmethod\ndef not_empty(cls, v):\n    if not v or not v.strip():\n        raise ValueError('message cannot be empty')\n    return v"
+  },
+  {
+    "id": "d13_q03",
+    "day": 13,
+    "topic": "FastAPI",
+    "level": 2,
+    "type": "debug",
+    "question": "You pass exc.errors() directly to JSONResponse and get a 500. Why?",
+    "answer": "exc.errors() may contain non-JSON-serializable objects (like Url, Decimal). Fix: sanitize first \u2014 convert to plain dicts/strings."
+  },
+  {
+    "id": "d13_q04",
+    "day": 13,
+    "topic": "Pydantic",
+    "level": 3,
+    "type": "comparison",
+    "question": "@field_validator vs Field(..., pattern=...) \u2014 when to use each?",
+    "answer": "Field pattern: simple regex checks, inline, concise. @field_validator: complex logic, cross-field validation, custom error messages, conditional checks."
+  },
+  {
+    "id": "d14_q01",
+    "day": 14,
+    "topic": "BigQuery",
+    "level": 1,
+    "type": "recall",
+    "question": "What is a CTE in SQL and why use it?",
+    "answer": "Common Table Expression. A named temporary result set defined with WITH. Makes complex queries readable and modular."
+  },
+  {
+    "id": "d14_q02",
+    "day": 14,
+    "topic": "BigQuery",
+    "level": 2,
+    "type": "application",
+    "question": "Write a query using CTE + ROW_NUMBER to get the top 3 posts per tag by score.",
+    "answer": "WITH ranked AS (\n  SELECT title, tag, score,\n    ROW_NUMBER() OVER (PARTITION BY tag ORDER BY score DESC) AS rn\n  FROM posts\n)\nSELECT * FROM ranked WHERE rn <= 3"
+  },
+  {
+    "id": "d14_q03",
+    "day": 14,
+    "topic": "BigQuery",
+    "level": 2,
+    "type": "debug",
+    "question": "A JOIN query returns more rows than expected with believable data. How do you diagnose?",
+    "answer": "Check join cardinality. Use COUNT(DISTINCT key) on both tables before joining. Look for duplicate keys or many-to-many relationships."
+  },
+  {
+    "id": "d14_q04",
+    "day": 14,
+    "topic": "BigQuery",
+    "level": 3,
+    "type": "comparison",
+    "question": "ROW_NUMBER vs RANK vs DENSE_RANK \u2014 give one use case for each.",
+    "answer": "ROW_NUMBER: pagination (top N without ties). RANK: tiered ranking (1st, 2nd, 2nd, 4th). DENSE_RANK: compact tiers (1st, 2nd, 2nd, 3rd)."
+  },
+  {
+    "id": "d14_q05",
+    "day": 14,
+    "topic": "BigQuery",
+    "level": 3,
+    "type": "comparison",
+    "question": "INNER JOIN vs LEFT JOIN vs CROSS JOIN \u2014 result set differences?",
+    "answer": "INNER: only matching rows from both. LEFT: all from left, nulls for right non-matches. CROSS: Cartesian product (every combination), dangerous if tables are large."
+  },
+  {
+    "id": "d14_q06",
+    "day": 14,
+    "topic": "BigQuery",
+    "level": 3,
+    "type": "application",
+    "question": "Design a BigQuery table schema for VECTOR_SEARCH. What columns and types do you need?",
+    "answer": "id STRING, content STRING, embedding ARRAY<FLOAT64> (768 dims for text-embedding-004). Optionally: metadata JSON, created_at TIMESTAMP."
+  }
+]
