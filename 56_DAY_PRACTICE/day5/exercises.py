@@ -1,197 +1,172 @@
-# Day 5 Exercises: JSON + File I/O
-# Simple style — one concept at a time, your world
-# Build these one by one. Each function = one concept.
+"""
+Day 5: JSON + File I/O
+5 exercises. Each one concept. No metaphors.
+
+Run: python3 exercises.py
+After filling in all 5, all tests should pass.
+"""
 
 import json
 import os
 
-# ================================================================
-# EXERCISE 1: Read a JSON file
-# Concept: with open() + json.load()
-# Your world: Read Dr. Sunder's profile from disk
-# ================================================================
+DATA = "data"
 
-def read_doctor_profile(filepath):
-    """
-    Read a JSON file and return the full dict.
 
-    Usage:
-        data = read_doctor_profile("data/doctor_profiles.json")
-        print(data["doctors"][0]["name"])  # Dr. Sunder Narasimhan
+# ================================================================
+# EXERCISE 1: Read a text file
+# ================================================================
+# Concept: with open("r") reads a file safely
+# Why: You need to load the content of a file from disk
+
+def read_file(path):
     """
-    # Step 1: Open the file in read mode
-    # Step 2: json.load() to convert to dict
-    # Step 3: Return the dict
+    Read and return the entire content of a text file.
+
+    Example:
+        content = read_file("data/notes.txt")
+        print(content)  # prints the whole file
+    """
+    # TODO: use with open(path, "r") as f:
+    #       return f.read()
     pass
 
 
 # ================================================================
 # EXERCISE 2: Write a JSON file
-# Concept: with open("w") + json.dump(indent=2)
-# Your world: Save Dr. Sunder's campaign report
 # ================================================================
+# Concept: json.dump() saves a Python dict as a JSON file
+# Why: You want to save settings or data in a readable format
 
-def save_campaign_report(filepath, doctor_id, leads, spend):
+def save_settings(path, settings_dict):
     """
-    Save a campaign report to JSON file with indent=2.
+    Save settings dict to a JSON file with indent=2.
 
-    The report dict should look like:
-    {
-        "doctor_id": "DOC001",
-        "leads_generated": 45,
-        "spend": 25000,
-        "roi": 1.8
-    }
-
-    Usage:
-        save_campaign_report("report.json", "DOC001", 45, 25000)
-        # Creates report.json with readable JSON inside
+    Example:
+        save_settings("data/config.json", {"theme": "dark", "lang": "en"})
+        # Creates readable JSON file
     """
-    # Step 1: Build the report dict
-    # Step 2: Open filepath in write mode ("w")
-    # Step 3: json.dump() with indent=2
+    # TODO: with open(path, "w") as f:
+    #       json.dump(settings_dict, f, indent=2)
     pass
 
 
 # ================================================================
-# EXERCISE 3: Check if file exists
-# Concept: os.path.exists()
-# Your world: Before emailing report to Dr. Sunder
+# EXERCISE 3: Read a JSON file
 # ================================================================
+# Concept: json.load() reads JSON file → Python dict
+# Why: Load saved settings or data from disk
 
-def report_ready(filepath):
+def load_settings(path):
     """
-    Return True if file exists, False otherwise.
+    Read a JSON file and return as Python dict.
 
-    Usage:
-        if report_ready("report_doc001.json"):
-            send_email("Dr. Sunder")
+    Example:
+        settings = load_settings("data/config.json")
+        print(settings["theme"])  # "dark"
+    """
+    # TODO: with open(path, "r") as f:
+    #       return json.load(f)
+    pass
+
+
+# ================================================================
+# EXERCISE 4: Check if a file exists
+# ================================================================
+# Concept: os.path.exists() returns True if file is on disk
+# Why: Don't try to read a file that doesn't exist yet
+
+def file_exists(path):
+    """
+    Return True if path exists, False otherwise.
+
+    Example:
+        if file_exists("data/config.json"):
+            settings = load_settings("data/config.json")
         else:
-            print("Still generating...")
+            print("No settings file yet")
     """
-    # One line: return os.path.exists(filepath)
+    # TODO: return os.path.exists(path)
     pass
 
 
 # ================================================================
-# EXERCISE 4: List all files in a folder
-# Concept: os.listdir() + filtering
-# Your world: See all campaign data files
+# EXERCISE 5: List files in a folder
 # ================================================================
+# Concept: os.listdir() returns all filenames in a folder
+# Why: See what files are available before processing them
 
-def list_campaign_files(folder_path):
+def list_json_files(folder):
     """
-    Return list of all .json and .txt files in the folder.
+    Return list of all .json filenames in the folder.
 
-    Usage:
-        files = list_campaign_files("data")
-        print(files)
-        # ['doctor_profiles.json', 'bank_transactions.json', ...]
+    Example:
+        files = list_json_files("data")
+        print(files)  # ["config.json", "todos.json", ...]
     """
-    # Step 1: os.listdir(folder_path) to get all files
-    # Step 2: Filter for .json or .txt
-    # Step 3: Return the filtered list
+    # TODO: all_files = os.listdir(folder)
+    #       return [f for f in all_files if f.endswith(".json")]
     pass
 
 
 # ================================================================
-# EXERCISE 5: Parse pipe-delimited text file
-# Concept: readlines() + split() + skip header
-# Your world: Process call center lead responses
-# ================================================================
-
-def count_interested_leads(filepath):
-    """
-    Read a pipe-delimited text file and count leads who said "yes".
-
-    File format:
-    LEAD_ID|NAME|PHONE|INTERESTED|DOCTOR_ID
-    L001|Ramesh|9876543210|yes|DOC001
-
-    Usage:
-        count = count_interested_leads("data/leads_response_2024_05.txt")
-        print(count)  # 3
-    """
-    # Step 1: with open() read all lines
-    # Step 2: Skip first line (header) with lines[1:]
-    # Step 3: For each line, split by "|"
-    # Step 4: If parts[3] == "yes", count += 1
-    # Step 5: Return the count
-    pass
-
-
-# ================================================================
-# RUNNER
+# TESTS
 # ================================================================
 
 if __name__ == "__main__":
-    DATA_DIR = "data"
-
     print("=" * 50)
-    print("DAY 5 EXERCISES — Your World Edition")
+    print("DAY 5 EXERCISES")
     print("=" * 50)
 
-    # Exercise 1: Read JSON file
-    print("\n--- Exercise 1: Read JSON file ---")
+    # Ex 1
     try:
-        profile = read_doctor_profile(os.path.join(DATA_DIR, "doctor_profiles.json"))
-        if profile and isinstance(profile, dict) and "doctors" in profile:
-            print(f"  ✅ Loaded {len(profile['doctors'])} doctors")
-            print(f"     First: {profile['doctors'][0]['name']}")
+        content = read_file(f"{DATA}/grades.csv")
+        if content and "Alice" in content:
+            print("  ✅ Ex1: read_file works")
         else:
-            print("  ❌ Fix: return the dict from json.load()")
+            print("  ❌ Ex1: return f.read()")
     except Exception as e:
-        print(f"  ❌ Error: {e}")
+        print(f"  ❌ Ex1: {e}")
 
-    # Exercise 2: Write JSON file
-    print("\n--- Exercise 2: Write JSON file ---")
+    # Ex 2
     try:
-        report_path = os.path.join(DATA_DIR, "test_report.json")
-        save_campaign_report(report_path, "DOC001", 45, 25000)
-        if os.path.exists(report_path):
-            print(f"  ✅ Report saved at {report_path}")
+        save_settings(f"{DATA}/test_settings.json", {"theme": "light", "font_size": 16})
+        if os.path.exists(f"{DATA}/test_settings.json"):
+            print("  ✅ Ex2: save_settings works")
         else:
-            print("  ❌ Fix: use json.dump(data, f, indent=2)")
+            print("  ❌ Ex2: use json.dump(settings_dict, f, indent=2)")
     except Exception as e:
-        print(f"  ❌ Error: {e}")
+        print(f"  ❌ Ex2: {e}")
 
-    # Exercise 3: Check file exists
-    print("\n--- Exercise 3: os.path.exists ---")
+    # Ex 3
     try:
-        if report_ready(report_path):
-            print(f"  ✅ report_ready() returned True correctly")
+        s = load_settings(f"{DATA}/config.json")
+        if s and isinstance(s, dict) and "theme" in s:
+            print(f"  ✅ Ex3: load_settings works — theme is '{s['theme']}'")
         else:
-            print("  ❌ Fix: return os.path.exists(filepath)")
+            print("  ❌ Ex3: return json.load(f)")
     except Exception as e:
-        print(f"  ❌ Error: {e}")
+        print(f"  ❌ Ex3: {e}")
 
-    # Exercise 4: List files in folder
-    print("\n--- Exercise 4: List files in folder ---")
+    # Ex 4
     try:
-        files = list_campaign_files(DATA_DIR)
-        if files is None:
-            print("  ❌ Fix: return the filtered list")
-        elif len(files) > 0:
-            print(f"  ✅ Found {len(files)} data files:")
+        if file_exists(f"{DATA}/config.json"):
+            print("  ✅ Ex4: file_exists works")
+        else:
+            print("  ❌ Ex4: return os.path.exists(path)")
+    except Exception as e:
+        print(f"  ❌ Ex4: {e}")
+
+    # Ex 5
+    try:
+        files = list_json_files(DATA)
+        if files and len(files) > 0:
+            print(f"  ✅ Ex5: list_json_files — found {len(files)} files")
             for f in sorted(files):
-                print(f"     - {f}")
+                print(f"       {f}")
         else:
-            print("  ❌ Fix: filter for .json or .txt files")
+            print("  ❌ Ex5: return filtered list of .json files")
     except Exception as e:
-        print(f"  ❌ Error: {e}")
+        print(f"  ❌ Ex5: {e}")
 
-    # Exercise 5: Parse pipe-delimited text
-    print("\n--- Exercise 5: Parse pipe-delimited text ---")
-    try:
-        interested = count_interested_leads(os.path.join(DATA_DIR, "leads_response_2024_05.txt"))
-        if interested == 3:
-            print(f"  ✅ Counted {interested} interested leads (correct!)")
-        else:
-            print(f"  ❌ Got {interested}, expected 3")
-            print("  💡 Hint: skip header with lines[1:], split by '|'")
-    except Exception as e:
-        print(f"  ❌ Error: {e}")
-
-    print("\n" + "=" * 50)
-    print("Fill in the pass statements and test again!")
     print("=" * 50)
+    print("Fill the pass statements, run again.")

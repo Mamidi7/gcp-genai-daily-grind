@@ -1,98 +1,173 @@
-# Day 5 Notes: JSON, File I/O, os module
+# Day 5 Notes: JSON + File I/O
 
-## What I Learned Today
+## The Big Picture
 
-### Key Concepts
-
-1. **File I/O** - Reading and writing files
-2. **JSON** - JavaScript Object Notation for data exchange
-3. **os module** - File system operations
-
----
-
-### File Operations
-
-```python
-# Read file
-with open("file.txt", "r") as f:
-    content = f.read()
-
-# Write file
-with open("file.txt", "w") as f:
-    f.write("Hello!")
-
-# Append
-with open("file.txt", "a") as f:
-    f.write("\nNew line")
+```
+File on disk          Python reads it          Python works with it
+────────────          ──────────────           ───────────────────
+config.json    →    open("r") as f     →     f.read()
+                  →    json.load(f)     →     {"theme": "dark"}
+                  →    returns dict              ↕
+Python saves it      json.dump(dict, f)  →     config.json updated
+{"theme": "light"}  open("w") as f
 ```
 
 ---
 
-### JSON Operations
+## with open() — Always Use This
+
+Regular `open()` can leave files open if your code crashes.
 
 ```python
-import json
+# BAD — file stays open if error happens
+f = open("config.json", "r")
+data = json.load(f)
+f.close()  # might never run
 
-# Write JSON
-data = {"name": "Krishna", "age": 25}
-with open("data.json", "w") as f:
-    json.dump(data, f, indent=2)
-
-# Read JSON
-with open("data.json", "r") as f:
+# GOOD — always closes automatically
+with open("config.json", "r") as f:
     data = json.load(f)
 ```
 
+The `with` keyword guarantees the file closes, even if an error happens.
+
 ---
 
-### os module
+## File Modes
+
+| Mode | What it does |
+|------|-------------|
+| `"r"` | Read (file must exist) |
+| `"w"` | Write (erases existing content) |
+| `"a"` | Append (adds to end) |
+
+---
+
+## JSON — Dicts as Text
+
+JSON looks like a Python dict, but it's stored as text.
+
+```python
+# Python dict (in memory)
+settings = {"theme": "dark", "font_size": 14}
+
+# JSON (text on disk)
+{
+  "theme": "dark",
+  "font_size": 14
+}
+```
+
+Key differences: `true/false` (lowercase), no trailing commas, keys always quoted.
+
+---
+
+## json.load() — File to Dict
+
+```python
+with open("config.json", "r") as f:
+    data = json.load(f)
+
+print(data["theme"])  # "dark"
+```
+
+---
+
+## json.dump() — Dict to File
+
+```python
+settings = {"theme": "dark", "notifications": True}
+
+with open("settings.json", "w") as f:
+    json.dump(settings, f, indent=2)
+```
+
+`indent=2` makes it readable. Without it, everything is one long line.
+
+---
+
+## json.dumps() vs json.dump()
+
+```
+json.dump(dict, file)  → writes to a file
+json.dumps(dict)       → returns a string (for APIs)
+```
+
+```python
+# For saving to disk
+json.dump(my_dict, f, indent=2)
+
+# For sending to an API
+string = json.dumps(my_dict)  # '{"theme": "dark", ...}'
+```
+
+---
+
+## os.path.exists() — Check Before Reading
 
 ```python
 import os
 
-os.path.exists("file.txt")  # Check if file exists
-os.getcwd()  # Current directory
-os.listdir(".")  # List files
-os.makedirs("folder")  # Create folder
+if os.path.exists("config.json"):
+    with open("config.json") as f:
+        data = json.load(f)
+else:
+    print("File not found")
 ```
 
 ---
 
-## SQL: Window Functions (Today's Track)
+## os.listdir() — List Folder Contents
 
-### ROW_NUMBER()
+```python
+files = os.listdir("data/")
+print(files)  # ['config.json', 'grades.csv', ...]
 
-```sql
-SELECT name, salary,
-       ROW_NUMBER() OVER (ORDER BY salary DESC) as rank
-FROM employees
-```
-
-### RANK() vs ROW_NUMBER()
-
-```sql
--- ROW_NUMBER: 1, 2, 3, 4 (always unique)
--- RANK: 1, 1, 3 (same rank for ties, skips numbers)
--- DENSE_RANK: 1, 1, 2 (same rank for ties, no gaps)
+# Filter for specific types
+json_files = [f for f in files if f.endswith(".json")]
 ```
 
 ---
 
-## Interview Punch
+## Common Mistakes
 
-> "I use Python's json module to read config files and save evaluation results. Combined with file I/O, this is how I persist data in my RAG pipeline."
+**1. Forgetting to close the file**
+```python
+# BAD
+f = open("data.json", "r")
+data = json.load(f)
 
----
+# GOOD
+with open("data.json", "r") as f:
+    data = json.load(f)
+```
 
-## Questions to Review
+**2. json.dump vs json.dumps**
+```python
+# WRONG — dump needs a file object
+result = json.dump({"name": "Alice"})  # TypeError!
 
-- [ ] Can you read a text file?
-- [ ] Can you write JSON to a file?
-- [ ] Can you read JSON from a file?
-- [ ] Can you check if a file exists?
+# CORRECT
+result = json.dumps({"name": "Alice"})  # returns string
+json.dump({"name": "Alice"}, f)        # writes to file
+```
 
----
+**3. No indent = unreadable JSON**
+```python
+# One long line
+json.dump(data, f)
 
-## Next: Day 6 - pip, venv!
+# Pretty and readable
+json.dump(data, f, indent=2)
+```
 
-Setting up Python environments professionally! 🐍
+**4. Using wrong file mode**
+```python
+# Writing to a file opened in read mode
+with open("data.json", "r") as f:
+    json.dump(data, f)  # io.UnsupportedOperation: not writable
+
+# Correct mode for writing
+with open("data.json", "w") as f:
+    json.dump(data, f)
+```

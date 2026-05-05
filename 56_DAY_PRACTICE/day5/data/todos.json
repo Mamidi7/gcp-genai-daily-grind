@@ -1,0 +1,8 @@
+{
+  "todos": [
+    {"id": 1, "task": "Buy groceries", "done": true},
+    {"id": 2, "task": "Walk the dog", "done": false},
+    {"id": 3, "task": "Finish project report", "done": false},
+    {"id": 4, "task": "Call mom", "done": true}
+  ]
+}
