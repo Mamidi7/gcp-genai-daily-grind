@@ -1,81 +1,141 @@
-# Day 4: Classes + OOP Solutions
+"""
+Day 4: Classes + OOP — Solution
+Run: python solution.py
+"""
 
-import json
-
-
-# Exercise 1: Basic Document Class
+# ──────────────────────────────────────────────
+# Exercise 1: Basic Document class
+# ──────────────────────────────────────────────
 class Document:
-    def __init__(self, title, content, metadata=None):
+    def __init__(self, title, content):
         self.title = title
         self.content = content
-        self.metadata = metadata if metadata is not None else {}
 
     def word_count(self):
-        """Return the number of words in the content"""
         return len(self.content.split())
 
-    def to_dict(self):
-        """Convert document to dictionary"""
-        return {
-            "title": self.title,
-            "content": self.content,
-            "metadata": self.metadata
-        }
+    def summary(self):
+        return f"Title: {self.title}, Words: {self.word_count()}"
 
 
-# Exercise 2: from_json Class Method
-class DocumentWithJson(Document):
-    @classmethod
-    def from_json(cls, json_str):
-        """Create Document from JSON string"""
-        data = json.loads(json_str)
-        return cls(
-            title=data.get("title", ""),
-            content=data.get("content", ""),
-            metadata=data.get("metadata", {})
-        )
-
-
-# Alternative: add from_json to original class
-# Document.from_json = classmethod(lambda cls, json_str: cls(**json.loads(json_str)))
-
-
-# Exercise 3: DocumentProcessor
+# ──────────────────────────────────────────────
+# Exercise 2: DocumentProcessor — Aggregation
+# ──────────────────────────────────────────────
 class DocumentProcessor:
     def __init__(self):
         self.documents = []
 
-    def add_document(self, doc):
-        """Add a document to the processor"""
+    def add(self, doc):
         self.documents.append(doc)
 
-    def get_by_title(self, title):
-        """Find document by title"""
-        for doc in self.documents:
-            if doc.title == title:
-                return doc
+    def total_words(self):
+        return sum(d.word_count() for d in self.documents)
+
+    def find_by_title(self, title):
+        for d in self.documents:
+            if d.title == title:
+                return d
         return None
 
-    def total_words(self):
-        """Return total words across all documents"""
-        return sum(doc.word_count() for doc in self.documents)
+
+# ──────────────────────────────────────────────
+# Exercise 3: DocumentChunk — Inheritance
+# ──────────────────────────────────────────────
+class DocumentChunk(Document):
+    def __init__(self, title, content, chunk_id, page_number):
+        super().__init__(title, content)
+        self.chunk_id = chunk_id
+        self.page_number = page_number
+
+    def summary(self):
+        return (f"Title: {self.title}, Chunk: {self.chunk_id}, "
+                f"Page: {self.page_number}, Words: {self.word_count()}")
 
 
-# Exercise 4: Testing Your Classes
+# ──────────────────────────────────────────────
+# Exercise 4: Mini RAG pipeline
+# ──────────────────────────────────────────────
+class RAGPipeline:
+    def __init__(self):
+        self.processor = DocumentProcessor()
+
+    def ingest(self, title, content):
+        doc = Document(title, content)
+        self.processor.add(doc)
+
+    def search(self, keyword):
+        return [d for d in self.processor.documents if keyword in d.content]
+
+    def stats(self):
+        docs = len(self.processor.documents)
+        words = self.processor.total_words()
+        avg = round(words / docs, 1) if docs > 0 else 0
+        print(f"Docs: {docs}, Words: {words}, Avg: {avg}")
+
+
+# ══════════════════════════════════════════════
+# TESTS — same as exercises.py
+# ══════════════════════════════════════════════
 if __name__ == "__main__":
-    # Test Exercise 1 & 2
-    doc = Document("RAG Introduction", "Retrieval Augmented Generation combines...", {"author": "Krishna"})
-    print(f"Word count: {doc.word_count()}")
-    print(f"Document: {doc.to_dict()}")
+    passed = 0
+    total = 0
 
-    # Test from_json
-    json_str = '{"title": "Test", "content": "Hello world", "metadata": {"page": 1}}'
-    doc2 = DocumentWithJson.from_json(json_str)
-    print(f"From JSON: {doc2.title}")
+    # Exercise 1
+    total += 1
+    try:
+        d = Document("RAG", "Hello world")
+        assert d.title == "RAG"
+        assert d.word_count() == 2
+        assert "RAG" in d.summary() and "2" in d.summary()
+        passed += 1
+        print("  ✅ Ex1: Document")
+    except Exception as e:
+        print(f"  ❌ Ex1: Document — {e}")
 
-    # Test DocumentProcessor
-    processor = DocumentProcessor()
-    processor.add_document(doc)
-    processor.add_document(doc2)
-    words: {processor.total_words()}")
- print(f"Total
+    # Exercise 2
+    total += 1
+    try:
+        dp = DocumentProcessor()
+        dp.add(Document("Doc1", "one two"))
+        dp.add(Document("Doc2", "three four five"))
+        assert dp.total_words() == 5
+        found = dp.find_by_title("Doc1")
+        assert found is not None and found.title == "Doc1"
+        assert dp.find_by_title("Nope") is None
+        passed += 1
+        print("  ✅ Ex2: DocumentProcessor")
+    except Exception as e:
+        print(f"  ❌ Ex2: DocumentProcessor — {e}")
+
+    # Exercise 3
+    total += 1
+    try:
+        dc = DocumentChunk("Chunk1", "some text", chunk_id=1, page_number=3)
+        assert dc.title == "Chunk1"
+        assert dc.word_count() == 2
+        assert dc.chunk_id == 1
+        assert dc.page_number == 3
+        assert "Chunk1" in dc.summary()
+        passed += 1
+        print("  ✅ Ex3: DocumentChunk")
+    except Exception as e:
+        print(f"  ❌ Ex3: DocumentChunk — {e}")
+
+    # Exercise 4
+    total += 1
+    try:
+        pipe = RAGPipeline()
+        pipe.ingest("RAG", "retrieval augmented generation")
+        pipe.ingest("SQL", "structured query language")
+        pipe.ingest("GCP", "google cloud platform")
+        results = pipe.search("cloud")
+        assert len(results) == 1
+        assert results[0].title == "GCP"
+        passed += 1
+        print("  ✅ Ex4: RAGPipeline")
+    except Exception as e:
+        print(f"  ❌ Ex4: RAGPipeline — {e}")
+
+    print(f"\n{'='*40}")
+    print(f"  Score: {passed}/{total}")
+    print(f"{'='*40}")
