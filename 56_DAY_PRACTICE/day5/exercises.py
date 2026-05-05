@@ -131,40 +131,66 @@ if __name__ == "__main__":
     print("DAY 5 EXERCISES — Your World Edition")
     print("=" * 50)
 
-    # Exercise 1
-    profile = read_doctor_profile(os.path.join(DATA_DIR, "doctor_profiles.json"))
-    if profile:
-        print(f"\n✅ Ex1: Loaded {len(profile['doctors'])} doctors")
-        print(f"   First doctor: {profile['doctors'][0]['name']}")
-    else:
-        print("\n❌ Ex1: Not working yet")
+    # Exercise 1: Read JSON file
+    print("\n--- Exercise 1: Read JSON file ---")
+    try:
+        profile = read_doctor_profile(os.path.join(DATA_DIR, "doctor_profiles.json"))
+        if profile and isinstance(profile, dict) and "doctors" in profile:
+            print(f"  ✅ Loaded {len(profile['doctors'])} doctors")
+            print(f"     First: {profile['doctors'][0]['name']}")
+        else:
+            print("  ❌ Fix: return the dict from json.load()")
+    except Exception as e:
+        print(f"  ❌ Error: {e}")
 
-    # Exercise 2
-    report_path = os.path.join(DATA_DIR, "test_report.json")
-    save_campaign_report(report_path, "DOC001", 45, 25000)
-    if os.path.exists(report_path):
-        print(f"\n✅ Ex2: Report saved at {report_path}")
-    else:
-        print("\n❌ Ex2: File not created")
+    # Exercise 2: Write JSON file
+    print("\n--- Exercise 2: Write JSON file ---")
+    try:
+        report_path = os.path.join(DATA_DIR, "test_report.json")
+        save_campaign_report(report_path, "DOC001", 45, 25000)
+        if os.path.exists(report_path):
+            print(f"  ✅ Report saved at {report_path}")
+        else:
+            print("  ❌ Fix: use json.dump(data, f, indent=2)")
+    except Exception as e:
+        print(f"  ❌ Error: {e}")
 
-    # Exercise 3
-    if report_ready(report_path):
-        print(f"\n✅ Ex3: os.path.exists works")
-    else:
-        print(f"\n❌ Ex3: Not working")
+    # Exercise 3: Check file exists
+    print("\n--- Exercise 3: os.path.exists ---")
+    try:
+        if report_ready(report_path):
+            print(f"  ✅ report_ready() returned True correctly")
+        else:
+            print("  ❌ Fix: return os.path.exists(filepath)")
+    except Exception as e:
+        print(f"  ❌ Error: {e}")
 
-    # Exercise 4
-    files = list_campaign_files(DATA_DIR)
-    print(f"\n✅ Ex4: Found {len(files)} data files")
-    for f in files:
-        print(f"   - {f}")
+    # Exercise 4: List files in folder
+    print("\n--- Exercise 4: List files in folder ---")
+    try:
+        files = list_campaign_files(DATA_DIR)
+        if files is None:
+            print("  ❌ Fix: return the filtered list")
+        elif len(files) > 0:
+            print(f"  ✅ Found {len(files)} data files:")
+            for f in sorted(files):
+                print(f"     - {f}")
+        else:
+            print("  ❌ Fix: filter for .json or .txt files")
+    except Exception as e:
+        print(f"  ❌ Error: {e}")
 
-    # Exercise 5
-    interested = count_interested_leads(os.path.join(DATA_DIR, "leads_response_2024_05.txt"))
-    if interested == 3:
-        print(f"\n✅ Ex5: Counted {interested} interested leads (correct!)")
-    else:
-        print(f"\n❌ Ex5: Got {interested}, expected 3")
+    # Exercise 5: Parse pipe-delimited text
+    print("\n--- Exercise 5: Parse pipe-delimited text ---")
+    try:
+        interested = count_interested_leads(os.path.join(DATA_DIR, "leads_response_2024_05.txt"))
+        if interested == 3:
+            print(f"  ✅ Counted {interested} interested leads (correct!)")
+        else:
+            print(f"  ❌ Got {interested}, expected 3")
+            print("  💡 Hint: skip header with lines[1:], split by '|'")
+    except Exception as e:
+        print(f"  ❌ Error: {e}")
 
     print("\n" + "=" * 50)
     print("Fill in the pass statements and test again!")
