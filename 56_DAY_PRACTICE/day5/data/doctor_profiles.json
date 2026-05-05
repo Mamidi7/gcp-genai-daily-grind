@@ -1,0 +1,34 @@
+{
+  "doctors": [
+    {
+      "id": "DOC001",
+      "name": "Dr. Sunder Narasimhan",
+      "specialty": "Vascular Surgery",
+      "hospital": "Apollo Bangalore",
+      "city": "Bangalore",
+      "campaign_active": true,
+      "monthly_budget": 50000,
+      "leads_target": 100
+    },
+    {
+      "id": "DOC002",
+      "name": "Dr. Priya Sharma",
+      "specialty": "Cardiology",
+      "hospital": "Fortis Mumbai",
+      "city": "Mumbai",
+      "campaign_active": false,
+      "monthly_budget": 0,
+      "leads_target": 0
+    },
+    {
+      "id": "DOC003",
+      "name": "Dr. Rajesh Kumar",
+      "specialty": "Orthopedics",
+      "hospital": "Manipal Bangalore",
+      "city": "Bangalore",
+      "campaign_active": true,
+      "monthly_budget": 35000,
+      "leads_target": 75
+    }
+  ]
+}

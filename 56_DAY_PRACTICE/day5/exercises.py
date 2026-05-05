@@ -1,45 +1,171 @@
-# Day 5 Exercises: JSON, File I/O, os module
+# Day 5 Exercises: JSON + File I/O
+# Simple style — one concept at a time, your world
+# Build these one by one. Each function = one concept.
 
-# Exercise 1: Read a text file
-def read_file(filename):
-    """Read and return content of a text file"""
-    # TODO: Use with open() to read the file
-    # Return the content
+import json
+import os
+
+# ================================================================
+# EXERCISE 1: Read a JSON file
+# Concept: with open() + json.load()
+# Your world: Read Dr. Sunder's profile from disk
+# ================================================================
+
+def read_doctor_profile(filepath):
+    """
+    Read a JSON file and return the full dict.
+
+    Usage:
+        data = read_doctor_profile("data/doctor_profiles.json")
+        print(data["doctors"][0]["name"])  # Dr. Sunder Narasimhan
+    """
+    # Step 1: Open the file in read mode
+    # Step 2: json.load() to convert to dict
+    # Step 3: Return the dict
     pass
 
 
-# Exercise 2: Write to a text file
-def write_file(filename, content):
-    """Write content to a text file"""
-    # TODO: Use with open() in write mode
-    # Write the content
+# ================================================================
+# EXERCISE 2: Write a JSON file
+# Concept: with open("w") + json.dump(indent=2)
+# Your world: Save Dr. Sunder's campaign report
+# ================================================================
+
+def save_campaign_report(filepath, doctor_id, leads, spend):
+    """
+    Save a campaign report to JSON file with indent=2.
+
+    The report dict should look like:
+    {
+        "doctor_id": "DOC001",
+        "leads_generated": 45,
+        "spend": 25000,
+        "roi": 1.8
+    }
+
+    Usage:
+        save_campaign_report("report.json", "DOC001", 45, 25000)
+        # Creates report.json with readable JSON inside
+    """
+    # Step 1: Build the report dict
+    # Step 2: Open filepath in write mode ("w")
+    # Step 3: json.dump() with indent=2
     pass
 
 
-# Exercise 3: Read JSON config
-def load_config(filename):
-    """Load JSON config from file and return model name"""
-    # TODO: Use json.load() to read JSON
-    # Return the "model" value
+# ================================================================
+# EXERCISE 3: Check if file exists
+# Concept: os.path.exists()
+# Your world: Before emailing report to Dr. Sunder
+# ================================================================
+
+def report_ready(filepath):
+    """
+    Return True if file exists, False otherwise.
+
+    Usage:
+        if report_ready("report_doc001.json"):
+            send_email("Dr. Sunder")
+        else:
+            print("Still generating...")
+    """
+    # One line: return os.path.exists(filepath)
     pass
 
 
-# Exercise 4: Save JSON results
-def save_results(filename, data):
-    """Save data as JSON to file with indent=2"""
-    # TODO: Use json.dump() to save
+# ================================================================
+# EXERCISE 4: List all files in a folder
+# Concept: os.listdir() + filtering
+# Your world: See all campaign data files
+# ================================================================
+
+def list_campaign_files(folder_path):
+    """
+    Return list of all .json and .txt files in the folder.
+
+    Usage:
+        files = list_campaign_files("data")
+        print(files)
+        # ['doctor_profiles.json', 'bank_transactions.json', ...]
+    """
+    # Step 1: os.listdir(folder_path) to get all files
+    # Step 2: Filter for .json or .txt
+    # Step 3: Return the filtered list
     pass
 
 
-# Exercise 5: List all JSON files in folder
-def list_json_files(folder_path):
-    """Return list of all .json files in folder"""
-    # TODO: Use os.listdir() and filter for .json
+# ================================================================
+# EXERCISE 5: Parse pipe-delimited text file
+# Concept: readlines() + split() + skip header
+# Your world: Process call center lead responses
+# ================================================================
+
+def count_interested_leads(filepath):
+    """
+    Read a pipe-delimited text file and count leads who said "yes".
+
+    File format:
+    LEAD_ID|NAME|PHONE|INTERESTED|DOCTOR_ID
+    L001|Ramesh|9876543210|yes|DOC001
+
+    Usage:
+        count = count_interested_leads("data/leads_response_2024_05.txt")
+        print(count)  # 3
+    """
+    # Step 1: with open() read all lines
+    # Step 2: Skip first line (header) with lines[1:]
+    # Step 3: For each line, split by "|"
+    # Step 4: If parts[3] == "yes", count += 1
+    # Step 5: Return the count
     pass
 
 
-# Exercise 6: Check if file exists
-def file_exists(filename):
-    """Return True if file exists, False otherwise"""
-    # TODO: Use os.path.exists()
-    pass
+# ================================================================
+# RUNNER
+# ================================================================
+
+if __name__ == "__main__":
+    DATA_DIR = "data"
+
+    print("=" * 50)
+    print("DAY 5 EXERCISES — Your World Edition")
+    print("=" * 50)
+
+    # Exercise 1
+    profile = read_doctor_profile(os.path.join(DATA_DIR, "doctor_profiles.json"))
+    if profile:
+        print(f"\n✅ Ex1: Loaded {len(profile['doctors'])} doctors")
+        print(f"   First doctor: {profile['doctors'][0]['name']}")
+    else:
+        print("\n❌ Ex1: Not working yet")
+
+    # Exercise 2
+    report_path = os.path.join(DATA_DIR, "test_report.json")
+    save_campaign_report(report_path, "DOC001", 45, 25000)
+    if os.path.exists(report_path):
+        print(f"\n✅ Ex2: Report saved at {report_path}")
+    else:
+        print("\n❌ Ex2: File not created")
+
+    # Exercise 3
+    if report_ready(report_path):
+        print(f"\n✅ Ex3: os.path.exists works")
+    else:
+        print(f"\n❌ Ex3: Not working")
+
+    # Exercise 4
+    files = list_campaign_files(DATA_DIR)
+    print(f"\n✅ Ex4: Found {len(files)} data files")
+    for f in files:
+        print(f"   - {f}")
+
+    # Exercise 5
+    interested = count_interested_leads(os.path.join(DATA_DIR, "leads_response_2024_05.txt"))
+    if interested == 3:
+        print(f"\n✅ Ex5: Counted {interested} interested leads (correct!)")
+    else:
+        print(f"\n❌ Ex5: Got {interested}, expected 3")
+
+    print("\n" + "=" * 50)
+    print("Fill in the pass statements and test again!")
+    print("=" * 50)

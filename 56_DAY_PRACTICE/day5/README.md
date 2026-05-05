@@ -1,63 +1,76 @@
-# 📄 Day 5: JSON, File I/O, os module
+# 📄 Day 5: JSON + File I/O — Your World Edition
 
 ## Mission
-Learn to read/write files and handle JSON — essential for RAG pipelines!
+Master reading/writing files and JSON — the backbone of every data pipeline you will build.
 
-## Today's Topic: Working with Files
+## Your Context (Not Generic BS)
+- **Dr. Sunder Narasimhan** — vascular surgeon at Apollo Bangalore
+- **Lead generation system** — reads doctor profiles, processes leads, saves reports
+- **Banking ETL** — transaction exports in JSON, status filtering
+- **Call center data** — pipe-delimited text files with lead responses
 
-### 💾 File I/O Analogy
-File = 📚 Book
-- `open("file.txt", "r")` = Opening book to read
-- `open("file.txt", "w")` = Opening book to write
-- `with open()` = Having a friend hold the book, then return it properly
+---
+
+## Files in This Folder
+
+| File | Purpose |
+|------|---------|
+| `data/doctor_profiles.json` | 3 doctors, campaign budgets, targets |
+| `data/bank_transactions.json` | 5 transactions with status |
+| `data/leads_response_2024_05.txt` | 5 leads from call center |
+| `exercises.py` | 7 TODOs for you to fill |
+| `solution.py` | Complete working solution |
+| `CONCEPT_DAY05.md` | Concepts + interview answers |
+| `debug_and_interview.py` | 5 real bugs + STAR stories |
+
+---
+
+## Quick Start
+
+```bash
+# 1. Run the solution to see what success looks like
+cd day5
+python solution.py
+
+# 2. Open exercises.py, fill in the 7 TODO functions
+# 3. Uncomment the runner at the bottom of exercises.py
+# 4. Run your code: python exercises.py
+
+# 5. Read CONCEPT_DAY05.md for interview framing
+# 6. Read debug_and_interview.py for common mistakes
+```
+
+---
+
+## 7 Exercises (Your World)
+
+1. **get_active_doctors** — Which doctors have active campaigns?
+2. **get_total_budget** — Sum all monthly budgets
+3. **save_campaign_report** — Write report JSON with indent=2
+4. **get_failed_transactions** — Find failed bank payments
+5. **report_exists** — Check if file exists before sending to client
+6. **list_data_files** — Show all .json and .txt files
+7. **count_interested_leads** — Parse pipe-delimited text, count "yes" responses
 
 ---
 
 ## Key Concepts
 
-| Function | What It Does |
-|----------|--------------|
-| `open("file", "r")` | Read file |
-| `open("file", "w")` | Write file (overwrites) |
-| `open("file", "a")` | Append to file |
-| `json.load(f)` | Read JSON from file |
-| `json.dump(obj, f)` | Write JSON to file |
-| `os.path.exists()` | Check if file exists |
-| `os.listdir()` | List files in folder |
-
----
-
-## Hands-On Task
-
-**Read a JSON config file and write results:**
-
-```python
-import json
-import os
-
-# Read JSON config
-with open("config.json", "r") as f:
-    config = json.load(f)
-
-print(config["model"], config["temperature"])
-
-# Write results to JSON
-results = {"answer": "RAG is great", "confidence": 0.9}
-with open("results.json", "w") as f:
-    json.dump(results, f, indent=2)
-```
+| Pattern | Your Use Case |
+|---------|---------------|
+| `with open(...) as f:` | Read doctor profiles safely |
+| `json.load(f)` | Convert JSON file to Python dict |
+| `json.dump(data, f, indent=2)` | Save campaign report |
+| `os.path.exists()` | Check if report is ready before email |
+| `os.listdir()` | List all campaign data files |
+| `os.path.join()` | Cross-platform file paths |
 
 ---
 
 ## Interview Punch
 
-> "I use Python's json module to read config files and save outputs. Combined with file I/O, this is how I persist data in my RAG pipeline — configs go in, evaluation results come out."
+> "For Dr. Sunder's lead generation, I built a data pipeline using Python's json and os modules. I read doctor profiles from JSON, parsed pipe-delimited lead responses from call centers, and saved campaign reports back to JSON. I used `with open()` to prevent file handle leaks and `os.path.exists()` for safe file operations."
 
 ---
 
-## Resources
-- Python Docs: docs.python.org/3/tutorial/inputoutput.html
-
----
-
-*Mantra: Thaggedhe Le* 🔥
+*Thaggedhe Le* 🔥
