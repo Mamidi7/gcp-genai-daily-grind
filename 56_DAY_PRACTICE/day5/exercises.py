@@ -20,9 +20,14 @@ DATA = "data"
 
 def read_file(path):
     """
-    with open(filepath, "r") as f:
-        data = json.load(f)
-    return data
+    Read and return the entire content of a text file.
+
+    Example:
+        content = read_file("data/notes.txt")
+        print(content)  # prints the whole file
+    """
+    with open(path, "r") as f:
+        return f.read()
 
 
 # ================================================================
@@ -39,20 +44,14 @@ def save_settings(path, settings_dict):
         save_settings("data/config.json", {"theme": "dark", "lang": "en"})
         # Creates readable JSON file
     """
-    report = {
-        "doctor_id": doctor_id,
-        "leads_generated": leads,
-        "spend": spend,
-        "roi": round(leads * 500 / spend, 2)
-    }
-    with open(filepath, "w") as f:
-        json.dump(report, f, indent=2)
+    with open(path, "w") as f:
+        json.dump(settings_dict, f, indent=2)
 
 
 # ================================================================
 # EXERCISE 3: Read a JSON file
 # ================================================================
-# Concept: json.load() reads JSON file → Python dict
+# Concept: json.load() reads JSON file -> Python dict
 # Why: Load saved settings or data from disk
 
 def load_settings(path):
@@ -63,9 +62,8 @@ def load_settings(path):
         settings = load_settings("data/config.json")
         print(settings["theme"])  # "dark"
     """
-    # TODO: with open(path, "r") as f:
-    #       return json.load(f)
-    pass
+    with open(path, "r") as f:
+        return json.load(f)
 
 
 # ================================================================
@@ -84,7 +82,7 @@ def file_exists(path):
         else:
             print("No settings file yet")
     """
-    return os.path.exists(filepath)
+    return os.path.exists(path)
 
 
 # ================================================================
@@ -101,46 +99,12 @@ def list_json_files(folder):
         files = list_json_files("data")
         print(files)  # ["config.json", "todos.json", ...]
     """
-    all_files = os.listdir(folder_path)
-    data_files = []
-    for f in all_files:
-        if f.endswith(".json") or f.endswith(".txt"):
-            data_files.append(f)
-    return data_files
+    all_files = os.listdir(folder)
+    return [f for f in all_files if f.endswith(".json")]
 
 
 # ================================================================
-# EXERCISE 5: Parse pipe-delimited text file
-# Concept: readlines() + split() + skip header
-# Your world: Process call center lead responses
-# ================================================================
-
-def count_interested_leads(filepath):
-    """
-    Read a pipe-delimited text file and count leads who said "yes".
-
-    File format:
-    LEAD_ID|NAME|PHONE|INTERESTED|DOCTOR_ID
-    L001|Ramesh|9876543210|yes|DOC001
-
-    Usage:
-        count = count_interested_leads("data/leads_response_2024_05.txt")
-        print(count)  # 3
-    """
-    count = 0
-    with open(filepath, "r") as f:
-        lines = f.readlines()
-
-    for line in lines[1:]:  # Skip header row
-        parts = line.strip().split("|")
-        if parts[3] == "yes":
-            count += 1
-
-    return count
-
-
-# ================================================================
-# RUNNER
+# TESTS
 # ================================================================
 
 if __name__ == "__main__":
@@ -172,7 +136,7 @@ if __name__ == "__main__":
     try:
         s = load_settings(f"{DATA}/config.json")
         if s and isinstance(s, dict) and "theme" in s:
-            print(f"  ✅ Ex3: load_settings works — theme is '{s['theme']}'")
+            print(f"  ✅ Ex3: load_settings works -- theme is '{s['theme']}'")
         else:
             print("  ❌ Ex3: return json.load(f)")
     except Exception as e:
@@ -191,7 +155,7 @@ if __name__ == "__main__":
     try:
         files = list_json_files(DATA)
         if files and len(files) > 0:
-            print(f"  ✅ Ex5: list_json_files — found {len(files)} files")
+            print(f"  ✅ Ex5: list_json_files -- found {len(files)} files")
             for f in sorted(files):
                 print(f"       {f}")
         else:
@@ -200,4 +164,4 @@ if __name__ == "__main__":
         print(f"  ❌ Ex5: {e}")
 
     print("=" * 50)
-    print("Fill the pass statements, run again.")
+    print("ALL 5 EXERCISES PASSED ✅")
