@@ -20,15 +20,9 @@ DATA = "data"
 
 def read_file(path):
     """
-    Read and return the entire content of a text file.
-
-    Example:
-        content = read_file("data/notes.txt")
-        print(content)  # prints the whole file
-    """
-    # TODO: use with open(path, "r") as f:
-    #       return f.read()
-    pass
+    with open(filepath, "r") as f:
+        data = json.load(f)
+    return data
 
 
 # ================================================================
@@ -45,9 +39,14 @@ def save_settings(path, settings_dict):
         save_settings("data/config.json", {"theme": "dark", "lang": "en"})
         # Creates readable JSON file
     """
-    # TODO: with open(path, "w") as f:
-    #       json.dump(settings_dict, f, indent=2)
-    pass
+    report = {
+        "doctor_id": doctor_id,
+        "leads_generated": leads,
+        "spend": spend,
+        "roi": round(leads * 500 / spend, 2)
+    }
+    with open(filepath, "w") as f:
+        json.dump(report, f, indent=2)
 
 
 # ================================================================
@@ -85,8 +84,7 @@ def file_exists(path):
         else:
             print("No settings file yet")
     """
-    # TODO: return os.path.exists(path)
-    pass
+    return os.path.exists(filepath)
 
 
 # ================================================================
@@ -103,13 +101,46 @@ def list_json_files(folder):
         files = list_json_files("data")
         print(files)  # ["config.json", "todos.json", ...]
     """
-    # TODO: all_files = os.listdir(folder)
-    #       return [f for f in all_files if f.endswith(".json")]
-    pass
+    all_files = os.listdir(folder_path)
+    data_files = []
+    for f in all_files:
+        if f.endswith(".json") or f.endswith(".txt"):
+            data_files.append(f)
+    return data_files
 
 
 # ================================================================
-# TESTS
+# EXERCISE 5: Parse pipe-delimited text file
+# Concept: readlines() + split() + skip header
+# Your world: Process call center lead responses
+# ================================================================
+
+def count_interested_leads(filepath):
+    """
+    Read a pipe-delimited text file and count leads who said "yes".
+
+    File format:
+    LEAD_ID|NAME|PHONE|INTERESTED|DOCTOR_ID
+    L001|Ramesh|9876543210|yes|DOC001
+
+    Usage:
+        count = count_interested_leads("data/leads_response_2024_05.txt")
+        print(count)  # 3
+    """
+    count = 0
+    with open(filepath, "r") as f:
+        lines = f.readlines()
+
+    for line in lines[1:]:  # Skip header row
+        parts = line.strip().split("|")
+        if parts[3] == "yes":
+            count += 1
+
+    return count
+
+
+# ================================================================
+# RUNNER
 # ================================================================
 
 if __name__ == "__main__":
