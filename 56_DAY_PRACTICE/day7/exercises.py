@@ -2,24 +2,18 @@
 
 # Exercise 1: GET Request
 # Fetch data from a public API and print the title
+import requests
 def fetch_post():
     """Fetch post #5 from JSONPlaceholder and print its title"""
     # TODO: Use requests.get() to fetch from:
     # https://jsonplaceholder.typicode.com/posts/5
     # Return the title from the response
-    pass
-
-
-# Exercise 2: POST Request
-# Create a new post using POST request
-def create_post(title, body, user_id):
-    """Create a new post and return the created post's ID"""
-    # TODO: Use requests.post() to create a post at:
-    # https://jsonplaceholder.typicode.com/posts
-    # Pass: {"title": title, "body": body, "userId": user_id}
-    # Return the ID from the response
-    pass
-
+    response = requests.get("https://jsonplaceholder.typicode.com/posts/5")
+    data = response.json()
+    return data['title']    
+    
+if __name__ == "__main__":
+    print(fetch_post())
 
 # Exercise 3: Error Handling
 # Handle API errors gracefully
