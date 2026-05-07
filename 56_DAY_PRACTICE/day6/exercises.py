@@ -8,28 +8,31 @@ class Document:
         """Initialize document with title, content, and optional metadata"""
         self.title = title
         self.content = content
+        self.metadata = metadata if metadata else {}
         # TODO: Handle metadata default to empty dict if None
 
     def to_dict(self):
         """Convert document to dictionary"""
         # TODO: Return {"title": ..., "content": ..., "metadata": ...}
-        pass
+        return { "title": self.title,"content":self.content,"metadata":self.metadata}
 
     def word_count(self):
         """Return number of words in content"""
         # TODO: Split by space and count
-        pass
+        return len(self.content.split())    
 
     def char_count(self):
         """Return number of characters in content"""
         # TODO: Return len(self.content)
-        pass
+        return len(self.content)
 
-    def summary(self, first_n=50):
+    def summary(self, first_n=100):
         """Return first N characters with '...' if truncated"""
         # TODO: If content <= first_n, return full content
         # Otherwise return content[:first_n] + "..."
-        pass
+        if len(self.content) <= first_n:
+            return self.content
+        return self.content[:first_n] + "..."
 
     @classmethod
     def from_json(cls, json_data):
