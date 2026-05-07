@@ -1,0 +1,18 @@
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "UPI is Unified Payments Interface, India's real-time payment system."
+          }
+        ]
+      },
+      "finish_reason": "STOP"
+    }
+  ],
+  "usage_metadata": {
+    "prompt_token_count": 5,
+    "candidates_token_count": 18
+  }
+}

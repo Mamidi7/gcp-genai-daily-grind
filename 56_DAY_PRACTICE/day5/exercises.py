@@ -37,6 +37,7 @@ def read_file(path):
 # Why: You want to save settings or data in a readable format
 
 def save_settings(path, settings_dict):
+    
     """
     Save settings dict to a JSON file with indent=2.
 
