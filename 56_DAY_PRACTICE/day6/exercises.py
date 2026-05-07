@@ -37,14 +37,27 @@ class Document:
     @classmethod
     def from_json(cls, json_data):
         """Create Document from JSON/dictionary"""
-        # TODO: Use cls() to create new Document
-        # Extract title, content, metadata from json_data
-        pass
+        return cls(
+            title=json_data.get("title", ""),
+            content=json_data.get("content", ""),
+            metadata=json_data.get("metadata", {})
+        )
 
 
 # Exercise 2: Create a Car class
 class Car:
     """Create a Car class with brand, color, miles"""
+    def __init__(self,brand,color,miles=0):
+        self.brand=brand
+        self.color=color
+        self.miles=miles
+    def drive(self,distance):
+        self.miles+=distance
+        return self.miles
+    def repaint(self,color):
+        self.color=color
+    def describe(self):
+        return f"{self.brand} {self.color} with {self.miles} miles"
     # TODO: Add __init__(brand, color, miles=0)
     # TODO: Add drive(distance) method - adds to miles
     # TODO: Add repaint(new_color) method - changes color
@@ -54,7 +67,23 @@ class Car:
 # Exercise 3: Create a Book class
 class Book:
     """Create a Book class for a library system"""
-    # TODO: Add __init__(title, author, pages)
-    # TODO: Add is_long_read() - returns True if > 300 pages
-    # TODO: Add get_info() - returns formatted string
-    # TODO: Add @classmethod from_string(text) that parses "Title by Author (pages pages)"
+    def __init__(self,title,author,pages):
+        self.title=title
+        self.author=author
+        self.pages=pages
+    def is_long_read(self):
+        return self.pages>300
+    def get_info(self):
+        return f"{self.title} by {self.author} ({self.pages} pages)"
+
+    @classmethod
+    def from_string(cls, text):
+        """Parse 'Title by Author (pages pages)' format"""
+        # Split on " by " and " (pages)" markers
+        parts = text.replace(" by ", "|").replace(" (", "|").replace(" pages)", "").split("|")
+        return cls(
+            title=parts[0],
+            author=parts[1],
+            pages=int(parts[2])
+        )
+
