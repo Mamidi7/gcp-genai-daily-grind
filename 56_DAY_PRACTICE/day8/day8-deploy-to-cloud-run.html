@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 8 — From Script to Cloud Run</title>
+<style>
+  :root {
+    --bg: #fbf7f2; --fg: #1c1917;
+    --card: #fff; --card-fg: #1c1917;
+    --accent: #bf5b3a; --accent-fg: #fff;
+    --good: #528c55; --good-bg: rgba(82,140,85,0.1);
+    --bad: #c13e3e; --bad-bg: rgba(193,62,62,0.1);
+    --blue: #3b6ea5; --blue-bg: rgba(59,110,165,0.1);
+    --muted: #ede8e1; --muted-fg: #7a6f64;
+    --border: #d9d0c7; --ring: #bf5b3a;
+    --radius: 6px;
+    --sans: "DM Sans", system-ui, -apple-system, sans-serif;
+    --serif: "DM Serif Display", Georgia, serif;
+    --mono: "Fira Code", "SF Mono", ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141210; --fg: #e8e2da;
+      --card: #1e1b18; --card-fg: #e8e2da;
+      --accent: #d47858; --accent-fg: #141210;
+      --muted: #2a2622; --muted-fg: #9c8f82;
+      --border: #37312c; --ring: #d47858;
+      --good-bg: rgba(82,140,85,0.18); --bad-bg: rgba(193,62,62,0.18);
+      --blue-bg: rgba(59,110,165,0.18);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: var(--sans); font-size: 15px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    padding: 48px 24px 120px;
+  }
+  .page { max-width: 960px; margin: 0 auto; }
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-fg); margin-bottom: 8px; }
+  h1 { font-family: var(--serif); font-weight: 500; font-size: 36px; letter-spacing: -0.01em; margin-bottom: 8px; }
+  .lead { font-size: 15px; color: var(--muted-fg); max-width: 700px; margin-bottom: 32px; }
+  h2 { font-family: var(--serif); font-weight: 500; font-size: 26px; margin: 48px 0 14px; padding-top: 10px; }
+  h3 { font-weight: 600; font-size: 16px; margin: 24px 0 10px; }
+  p { margin-bottom: 14px; max-width: 680px; }
+  code { font-family: var(--mono); font-size: 13px; background: var(--muted); padding: 1px 5px; border-radius: 4px; }
+
+  .code {
+    border-radius: var(--radius); background: var(--muted); padding: 1rem 1.25rem;
+    font-family: var(--mono); font-size: 13px; line-height: 1.55;
+    overflow-x: auto; margin: 14px 0; white-space: pre-wrap;
+  }
+  .code .cm { color: var(--muted-fg); font-style: italic; }
+  .code .kw { color: #7c3aed; }
+  .code .st { color: var(--good); }
+  .code .fn { color: var(--accent); }
+
+  .card {
+    border-radius: var(--radius); border: 1px solid var(--border);
+    background: var(--card); padding: 1.25rem; margin: 14px 0;
+  }
+  .card-title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+
+  .callout {
+    border-radius: var(--radius); border: 1px solid var(--border);
+    border-left: 3px solid var(--muted-fg);
+    padding: 0.875rem 1.125rem; margin: 14px 0;
+    font-size: 14px; line-height: 1.5;
+  }
+  .callout.good { border-left-color: var(--good); background: var(--good-bg); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 14px 0; }
+  @media (max-width: 700px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .flow { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+  .flow-step {
+    flex: 1; min-width: 120px;
+    border-radius: var(--radius); border: 1px solid var(--border);
+    background: var(--card); padding: 10px 14px;
+    cursor: pointer; transition: all 0.12s;
+  }
+  .flow-step:hover { border-color: var(--ring); transform: translateY(-1px); }
+  .flow-step.active { border-color: var(--accent); border-width: 2px; padding: 9px 13px; }
+  .flow-step .sn { font-family: var(--mono); font-size: 10px; color: var(--muted-fg); margin-bottom: 2px; }
+  .flow-step .ft { font-size: 13px; font-weight: 600; }
+  .flow-step .fs { font-size: 11px; color: var(--muted-fg); }
+  .flow-arrow { display: flex; align-items: center; color: var(--muted-fg); font-size: 14px; padding: 0 2px; }
+  @keyframes bounce { 0%,100%{transform:translateX(0)} 50%{transform:translateX(3px)} }
+  .flow-arrow { animation: bounce 1.2s ease-in-out infinite; }
+
+  .detail {
+    border-radius: var(--radius); border: 1px solid var(--border);
+    background: var(--card); padding: 1.25rem; margin: 8px 0;
+    min-height: 80px;
+  }
+  .detail .meta { font-family: var(--mono); font-size: 11px; color: var(--muted-fg); margin-bottom: 6px; }
+  .detail .body { font-size: 13px; line-height: 1.6; color: var(--muted-fg); margin-bottom: 10px; }
+  .detail .body strong { color: var(--fg); }
+
+  .mistake { border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; background: var(--card); }
+  .mistake h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .mistake p { font-size: 13px; color: var(--muted-fg); margin: 0; max-width: none; }
+
+  .badge {
+    display: inline-flex; align-items: center;
+    border-radius: 4px; padding: 2px 8px;
+    font-size: 11px; font-weight: 600; line-height: 1.3;
+    border: 1px solid transparent;
+  }
+  .badge-good { background: var(--good-bg); color: var(--good); border-color: rgba(82,140,85,0.2); }
+  .badge-bad { background: var(--bad-bg); color: var(--bad); border-color: rgba(193,62,62,0.2); }
+  .badge-blue { background: var(--blue-bg); color: var(--blue); border-color: rgba(59,110,165,0.2); }
+
+  /* SVG container */
+  .svg-wrap {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--card); padding: 1.25rem; margin: 14px 0;
+    overflow: hidden;
+  }
+  .svg-wrap svg { display: block; width: 100%; height: auto; }
+
+  @media (max-width: 600px) {
+    body { padding: 24px 12px 80px; }
+    h1 { font-size: 28px; }
+  }
+
+  /* Floating animation for data packets */
+  @keyframes fly-right {
+    0% { transform: translateX(0); opacity: 1; }
+    85% { opacity: 1; }
+    100% { transform: translateX(180px); opacity: 0; }
+  }
+  @keyframes fly-left {
+    0% { transform: translateX(0); opacity: 1; }
+    85% { opacity: 1; }
+    100% { transform: translateX(-180px); opacity: 0; }
+  }
+  @keyframes fly-down {
+    0% { transform: translateY(0); opacity: 1; }
+    85% { opacity: 1; }
+    100% { transform: translateY(60px); opacity: 0; }
+  }
+  @keyframes fly-up {
+    0% { transform: translateY(0); opacity: 1; }
+    85% { opacity: 1; }
+    100% { transform: translateY(-60px); opacity: 0; }
+  }
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+  @keyframes scale-in {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes progress-fill {
+    0% { width: 0%; }
+    100% { width: 100%; }
+  }
+
+  /* Toggle / control styling */
+  .ctrl-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 0; flex-wrap: wrap;
+  }
+  .ctrl-row label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); min-width: 60px; }
+  .toggle {
+    position: relative; width: 40px; height: 22px;
+    background: var(--muted); border-radius: 11px;
+    cursor: pointer; transition: background 0.2s;
+    border: 1px solid var(--border);
+  }
+  .toggle.on { background: var(--good); border-color: var(--good); }
+  .toggle::after {
+    content: ''; position: absolute; top: 2px; left: 2px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #fff; transition: transform 0.2s;
+  }
+  .toggle.on::after { transform: translateX(18px); }
+
+  .slider-row { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 120px; }
+  .slider-row input[type=range] { flex: 1; accent-color: var(--accent); }
+  .slider-row .val { font-family: var(--mono); font-size: 12px; min-width: 30px; text-align: right; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    border-radius: var(--radius); padding: 8px 16px;
+    font-size: 13px; font-weight: 500; font-family: var(--sans);
+    border: 1px solid var(--border); cursor: pointer; transition: all 0.12s;
+    background: var(--card); color: var(--fg); line-height: 1;
+  }
+  .btn:hover { background: var(--muted); }
+  .btn-primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-small { padding: 5px 10px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="eyebrow">Day 8 · GCP Deployment</div>
+<h1>From Script → API → Cloud</h1>
+<p class="lead">Day 7 you called Gemini from a Python script. Today you wrap it in FastAPI, put it in a Docker container, and deploy to Cloud Run — turning a local script into a public web service.</p>
+
+<!-- ============================================================ -->
+<!-- 0. LAYER CAKE SVG -->
+<!-- ============================================================ -->
+<h2>The Stack — What We're Building</h2>
+<p>Four layers. Each one adds a capability. Tap a layer to see what it does.</p>
+
+<div class="svg-wrap" style="text-align:center;">
+  <svg viewBox="0 0 600 340" style="max-width:600px;margin:0 auto;">
+    <defs>
+      <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#528c55"/><stop offset="100%" stop-color="#3d6b40"/></linearGradient>
+      <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#bf5b3a"/><stop offset="100%" stop-color="#9c4a2e"/></linearGradient>
+      <linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b6ea5"/><stop offset="100%" stop-color="#2d5580"/></linearGradient>
+      <linearGradient id="g4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#6028c9"/></linearGradient>
+    </defs>
+
+    <!-- Layer 1 (bottom) -->
+    <g class="layer" data-layer="python" style="cursor:pointer;">
+      <rect x="100" y="240" width="400" height="60" rx="8" fill="url(#g1)" opacity="0.9"/>
+      <text x="300" y="276" text-anchor="middle" fill="#fff" font-size="16" font-weight="600" font-family="DM Sans, sans-serif">🐍 Python + requests</text>
+      <text x="300" y="292" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="11" font-family="DM Sans, sans-serif">Calls Gemini API (Day 7)</text>
+    </g>
+
+    <!-- Layer 2 -->
+    <g class="layer" data-layer="fastapi" style="cursor:pointer;">
+      <rect x="100" y="175" width="400" height="60" rx="8" fill="url(#g2)" opacity="0.9"/>
+      <text x="300" y="211" text-anchor="middle" fill="#fff" font-size="16" font-weight="600" font-family="DM Sans, sans-serif">⚡ FastAPI</text>
+      <text x="300" y="227" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="11" font-family="DM Sans, sans-serif">Wraps Python function → HTTP endpoint</text>
+    </g>
+
+    <!-- Layer 3 -->
+    <g class="layer" data-layer="docker" style="cursor:pointer;">
+      <rect x="100" y="110" width="400" height="60" rx="8" fill="url(#g3)" opacity="0.9"/>
+      <text x="300" y="146" text-anchor="middle" fill="#fff" font-size="16" font-weight="600" font-family="DM Sans, sans-serif">🐳 Docker</text>
+      <text x="300" y="162" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="11" font-family="DM Sans, sans-serif">Packages app + environment → portable image</text>
+    </g>
+
+    <!-- Layer 4 (top) -->
+    <g class="layer" data-layer="cloudrun" style="cursor:pointer;">
+      <rect x="100" y="45" width="400" height="60" rx="8" fill="url(#g4)" opacity="0.9"/>
+      <text x="300" y="81" text-anchor="middle" fill="#fff" font-size="16" font-weight="600" font-family="DM Sans, sans-serif">☁️ Cloud Run</text>
+      <text x="300" y="97" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="11" font-family="DM Sans, sans-serif">Runs container → public HTTPS URL</text>
+    </g>
+
+    <!-- Arrow connections -->
+    <line x1="300" y1="108" x2="300" y2="112" stroke="var(--border)" stroke-width="2" stroke-dasharray="4,4"/>
+    <line x1="300" y1="173" x2="300" y2="177" stroke="var(--border)" stroke-width="2" stroke-dasharray="4,4"/>
+    <line x1="300" y1="238" x2="300" y2="242" stroke="var(--border)" stroke-width="2" stroke-dasharray="4,4"/>
+
+    <!-- Layer info callout -->
+    <rect x="0" y="15" width="90" height="24" rx="4" fill="var(--accent)" opacity="0.15"/>
+    <text x="45" y="31" text-anchor="middle" fill="var(--accent)" font-size="10" font-weight="600" font-family="DM Sans, sans-serif">TAP A LAYER</text>
+  </svg>
+  <div class="detail" id="stack-detail" style="margin:0;margin-top:12px;min-height:60px;">
+    <div class="meta" id="stack-meta">☁️ Cloud Run</div>
+    <div class="body" id="stack-body">The top layer. Cloud Run takes your Docker image and runs it on GCP's infrastructure. You get a public HTTPS URL, managed SSL, auto-scaling, and pay only when requests come in.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 1. PLAYGROUND -->
+<!-- ============================================================ -->
+<h2>Live API Simulator</h2>
+<p>Toggle options, see the request and code change in real time.</p>
+
+<div class="card">
+  <div>
+    <div class="ctrl-row">
+      <label>Method</label>
+      <span class="btn btn-small" id="pg-get" style="background:var(--good);color:#fff;border-color:var(--good);">GET</span>
+      <span class="btn btn-small" id="pg-post">POST</span>
+      <span class="badge badge-blue" id="pg-badge" style="margin-left:8px;">/health</span>
+    </div>
+    <div class="ctrl-row">
+      <label>Input</label>
+      <input id="pg-input" value="What is serverless?" style="flex:1;min-width:150px;border-radius:var(--radius);border:1px solid var(--border);padding:8px 12px;font-family:var(--mono);font-size:13px;background:transparent;color:var(--fg);outline:none;">
+    </div>
+    <div class="ctrl-row" id="pg-err-row" style="display:none;">
+      <label>Errors</label>
+      <span class="toggle" id="pg-err-toggle"></span>
+      <span style="font-size:12px;color:var(--muted-fg);">Simulate API failure</span>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px;">
+    <div style="border:1px solid var(--border);border-radius:var(--radius);padding:1rem;background:var(--muted);font-family:var(--mono);font-size:12px;line-height:1.6;min-height:130px;overflow-x:auto;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted-fg);margin-bottom:6px;">📤 HTTP Request</div>
+      <div id="pg-req">GET /health HTTP/1.1<br>Host: localhost:8080</div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:var(--radius);padding:1rem;background:var(--muted);font-family:var(--mono);font-size:12px;line-height:1.6;min-height:130px;overflow-x:auto;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted-fg);margin-bottom:6px;">🐍 Python Code Called</div>
+      <div id="pg-code">def health():<br>    return {"status": "ok"}</div>
+    </div>
+  </div>
+  <div style="margin-top:10px;padding:8px 12px;border-radius:var(--radius);background:var(--good-bg);border:1px solid rgba(82,140,85,0.2);font-size:13px;" id="pg-status">
+    <span>✅ 200 OK — Server responded</span>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 2. THE PROBLEM SVG -->
+<!-- ============================================================ -->
+<h2>Day 7: Local Script → Day 8: Web Service</h2>
+
+<h2>Day 7 → Day 8: The Upgrade</h2>
+
+<div class="svg-wrap" style="text-align:center;">
+  <svg viewBox="0 0 760 180" style="max-width:760px;margin:0 auto;">
+    <defs>
+      <marker id="carrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="var(--muted-fg)"/></marker>
+    </defs>
+
+    <!-- Day 7 side -->
+    <rect x="10" y="10" width="350" height="160" rx="10" fill="var(--card)" stroke="var(--bad)" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="185" y="38" text-anchor="middle" fill="var(--bad)" font-size="14" font-weight="600" font-family="DM Sans, sans-serif">❌ Day 7 — Script on Laptop</text>
+
+    <!-- Laptop icon -->
+    <rect x="80" y="55" width="90" height="55" rx="6" fill="var(--muted)" stroke="var(--border)"/>
+    <rect x="90" y="65" width="70" height="28" rx="3" fill="var(--card)"/>
+    <text x="125" y="83" text-anchor="middle" fill="var(--muted-fg)" font-size="9" font-family="DM Sans, sans-serif">requests.post()</text>
+    <text x="125" y="100" text-anchor="middle" fill="var(--fg)" font-size="11" font-weight="600" font-family="DM Sans, sans-serif">💻 Your Machine</text>
+
+    <!-- Arrow -->
+    <line x1="170" y1="82" x2="210" y2="82" stroke="var(--good)" stroke-width="2" marker-end="url(#carrow)"/>
+
+    <!-- Gemini -->
+    <rect x="215" y="62" width="60" height="40" rx="6" fill="var(--good-bg)" stroke="var(--good)" stroke-width="1.5"/>
+    <text x="245" y="85" text-anchor="middle" fill="var(--good)" font-size="10" font-weight="600" font-family="DM Sans, sans-serif">Gemini</text>
+
+    <!-- X marks -->
+    <text x="185" y="140" text-anchor="middle" fill="var(--bad)" font-size="11" font-family="DM Sans, sans-serif">✕ No one else can access</text>
+
+    <!-- Upgrade arrow in middle -->
+    <text x="370" y="95" text-anchor="middle" fill="var(--accent)" font-size="28" font-weight="600" font-family="DM Sans, sans-serif">→</text>
+    <text x="370" y="115" text-anchor="middle" fill="var(--muted-fg)" font-size="10" font-family="DM Sans, sans-serif">deploy</text>
+
+    <!-- Day 8 side -->
+    <rect x="400" y="10" width="350" height="160" rx="10" fill="var(--card)" stroke="var(--good)" stroke-width="2"/>
+    <text x="575" y="38" text-anchor="middle" fill="var(--good)" font-size="14" font-weight="600" font-family="DM Sans, sans-serif">✅ Day 8 — Public Web Service</text>
+
+    <rect x="420" y="55" width="70" height="55" rx="6" fill="var(--blue-bg)" stroke="var(--blue)" stroke-width="1.5"/>
+    <text x="455" y="78" text-anchor="middle" fill="var(--blue)" font-size="11" font-weight="600" font-family="DM Sans, sans-serif">curl</text>
+    <text x="455" y="97" text-anchor="middle" fill="var(--blue)" font-size="10" font-family="DM Sans, sans-serif">🌍 Anyone</text>
+
+    <line x1="490" y1="82" x2="520" y2="82" stroke="var(--good)" stroke-width="2" marker-end="url(#carrow)"/>
+
+    <rect x="525" y="55" width="80" height="55" rx="6" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/>
+    <text x="565" y="75" text-anchor="middle" fill="var(--accent)" font-size="10" font-weight="600" font-family="DM Sans, sans-serif">☁️ Cloud Run</text>
+    <text x="565" y="95" text-anchor="middle" fill="var(--muted-fg)" font-size="9" font-family="DM Sans, sans-serif">FastAPI + Docker</text>
+
+    <line x1="605" y1="82" x2="635" y2="82" stroke="var(--good)" stroke-width="2" marker-end="url(#carrow)"/>
+
+    <rect x="640" y="58" width="60" height="40" rx="6" fill="var(--good-bg)" stroke="var(--good)" stroke-width="1.5"/>
+    <text x="670" y="81" text-anchor="middle" fill="var(--good)" font-size="10" font-weight="600" font-family="DM Sans, sans-serif">Gemini</text>
+
+    <rect x="460" y="130" width="200" height="26" rx="13" fill="var(--good-bg)" stroke="var(--good)" stroke-width="1"/>
+    <text x="560" y="147" text-anchor="middle" fill="var(--good)" font-size="10" font-weight="600" font-family="DM Sans, sans-serif">🔗 https://main-xxxx-uc.a.run.app</text>
+  </svg>
+</div>
+<h2>How FastAPI Works</h2>
+<p>When a request arrives, here's the exact path it takes through FastAPI. <strong>Click "Send Request"</strong> to animate the flow.</p>
+
+<div class="svg-wrap" style="text-align:center;">
+  <svg viewBox="0 0 700 200" style="max-width:700px;margin:0 auto;">
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="var(--muted-fg)"/></marker>
+      <!-- Glow filter for active nodes -->
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="3" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
+    <!-- Client -->
+    <g id="fa-client">
+      <rect x="20" y="70" width="80" height="50" rx="8" fill="var(--card)" stroke="var(--border)" stroke-width="2"/>
+      <text x="60" y="98" text-anchor="middle" fill="var(--fg)" font-size="13" font-weight="600" font-family="DM Sans, sans-serif">🌍 Client</text>
+    </g>
+
+    <!-- Arrow 1 -->
+    <line x1="100" y1="95" x2="150" y2="95" stroke="var(--muted-fg)" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- Uvicorn -->
+    <g id="fa-uvicorn">
+      <rect x="150" y="35" width="90" height="50" rx="6" fill="var(--card)" stroke="var(--border)" stroke-width="2"/>
+      <text x="195" y="55" text-anchor="middle" fill="var(--muted-fg)" font-size="11" font-weight="600" font-family="DM Sans, sans-serif">Uvicorn</text>
+      <text x="195" y="73" text-anchor="middle" fill="var(--muted-fg)" font-size="9" font-family="DM Sans, sans-serif">ASGI server</text>
+    </g>
+
+    <!-- Arrow 2 -->
+    <line x1="240" y1="60" x2="290" y2="60" stroke="var(--muted-fg)" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- Router -->
+    <g id="fa-router">
+      <rect x="290" y="35" width="90" height="50" rx="6" fill="var(--card)" stroke="var(--border)" stroke-width="2"/>
+      <text x="335" y="55" text-anchor="middle" fill="var(--muted-fg)" font-size="11" font-weight="600" font-family="DM Sans, sans-serif">Router</text>
+      <text x="335" y="73" text-anchor="middle" fill="var(--muted-fg)" font-size="9" font-family="DM Sans, sans-serif">/health? /chat?</text>
+    </g>
+
+    <!-- Arrow 3 (down) -->
+    <line x1="335" y1="85" x2="335" y2="115" stroke="var(--muted-fg)" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- Function -->
+    <g id="fa-function">
+      <rect x="280" y="120" width="110" height="50" rx="6" fill="var(--card)" stroke="var(--border)" stroke-width="2"/>
+      <text x="335" y="140" text-anchor="middle" fill="var(--muted-fg)" font-size="11" font-weight="600" font-family="DM Sans, sans-serif">def health()</text>
+      <text x="335" y="158" text-anchor="middle" fill="var(--muted-fg)" font-size="9" font-family="DM Sans, sans-serif">Your code runs</text>
+    </g>
+
+    <!-- Response arrow (back up and left) -->
+    <line x1="280" y1="145" x2="100" y2="145" stroke="var(--good)" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrow)"/>
+    <text x="190" y="138" text-anchor="middle" fill="var(--good)" font-size="10" font-weight="600" font-family="DM Sans, sans-serif">← 200 JSON response</text>
+
+    <!-- Animated packet -->
+    <g id="fa-packet" style="display:none;">
+      <rect x="0" y="-10" width="26" height="18" rx="3" fill="var(--accent)"/>
+      <text x="13" y="3" text-anchor="middle" fill="#fff" font-size="8" font-weight="600" font-family="DM Sans, sans-serif">REQ</text>
+    </g>
+  </svg>
+  <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
+    <span class="btn btn-primary btn-small" id="fa-send-btn">▶ Send Request</span>
+    <span class="btn btn-small" id="fa-reset-btn">⟲ Reset</span>
+  </div>
+  <div id="fa-status" style="margin-top:10px;padding:8px 12px;border-radius:var(--radius);background:var(--muted);font-size:13px;color:var(--muted-fg);">
+    💡 Click "Send Request" to trace a packet through the FastAPI pipeline
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 4. THE THREE FILES — INTERACTIVE -->
+<!-- ============================================================ -->
+<h2>The Three Files You Need</h2>
+
+<div class="grid-3">
+  <div class="card" data-file="main" style="cursor:pointer;text-align:center;border-bottom:3px solid var(--accent);">
+    <div style="font-size:32px;">📄</div>
+    <div class="card-title">main.py</div>
+    <p style="font-size:12px;color:var(--muted-fg);margin:4px 0 0;max-width:none;">Your FastAPI code. Routes + Gemini call.</p>
+  </div>
+  <div class="card" data-file="reqs" style="cursor:pointer;text-align:center;">
+    <div style="font-size:32px;">📋</div>
+    <div class="card-title">requirements.txt</div>
+    <p style="font-size:12px;color:var(--muted-fg);margin:4px 0 0;max-width:none;">Dependency list for pip.</p>
+  </div>
+  <div class="card" data-file="docker" style="cursor:pointer;text-align:center;">
+    <div style="font-size:32px;">🐳</div>
+    <div class="card-title">Dockerfile</div>
+    <p style="font-size:12px;color:var(--muted-fg);margin:4px 0 0;max-width:none;">Container build instructions.</p>
+  </div>
+</div>
+
+<pre class="code" id="file-viewer"><span class="cm"># main.py — Click a card above to switch files</span>
+<span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
+<span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel
+<span class="kw">import</span> requests, os
+
+app = FastAPI()
+
+<span class="kw">class</span> <span class="fn">Prompt</span>(BaseModel):
+    text: str
+
+GEMINI_KEY = os.environ[<span class="st">"GEMINI_API_KEY"</span>]
+MODEL = <span class="st">"gemini-2.0-flash-001"</span>
+BASE = <span class="st">"https://generativelanguage.googleapis.com/v1beta/models"</span>
+
+@app.get(<span class="st">"/health"</span>)
+<span class="kw">def</span> <span class="fn">health</span>():
+    <span class="kw">return</span> {<span class="st">"status"</span>: <span class="st">"ok"</span>}
+
+@app.post(<span class="st">"/chat"</span>)
+<span class="kw">def</span> <span class="fn">chat</span>(body: Prompt):
+    url = <span class="st">f"{BASE}/{MODEL}:generateContent?key={GEMINI_KEY}"</span>
+    payload = {<span class="st">"contents"</span>: [{<span class="st">"parts"</span>: [{<span class="st">"text"</span>: body.text}]}]}
+    r = requests.post(url, json=payload, timeout=30)
+    r.raise_for_status()
+    result = r.json()
+    answer = result[<span class="st">"candidates"</span>][0][<span class="st">"content"</span>][<span class="st">"parts"</span>][0][<span class="st">"text"</span>]
+    <span class="kw">return</span> {<span class="st">"response"</span>: answer}</pre>
+
+<!-- ============================================================ -->
+<!-- 5. DEPLOY VISUAL -->
+<!-- ============================================================ -->
+<h2>Deployment Pipeline</h2>
+<p>Three commands. Watch each stage as your code travels from laptop to live URL.</p>
+
+<div class="svg-wrap" style="text-align:center;">
+  <svg viewBox="0 0 700 150" style="max-width:700px;margin:0 auto;">
+    <defs>
+      <marker id="darrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="var(--muted-fg)"/></marker>
+    </defs>
+
+    <!-- Stage 1 -->
+    <g class="dstage" data-stage="0" style="cursor:pointer;">
+      <rect x="10" y="30" width="140" height="80" rx="8" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+      <text x="80" y="60" text-anchor="middle" fill="var(--fg)" font-size="13" font-weight="600" font-family="DM Sans, sans-serif">📝 Your Code</text>
+      <text x="80" y="80" text-anchor="middle" fill="var(--muted-fg)" font-size="10" font-family="DM Sans, sans-serif">main.py</text>
+      <text x="80" y="95" text-anchor="middle" fill="var(--muted-fg)" font-size="10" font-family="DM Sans, sans-serif">Dockerfile</text>
+      <text x="80" y="105" text-anchor="middle" fill="var(--muted-fg)" font-size="9" font-family="DM Sans, sans-serif">requirements.txt</text>
+    </g>
+    <line x1="150" y1="70" x2="190" y2="70" stroke="var(--muted-fg)" stroke-width="1.5" marker-end="url(#darrow)"/>
+    <text x="170" y="60" text-anchor="middle" fill="var(--muted-fg)" font-size="9" font-family="DM Sans, sans-serif">1. submit</text>
+
+    <!-- Stage 2 -->
+    <g class="dstage" data-stage="1" style="cursor:pointer;">
+      <rect x="195" y="30" width="140" height="80" rx="8" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+      <text x="265" y="58" text-anchor="middle" fill="var(--fg)" font-size="13" font-weight="600" font-family="DM Sans, sans-serif">☁️ Cloud Build</text>
+      <text x="265" y="78" text-anchor="middle" fill="var(--muted-fg)" font-size="10" font-family="DM Sans, sans-serif">Reads Dockerfile</text>
+      <text x="265" y="95" text-anchor="middle" fill="var(--muted-fg)" font-size="10" font-family="DM Sans, sans-serif">Builds image</text>
+      <text x="265" y="105" text-anchor="middle" fill="var(--muted-fg)" font-size="9" font-family="DM Sans, sans-serif">Pushes to registry</text>
+    </g>
+    <line x1="335" y1="70" x2="375" y2="70" stroke="var(--muted-fg)" stroke-width="1.5" marker-end="url(#darrow)"/>
+    <text x="355" y="60" text-anchor="middle" fill="var(--muted-fg)" font-size="9" font-family="DM Sans, sans-serif">2. deploy</text>
+
+    <!-- Stage 3 -->
+    <g class="dstage" data-stage="2" style="cursor:pointer;">
+      <rect x="380" y="30" width="140" height="80" rx="8" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+      <text x="450" y="58" text-anchor="middle" fill="var(--fg)" font-size="13" font-weight="600" font-family="DM Sans, sans-serif">☁️ Cloud Run</text>
+      <text x="450" y="78" text-anchor="middle" fill="var(--muted-fg)" font-size="10" font-family="DM Sans, sans-serif">Pulls image</text>
+      <text x="450" y="95" text-anchor="middle" fill="var(--muted-fg)" font-size="10" font-family="DM Sans, sans-serif">Starts container</text>
+      <text x="450" y="105" text-anchor="middle" fill="var(--muted-fg)" font-size="9" font-family="DM Sans, sans-serif">Runs health checks</text>
+    </g>
+    <line x1="520" y1="70" x2="560" y2="70" stroke="var(--muted-fg)" stroke-width="1.5" marker-end="url(#darrow)"/>
+    <text x="540" y="60" text-anchor="middle" fill="var(--muted-fg)" font-size="9" font-family="DM Sans, sans-serif">3. live!</text>
+
+    <!-- Stage 4 - Live -->
+    <g class="dstage" data-stage="3" style="cursor:pointer;">
+      <rect x="565" y="30" width="120" height="80" rx="8" fill="var(--good-bg)" stroke="var(--good)" stroke-width="2"/>
+      <text x="625" y="58" text-anchor="middle" fill="var(--good)" font-size="13" font-weight="600" font-family="DM Sans, sans-serif">🌐 Live!</text>
+      <text x="625" y="78" text-anchor="middle" fill="var(--good)" font-size="10" font-family="DM Sans, sans-serif">HTTPS URL</text>
+      <text x="625" y="95" text-anchor="middle" fill="var(--good)" font-size="9" font-family="DM Sans, sans-serif">Ready for requests</text>
+    </g>
+
+    <!-- Progress bar -->
+    <rect x="10" y="130" width="675" height="6" rx="3" fill="var(--muted)"/>
+    <rect id="dprogress" x="10" y="130" width="0" height="6" rx="3" fill="var(--good)"/>
+  </svg>
+  <div class="detail" id="deploy-detail" style="margin:0;margin-top:12px;min-height:55px;">
+    <div class="meta" id="dd-meta">📝 Stage 1: Your Code</div>
+    <div class="body" id="dd-body">You have three files: <strong>main.py</strong> (FastAPI app), <strong>requirements.txt</strong> (dependencies), and <strong>Dockerfile</strong> (build instructions). Run <code>gcloud builds submit</code> to send them to Cloud Build.</div>
+  </div>
+</div>
+
+<pre class="code" id="deploy-commands"><span class="cm"># Step 1: Build container</span>
+gcloud builds submit --tag us-central1-docker.pkg.dev/$PROJECT/app/main:latest
+
+<span class="cm"># Step 2: Deploy to Cloud Run</span>
+gcloud run deploy main \
+  --image us-central1-docker.pkg.dev/$PROJECT/app/main:latest \
+  --region us-central1 --allow-unauthenticated \
+  --set-env-vars GEMINI_API_KEY=your_key_here</pre>
+
+<!-- ============================================================ -->
+<!-- 6. REQUEST JOURNEY — ANIMATED SVG -->
+<!-- ============================================================ -->
+<h2>The Request Journey</h2>
+<p>Every layer your request passes through. <strong>Click "Trace Request"</strong> to see the packet travel.</p>
+
+<div class="svg-wrap" style="text-align:center;">
+  <svg viewBox="0 0 700 260" style="max-width:700px;margin:0 auto;">
+    <defs>
+      <marker id="rarrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0,0 8,3 0,6" fill="var(--muted-fg)"/>
+      </marker>
+    </defs>
+
+    <!-- Vertical layers -->
+    <!-- Client -->
+    <rect x="280" y="10" width="140" height="40" rx="6" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/>
+    <text x="350" y="35" text-anchor="middle" fill="var(--accent)" font-size="13" font-weight="600" font-family="DM Sans, sans-serif">🌍 Client (curl/browser)</text>
+
+    <g id="rj-arrow1"><line x1="350" y1="50" x2="350" y2="72" stroke="var(--muted-fg)" stroke-width="2" marker-end="url(#rarrow)"/></g>
+
+    <!-- Cloud Run -->
+    <rect x="230" y="75" width="240" height="40" rx="6" fill="var(--card)" stroke="var(--blue)" stroke-width="2"/>
+    <text x="350" y="100" text-anchor="middle" fill="var(--blue)" font-size="13" font-weight="600" font-family="DM Sans, sans-serif">☁️ Cloud Run — gVisor sandbox, port 8080</text>
+
+    <g id="rj-arrow2"><line x1="350" y1="115" x2="350" y2="137" stroke="var(--muted-fg)" stroke-width="2" marker-end="url(#rarrow)"/></g>
+
+    <!-- Uvicorn -->
+    <rect x="230" y="140" width="240" height="40" rx="6" fill="var(--card)" stroke="var(--border)" stroke-width="2"/>
+    <text x="350" y="165" text-anchor="middle" fill="var(--muted-fg)" font-size="13" font-weight="600" font-family="DM Sans, sans-serif">Uvicorn (ASGI server)</text>
+
+    <g id="rj-arrow3"><line x1="350" y1="180" x2="350" y2="202" stroke="var(--muted-fg)" stroke-width="2" marker-end="url(#rarrow)"/></g>
+
+    <!-- FastAPI -->
+    <rect x="230" y="205" width="240" height="40" rx="6" fill="var(--card)" stroke="var(--accent)" stroke-width="2"/>
+    <text x="350" y="230" text-anchor="middle" fill="var(--accent)" font-size="13" font-weight="600" font-family="DM Sans, sans-serif">⚡ FastAPI → Routes to function</text>
+
+    <!-- Animated packet -->
+    <g id="rj-packet" style="display:none;">
+      <rect x="0" y="0" width="30" height="18" rx="3" fill="#bf5b3a"/>
+      <text x="15" y="13" text-anchor="middle" fill="#fff" font-size="8" font-weight="600" font-family="DM Sans, sans-serif">REQ</text>
+    </g>
+  </svg>
+  <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
+    <span class="btn btn-primary btn-small" id="trace-btn">▶ Trace Request</span>
+    <span class="btn btn-small" id="reset-trace-btn">⟲ Reset</span>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 7. DOCKER EXPLAINED VISUALLY -->
+<!-- ============================================================ -->
+<h2>What Docker Actually Does</h2>
+<p>Each line in the Dockerfile is a step. Hover to see what it does.</p>
+
+<div style="position:relative;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);padding:0;overflow:hidden;">
+  <svg viewBox="0 0 680 200" style="width:100%;height:auto;display:block;">
+    <!-- Step 1 -->
+    <g>
+      <rect x="20" y="15" width="200" height="50" rx="6" fill="var(--muted)" stroke="var(--border)"/>
+      <text x="120" y="38" text-anchor="middle" fill="var(--fg)" font-size="12" font-family="var(--mono)" font-weight="600">FROM python:3.12</text>
+      <text x="120" y="55" text-anchor="middle" fill="var(--muted-fg)" font-size="10" font-family="DM Sans, sans-serif">Base OS with Python installed</text>
+    </g>
+    <line x1="220" y1="40" x2="250" y2="40" stroke="var(--border)" stroke-width="1.5"/>
+    <polygon points="250,36 258,40 250,44" fill="var(--border)"/>
+
+    <!-- Step 2 -->
+    <g>
+      <rect x="260" y="15" width="200" height="50" rx="6" fill="var(--muted)" stroke="var(--border)"/>
+      <text x="360" y="38" text-anchor="middle" fill="var(--fg)" font-size="12" font-family="var(--mono)" font-weight="600">RUN pip install ...</text>
+      <text x="360" y="55" text-anchor="middle" fill="var(--muted-fg)" font-size="10" font-family="DM Sans, sans-serif">Install all dependencies</text>
+    </g>
+    <line x1="460" y1="40" x2="490" y2="40" stroke="var(--border)" stroke-width="1.5"/>
+    <polygon points="490,36 498,40 490,44" fill="var(--border)"/>
+
+    <!-- Step 3 -->
+    <g>
+      <rect x="500" y="15" width="160" height="50" rx="6" fill="var(--muted)" stroke="var(--border)"/>
+      <text x="580" y="38" text-anchor="middle" fill="var(--fg)" font-size="12" font-family="var(--mono)" font-weight="600">COPY . .</text>
+      <text x="580" y="55" text-anchor="middle" fill="var(--muted-fg)" font-size="10" font-family="DM Sans, sans-serif">Add your source code</text>
+    </g>
+
+    <!-- Label: Result = Image -->
+    <rect x="220" y="90" width="240" height="30" rx="15" fill="var(--good-bg)" stroke="var(--good)" stroke-width="1.5"/>
+    <text x="340" y="109" text-anchor="middle" fill="var(--good)" font-size="12" font-weight="600" font-family="DM Sans, sans-serif">📦 Result: One portable image file</text>
+  </svg>
+</div>
+
+<div class="callout good">
+  <strong>💡 Think of it like this:</strong> Docker is a shipping container. Your app, Python, and all packages go inside. The container runs identically on your laptop, on your friend's Windows PC, and on Google's servers. No "but it works on my machine!" problems.
+</div>
+
+<!-- ============================================================ -->
+<!-- 8. COMMON MISTAKES -->
+<!-- ============================================================ -->
+<h2>Common Mistakes</h2>
+<div class="grid-2">
+  <div class="mistake">
+    <h4 style="color:var(--bad);">🔥 Port mismatch</h4>
+    <p>Cloud Run sets <code>PORT=8080</code>. Your app MUST listen on whatever PORT says. If you hardcode 8000, health checks fail → revision killed.</p>
+    <pre class="code" style="font-size:11px;margin:8px 0 0;padding:8px;">port = int(os.getenv("PORT", 8080))</pre>
+  </div>
+  <div class="mistake">
+    <h4 style="color:var(--bad);">🔥 Hardcoded secrets</h4>
+    <p>If you write <code>API_KEY = "AIza..."</code> in main.py, that key is baked into your Docker image forever. Use env vars.</p>
+  </div>
+  <div class="mistake">
+    <h4 style="color:var(--bad);">🔥 No try/except</h4>
+    <p>Gemini might fail. If you don't catch errors, FastAPI returns a 500 with no helpful message. Always wrap external calls.</p>
+  </div>
+  <div class="mistake">
+    <h4 style="color:var(--bad);">🔥 Confusing layers</h4>
+    <p>FastAPI ≠ deployment. Docker ≠ deployment. Cloud Run IS deployment. FastAPI runs locally. Docker packages it. Cloud Run hosts it.</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 9. INTERVIEW -->
+<!-- ============================================================ -->
+<h2>Interview Answers</h2>
+
+<h3>🎯 30-second</h3>
+<p>"FastAPI turns Python functions into HTTP endpoints. I wrapped a Gemini API call in a FastAPI route, containerized it with Docker, and deployed to Cloud Run — which gave me a public HTTPS URL with auto-scaling and zero cost when idle."</p>
+
+<h3>🎯 90-second STAR</h3>
+<div class="card">
+  <strong>S:</strong> My Gemini script only worked on my laptop.<br>
+  <strong>T:</strong> Needed a public web service so interviewers and apps could call it.<br>
+  <strong>A:</strong> Built a FastAPI app with <code>/health</code> and <code>/chat</code> endpoints. Dockerized it. Deployed to Cloud Run with <code>gcloud run deploy</code>, passing the Gemini key as an env var.<br>
+  <strong>R:</strong> Live HTTPS URL in 5 minutes. Cold start ~3s, warm requests ~200ms. Zero cost when idle. Rolled back a bad revision via traffic-split in 10 seconds.<br>
+  <strong>I:</strong> The FastAPI → Docker → Cloud Run pipeline is the standard GCP deploy pattern. Every cloud interview covers this stack.
+</div>
+
+<h3>🎯 3-minute technical walkthrough</h3>
+<p>FastAPI sits on Starlette (ASGI) and Pydantic. When a request hits, Uvicorn passes it to FastAPI, which matches the URL path to a route decorator. For POST with JSON, Pydantic auto-validates the body — missing fields return a 422 BEFORE your function runs. You never write manual validation.</p>
+<p>For deployment: Cloud Build reads the Dockerfile. Each instruction is a cached layer — <code>pip install</code> only re-runs when <code>requirements.txt</code> changes. The image is stored in Artifact Registry. Cloud Run then pulls the image into a gVisor sandbox — a lightweight container runtime with kernel-level isolation. Cloud Run sets <code>PORT=8080</code>, pings <code>/health</code> every 5s, and scales from 0 to N instances based on traffic.</p>
+<p>Key constraint: stateless. No filesystem persistence. For our Gemini proxy, that's fine — but databases or file uploads need Cloud Storage, which is Day 9.</p>
+
+<script>
+// ===== LAYER CAKE =====
+var STACK = {
+  python: {meta:'🐍 Python + requests', body:'The foundation. You write Python code that calls Gemini using the requests library. At this stage, only your laptop can run it.'},
+  fastapi: {meta:'⚡ FastAPI', body:'A web framework. Wraps your Python function so it responds to HTTP requests. <code>@app.get("/health")</code> turns a function into a web endpoint.'},
+  docker: {meta:'🐳 Docker', body:'A packaging tool. Takes your app + Python + all dependencies and creates one portable image file. Runs exactly the same everywhere. No "works on my machine" issues.'},
+  cloudrun: {meta:'☁️ Cloud Run', body:'GCP\'s serverless container platform. Takes your Docker image, runs it on Google\'s infrastructure, gives you a public HTTPS URL. Auto-scales. Pay per request.'}
+};
+
+document.querySelectorAll('.layer').forEach(function(el) {
+  el.addEventListener('click', function() {
+    var key = this.dataset.layer;
+    document.getElementById('stack-meta').innerHTML = STACK[key].meta;
+    document.getElementById('stack-body').innerHTML = STACK[key].body;
+  });
+});
+
+// ===== PLAYGROUND =====
+document.getElementById('pg-get').onclick = function() {
+  document.getElementById('pg-post').style.background = '';
+  document.getElementById('pg-post').style.color = '';
+  this.style.background = 'var(--good)'; this.style.color = '#fff';
+  document.getElementById('pg-badge').textContent = '/health';
+  document.getElementById('pg-err-row').style.display = 'none';
+  updatePlayground('GET');
+};
+document.getElementById('pg-post').onclick = function() {
+  document.getElementById('pg-get').style.background = '';
+  document.getElementById('pg-get').style.color = '';
+  this.style.background = 'var(--accent)'; this.style.color = '#fff';
+  document.getElementById('pg-badge').textContent = '/chat';
+  document.getElementById('pg-err-row').style.display = 'flex';
+  updatePlayground('POST');
+};
+
+function updatePlayground(method) {
+  var input = document.getElementById('pg-input').value || 'Hello';
+  var errOn = document.getElementById('pg-err-toggle').classList.contains('on');
+  if (method === 'GET') {
+    document.getElementById('pg-req').innerHTML = 'GET /health HTTP/1.1<br>Host: localhost:8080';
+    document.getElementById('pg-code').innerHTML = 'def health():<br>    return {"status": "ok"}';
+    document.getElementById('pg-status').innerHTML = '<span>✅ 200 OK — {"status": "ok"}</span>';
+    document.getElementById('pg-status').style.background = 'var(--good-bg)';
+  } else {
+    var body = JSON.stringify({text: input});
+    document.getElementById('pg-req').innerHTML = 'POST /chat HTTP/1.1<br>Host: localhost:8080<br>Content-Type: application/json<br><br>' + body;
+    document.getElementById('pg-code').innerHTML = 'def chat(body: Prompt):<br>    r = requests.post(url, json=payload, timeout=30)<br>    r.raise_for_status()<br>    return {"response": answer}';
+    if (errOn) {
+      document.getElementById('pg-status').innerHTML = '<span>❌ 502 Bad Gateway — Gemini API failed (simulated)</span>';
+      document.getElementById('pg-status').style.background = 'var(--bad-bg)';
+    } else {
+      document.getElementById('pg-status').innerHTML = '<span>✅ 200 OK — {"response": "' + input.substring(0,40) + '..."}</span>';
+      document.getElementById('pg-status').style.background = 'var(--good-bg)';
+    }
+  }
+}
+
+document.getElementById('pg-input').oninput = function() { updatePlayground('POST'); };
+
+document.getElementById('pg-err-toggle').onclick = function() {
+  this.classList.toggle('on');
+  updatePlayground('POST');
+};
+
+// ===== FILE VIEWER =====
+var FILES = {
+  main: {label:'📄 main.py', code:'from fastapi import FastAPI\nfrom pydantic import BaseModel\nimport requests, os\n\napp = FastAPI()\n\nclass Prompt(BaseModel):\n    text: str\n\nGEMINI_KEY = os.environ["GEMINI_API_KEY"]\nMODEL = "gemini-2.0-flash-001"\nBASE = "https://generativelanguage.googleapis.com/v1beta/models"\n\n@app.get("/health")\ndef health():\n    return {"status": "ok"}\n\n@app.post("/chat")\ndef chat(body: Prompt):\n    url = f"{BASE}/{MODEL}:generateContent?key={GEMINI_KEY}"\n    payload = {"contents": [{"parts": [{"text": body.text}]}]}\n    r = requests.post(url, json=payload, timeout=30)\n    r.raise_for_status()\n    result = r.json()\n    answer = result["candidates"][0]["content"]["parts"][0]["text"]\n    return {"response": answer}'},
+  reqs: {label:'📋 requirements.txt', code:'fastapi[standard]>=0.135.1\npydantic>=2.7.1\nrequests>=2.31.0\nuvicorn[standard]>=0.29.0'},
+  docker: {label:'🐳 Dockerfile', code:'FROM python:3.12-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\nCOPY . .\nCMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]'}
+};
+
+document.querySelectorAll('[data-file]').forEach(function(el) {
+  el.addEventListener('click', function() {
+    var key = this.dataset.file;
+    document.querySelectorAll('[data-file]').forEach(function(c) {
+      c.style.borderBottom = '1px solid var(--border)';
+    });
+    this.style.borderBottom = '3px solid var(--accent)';
+    document.getElementById('file-viewer').innerHTML = FILES[key].code;
+  });
+});
+
+// ===== DEPLOY PIPELINE =====
+var DSTAGES = [
+  {meta:'📝 Stage 1: Your Code', body:'You have three files: main.py (FastAPI app), requirements.txt (dependencies), and Dockerfile (build instructions). Run <code>gcloud builds submit</code> to send them to Cloud Build.'},
+  {meta:'☁️ Stage 2: Cloud Build', body:'Cloud Build reads your Dockerfile, builds each layer, caches them, and pushes the final image to Artifact Registry. Takes 2-5 min fresh, seconds if cached.'},
+  {meta:'☁️ Stage 3: Cloud Run', body:'Cloud Run pulls the image, starts a gVisor sandbox, sets PORT=8080, and begins health checks. Takes ~30 seconds. If /health returns 200, you\'re live.'},
+  {meta:'🌐 Stage 4: Live!', body:'Your API is publicly accessible at the HTTPS URL. Test: <code>curl https://your-url/health</code> should return {"status": "ok"}.'}
+];
+
+document.querySelectorAll('.dstage').forEach(function(el) {
+  el.addEventListener('click', function() {
+    var i = parseInt(this.dataset.stage);
+    var d = DSTAGES[i];
+    document.getElementById('dd-meta').innerHTML = d.meta;
+    document.getElementById('dd-body').innerHTML = d.body;
+    // Update progress
+    document.getElementById('dprogress').setAttribute('width', ((i+1)/4*100) + '%');
+    // Update visual
+    document.querySelectorAll('.dstage').forEach(function(s) {
+      s.querySelector('rect').setAttribute('stroke', 'var(--border)');
+    });
+    this.querySelector('rect').setAttribute('stroke', 'var(--accent)');
+  });
+});
+
+// ===== FASTAPI FLOW ANIMATION (SMOOTH) =====
+var faAnimating = false;
+document.getElementById('fa-send-btn').onclick = function() {
+  if (faAnimating) return;
+  faAnimating = true;
+  var p = document.getElementById('fa-packet');
+  var status = document.getElementById('fa-status');
+  p.style.display = 'block';
+  
+  // Nodes position: Client(60,95) → Uvicorn(195,60) → Router(335,60) → Function(335,145)
+  var waypoints = [
+    {x: 60, y: 95, label: '🌍 Client sends HTTP request'},
+    {x: 195, y: 60, label: '⏳ Uvicorn receives connection'},
+    {x: 335, y: 60, label: '🔀 Router matches /health → health()'},
+    {x: 335, y: 145, label: '⚡ Function runs — returns {"status": "ok"}'},
+    {x: 60, y: 145, label: '✅ Response sent back to client'}
+  ];
+  
+  function resetNodes() {
+    ['fa-client','fa-uvicorn','fa-router','fa-function'].forEach(function(id) {
+      var g = document.getElementById(id);
+      g.querySelector('rect').setAttribute('stroke', 'var(--border)');
+      g.querySelector('rect').setAttribute('filter', '');
+    });
+  }
+  
+  var step = 0;
+  function animateStep() {
+    if (step >= waypoints.length) {
+      p.style.display = 'none';
+      resetNodes();
+      status.innerHTML = '✅ Request completed! 200 JSON response returned to client';
+      status.style.background = 'var(--good-bg)';
+      faAnimating = false;
+      return;
+    }
+    
+    var wp = waypoints[step];
+    p.setAttribute('transform', 'translate(' + (wp.x - 13) + ', ' + (wp.y + 5) + ')');
+    
+    // Highlight the current node
+    resetNodes();
+    var nodeId = ['fa-client','fa-uvicorn','fa-router','fa-function','fa-client'][step];
+    if (nodeId) {
+      var g = document.getElementById(nodeId);
+      g.querySelector('rect').setAttribute('stroke', 'var(--accent)');
+      g.querySelector('rect').setAttribute('filter', 'url(#glow)');
+    }
+    
+    status.innerHTML = wp.label;
+    status.style.background = 'var(--muted)';
+    step++;
+    setTimeout(animateStep, 700);
+  }
+  
+  status.innerHTML = '🚀 Sending request...';
+  status.style.background = 'var(--accent)';
+  status.style.color = '#fff';
+  step = 0;
+  setTimeout(animateStep, 300);
+};
+
+document.getElementById('fa-reset-btn').onclick = function() {
+  var p = document.getElementById('fa-packet');
+  p.style.display = 'none';
+  faAnimating = false;
+  ['fa-client','fa-uvicorn','fa-router','fa-function'].forEach(function(id) {
+    var g = document.getElementById(id);
+    g.querySelector('rect').setAttribute('stroke', 'var(--border)');
+    g.querySelector('rect').setAttribute('filter', '');
+  });
+  var status = document.getElementById('fa-status');
+  status.innerHTML = '💡 Click "Send Request" to trace a packet through the FastAPI pipeline';
+  status.style.background = 'var(--muted)';
+  status.style.color = 'var(--muted-fg)';
+};
+
+// ===== REQUEST JOURNEY ANIMATION (SMOOTH) =====
+var rjAnimating = false;
+document.getElementById('trace-btn').onclick = function() {
+  if (rjAnimating) return;
+  rjAnimating = true;
+  var p = document.getElementById('rj-packet');
+  p.style.display = 'block';
+  
+  var waypoints = [
+    {y: 30, label: '🌍 Client sends HTTPS request'},
+    {y: 95, label: '☁️ Cloud Run: gVisor sandbox, PORT=8080'},
+    {y: 160, label: '⏳ Uvicorn: ASGI server passes to FastAPI'},
+    {y: 225, label: '⚡ FastAPI: routes to your function → calls Gemini'}
+  ];
+  
+  function resetNodes() {
+    var nodes = ['rj-arrow1','rj-arrow2','rj-arrow3'];
+    // reset any stroke changes (none for this diagram)
+  }
+  
+  function rjComplete() {
+    p.style.display = 'none';
+    rjAnimating = false;
+    document.querySelector('#rj-packet rect').setAttribute('fill', 'var(--accent)');
+  }
+  
+  var step = 0;
+  function nextHop() {
+    if (step >= waypoints.length) {
+      // Flash green and done
+      document.querySelector('#rj-packet rect').setAttribute('fill', 'var(--good)');
+      setTimeout(rjComplete, 600);
+      return;
+    }
+    var wp = waypoints[step];
+    p.setAttribute('transform', 'translate(350, ' + wp.y + ')');
+    step++;
+    setTimeout(nextHop, 500);
+  }
+  
+  nextHop();
+};
+
+document.getElementById('reset-trace-btn').onclick = function() {
+  var p = document.getElementById('rj-packet');
+  p.style.display = 'none';
+  document.querySelector('#rj-packet rect').setAttribute('fill', 'var(--accent)');
+  rjAnimating = false;
+};
+
+// ===== INIT =====
+document.getElementById('stack-meta').innerHTML = STACK.cloudrun.meta;
+document.getElementById('stack-body').innerHTML = STACK.cloudrun.body;
+document.querySelector('[data-file="main"]').style.borderBottom = '3px solid var(--accent)';
+</script>
+
+</div>
+</body>
+</html>

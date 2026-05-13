@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 8 — Flask App Code: Block by Block</title>
+<style>
+:root {
+  --bg: #fbf7f2;
+  --surface: #fffcf8;
+  --text: #2d2a24;
+  --muted: #6b6560;
+  --accent: #bf5b3a;
+  --accent-light: #e8c8b8;
+  --good: #528c55;
+  --good-light: #d4eed4;
+  --bad: #c0392b;
+  --bad-light: #f5d0c9;
+  --blue: #2563eb;
+  --blue-light: #dbeafe;
+  --amber: #d97706;
+  --amber-light: #fef3c7;
+  --border: #e0d8d0;
+  --code-bg: #f4efe8;
+  --radius: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1816;
+    --surface: #242220;
+    --text: #e8e2da;
+    --muted: #9c958e;
+    --accent: #d97a55;
+    --accent-light: #3d2a20;
+    --good: #6dbf72;
+    --good-light: #1a331c;
+    --bad: #e74c3c;
+    --bad-light: #3a1a16;
+    --blue: #609fff;
+    --blue-light: #142642;
+    --amber: #fbbf24;
+    --amber-light: #332a10;
+    --border: #3a3632;
+    --code-bg: #2a2824;
+  }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  padding: 20px;
+}
+h1, h2, h3 { font-weight: 600; line-height: 1.3; }
+h1 { font-size: 1.8rem; margin-bottom: 0.25rem; }
+h2 {
+  font-size: 1.3rem;
+  margin: 2rem 0 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid var(--accent);
+  display: inline-block;
+}
+h3 { font-size: 1.05rem; margin: 1.2rem 0 0.5rem; }
+p { margin: 0.6rem 0; color: var(--muted); }
+
+.tldr {
+  background: var(--accent-light);
+  border-left: 4px solid var(--accent);
+  padding: 12px 16px;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin: 1rem 0;
+  font-size: 0.95rem;
+}
+.tldr strong { color: var(--accent); }
+
+.container { max-width: 880px; margin: 0 auto; }
+
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin: 1.2rem 0;
+}
+
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  tab-size: 2;
+}
+
+.code-line {
+  display: block;
+  white-space: pre;
+}
+.code-line .hl { background: var(--amber-light); border-radius: 3px; padding: 0 2px; }
+.code-line .hl-blue { background: var(--blue-light); border-radius: 3px; padding: 0 2px; }
+.code-line .hl-green { background: var(--good-light); border-radius: 3px; padding: 0 2px; }
+.code-line .hl-red { background: var(--bad-light); border-radius: 3px; padding: 0 2px; }
+.comment { color: var(--muted); font-style: italic; }
+
+.annotation-list { margin: 1rem 0; }
+.annotation-item {
+  display: flex;
+  gap: 10px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--border);
+  margin-bottom: 6px;
+  align-items: flex-start;
+}
+.annotation-item .num {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.annotation-item .desc { font-size: 0.92rem; }
+.annotation-item .desc strong { color: var(--accent); }
+
+/* SVG diagram */
+.svg-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 1rem 0;
+  text-align: center;
+}
+.svg-wrap svg { max-width: 100%; height: auto; }
+
+/* Playground */
+.playground {
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 1rem 0;
+}
+.playground .head {
+  background: var(--accent);
+  color: #fff;
+  padding: 8px 16px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.playground .body { padding: 16px; }
+
+.ctrl-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.ctrl-row label { font-size: 0.9rem; font-weight: 500; white-space: nowrap; }
+.ctrl-row .readout {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85rem;
+  min-width: 60px;
+}
+.btn {
+  padding: 6px 16px;
+  border: 1px solid var(--accent);
+  background: var(--surface);
+  color: var(--accent);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.btn:hover { background: var(--accent); color: #fff; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { opacity: 0.9; }
+
+/* Status bar */
+.status-bar {
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  font-family: 'Fira Code', monospace;
+  margin-top: 8px;
+  transition: all 0.3s;
+}
+.status-bar.idle { background: var(--border); color: var(--muted); }
+.status-bar.ok { background: var(--good-light); color: var(--good); }
+.status-bar.busy { background: var(--amber-light); color: var(--amber); }
+
+/* Mistake cards */
+.mistake-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 1rem 0;
+}
+.mistake-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  background: var(--surface);
+}
+.mistake-card h4 { font-size: 0.9rem; margin-bottom: 4px; }
+.mistake-card p { font-size: 0.85rem; margin: 0; }
+.mistake-card .fix {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.82rem;
+  color: var(--good);
+  font-weight: 600;
+}
+
+/* Interview blocks */
+.interview-block {
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin: 0.8rem 0;
+}
+.interview-block h4 { font-size: 0.95rem; color: var(--accent); margin-bottom: 4px; }
+.interview-block p, .interview-block li { font-size: 0.9rem; color: var(--muted); }
+
+/* Tab bar */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+}
+.tab {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius) var(--radius) 0 0;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: var(--bg);
+  color: var(--muted);
+}
+.tab.active {
+  background: var(--surface);
+  color: var(--accent);
+  border-color: var(--border);
+  border-bottom-color: var(--surface);
+}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Annotated diagram */
+.diagram-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+  margin: 1rem 0;
+}
+.diagram-box .svg-col { flex: 1; min-width: 300px; }
+.diagram-box .legend-col { flex: 0 0 180px; }
+.legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.85rem; }
+.legend-dot { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
+
+@media (max-width: 600px) {
+  body { padding: 12px; }
+  .section { padding: 16px; }
+  h1 { font-size: 1.4rem; }
+  .mistake-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Day 8 — Flask App: Block by Block</h1>
+<p style="font-size: 1rem; margin-bottom: 0;">Understanding the code before we deploy.</p>
+
+<div class="tldr">
+<strong>TL;DR</strong> — We have a Flask app with 3 endpoints, packaged with gunicorn in a Docker container, ready for Cloud Run. This explainer breaks down <strong>what each line does</strong>, <strong>why it's written that way</strong>, and <strong>how the pieces fit together</strong>.
+</div>
+
+<!-- ============ PLAYGROUND ============ -->
+<h2>Playground</h2>
+<p>Click "Send Request" to see how the Flask app processes a request step by step.</p>
+
+<div class="playground">
+  <div class="head"> Live Request Simulator</div>
+  <div class="body">
+    <div class="ctrl-row">
+      <label>Route:</label>
+      <button class="btn btn-primary" data-route="/" onclick="simRequest('/')">GET /</button>
+      <button class="btn" data-route="/health" onclick="simRequest('/health')">GET /health</button>
+      <button class="btn" data-route="/info" onclick="simRequest('/info')">GET /info</button>
+    </div>
+
+    <svg viewBox="0 0 740 160" style="width:100%;max-width:740px;height:auto;margin:10px 0;">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L8,3 L0,6" fill="var(--accent)"/>
+        </marker>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <!-- Nodes -->
+      <g id="node-client"><rect x="10" y="55" width="90" height="40" rx="6" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="2"/><text x="55" y="77" text-anchor="middle" dominant-baseline="central" font-size="13" fill="var(--text)">🌐 Browser</text></g>
+      <g id="node-gunicorn"><rect x="160" y="55" width="90" height="40" rx="6" fill="var(--blue-light)" stroke="var(--blue)" stroke-width="2"/><text x="205" y="77" text-anchor="middle" dominant-baseline="central" font-size="13" fill="var(--text)">⏳ Gunicorn</text></g>
+      <g id="node-flask"><rect x="320" y="55" width="90" height="40" rx="6" fill="var(--good-light)" stroke="var(--good)" stroke-width="2"/><text x="365" y="77" text-anchor="middle" dominant-baseline="central" font-size="13" fill="var(--text)">⚡ Flask</text></g>
+      <g id="node-route"><rect x="470" y="55" width="90" height="40" rx="6" fill="var(--amber-light)" stroke="var(--amber)" stroke-width="2"/><text x="515" y="77" text-anchor="middle" dominant-baseline="central" font-size="13" fill="var(--text)">🎯 Route</text></g>
+      <g id="node-response"><rect x="620" y="55" width="90" height="40" rx="6" fill="var(--good-light)" stroke="var(--good)" stroke-width="2"/><text x="665" y="77" text-anchor="middle" dominant-baseline="central" font-size="13" fill="var(--text)">✅ Response</text></g>
+      <!-- Arrows -->
+      <line x1="100" y1="75" x2="155" y2="75" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrow)"/>
+      <line x1="250" y1="75" x2="315" y2="75" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrow)"/>
+      <line x1="410" y1="75" x2="465" y2="75" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrow)"/>
+      <line x1="560" y1="75" x2="615" y2="75" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- Animated packet -->
+      <g id="sim-packet" style="display:none">
+        <rect width="30" height="18" rx="3" fill="var(--accent)"/>
+        <text x="15" y="10" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="8">REQ</text>
+      </g>
+    </svg>
+
+    <div id="sim-status" class="status-bar idle">Click a route button to simulate the request flow.</div>
+    <div id="sim-output" style="margin-top:8px; padding:10px; background:var(--code-bg); border-radius:var(--radius); font-family:'Fira Code',monospace; font-size:0.82rem; display:none; white-space:pre-wrap;"></div>
+  </div>
+</div>
+
+<!-- ============ CONCEPT ============ -->
+<h2>Concept — The 3 Files</h2>
+<p>Our Flask app has 3 files. Each has a distinct job.</p>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="switchTab('tab-main')">main.py</div>
+  <div class="tab" onclick="switchTab('tab-requirements')">requirements.txt</div>
+  <div class="tab" onclick="switchTab('tab-dockerfile')">Dockerfile</div>
+</div>
+
+<!-- main.py -->
+<div id="tab-main" class="tab-panel active">
+<div class="section">
+<h3>main.py — The Application Logic</h3>
+
+<div class="diagram-box">
+  <div class="svg-col">
+    <svg viewBox="0 0 520 160" style="width:100%;max-width:520px;">
+      <rect x="0" y="0" width="520" height="30" rx="4" fill="var(--accent-light)"/><text x="260" y="17" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--text)" font-weight="600">1. Request arrives</text>
+      <line x1="260" y1="30" x2="260" y2="45" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrow)"/>
+      <rect x="60" y="48" width="400" height="30" rx="4" fill="var(--blue-light)"/><text x="260" y="65" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--text)" font-weight="600">2. Flask matches the URL</text>
+      <line x1="260" y1="78" x2="260" y2="93" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrow)"/>
+      <rect x="60" y="96" width="400" height="30" rx="4" fill="var(--good-light)"/><text x="260" y="113" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--text)" font-weight="600">3. Runs the matched function</text>
+      <line x1="260" y1="126" x2="260" y2="135" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrow)"/>
+      <rect x="160" y="138" width="200" height="20" rx="4" fill="var(--amber-light)"/><text x="260" y="150" text-anchor="middle" dominant-baseline="central" font-size="11" fill="var(--text)" font-weight="600">4. Returns JSON response</text>
+    </svg>
+  </div>
+  <div class="legend-col">
+    <div class="legend-item"><span class="legend-dot" style="background:var(--accent)"></span> Entry</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span> Routing</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--good)"></span> Execution</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--amber)"></span> Output</div>
+  </div>
+</div>
+
+<pre>
+<span class="code-line"><span class="comment"># 1. Import Flask</span></span>
+<span class="code-line"><span class="hl-blue">from flask import Flask, jsonify</span></span>
+<span class="code-line"><span class="hl-blue">import os</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment"># 2. Create the Flask app</span></span>
+<span class="code-line"><span class="hl">app = Flask(__name__)</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment"># 3. Define routes</span></span>
+<span class="code-line"><span class="hl-green">@app.route('/')</span></span>
+<span class="code-line">def hello():</span>
+<span class="code-line">    return jsonify({</span>
+<span class="code-line">        <span class="hl">"message": "Hello from Cloud Run!"</span>,</span>
+<span class="code-line">        "status": "deployed",</span>
+<span class="code-line">        "platform": "Google Cloud Run"</span>
+<span class="code-line">    })</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="hl-green">@app.route('/health')</span></span>
+<span class="code-line">def health():</span>
+<span class="code-line">    return jsonify({"status": "healthy"})</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="hl-green">@app.route('/info')</span></span>
+<span class="code-line">def info():</span>
+<span class="code-line">    return jsonify({</span>
+<span class="code-line">        "app": "Flask on Cloud Run",</span>
+<span class="code-line">        <span class="hl-red">"port": os.environ.get("PORT", 8080)</span></span>
+<span class="code-line">    })</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment"># 4. Entry point — only runs when executed directly</span></span>
+<span class="code-line"><span class="hl">if __name__ == "__main__":</span></span>
+<span class="code-line">    port = int(os.environ.get("PORT", 8080))</span>
+<span class="code-line">    app.run(host="0.0.0.0", port=port)</span>
+</pre>
+
+<div class="annotation-list">
+  <div class="annotation-item">
+    <span class="num">1</span>
+    <div class="desc"><strong>from flask import Flask, jsonify</strong> — Flask is a lightweight Python web framework. `jsonify` converts Python dicts into JSON responses. <code>import os</code> reads environment variables (like PORT).</div>
+  </div>
+  <div class="annotation-item">
+    <span class="num">2</span>
+    <div class="desc"><strong>app = Flask(__name__)</strong> — Creates the Flask application. <code>__name__</code> tells Flask where to look for templates/static files. This <code>app</code> object handles all incoming HTTP requests.</div>
+  </div>
+  <div class="annotation-item">
+    <span class="num">3</span>
+    <div class="desc"><strong>@app.route()</strong> — A Python <strong>decorator</strong>. It tells Flask: "When someone visits this URL path, run the function below." Each decorated function returns a JSON response via <code>jsonify()</code>.</div>
+  </div>
+  <div class="annotation-item">
+    <span class="num">4</span>
+    <div class="desc"><strong>if __name__ == "__main__"</strong> — Only runs when you execute <code>python main.py</code> directly. When gunicorn runs this (in production), this block is ignored. <code>host="0.0.0.0"</code> means "accept connections from anywhere" (required inside a container). PORT defaults to 8080 — Cloud Run's expected port.</div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- requirements.txt -->
+<div id="tab-requirements" class="tab-panel">
+<div class="section">
+<h3>requirements.txt — Dependencies</h3>
+<pre>
+<span class="code-line">flask&gt;=2.0.0</span>
+<span class="code-line">gunicorn&gt;=20.0.0</span>
+</pre>
+<div class="annotation-list">
+  <div class="annotation-item">
+    <span class="num">1</span>
+    <div class="desc"><strong>flask</strong> — The web framework. <code>&gt;=2.0.0</code> means "any version 2.0 or newer". We use this to build the API.</div>
+  </div>
+  <div class="annotation-item">
+    <span class="num">2</span>
+    <div class="desc"><strong>gunicorn</strong> — A production WSGI server. Flask's built-in server is single-threaded (good for dev). Gunicorn handles multiple requests in parallel. Cloud Run uses it to serve traffic properly.</div>
+  </div>
+</div>
+
+<div class="mistake-grid">
+  <div class="mistake-card">
+    <h4>🔴 Forgetting gunicorn</h4>
+    <p>If you deploy with only flask (no gunicorn), Cloud Run will timeout or crash under load because Flask's dev server can't handle concurrent requests.</p>
+    <span class="fix">✓ Always include gunicorn in requirements.txt for production</span>
+  </div>
+  <div class="mistake-card">
+    <h4>🔴 Using flask run directly</h4>
+    <p>CMD ["python", "main.py"] in Dockerfile uses Flask dev server — fine for testing, not for production traffic.</p>
+    <span class="fix">✓ Use CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]</span>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- Dockerfile -->
+<div id="tab-dockerfile" class="tab-panel">
+<div class="section">
+<h3>Dockerfile — The Container Recipe</h3>
+<pre>
+<span class="code-line"><span class="comment"># 1. Base image</span></span>
+<span class="code-line"><span class="hl-blue">FROM python:3.11-slim</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment"># 2. Working directory inside container</span></span>
+<span class="code-line"><span class="hl">WORKDIR /app</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment"># 3. Copy dependencies first (layer caching)</span></span>
+<span class="code-line"><span class="hl-green">COPY requirements.txt .</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment"># 4. Install Python packages</span></span>
+<span class="code-line"><span class="hl-green">RUN pip install --no-cache-dir -r requirements.txt</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment"># 5. Copy the rest of the code</span></span>
+<span class="code-line"><span class="hl">COPY . .</span></span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment"># 6. Document the port</span></span>
+<span class="code-line">EXPOSE 8080</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment"># 7. Start gunicorn</span></span>
+<span class="code-line"><span class="hl-red">CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]</span></span>
+</pre>
+
+<div class="annotation-list">
+  <div class="annotation-item">
+    <span class="num">1</span>
+    <div class="desc"><strong>FROM python:3.11-slim</strong> — Starts from an official Python image. <strong>Slim</strong> = minimal OS layer (smaller image size, fewer security holes). Full image would be 1GB+, slim is ~120MB.</div>
+  </div>
+  <div class="annotation-item">
+    <span class="num">2</span>
+    <div class="desc"><strong>WORKDIR /app</strong> — All subsequent commands run from this directory inside the container. Like <code>cd /app</code>.</div>
+  </div>
+  <div class="annotation-item">
+    <span class="num">3</span>
+    <div class="desc"><strong>COPY requirements.txt .</strong> — Copy only the requirements file first. This is a Docker caching trick: if requirements.txt hasn't changed, Docker reuses the cached pip install layer instead of reinstalling everything.</div>
+  </div>
+  <div class="annotation-item">
+    <span class="num">4</span>
+    <div class="desc"><strong>COPY . .</strong> — Copy the actual app code (main.py). This happens AFTER pip install so code changes don't trigger a full reinstall.</div>
+  </div>
+  <div class="annotation-item">
+    <span class="num">5</span>
+    <div class="desc"><strong>CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]</strong> — The command that runs when the container starts. <code>main:app</code> means "from main.py, use the variable named 'app'". <code>--bind 0.0.0.0:8080</code> tells gunicorn to listen on port 8080 from all network interfaces.</div>
+  </div>
+</div>
+
+<div class="mistake-grid">
+  <div class="mistake-card">
+    <h4>🔴 Wrong CMD syntax</h4>
+    <p>CMD ["python", "main.py"] instead of gunicorn — Flask dev server can't handle multiple requests. The app will timeout under load.</p>
+    <span class="fix">✓ CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]</span>
+  </div>
+  <div class="mistake-card">
+    <h4>🔴 Not using .dockerignore</h4>
+    <p>Without it, your local venv, __pycache__, .git all get copied into the image, making it huge and slow to upload.</p>
+    <span class="fix">✓ Add .dockerignore with __pycache__/, .git, *.pyc, venv/</span>
+  </div>
+  <div class="mistake-card">
+    <h4>🔴 Hardcoding port</h4>
+    <p>Cloud Run sets the PORT env var dynamically. If you hardcode port 5000 or 80, Cloud Run can't route traffic to you.</p>
+    <span class="fix">✓ Always use os.environ.get("PORT", 8080) and match EXPOSE + CMD</span>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ============ How the 3 files connect ============ -->
+<h2>How the 3 Files Connect</h2>
+<div class="section">
+<svg viewBox="0 0 760 200" style="width:100%;max-width:760px;">
+  <g transform="translate(10,10)">
+    <!-- File boxes -->
+    <rect x="0" y="40" width="200" height="50" rx="6" fill="var(--accent-light)" stroke="var(--accent)" stroke-width="2"/>
+    <text x="100" y="67" text-anchor="middle" dominant-baseline="central" font-size="13" fill="var(--text)" font-weight="600">requirements.txt</text>
+    <text x="100" y="82" text-anchor="middle" dominant-baseline="central" font-size="10" fill="var(--muted)">flask + gunicorn</text>
+
+    <rect x="280" y="20" width="200" height="50" rx="6" fill="var(--blue-light)" stroke="var(--blue)" stroke-width="2"/>
+    <text x="380" y="47" text-anchor="middle" dominant-baseline="central" font-size="13" fill="var(--text)" font-weight="600">Dockerfile</text>
+    <text x="380" y="62" text-anchor="middle" dominant-baseline="central" font-size="10" fill="var(--muted)">build instructions</text>
+
+    <rect x="560" y="0" width="200" height="50" rx="6" fill="var(--good-light)" stroke="var(--good)" stroke-width="2"/>
+    <text x="660" y="27" text-anchor="middle" dominant-baseline="central" font-size="13" fill="var(--text)" font-weight="600">main.py</text>
+    <text x="660" y="42" text-anchor="middle" dominant-baseline="central" font-size="10" fill="var(--muted)">app code</text>
+
+    <!-- Docker build process -->
+    <rect x="280" y="110" width="480" height="55" rx="8" fill="var(--amber-light)" stroke="var(--amber)" stroke-width="2"/>
+    <text x="520" y="131" text-anchor="middle" dominant-baseline="central" font-size="12" fill="var(--text)" font-weight="600">🔨 Cloud Build — gcloud builds submit</text>
+    <text x="520" y="150" text-anchor="middle" dominant-baseline="central" font-size="10" fill="var(--muted)">Reads Dockerfile → Installs requirements.txt → Copies main.py → Pushes image</text>
+
+    <!-- Arrows -->
+    <line x1="200" y1="55" x2="275" y2="55" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M380,70 L380,105 L280,105 L280,130" stroke="var(--blue)" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+    <line x1="560" y1="25" x2="520" y2="130" stroke="var(--good)" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="760" y1="25" x2="800" y2="25" stroke="var(--good)" stroke-width="2" marker-end="url(#arrow)"/>
+    <text x="810" y="30" font-size="10" fill="var(--good)" font-weight="600">Deployed! 🚀</text>
+  </g>
+</svg>
+<p style="text-align:center;font-size:0.9rem;color:var(--muted);margin-top:8px;">
+<strong>Flow:</strong> requirements.txt lists what's needed → Dockerfile builds the container → Cloud Build executes the build → Container runs on Cloud Run
+</p>
+</div>
+
+<!-- ============ Common mistakes ============ -->
+<h2>Common Mistakes</h2>
+<div class="mistake-grid">
+  <div class="mistake-card">
+    <h4>🔄 PORT mismatch</h4>
+    <p>Dockerfile EXPOSEs 8080, CMD binds 8080, but the app uses os.getenv("PORT", 5000). These must all agree.</p>
+    <span class="fix">✓ Keep PORT=8080 as default everywhere</span>
+  </div>
+  <div class="mistake-card">
+    <h4>📦 requirements.txt missing</h4>
+    <p>pip install -r requirements.txt fails if the file isn't copied first. Docker layer caching makes this a two-step COPY.</p>
+    <span class="fix">✓ COPY requirements.txt . before RUN pip install</span>
+  </div>
+  <div class="mistake-card">
+    <h4>🌐 0.0.0.0 vs 127.0.0.1</h4>
+    <p>127.0.0.1 only allows connections from inside the container. Cloud Run's proxy connects externally → needs 0.0.0.0.</p>
+    <span class="fix">✓ app.run(host="0.0.0.0", port=port)</span>
+  </div>
+  <div class="mistake-card">
+    <h4>🚫 @app.route indentation</h4>
+    <p>If the function body isn't indented properly under the decorator, Flask won't register the route.</p>
+    <span class="fix">✓ Keep 4-space indentation consistently</span>
+  </div>
+</div>
+
+<!-- ============ INTERVIEW ============ -->
+<h2>Interview Prep</h2>
+
+<div class="interview-block">
+<h4>⚡ 30-Second Answer</h4>
+<p>This is a Flask web app with 3 endpoints (/, /health, /info) that returns JSON responses. It runs on gunicorn inside a Docker container and is deployed to Cloud Run. The /health endpoint is used by Cloud Run's load balancer to check if the service is alive.</p>
+</div>
+
+<div class="interview-block">
+<h4>🎯 90-Second STAR Answer</h4>
+<p><strong>S:</strong> I needed to build and deploy a lightweight API service on Google Cloud Run for a serverless project.<br>
+<strong>T:</strong> The app had to handle health checks, serve metadata, and be containerized properly for production traffic.<br>
+<strong>A:</strong> I built a Flask app with 3 routes, using jsonify() to return structured JSON. I added gunicorn in requirements.txt for production concurrency. The Dockerfile uses python:3.11-slim with layer caching (requirements.txt first, then code). For deployment, I used gcloud run deploy with --source flag, which triggers Cloud Build to containerize and push to Artifact Registry.<br>
+<strong>R:</strong> The service deployed successfully at a .run.app URL with all 3 endpoints responding. The build process was fully automated — one command from source code to live service.<br>
+<strong>I:</strong> Cloud Run's source-based deployment abstracts away the container registry push and build steps, making it ideal for quick prototyping.</p>
+</div>
+
+<div class="interview-block">
+<h4>🔧 3-Minute Technical Walkthrough</h4>
+<p><strong>Architecture:</strong> The request lifecycle is: Internet → Cloud Run proxy → container's gunicorn → Flask router → handler function → JSON response. Cloud Run automatically scales the container from 0 to N instances based on incoming traffic.</p>
+<p><strong>Key Design Decisions:</strong></p>
+<ul style="color:var(--muted);font-size:0.9rem;margin-left:18px;">
+  <li><strong>Slim base image</strong> — python:3.11-slim over full: 120MB vs 1GB+ image size, faster cold starts</li>
+  <li><strong>gunicorn over Flask dev server</strong> — Dev server is single-threaded, gunicorn forks workers to handle concurrent requests. Without this, multiple users would block each other.</li>
+  <li><strong>Layer caching</strong> — COPY requirements.txt first means code changes don't reinstall packages. Builds go from 60s → 5s on repeat deploys.</li>
+  <li><strong>Health check endpoint</strong> — Cloud Run's infrastructure polls /health every few seconds. If it returns non-200, the instance is killed and restarted.</li>
+</ul>
+<p><strong>Failure modes:</strong></p>
+<ul style="color:var(--muted);font-size:0.9rem;margin-left:18px;">
+  <li>If gunicorn isn't installed, the container starts but crashes immediately (ModuleNotFoundError)</li>
+  <li>If PORT env doesn't match between Dockerfile and app, Cloud Run's health check fails and never routes traffic</li>
+  <li>If the image is too large (full python image), cold starts take 10+ seconds versus 2-3 seconds for slim</li>
+</ul>
+</div>
+</div>
+
+<script>
+// ====== Tab switching ======
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelector(`.tab[onclick*="${id}"]`).classList.add('active');
+}
+
+// ====== Simulator ======
+var simSteps = {
+  '/': [
+    {x: 10, y: 95, label: '🌐 Browser sends GET /', node: 'node-client'},
+    {x: 160, y: 95, label: '⏳ Gunicorn receives the request', node: 'node-gunicorn'},
+    {x: 340, y: 95, label: '⚡ Flask routes to hello()', node: 'node-flask'},
+    {x: 490, y: 95, label: '🎯 Matches @app.route("/")', node: 'node-route'},
+    {x: 630, y: 95, label: '✅ Returns JSON: message + status + platform', node: 'node-response'}
+  ],
+  '/health': [
+    {x: 10, y: 95, label: '🌐 Browser sends GET /health', node: 'node-client'},
+    {x: 160, y: 95, label: '⏳ Gunicorn receives', node: 'node-gunicorn'},
+    {x: 340, y: 95, label: '⚡ Flask routes to health()', node: 'node-flask'},
+    {x: 490, y: 95, label: '🎯 Matches @app.route("/health")', node: 'node-route'},
+    {x: 630, y: 95, label: '✅ Returns {"status": "healthy"}', node: 'node-response'}
+  ],
+  '/info': [
+    {x: 10, y: 95, label: '🌐 Browser sends GET /info', node: 'node-client'},
+    {x: 160, y: 95, label: '⏳ Gunicorn receives', node: 'node-gunicorn'},
+    {x: 340, y: 95, label: '⚡ Flask routes to info()', node: 'node-flask'},
+    {x: 490, y: 95, label: '🎯 Matches @app.route("/info")', node: 'node-route'},
+    {x: 630, y: 95, label: '✅ Returns JSON: app name + port', node: 'node-response'}
+  ]
+};
+
+// Response outputs
+var simOutputs = {
+  '/': '{\n    "message": "Hello from Cloud Run!",\n    "status": "deployed",\n    "platform": "Google Cloud Run"\n}',
+  '/health': '{\n    "status": "healthy"\n}',
+  '/info': '{\n    "app": "Flask on Cloud Run",\n    "port": "8080"\n}'
+};
+
+var stepInterval = null;
+
+function simRequest(route) {
+  // Stop any existing animation
+  if (stepInterval) { clearInterval(stepInterval); stepInterval = null; }
+
+  var packet = document.getElementById('sim-packet');
+  var statusBar = document.getElementById('sim-status');
+  var output = document.getElementById('sim-output');
+  var steps = simSteps[route];
+
+  // Reset all nodes
+  document.querySelectorAll('#node-client rect, #node-gunicorn rect, #node-flask rect, #node-route rect, #node-response rect').forEach(function(r) {
+    r.removeAttribute('filter');
+    r.setAttribute('stroke-width', '2');
+  });
+
+  statusBar.className = 'status-bar busy';
+  statusBar.textContent = '🚀 Sending request...';
+  output.style.display = 'none';
+  packet.style.display = 'block';
+
+  var i = 0;
+  function nextStep() {
+    if (i >= steps.length) {
+      packet.style.display = 'none';
+      statusBar.className = 'status-bar ok';
+      statusBar.textContent = '✅ Request completed successfully!';
+      output.style.display = 'block';
+      output.textContent = simOutputs[route];
+      // Reset all node highlights
+      document.querySelectorAll('#node-client rect, #node-gunicorn rect, #node-flash rect, #node-route rect, #node-response rect').forEach(function(r) {
+        r.removeAttribute('filter');
+        r.setAttribute('stroke-width', '2');
+      });
+      return;
+    }
+    var s = steps[i];
+    // Move packet
+    packet.setAttribute('transform', 'translate(' + s.x + ', ' + s.y + ')');
+    // Highlight node
+    document.querySelectorAll('#node-client rect, #node-gunicorn rect, #node-flask rect, #node-route rect, #node-response rect').forEach(function(r) {
+      r.removeAttribute('filter');
+      r.setAttribute('stroke-width', '2');
+    });
+    var activeNode = document.getElementById(s.node);
+    if (activeNode) {
+      var rect = activeNode.querySelector('rect');
+      if (rect) {
+        rect.setAttribute('filter', 'url(#glow)');
+        rect.setAttribute('stroke-width', '3');
+      }
+    }
+    statusBar.textContent = s.label;
+    i++;
+    stepInterval = setTimeout(nextStep, 800);
+  }
+
+  nextStep();
+}
+</script>
+
+</body>
+</html>
