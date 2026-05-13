@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 7 — REST APIs with requests</title>
+<style>
+  :root {
+    --background: #fff; --foreground: #0a0a0b;
+    --card: #fff; --card-foreground: #0a0a0b;
+    --primary: #18181b; --primary-foreground: #fafafa;
+    --secondary: #f4f4f5; --secondary-foreground: #18181b;
+    --muted: #f4f4f5; --muted-foreground: #71717a;
+    --accent: #f4f4f5; --accent-foreground: #18181b;
+    --destructive: #ef4444; --destructive-foreground: #fafafa;
+    --border: #e4e4e7; --input: #e4e4e7; --ring: #18181b;
+    --radius: 0.5rem;
+    --serif: ui-serif, Georgia, "Times New Roman", serif;
+    --sans: system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono: ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: #09090b; --foreground: #fafafa;
+      --card: #09090b; --card-foreground: #fafafa;
+      --primary: #fafafa; --primary-foreground: #18181b;
+      --secondary: #27272a; --secondary-foreground: #fafafa;
+      --muted: #27272a; --muted-foreground: #a1a1aa;
+      --accent: #27272a; --accent-foreground: #fafafa;
+      --destructive: #7f1d1d; --destructive-foreground: #fafafa;
+      --border: #27272a; --input: #27272a; --ring: #d4d4d8;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--background); color: var(--foreground);
+    font-family: var(--sans); font-size: 15px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    padding: 48px 24px 120px;
+  }
+  .page { max-width: 880px; margin: 0 auto; }
+
+  /* Typography */
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted-foreground); margin-bottom: 8px; }
+  h1 { font-family: var(--serif); font-weight: 500; font-size: 34px; letter-spacing: -0.01em; margin-bottom: 8px; }
+  .lead { font-size: 14.5px; color: var(--muted-foreground); max-width: 640px; margin-bottom: 32px; }
+  h2 { font-family: var(--serif); font-weight: 500; font-size: 24px; margin: 48px 0 14px; padding-top: 10px; }
+  h3 { font-weight: 600; font-size: 16px; margin: 24px 0 10px; }
+  p { margin-bottom: 14px; max-width: 680px; }
+  code { font-family: var(--mono); font-size: 13px; background: var(--muted); padding: 1px 5px; border-radius: 4px; }
+
+  /* shadcn-style Buttons */
+  .sh-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    border-radius: calc(var(--radius) - 2px);
+    font-size: 0.875rem; font-weight: 500; line-height: 1; white-space: nowrap;
+    transition: all 0.12s ease; cursor: pointer;
+    outline: none; border: 1px solid transparent;
+    padding: 0.5rem 1rem; height: 2.25rem;
+  }
+  .sh-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+  .sh-btn:disabled { opacity: 0.5; pointer-events: none; }
+  .sh-btn:active { transform: scale(0.97); }
+  .sh-btn-primary { background: var(--primary); color: var(--primary-foreground); }
+  .sh-btn-primary:hover { opacity: 0.9; }
+  .sh-btn-secondary { background: var(--secondary); color: var(--secondary-foreground); }
+  .sh-btn-secondary:hover { background: var(--accent); }
+  .sh-btn-outline { border-color: var(--input); background: transparent; color: var(--foreground); }
+  .sh-btn-outline:hover { background: var(--accent); }
+  .sh-btn-ghost { background: transparent; color: var(--foreground); }
+  .sh-btn-ghost:hover { background: var(--accent); }
+  .sh-btn-sm { padding: 0.25rem 0.75rem; height: 2rem; font-size: 0.8125rem; }
+  .sh-btn-destructive { background: var(--destructive); color: var(--destructive-foreground); }
+
+  .sh-btn-active-get { background: #2563eb; color: #fff; }
+  .sh-btn-active-get:hover { opacity: 0.9; }
+  .sh-btn-active-post { background: #ea580c; color: #fff; }
+  .sh-btn-active-post:hover { opacity: 0.9; }
+
+  /* shadcn-style Card */
+  .sh-card {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--card-foreground);
+    padding: 1.5rem;
+    margin: 16px 0;
+  }
+  .sh-card-header { margin-bottom: 0.75rem; }
+  .sh-card-title { font-size: 1.125rem; font-weight: 600; margin: 0; }
+  .sh-card-desc { font-size: 0.875rem; color: var(--muted-foreground); margin: 0; }
+
+  /* shadcn-style Input */
+  .sh-input {
+    display: flex; height: 2.25rem; width: 100%;
+    border-radius: calc(var(--radius) - 2px);
+    border: 1px solid var(--input);
+    background: transparent;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem; font-family: var(--mono);
+    color: var(--foreground);
+    transition: box-shadow 0.15s;
+  }
+  .sh-input:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+  .sh-input::placeholder { color: var(--muted-foreground); }
+
+  /* shadcn Badge */
+  .sh-badge {
+    display: inline-flex; align-items: center;
+    border-radius: calc(var(--radius) - 2px);
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem; font-weight: 600; line-height: 1.25;
+    white-space: nowrap; border: 1px solid transparent;
+  }
+  .sh-badge-default { background: var(--primary); color: var(--primary-foreground); }
+  .sh-badge-outline { border-color: var(--border); color: var(--foreground); }
+  .sh-badge-destructive { background: rgba(239,68,68,0.1); color: var(--destructive); border-color: rgba(239,68,68,0.2); }
+
+  /* shadcn Table */
+  .sh-table { width: 100%; border-collapse: collapse; margin: 14px 0; }
+  .sh-table th { text-align: left; padding: 0.75rem 1rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); border-bottom: 1px solid var(--border); }
+  .sh-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.875rem; }
+  .sh-table tr:last-child td { border-bottom: none; }
+
+  /* Code block */
+  .sh-code {
+    border-radius: var(--radius); background: var(--muted); padding: 1rem 1.25rem;
+    font-family: var(--mono); font-size: 0.8125rem; line-height: 1.5;
+    overflow-x: auto; margin: 14px 0; white-space: pre-wrap;
+  }
+  .sh-code .cm { color: var(--muted-foreground); font-style: italic; }
+  .sh-code .kw { color: #7c3aed; }
+  .sh-code .st { color: #059669; }
+  .sh-code .fn { color: #dc2626; }
+
+  /* Separator */
+  .sh-sep { border: none; height: 1px; background: var(--border); margin: 1rem 0; }
+
+  /* Flow steps (shadcn-style cards) */
+  .sh-flow { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+  .sh-flow-step {
+    flex: 1; min-width: 120px;
+    border-radius: var(--radius); border: 1px solid var(--border);
+    background: var(--card); padding: 10px 14px;
+    cursor: pointer; transition: all 0.12s ease;
+  }
+  .sh-flow-step:hover { border-color: var(--ring); transform: translateY(-1px); }
+  .sh-flow-step.active { border-color: var(--primary); border-width: 2px; padding: 9px 13px; }
+  .sh-flow-step .fn { font-family: var(--mono); font-size: 10px; color: var(--muted-foreground); margin-bottom: 2px; }
+  .sh-flow-step .ft { font-size: 13px; font-weight: 600; }
+  .sh-flow-step .fs { font-size: 11px; color: var(--muted-foreground); }
+  .sh-flow-step.err { border-color: rgba(239,68,68,0.3); }
+  .sh-flow-step.err:hover { border-color: var(--destructive); }
+  .sh-flow-step.ok { border-color: rgba(5,150,105,0.3); }
+  .sh-flow-step.ok:hover { border-color: #059669; }
+  .sh-flow-arrow { display: flex; align-items: center; color: var(--muted-foreground); font-size: 14px; padding: 0 2px; }
+  @keyframes sh-arrow-bounce { 0%,100%{transform:translateX(0)} 50%{transform:translateX(3px)} }
+  .sh-flow-arrow { animation: sh-arrow-bounce 1.2s ease-in-out infinite; }
+
+  /* Detail panel */
+  .sh-detail {
+    border-radius: var(--radius); border: 1px solid var(--border);
+    background: var(--card); padding: 1.25rem; margin: 8px 0;
+    min-height: 100px;
+    animation: sh-fade-in 0.2s ease-out;
+  }
+  .sh-detail .meta { font-family: var(--mono); font-size: 11px; color: var(--muted-foreground); margin-bottom: 6px; }
+  .sh-detail .body { font-size: 13px; line-height: 1.6; color: var(--muted-foreground); margin-bottom: 10px; }
+  .sh-detail .body strong { color: var(--foreground); }
+
+  /* Playground */
+  .sh-playground {
+    border-radius: var(--radius); border: 1px solid var(--border);
+    background: var(--card); padding: 1.5rem; margin: 16px 0;
+  }
+  .sh-pg-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+  .sh-pg-row:last-child { margin-bottom: 0; }
+  .sh-pg-row label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); min-width: 50px; font-family: var(--mono); }
+  .sh-pg-row input[type="range"] { flex: 1; min-width: 80px; accent-color: var(--ring); }
+  .sh-pg-row .pg-val { font-family: var(--mono); font-size: 12px; color: var(--foreground); min-width: 40px; text-align: right; }
+
+  .sh-output { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+  @media (max-width: 700px) { .sh-output { grid-template-columns: 1fr; } }
+  .sh-pane {
+    border-radius: var(--radius); border: 1px solid var(--border);
+    background: var(--muted); padding: 1rem; min-height: 150px;
+    font-family: var(--mono); font-size: 0.75rem; line-height: 1.6; overflow-x: auto;
+  }
+  #pg-code { white-space: pre-wrap; }
+  .sh-pane .pn { font-size: 0.675rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted-foreground); margin-bottom: 8px; font-weight: 600; }
+
+  /* Status bar */
+  .sh-status {
+    display: flex; align-items: center; gap: 10px; padding: 0.625rem 1rem;
+    border-radius: var(--radius); font-size: 0.8125rem; font-family: var(--mono);
+    margin-top: 10px; transition: all 0.2s;
+  }
+  @keyframes sh-pulse { 0%,100%{opacity:1} 50%{opacity:0.65} }
+  .sh-status.idle { background: var(--muted); border: 1px solid var(--border); }
+  .sh-status.ok { background: rgba(5,150,105,0.06); border: 1px solid rgba(5,150,105,0.2); }
+  .sh-status.err { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2); animation: sh-pulse 1s ease-in-out infinite; }
+
+  /* Callout */
+  .sh-callout {
+    border-radius: var(--radius); border: 1px solid var(--border);
+    border-left: 3px solid var(--muted-foreground);
+    padding: 0.875rem 1.125rem; margin: 14px 0;
+    font-size: 0.875rem; line-height: 1.5;
+  }
+  .sh-callout.warn { border-left-color: var(--destructive); }
+
+  /* Card grid */
+  .sh-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: 14px 0; }
+  .sh-card-grid .sh-card { margin: 0; }
+  .sh-card-grid .sh-card h4 { font-size: 0.875rem; font-weight: 600; margin-bottom: 4px; color: var(--foreground); }
+  .sh-card-grid .sh-card p { font-size: 0.8125rem; color: var(--muted-foreground); margin: 0; max-width: none; }
+
+  /* Animations */
+  @keyframes sh-fade-in { from{opacity:0;transform:translateY(3px)} to{opacity:1;transform:translateY(0)} }
+  .sh-fade-in { animation: sh-fade-in 0.2s ease-out; }
+
+  /* HTTP message display */
+  .http-r { color: #2563eb; }
+  .http-h { color: var(--muted-foreground); }
+  .http-b { color: #059669; }
+  .http-i { padding-left: 14px; }
+  .http-i2 { padding-left: 28px; }
+  .http-i3 { padding-left: 42px; }
+
+  @media (max-width: 600px) {
+    body { padding: 24px 12px 80px; }
+    h1 { font-size: 26px; }
+    .sh-flow-step { min-width: 100%; }
+    .sh-playground { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="eyebrow">Day 7 · REST APIs with requests</div>
+<h1>Calling REST APIs from Python</h1>
+<p class="lead">Master GET, POST, error handling, and raw Gemini API calls. Start by playing with the request builder — see the HTTP request and Python code update live.</p>
+
+<!-- ============================================================ -->
+<!-- PLAYGROUND -->
+<!-- ============================================================ -->
+<h2>REST Playground</h2>
+<p>Toggle method, edit the URL, enable error simulation — see the HTTP request and matching Python code update in real time.</p>
+
+<div class="sh-playground">
+  <!-- Method -->
+  <div class="sh-pg-row">
+    <label>Method</label>
+    <button class="sh-btn sh-btn-active-get" id="btn-get">GET</button>
+    <button class="sh-btn sh-btn-outline" id="btn-post">POST</button>
+    <span class="sh-badge sh-badge-outline" id="method-badge">Body: none</span>
+  </div>
+
+  <!-- URL -->
+  <div class="sh-pg-row">
+    <label>URL</label>
+    <input class="sh-input" id="pg-url" value="https://jsonplaceholder.typicode.com/posts/5">
+  </div>
+
+  <!-- POST body -->
+  <div id="pg-body-area" style="display:none;">
+    <div class="sh-pg-row">
+      <label>Title</label>
+      <input class="sh-input" id="pg-title" value="My First Post">
+    </div>
+    <div class="sh-pg-row">
+      <label>Body</label>
+      <input class="sh-input" id="pg-body-text" value="Learning REST APIs">
+    </div>
+    <div class="sh-pg-row">
+      <label>User</label>
+      <input type="range" id="pg-user" min="1" max="5" value="1">
+      <span class="pg-val" id="pg-user-val">1</span>
+    </div>
+  </div>
+
+  <!-- Error sim -->
+  <div class="sh-pg-row">
+    <label>Errors</label>
+    <button class="sh-btn sh-btn-sm sh-btn-outline" id="btn-timeout">⏱ Timeout</button>
+    <button class="sh-btn sh-btn-sm sh-btn-outline" id="btn-conn">🌐 Connection</button>
+    <button class="sh-btn sh-btn-sm sh-btn-outline" id="btn-http">⚠️ HTTP 500</button>
+    <span style="font-size:11px;color:var(--muted-foreground);">enable to see catch blocks</span>
+  </div>
+
+  <!-- Output -->
+  <div class="sh-output">
+    <div class="sh-pane"><div class="pn">📤 HTTP Request</div><div id="pg-req"></div></div>
+    <div class="sh-pane"><div class="pn">🐍 Python Code</div><div id="pg-code"></div></div>
+  </div>
+
+  <!-- Status -->
+  <div class="sh-status idle" id="pg-status">
+    <span>💡</span>
+    <span>Toggle method, edit fields, or enable errors — everything updates live</span>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- GET vs POST -->
+<!-- ============================================================ -->
+<h2>1. GET vs POST</h2>
+<p>GET fetches data. POST creates data. The key difference is the request body and idempotence.</p>
+
+<div class="sh-flow" id="flow1">
+  <div class="sh-flow-step active" data-key="g-client">
+    <div class="fn">GET</div>
+    <div class="ft">/posts/5</div>
+    <div class="fs">No body, fetch</div>
+  </div>
+  <div class="sh-flow-arrow">→</div>
+  <div class="sh-flow-step" data-key="g-server">
+    <div class="fn">Server</div>
+    <div class="ft">JSONPlaceholder</div>
+    <div class="fs">Finds post #5</div>
+  </div>
+  <div class="sh-flow-arrow">→</div>
+  <div class="sh-flow-step ok" data-key="g-resp">
+    <div class="fn">200 OK</div>
+    <div class="ft">Returns data</div>
+    <div class="fs">{title, body, id}</div>
+  </div>
+</div>
+
+<div class="sh-flow" id="flow1b">
+  <div class="sh-flow-step" data-key="p-client">
+    <div class="fn">POST</div>
+    <div class="ft">/posts</div>
+    <div class="fs">JSON body</div>
+  </div>
+  <div class="sh-flow-arrow">→</div>
+  <div class="sh-flow-step" data-key="p-server">
+    <div class="fn">Server</div>
+    <div class="ft">Creates resource</div>
+    <div class="fs">Inserts row + ID</div>
+  </div>
+  <div class="sh-flow-arrow">→</div>
+  <div class="sh-flow-step ok" data-key="p-resp">
+    <div class="fn">201 Created</div>
+    <div class="ft">ID: 101</div>
+    <div class="fs">New resource</div>
+  </div>
+</div>
+
+<div class="sh-detail" id="panel1">
+  <div class="meta" id="p1-meta">HTTP GET · idempotent</div>
+  <div class="body" id="p1-body">Fetches post #5 from JSONPlaceholder. No request body — just the URL. Same URL always returns the same result.</div>
+  <div class="sh-code" id="p1-code">response = requests.get("https://jsonplaceholder.typicode.com/posts/5")</div>
+</div>
+
+<h3>Exercise 2 — create_post</h3>
+<div class="sh-callout warn">
+  <strong>⚡ <code>data=</code> vs <code>json=</code>:</strong> <code>data={"key":"val"}</code> sends form-encoded. <code>json={"key":"val"}</code> sends JSON with correct Content-Type. Use <code>json=</code> for REST APIs.
+</div>
+
+<!-- ============================================================ -->
+<!-- ERROR HANDLING -->
+<!-- ============================================================ -->
+<h2>2. Error Handling</h2>
+<p>APIs fail. Always handle every failure mode explicitly. Click any error type to see the matching catch block.</p>
+
+<div class="sh-flow" id="flow2">
+  <div class="sh-flow-step active" data-key="try">
+    <div class="fn">try</div>
+    <div class="ft">requests.get(url, timeout=10)</div>
+    <div class="fs">Wrap every API call</div>
+  </div>
+  <div class="sh-flow-arrow">→</div>
+  <div class="sh-flow-step" data-key="rfs">
+    <div class="fn">Decision</div>
+    <div class="ft">raise_for_status()</div>
+    <div class="fs">4xx/5xx → HTTPError</div>
+  </div>
+  <div class="sh-flow-arrow">→</div>
+  <div class="sh-flow-step ok" data-key="success">
+    <div class="fn">2xx</div>
+    <div class="ft">Return data</div>
+    <div class="fs">{"success": True, ...}</div>
+  </div>
+</div>
+
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;">
+  <div class="sh-flow-step err" data-key="conn" style="flex:1;min-width:130px;cursor:pointer;">
+    <div class="fn">ConnectionError</div>
+    <div class="ft">Server unreachable</div>
+    <div class="fs">DNS / WiFi / offline</div>
+  </div>
+  <div class="sh-flow-step err" data-key="http" style="flex:1;min-width:130px;cursor:pointer;">
+    <div class="fn">HTTPError</div>
+    <div class="ft">4xx / 5xx</div>
+    <div class="fs">404 / 500 / 403</div>
+  </div>
+  <div class="sh-flow-step err" data-key="time" style="flex:1;min-width:130px;cursor:pointer;">
+    <div class="fn">Timeout</div>
+    <div class="ft">Server too slow</div>
+    <div class="fs">No response in 10s</div>
+  </div>
+</div>
+
+<div class="sh-detail" id="panel2">
+  <div class="meta" id="p2-meta">error handling pattern</div>
+  <div class="body" id="p2-body">Wrap every API call. Always set timeout. Validate HTTP status before parsing JSON.</div>
+  <pre class="sh-code" id="p2-code">import requests.exceptions
+
+def fetch(url):
+    try:
+        r = requests.get(url, timeout=10)
+        r.raise_for_status()
+        return {"success": True, "data": r.json()}
+    except requests.exceptions.ConnectionError:
+        return {"success": False, "error": "Connection failed"}
+    except requests.exceptions.Timeout:
+        return {"success": False, "error": "Request timed out"}
+    except requests.exceptions.HTTPError as e:
+        return {"success": False, "error": f"HTTP error: {e}"}</pre>
+</div>
+
+<div class="sh-callout warn">
+  <strong>⚡ Order:</strong> <code>raise_for_status()</code> BEFORE <code>.json()</code>. A 500 often returns HTML — <code>.json()</code> on HTML crashes with ValueError.
+</div>
+
+<table class="sh-table">
+  <tr><th>Exception</th><th>Fires when</th><th>Cause</th></tr>
+  <tr><td>ConnectionError</td><td>Server unreachable</td><td>WiFi down, DNS failure, server offline</td></tr>
+  <tr><td>Timeout</td><td>No response in N seconds</td><td>Slow server, no timeout= set</td></tr>
+  <tr><td>HTTPError</td><td>4xx/5xx status</td><td>404, 500, 403, 429</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- GEMINI -->
+<!-- ============================================================ -->
+<h2>3. Gemini Without the SDK</h2>
+<p>The Vertex AI SDK does exactly this HTTP call under the hood. Click each step to see what it does.</p>
+
+<div class="sh-flow" id="flow3">
+  <div class="sh-flow-step active" data-key="gurl">
+    <div class="fn">Step 1</div>
+    <div class="ft">Build URL</div>
+    <div class="fs">/v1beta/models/gemini-2.0-flash:generateContent?key=...</div>
+  </div>
+  <div class="sh-flow-arrow">→</div>
+  <div class="sh-flow-step" data-key="ghead">
+    <div class="fn">Step 2</div>
+    <div class="ft">Set Headers</div>
+    <div class="fs">Content-Type: application/json</div>
+  </div>
+  <div class="sh-flow-arrow">→</div>
+  <div class="sh-flow-step" data-key="gbody">
+    <div class="fn">Step 3</div>
+    <div class="ft">Build Body</div>
+    <div class="fs">contents → parts → text</div>
+  </div>
+  <div class="sh-flow-arrow">→</div>
+  <div class="sh-flow-step" data-key="gpost">
+    <div class="fn">Request</div>
+    <div class="ft">POST → Gemini</div>
+    <div class="fs">requests.post(url, headers, json=data, timeout=30)</div>
+  </div>
+  <div class="sh-flow-arrow">→</div>
+  <div class="sh-flow-step ok" data-key="gparse">
+    <div class="fn">Step 4</div>
+    <div class="ft">Parse Response</div>
+    <div class="fs">candidates → content → parts → text</div>
+  </div>
+</div>
+
+<div class="sh-detail" id="panel3">
+  <div class="meta" id="p3-meta">Step 4: Parse Response</div>
+  <div class="body" id="p3-body">Path to the answer: <strong>candidates[0] → content → parts[0] → text</strong></div>
+  <pre class="sh-code">result = response.json()
+answer = result["candidates"][0]["content"]["parts"][0]["text"]</pre>
+</div>
+
+<!-- ============================================================ -->
+<!-- GEMINI RESPONSE VISUAL -->
+<!-- ============================================================ -->
+<h2 style="margin-top:12px;">Gemini Response — Visual Breakdown</h2>
+<p>The Gemini API returns nested JSON. Here's exactly what that <code>answer</code> line accesses, one level at a time.</p>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:16px 0;">
+  <!-- Left: Visual tree -->
+  <div style="border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;background:var(--card);font-family:var(--mono);font-size:13px;line-height:1.7;overflow-x:auto;">
+    <div style="color:var(--muted-foreground);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;font-weight:600;font-family:var(--sans);">📦 Gemini Response JSON</div>
+    <div style="padding-left:0;">{</div>
+    <div style="padding-left:16px;color:#7c3aed;font-weight:600;">"candidates"<span style="color:var(--foreground);">: [</span></div>
+    <div style="padding-left:32px;">{</div>
+    <div style="padding-left:48px;display:flex;align-items:center;">
+      <span style="background:#2563eb;color:#fff;border-radius:3px;padding:0 5px;font-size:10px;margin-right:6px;">← pick [0]</span>
+      <span style="color:#059669;font-weight:600;">"content"</span><span>: {</span>
+    </div>
+    <div style="padding-left:64px;display:flex;align-items:center;">
+      <span style="background:#d97706;color:#fff;border-radius:3px;padding:0 5px;font-size:10px;margin-right:6px;">← here</span>
+      <span style="color:#059669;font-weight:600;">"parts"</span><span>: [</span>
+    </div>
+    <div style="padding-left:80px;">{</div>
+    <div style="padding-left:96px;display:flex;align-items:center;">
+      <span style="background:#059669;color:#fff;border-radius:3px;padding:0 5px;font-size:10px;margin-right:6px;">← THIS</span>
+      <span style="color:#dc2626;font-weight:600;">"text"</span><span>: <span style="color:#059669;">"RAG is a technique..."</span></span>
+    </div>
+    <div style="padding-left:80px;">}</div>
+    <div style="padding-left:64px;">]</div>
+    <div style="padding-left:48px;">}</div>
+    <div style="padding-left:32px;">}</div>
+    <div style="padding-left:16px;">]</div>
+    <div>}</div>
+  </div>
+
+  <!-- Right: Step-by-step table -->
+  <div style="border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;background:var(--card);">
+    <div style="color:var(--muted-foreground);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;font-weight:600;font-family:var(--sans);">🔑 Step by Step</div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <tr>
+        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted-foreground);">Expression</th>
+        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted-foreground);">Returns</th>
+        <th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted-foreground);">Why</th>
+      </tr>
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;color:#7c3aed;">result["candidates"]</td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);">A list <span style="color:var(--muted-foreground);">[...]</span></td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted-foreground);">Gemini can return multiple possible answers</td>
+      </tr>
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;color:#2563eb;">[0]</td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);">First candidate <span style="color:var(--muted-foreground);">{...}</span></td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted-foreground);">Pick the first (usually only) response</td>
+      </tr>
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;color:#059669;">["content"]</td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);">Content object <span style="color:var(--muted-foreground);">{...}</span></td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted-foreground);">Wraps the message (role + parts)</td>
+      </tr>
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;color:#d97706;">["parts"]</td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);">Parts list <span style="color:var(--muted-foreground);">[...]</span></td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted-foreground);">Can hold text + images + function calls</td>
+      </tr>
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;color:#2563eb;">[0]</td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);">First part <span style="color:var(--muted-foreground);">{...}</span></td>
+        <td style="padding:8px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted-foreground);">For text-only, the first part IS the text</td>
+      </tr>
+      <tr style="background:var(--muted);">
+        <td style="padding:8px;font-family:var(--mono);font-size:12px;color:#dc2626;font-weight:600;">["text"]</td>
+        <td style="padding:8px;"><span style="background:#059669;color:#fff;border-radius:3px;padding:1px 5px;font-size:11px;">THE ANSWER</span></td>
+        <td style="padding:8px;font-size:12px;color:var(--muted-foreground);">The actual generated text you asked for</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<!-- One-liner summary -->
+<div style="border:1px solid var(--border);border-radius:var(--radius);border-left:3px solid #059669;padding:1rem 1.25rem;margin:14px 0;font-size:14px;background:var(--card);">
+  <strong>💡 In one line:</strong> <code style="font-size:13px;">answer = result["candidates"][0]["content"]["parts"][0]["text"]</code>
+  drills into <strong>list → pick → object → list → pick → text</strong> to extract the model's response from the nested JSON.
+</div>
+
+<!-- Common mistakes for response parsing -->
+<h3>Common Mistakes</h3>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin:14px 0;">
+
+  <div style="border:1px solid var(--border);border-radius:var(--radius);padding:1rem;background:var(--card);">
+    <h4 style="font-size:14px;font-weight:600;margin-bottom:4px;color:var(--destructive);">🔥 Direct .json() crash</h4>
+    <p style="font-size:13px;color:var(--muted-foreground);margin:0;max-width:none;">A 500 error page is HTML, not JSON. Call <code style="font-size:12px;">raise_for_status()</code> FIRST.</p>
+  </div>
+
+  <div style="border:1px solid var(--border);border-radius:var(--radius);padding:1rem;background:var(--card);">
+    <h4 style="font-size:14px;font-weight:600;margin-bottom:4px;color:var(--destructive);">🔥 Missing safety check</h4>
+    <p style="font-size:13px;color:var(--muted-foreground);margin:0;max-width:none;">If the prompt is blocked, <code style="font-size:12px;">candidates</code> may be empty. Always check <code style="font-size:12px;">if result.get("candidates")</code> first.</p>
+  </div>
+
+  <div style="border:1px solid var(--border);border-radius:var(--radius);padding:1rem;background:var(--card);">
+    <h4 style="font-size:14px;font-weight:600;margin-bottom:4px;color:var(--destructive);">🔥 Forgetting [0]</h4>
+    <p style="font-size:13px;color:var(--muted-foreground);margin:0;max-width:none;"><code style="font-size:12px;">candidates</code> is a LIST. You NEED <code style="font-size:12px;">[0]</code> to get the first one. Same for <code style="font-size:12px;">parts</code>.</p>
+  </div>
+
+</div>
+
+<!-- Gemini Live Builder -->
+<div class="sh-playground">
+  <div class="sh-card-header">
+    <div class="sh-card-title">🎮 Live Gemini Request Builder</div>
+    <div class="sh-card-desc">Type a prompt and API key — see the full HTTP request assemble in real time</div>
+  </div>
+  <div style="margin-top:12px;">
+    <div class="sh-pg-row">
+      <label>Prompt</label>
+      <input class="sh-input" id="gem-prompt" value="Explain RAG in one sentence">
+    </div>
+    <div class="sh-pg-row">
+      <label>Key</label>
+      <input class="sh-input" id="gem-key" placeholder="AIza...">
+    </div>
+  </div>
+  <div class="sh-pane" style="margin-top:12px;min-height:120px;">
+    <div class="pn">📤 Full HTTP Request</div>
+    <div id="gem-http"></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- COMMON MISTAKES -->
+<!-- ============================================================ -->
+<h2>4. Common Mistakes</h2>
+<div class="sh-card-grid">
+  <div class="sh-card"><h4>🔥 No timeout</h4><p>Without <code>timeout=10</code>, a hanging server freezes your app forever.</p></div>
+  <div class="sh-card"><h4>🔥 .json() before raise_for_status()</h4><p>500 returns HTML — .json() crashes with ValueError.</p></div>
+  <div class="sh-card"><h4>🔥 data= instead of json=</h4><p>Form-encoded ≠ JSON. Use <code>json=</code> for REST APIs.</p></div>
+  <div class="sh-card"><h4>🔥 Bare except:</h4><p>Catches everything including KeyboardInterrupt.</p></div>
+  <div class="sh-card"><h4>🔥 Hardcoded keys</h4><p>Use <code>os.environ.get()</code>, never <code>"AIza..."</code> in source.</p></div>
+  <div class="sh-card"><h4>🔥 Ignoring status_code</h4><p>A 404 returns valid JSON too — but it's an error.</p></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- INTERVIEW ANSWERS -->
+<!-- ============================================================ -->
+<h2>5. Interview Answers</h2>
+<div class="sh-card-grid">
+  <div class="sh-card"><h4>🎯 30-second</h4><p>"I built API clients with Python requests — GET to fetch, POST to create, error handling with timeout/connection/HTTP checks, then called Gemini 2.0 Flash directly."</p></div>
+  <div class="sh-card"><h4>🎯 90-second STAR</h4><p><strong>S/T:</strong> Building API client. <strong>A:</strong> Called .json() before raise_for_status(). 500 → HTML → ValueError. <strong>R:</strong> Reordered, added specific catches. <strong>I:</strong> From "Expecting value" to "HTTP error: 500".</p></div>
+  <div class="sh-card"><h4>🎯 3-minute</h4><p>"Calling Gemini without the SDK reveals the HTTP layer. URL construction, API key as query param, body formatting, response parsing. When the SDK breaks, you know what it's doing."</p></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- QUICK REFERENCE -->
+<!-- ============================================================ -->
+<h2>6. Quick Reference</h2>
+<table class="sh-table">
+  <tr><th>Action</th><th>Code</th><th>Status</th></tr>
+  <tr><td>GET</td><td><code>requests.get(url, timeout=10)</code></td><td>200 OK</td></tr>
+  <tr><td>POST</td><td><code>requests.post(url, json={...}, timeout=10)</code></td><td>201 Created</td></tr>
+  <tr><td>Error handling</td><td><code>try/except requests.exceptions.*</code></td><td>graceful</td></tr>
+  <tr><td>Gemini URL</td><td><code>/v1beta/models/{model}:generateContent?key={key}</code></td><td>200 OK</td></tr>
+  <tr><td>Gemini body</td><td><code>{"contents":[{"parts":[{"text":prompt}]}]}</code></td><td>—</td></tr>
+  <tr><td>Gemini response</td><td><code>result["candidates"][0]["content"]["parts"][0]["text"]</code></td><td>—</td></tr>
+</table>
+
+</div>
+
+<script>
+// ===== DATA =====
+const D1 = {
+  "g-client": {meta:"HTTP GET · idempotent",body:"Fetches post #5 from JSONPlaceholder. No request body — just the URL. Same URL always returns the same result.",code:'response = requests.get("https://jsonplaceholder.typicode.com/posts/5")'},
+  "g-server": {meta:"Server · JSONPlaceholder",body:"The server looks up post #5 in its database and returns it as JSON. Nothing is modified — pure read operation.",code:"# Server:\n# 1. Extract post_id=5 from URL\n# 2. SELECT * FROM posts WHERE id=5\n# 3. Return 200 + JSON"},
+  "g-resp": {meta:"200 OK",body:'Success! Server returns {userId, id, title, body}. Clean data for the caller.',code:'{\n  "userId": 1,\n  "id": 5,\n  "title": "nesciunt quas odio",\n  "body": "repudiandae veniam..."\n}'},
+  "p-client": {meta:"HTTP POST · creates",body:"Sends a POST with JSON body. Each call creates something NEW on the server. json= serializes the dict and sets Content-Type.",code:'response = requests.post(\n  "https://jsonplaceholder.typicode.com/posts",\n  json={"title": "My Title", "body": "Content", "userId": 1}\n)'},
+  "p-server": {meta:"Server · creates resource",body:"Server reads JSON body, inserts a new row, generates ID 101, returns the full created resource with its new ID.",code:"# Server:\n# 1. Parse JSON body\n# 2. INSERT INTO posts\n# 3. Auto-generate id=101\n# 4. Return 201 + resource"},
+  "p-resp": {meta:"201 Created",body:'Status 201 means resource created. Response includes the full resource with "id": 101 — proof of creation.',code:'{\n  "title": "My Title",\n  "body": "Content",\n  "userId": 1,\n  "id": 101\n}'}
+};
+
+const D2 = {
+  "try": {meta:"try/except pattern",body:"Wrap every API call in try/except. Always set timeout. Validate HTTP status with raise_for_status() BEFORE parsing JSON.",code:'import requests.exceptions\n\ndef fetch(url):\n    try:\n        r = requests.get(url, timeout=10)\n        r.raise_for_status()\n        return {"success": True, "data": r.json()}\n    except requests.exceptions.ConnectionError:\n        return {"success": False, "error": "Connection failed"}\n    except requests.exceptions.Timeout:\n        return {"success": False, "error": "Request timed out"}\n    except requests.exceptions.HTTPError as e:\n        return {"success": False, "error": f"HTTP error: {e}"}'},
+  "rfs": {meta:"raise_for_status() gate",body:"If status is 200-399, passes. If 4xx/5xx, raises HTTPError. Call this BEFORE .json() — a 500 error page is HTML, not JSON.",code:'response = requests.get(url, timeout=10)\nresponse.raise_for_status()  # ⭐ gate\ndata = response.json()'},
+  "success": {meta:"✅ 2xx success",body:"Status is 2xx. Parse JSON and return with success flag. Caller can trust this response.",code:'return {"success": True, "data": response.json()}'},
+  "conn": {meta:"ConnectionError",body:"The request never reached the server. No TCP connection. No HTTP status code because no HTTP response was received. Common: WiFi down, DNS failure, server offline, wrong hostname.",code:'except requests.exceptions.ConnectionError:\n    return {"success": False, "error": "Connection failed"}'},
+  "http": {meta:"HTTPError",body:"The request reached the server. The server responded — but with an error. Common codes: 400 (bad request), 401 (unauthorized), 404 (not found), 429 (rate limited), 500 (server error).",code:'except requests.exceptions.HTTPError as e:\n    return {"success": False, "error": f"HTTP error: {e}"}'},
+  "time": {meta:"Timeout",body:"TCP connection established, but server didn't respond within the timeout window. Without timeout=, your app hangs forever waiting for a response that may never come.",code:'except requests.exceptions.Timeout:\n    return {"success": False, "error": "Request timed out"}'}
+};
+
+const D3 = {
+  "gurl": {meta:"Step 1: Build URL",body:"URL: base + /v1beta/models/{model}:generateContent?key=API_KEY. The API key goes in the URL as a query parameter, not in HTTP headers.",code:'url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"'},
+  "ghead": {meta:"Step 2: Set Headers",body:"Only one header needed: Content-Type. The API key is already in the URL. Some APIs use Authorization: Bearer — Gemini uses the simpler ?key= approach.",code:'headers = {"Content-Type": "application/json"}'},
+  "gbody": {meta:"Step 3: Build Body",body:"Gemini requires specific nesting: contents array → each content has parts array → each part has text. This structure supports multi-turn conversations and multimodal inputs.",code:'data = {\n  "contents": [\n    {"parts": [{"text": prompt}]}\n  ]\n}'},
+  "gpost": {meta:"POST to Gemini",body:"The actual HTTP POST. timeout=30 is important — LLMs are slow and can take 10-20s for long responses. Without timeout, a hanging LLM call freezes your app.",code:'response = requests.post(\n  url, headers=headers, json=data, timeout=30\n)'},
+  "gparse": {meta:"Step 4: Parse Response",body:"Path to the answer: candidates[0] → content → parts[0] → text. This nested structure supports multiple candidates and multimodal responses.",code:'result = response.json()\nanswer = result["candidates"][0]["content"]["parts"][0]["text"]\n#                  └─list──┘  └─obj──┘  └─list─┘  └─obj───'}
+};
+
+// ===== FLOW STEP SETUP =====
+function setupFlows() {
+  // Flow 1 GET
+  document.querySelectorAll('#flow1 .sh-flow-step').forEach(el => {
+    el.addEventListener('click', function() {
+      setActive(this, '#flow1');
+      showDetail('panel1', D1[this.dataset.key]);
+    });
+  });
+  document.querySelector('#flow1 .sh-flow-step').classList.add('active');
+  showDetail('panel1', D1['g-client']);
+
+  // Flow 1b POST
+  document.querySelectorAll('#flow1b .sh-flow-step').forEach(el => {
+    el.addEventListener('click', function() {
+      setActive(this, '#flow1b');
+      showDetail('panel1', D1[this.dataset.key]);
+    });
+  });
+
+  // Flow 2 Errors
+  document.querySelectorAll('#flow2 .sh-flow-step').forEach(el => {
+    el.addEventListener('click', function() {
+      setActive(this, '#flow2');
+      showDetail('panel2', D2[this.dataset.key]);
+    });
+  });
+  document.querySelector('#flow2 .sh-flow-step').classList.add('active');
+  showDetail('panel2', D2['try']);
+
+  // Error cards
+  document.querySelectorAll('[data-key="conn"],[data-key="http"],[data-key="time"]').forEach(el => {
+    el.addEventListener('click', function() {
+      document.querySelectorAll('[data-key="conn"],[data-key="http"],[data-key="time"]').forEach(s => s.classList.remove('active'));
+      this.classList.add('active');
+      showDetail('panel2', D2[this.dataset.key]);
+    });
+  });
+
+  // Flow 3 Gemini
+  document.querySelectorAll('#flow3 .sh-flow-step').forEach(el => {
+    el.addEventListener('click', function() {
+      setActive(this, '#flow3');
+      showDetail('panel3', D3[this.dataset.key]);
+    });
+  });
+  document.querySelector('#flow3 .sh-flow-step').classList.add('active');
+  showDetail('panel3', D3['gurl']);
+}
+
+function setActive(el, container) {
+  document.querySelectorAll(container + ' .sh-flow-step').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function showDetail(panelId, data) {
+  if (!data) return;
+  var p = document.getElementById(panelId);
+  p.querySelector('.meta').textContent = data.meta;
+  p.querySelector('.body').innerHTML = data.body;
+  p.querySelector('.sh-code').textContent = data.code;
+  p.style.animation = 'none';
+  p.offsetHeight;
+  p.style.animation = 'sh-fade-in 0.2s ease-out';
+}
+
+// ===== PLAYGROUND =====
+var pgMethod = 'GET';
+var errors = {timeout:false, conn:false, http:false};
+
+function setupPlayground() {
+  doc('btn-get').onclick = function(){ setMethod('GET'); };
+  doc('btn-post').onclick = function(){ setMethod('POST'); };
+  doc('btn-timeout').onclick = function(){ toggleErr('timeout'); };
+  doc('btn-conn').onclick = function(){ toggleErr('conn'); };
+  doc('btn-http').onclick = function(){ toggleErr('http'); };
+  doc('pg-url').oninput = updatePg;
+  doc('pg-title').oninput = updatePg;
+  doc('pg-body-text').oninput = updatePg;
+  doc('pg-user').oninput = function(){ doc('pg-user-val').textContent = this.value; updatePg(); };
+  updatePg();
+}
+
+function doc(id){ return document.getElementById(id); }
+
+function setMethod(m) {
+  pgMethod = m;
+  doc('btn-get').className = 'sh-btn' + (m==='GET' ? ' sh-btn-active-get' : ' sh-btn-outline');
+  doc('btn-post').className = 'sh-btn' + (m==='POST' ? ' sh-btn-active-post' : ' sh-btn-outline');
+  doc('pg-body-area').style.display = m==='POST' ? 'block' : 'none';
+  doc('method-badge').textContent = m==='GET' ? 'Body: none' : 'Body: JSON';
+  updatePg();
+}
+
+function toggleErr(type) {
+  errors[type] = !errors[type];
+  doc('btn-'+type).className = 'sh-btn sh-btn-sm ' + (errors[type] ? 'sh-btn-destructive' : 'sh-btn-outline');
+  updatePg();
+}
+
+function updatePg() {
+  var url = doc('pg-url').value || '/';
+  var method = pgMethod;
+  var title = doc('pg-title')?.value || '';
+  var bodyT = doc('pg-body-text')?.value || '';
+  var user = doc('pg-user')?.value || '1';
+
+  var errList = [];
+  if(errors.timeout) errList.push('Timeout');
+  if(errors.conn) errList.push('ConnectionError');
+  if(errors.http) errList.push('HTTPError');
+
+  // Request pane
+  var host = url.split('://')[1]?.split('/')[0] || 'api.example.com';
+  var path = '/' + (url.split('://')[1]?.split('/').slice(1).join('/') || '');
+  var req = '<div class="http-r">' + method + ' ' + path + ' HTTP/1.1</div>';
+  req += '<div class="http-h">Host: ' + host + '</div>';
+  if(method === 'POST') {
+    req += '<div class="http-h">Content-Type: application/json</div>';
+    req += '<div style="margin-top:4px;"><span class="http-b">{</span></div>';
+    req += '<div class="http-i"><span class="http-b">"title": "' + title + '",</span></div>';
+    req += '<div class="http-i"><span class="http-b">"body": "' + bodyT + '",</span></div>';
+    req += '<div class="http-i"><span class="http-b">"userId": ' + user + '</span></div>';
+    req += '<div><span class="http-b">}</span></div>';
+  }
+  doc('pg-req').innerHTML = req;
+
+  // Code pane
+  var code = '<span class="cm"># GET vs POST demo</span>\n';
+  code += '<span class="kw">import</span> requests\n';
+  code += '<span class="kw">import</span> requests.exceptions\n\n';
+  code += '<span class="kw">def</span> <span class="fn">fetch_data</span>():';
+  code += '\n    url = <span class="st">"' + url + '"</span>';
+  if(method === 'POST') {
+    var ds = '{"title": "' + title + '", "body": "' + bodyT + '", "userId": ' + user + '}';
+    code += '\n    data = <span class="st">' + ds.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</span>';
+  }
+  code += '\n    <span class="kw">try</span>:';
+  code += '\n        r = requests.' + method.toLowerCase() + '(url' + (method==='POST' ? ', json=data' : '') + ', timeout=10)';
+  code += '\n        r.raise_for_status()\n        <span class="kw">return</span> {"success": <span class="kw">True</span>, "data": r.json()}';
+  if(errors.conn) {
+    code += '\n    <span class="kw">except</span> requests.exceptions.ConnectionError:';
+    code += '\n        <span class="kw">return</span> {"success": <span class="kw">False</span>, "error": <span class="st">"Connection failed"</span>}';
+  }
+  if(errors.time) {
+    code += '\n    <span class="kw">except</span> requests.exceptions.Timeout:';
+    code += '\n        <span class="kw">return</span> {"success": <span class="kw">False</span>, "error": <span class="st">"Request timed out"</span>}';
+  }
+  code += '\n    <span class="kw">except</span> requests.exceptions.HTTPError <span class="kw">as</span> e:';
+  code += '\n        <span class="kw">return</span> {"success": <span class="kw">False</span>, "error": <span class="st">f"HTTP error: {e}"</span>}';
+  doc('pg-code').innerHTML = code;
+
+  // Status
+  var status = doc('pg-status');
+  if(errList.length > 0) {
+    status.className = 'sh-status err';
+    status.innerHTML = '<span>⚠️</span><span>Error simulation on: <strong>' + errList.join(', ') + '</strong> — the except blocks above handle these</span>';
+  } else if(method === 'POST') {
+    status.className = 'sh-status ok';
+    status.innerHTML = '<span>✅</span><span>POST mode — JSON body sent with request. Use <strong>json=</strong> not data=</span>';
+  } else {
+    status.className = 'sh-status ok';
+    status.innerHTML = '<span>✅</span><span>GET mode — no body. Same URL = same result (idempotent)</span>';
+  }
+}
+
+// ===== GEMINI LIVE =====
+doc('gem-prompt').oninput = updateGem;
+doc('gem-key').oninput = updateGem;
+
+function updateGem() {
+  var prompt = doc('gem-prompt').value || '[empty]';
+  var key = doc('gem-key').value || 'YOUR_KEY';
+  var h = '<div class="http-r">POST /v1beta/models/gemini-2.0-flash:generateContent?key=' + esc(key) + '</div>';
+  h += '<div class="http-h">Content-Type: application/json</div>';
+  h += '<div style="margin-top:4px;color:var(--muted-foreground);">{</div>';
+  h += '<div class="http-i" style="color:var(--muted-foreground);">"contents": [</div>';
+  h += '<div class="http-i2" style="color:var(--muted-foreground);">{</div>';
+  h += '<div class="http-i3" style="color:var(--muted-foreground);">"parts": [</div>';
+  h += '<div class="http-i3 http-b">{ "text": "' + esc(prompt) + '" }</div>';
+  h += '<div class="http-i3" style="color:var(--muted-foreground);">]</div>';
+  h += '<div class="http-i2" style="color:var(--muted-foreground);">}</div>';
+  h += '<div class="http-i" style="color:var(--muted-foreground);">]</div>';
+  h += '<div style="color:var(--muted-foreground);">}</div>';
+  doc('gem-http').innerHTML = h;
+}
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ===== INIT =====
+setupFlows();
+setupPlayground();
+updateGem();
+</script>
+
+</body>
+</html>
