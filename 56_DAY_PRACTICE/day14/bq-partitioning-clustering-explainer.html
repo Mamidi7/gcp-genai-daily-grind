@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BigQuery Partitioning & Clustering — Interview Explainer</title>
+<style>
+:root {
+  --bg: #fbf7f2; --surface: #ffffff; --fg: #201e1a; --muted: #7a766e;
+  --border: #e3ddd4; --accent: #bf5b3a; --accent-dim: rgba(191,91,58,0.08);
+  --good: #528c55; --warn: #c4903a; --info: #4a7c9e; --card-bg: #ffffff;
+  --serif: "Crimson Pro", "Instrument Serif", ui-serif, Georgia, serif;
+  --sans: "DM Sans", system-ui, -apple-system, sans-serif;
+  --mono: "Fira Code", "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161310; --surface: #1f1b17; --fg: #e2ddd6; --muted: #928c83;
+    --border: #353027; --accent: #e6825a; --accent-dim: rgba(230,130,90,0.1);
+    --good: #5daF60; --warn: #d4a045; --info: #5d8fad; --card-bg: #1f1b17;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--sans); font-size: 16px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 880px; margin: 0 auto; padding: 0 1.25rem; }
+
+/* Hero */
+.hero { padding: 4rem 0 2.5rem; }
+.hero .eyebrow {
+  font: 600 11px/1 var(--sans); text-transform: uppercase;
+  letter-spacing: .15em; color: var(--accent); margin-bottom: 1.4rem;
+}
+.hero h1 {
+  font: 600 clamp(2rem,5vw,2.6rem)/1.1 var(--serif);
+  letter-spacing: -.02em; margin: 0 0 .5rem; color: var(--fg);
+}
+.hero h1 em { color: var(--accent); font-style: italic; }
+.hero .tldr {
+  font-size: 1.05rem; line-height: 1.5; color: var(--muted);
+  max-width: 38em;
+}
+.hero .tldr strong { color: var(--fg); font-weight: 500; }
+
+/* Section */
+section { margin: 3rem 0; }
+section h2 {
+  font: 600 1.35rem/1.2 var(--serif); margin-bottom: 1.2rem;
+  padding-bottom: .4rem; border-bottom: 2px solid var(--accent-dim);
+}
+section h3 {
+  font: 600 1.05rem/1.2 var(--sans); margin: 1.5rem 0 .6rem;
+  color: var(--fg);
+}
+
+/* Demo playground */
+.playground {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; overflow: hidden;
+}
+.playground-head {
+  background: var(--accent-dim); padding: .8rem 1.2rem;
+  font: 600 13px/1 var(--sans); text-transform: uppercase;
+  letter-spacing: .06em; color: var(--accent);
+}
+.playground-body { padding: 1.2rem; }
+.ctrl-row {
+  display: flex; flex-wrap: wrap; gap: .75rem; align-items: center;
+  margin-bottom: 1rem;
+}
+.ctrl-row label { font: 500 13px/1 var(--sans); color: var(--muted); }
+.ctrl-row input[type="range"] { flex: 1; min-width: 120px; accent-color: var(--accent); }
+.ctrl-row .readout {
+  font: 500 14px var(--mono); color: var(--accent);
+  background: var(--accent-dim); padding: .2em .6em; border-radius: 3px;
+  min-width: 2.8rem; text-align: center;
+}
+.ctrl-row .tag {
+  display: inline-block; font: 10px/1 var(--sans); text-transform: uppercase;
+  letter-spacing: .08em; padding: .3em .6em; border-radius: 3px;
+  font-weight: 600;
+}
+.tag-cost { background: var(--warn); color: #fff; }
+.tag-speed { background: var(--good); color: #fff; }
+.tag-prune { background: var(--info); color: #fff; }
+
+/* Output area: two panes */
+.split-pane {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  margin: 1rem 0 .6rem;
+}
+@media (max-width: 640px) { .split-pane { grid-template-columns: 1fr; } }
+.pane {
+  border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+}
+.pane-label {
+  font: 500 11px/1 var(--sans); text-transform: uppercase;
+  letter-spacing: .06em; padding: .4rem .6rem;
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  color: var(--muted);
+}
+.pane-body {
+  font: 13px/1.5 var(--mono); padding: .6rem;
+  min-height: 140px; white-space: pre-wrap; overflow-x: auto;
+}
+.pane-code { font: 13px/1.5 var(--mono); padding: .6rem; white-space: pre; overflow-x: auto; }
+code { font: .88em var(--mono); }
+pre {
+  background: var(--surface); border: 1px solid var(--border);
+  padding: .8rem; border-radius: 4px; overflow-x: auto;
+  font: 13px/1.5 var(--mono); margin: .6rem 0;
+}
+
+/* SVG Diagram */
+.diagram-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; padding: 1rem; margin: 1rem 0;
+}
+.diagram-box svg { width: 100%; height: auto; display: block; }
+.diagram-box .caption {
+  font-size: 13px; color: var(--muted); text-align: center;
+  margin-top: .5rem; font-style: italic;
+}
+.diagram-box .legend {
+  display: flex; gap: 1.5rem; justify-content: center;
+  flex-wrap: wrap; margin-top: .6rem; font: 12px/1 var(--sans);
+}
+.legend-item { display: flex; align-items: center; gap: .3rem; }
+.legend-swatch { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+
+/* Cards */
+.card-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: .75rem; margin: .75rem 0;
+}
+.card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 4px; padding: .8rem 1rem;
+}
+.card h4 { font: 600 14px/1.1 var(--sans); margin-bottom: .3rem; }
+.card p { font-size: 14px; line-height: 1.5; color: var(--muted); }
+.card .badge {
+  display: inline-block; font: 10px/1 var(--sans); text-transform: uppercase;
+  letter-spacing: .06em; padding: .15em .5em; border-radius: 2px;
+  margin-right: .3rem; font-weight: 600;
+}
+
+/* Comparison Table */
+table.compare {
+  width: 100%; border-collapse: collapse; margin: .75rem 0;
+  font-size: 14px;
+}
+table.compare th {
+  font: 600 11px/1 var(--sans); text-transform: uppercase;
+  letter-spacing: .08em; text-align: left; padding: .5rem .6rem;
+  border-bottom: 2px solid var(--border); color: var(--muted);
+}
+table.compare td {
+  padding: .5rem .6rem; border-bottom: 1px solid var(--border);
+  vertical-align: top; line-height: 1.4;
+}
+table.compare tr:hover td { background: var(--accent-dim); }
+
+/* Mistake cards */
+.mistake-card {
+  border-left: 3px solid var(--warn); padding-left: .8rem;
+  margin: .8rem 0;
+}
+.mistake-card h4 { font: 600 14px/1 var(--sans); color: var(--warn); }
+.mistake-card p { font-size: 14px; color: var(--muted); margin-top: .2rem; }
+.mistake-card .fix {
+  display: inline-block; margin-top: .3rem;
+  font: 11px var(--mono); color: var(--good);
+  background: rgba(82,140,85,0.08); padding: .15em .5em; border-radius: 2px;
+}
+
+/* Interview section */
+.interview-section {
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px; padding: 1.2rem; margin: 1.5rem 0;
+}
+.interview-section .depth-label {
+  font: 600 10px/1 var(--sans); text-transform: uppercase;
+  letter-spacing: .12em; color: var(--accent); margin-bottom: .3rem;
+}
+.interview-section h3 { margin-top: 0; font-style: italic; }
+.interview-section p { font-size: 14px; line-height: 1.55; }
+.interview-section .star-box {
+  margin: .5rem 0; padding: .6rem; background: var(--accent-dim);
+  border-radius: 3px; font-size: 13px;
+}
+.interview-section .star-box strong { font-weight: 600; }
+
+/* Status bar */
+.status-bar {
+  padding: .4rem .8rem; border-radius: 3px;
+  font: 13px/1 var(--mono); margin-top: .5rem;
+  background: var(--good); color: #fff;
+  transition: background .3s;
+}
+.status-bar.warn { background: var(--warn); }
+.status-bar.info { background: var(--info); }
+
+/* Footer */
+.footer {
+  text-align: center; padding: 2rem 0; font-size: 12px; color: var(--muted);
+  border-top: 1px solid var(--border); margin-top: 3rem;
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<!-- HERO -->
+<header class="hero">
+  <div class="eyebrow">Interview Explainer · Day 14</div>
+  <h1>BigQuery Partitioning <em>+</em> Clustering</h1>
+  <p class="tldr">
+    Two features that slash query costs and speed up scans — but only when you
+    understand <strong>which column drives pruning</strong> and <strong>when clustering helps</strong>
+    more than partitioning alone.
+  </p>
+</header>
+
+<!-- SECTION 0: INTERACTIVE PLAYGROUND -->
+<section>
+  <h2>Playground: See the cost difference</h2>
+  <p style="color:var(--muted);margin-bottom:.8rem;">
+    Drag the partition count slider. Watch the scanned bytes change.
+  </p>
+
+  <div class="playground">
+    <div class="playground-head">Live Simulator</div>
+    <div class="playground-body">
+      <!-- Row 1: Partition count -->
+      <div class="ctrl-row">
+        <label>Partitions</label>
+        <input type="range" id="partSlider" min="0" max="100" value="30" step="1">
+        <span class="readout" id="partReadout">30</span>
+        <span class="tag tag-cost" id="costTag">$0.12/query</span>
+      </div>
+      <!-- Row 2: Toggles -->
+      <div class="ctrl-row">
+        <label style="display:flex;align-items:center;gap:.3rem;">
+          <input type="checkbox" id="usePart" checked>
+          Partitioning <span class="tag tag-speed" style="margin-left:.3rem;">ON</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:.3rem;">
+          <input type="checkbox" id="useCluster" checked>
+          Clustering <span class="tag tag-prune" style="margin-left:.3rem;">ON</span>
+        </label>
+      </div>
+
+      <!-- Split pane: scanned bytes / SQL -->
+      <div class="split-pane">
+        <div class="pane">
+          <div class="pane-label">Bytes Scanned (per query)</div>
+          <div class="pane-body" id="bytesPane">
+Scanned: 1.2 GB
+Cost:   $0.006
+Pruned: 97.3%
+          </div>
+        </div>
+        <div class="pane">
+          <div class="pane-label">Generated SQL</div>
+          <div class="pane-code" id="sqlPane">SELECT *
+FROM `project.dataset.orders`
+WHERE order_date >= '2025-01-01'
+  AND status = 'shipped'</div>
+        </div>
+      </div>
+
+      <div class="status-bar" id="statusBar">Partition + cluster active — optimal performance</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 1: CORE CONCEPT -->
+<section>
+  <h2>What these do, in one line</h2>
+  <p>
+    <strong>Partitioning</strong> chops a table into date-based slices so queries skip entire
+    irrelevant slices. <strong>Clustering</strong> sorts rows within each slice so block-level
+    pruning works on non-date filters.
+  </p>
+
+  <div class="diagram-box">
+    <svg viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M2,1 L8,5 L2,9" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+        </marker>
+      </defs>
+      <!-- Unpartitioned (left) -->
+      <rect x="20" y="20" width="150" height="40" rx="4" fill="var(--accent-dim)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="95" y="44" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="var(--sans)" font-weight="600">Full-Table Scan</text>
+
+      <rect x="20" y="70" width="150" height="150" rx="3" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
+      <rect x="30" y="80" width="130" height="22" rx="2" fill="#e8e2da"/>
+      <text x="95" y="93" text-anchor="middle" dominant-baseline="central" font-size="10" fill="var(--muted)" font-family="var(--sans)">day 1</text>
+      <rect x="30" y="106" width="130" height="22" rx="2" fill="#e8e2da"/>
+      <text x="95" y="119" text-anchor="middle" dominant-baseline="central" font-size="10" fill="var(--muted)" font-family="var(--sans)">day 2</text>
+      <rect x="30" y="132" width="130" height="22" rx="2" fill="#e8e2da"/>
+      <text x="95" y="145" text-anchor="middle" dominant-baseline="central" font-size="10" fill="var(--muted)" font-family="var(--sans)">day 3</text>
+      <!-- ellipsis -->
+      <text x="95" y="163" text-anchor="middle" dominant-baseline="central" font-size="10" fill="var(--muted)">...</text>
+      <rect x="30" y="172" width="130" height="22" rx="2" fill="#e8e2da"/>
+      <text x="95" y="185" text-anchor="middle" dominant-baseline="central" font-size="10" fill="var(--muted)" font-family="var(--sans)">day N</text>
+
+      <!-- Arrow between -->
+      <text x="220" y="100" text-anchor="middle" dominant-baseline="central" font-size="14" fill="var(--accent)" font-family="var(--serif)">vs</text>
+
+      <!-- Partitioned (right) -->
+      <rect x="280" y="20" width="180" height="40" rx="4" fill="var(--good)" opacity="0.15" stroke="var(--good)" stroke-width="1.5"/>
+      <text x="370" y="44" text-anchor="middle" dominant-baseline="central" font-size="13" font-family="var(--sans)" font-weight="600" fill="var(--good)">Partition Prune</text>
+
+      <rect x="280" y="70" width="180" height="150" rx="3" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
+      <rect x="290" y="80" width="160" height="22" rx="2" fill="var(--good)" opacity="0.2" stroke="var(--good)" stroke-width="1"/>
+      <text x="370" y="93" text-anchor="middle" dominant-baseline="central" font-size="10" fill="var(--good)" font-family="var(--sans)" font-weight="600">2025-04-10 ✓</text>
+      <rect x="290" y="106" width="160" height="22" rx="2" fill="var(--good)" opacity="0.2" stroke="var(--good)" stroke-width="1"/>
+      <text x="370" y="119" text-anchor="middle" dominant-baseline="central" font-size="10" fill="var(--good)" font-family="var(--sans)" font-weight="600">2025-04-11 ✓</text>
+      <rect x="290" y="132" width="160" height="22" rx="2" fill="var(--accent-dim)" stroke="var(--border)" stroke-width="1"/>
+      <text x="370" y="145" text-anchor="middle" dominant-baseline="central" font-size="10" fill="var(--muted)" font-family="var(--sans)">2025-04-12 ✗</text>
+      <rect x="290" y="158" width="160" height="22" rx="2" fill="var(--accent-dim)" stroke="var(--border)" stroke-width="1"/>
+      <text x="370" y="171" text-anchor="middle" dominant-baseline="central" font-size="10" fill="var(--muted)" font-family="var(--sans)">2025-04-13 ✗</text>
+      <!-- filter arrow -->
+      <path d="M 470 95 L 500 95" fill="none" stroke="var(--warn)" stroke-width="2" marker-end="url(#arrow)"/>
+      <text x="490" y="82" text-anchor="middle" dominant-baseline="central" font-size="9" fill="var(--warn)" font-family="var(--sans)">WHERE</text>
+      <text x="490" y="94" text-anchor="middle" dominant-baseline="central" font-size="9" fill="var(--warn)" font-family="var(--mono)">date > '2025-04-11'</text>
+
+      <!-- Clustering inset (bottom right) -->
+      <rect x="540" y="70" width="200" height="150" rx="3" fill="var(--surface)" stroke="var(--info)" stroke-width="1.5" stroke-dasharray="4"/>
+      <text x="640" y="90" text-anchor="middle" dominant-baseline="central" font-size="10" fill="var(--info)" font-family="var(--sans)" font-weight="600">+ Clustering</text>
+      <rect x="550" y="100" width="180" height="22" rx="2" fill="var(--info)" opacity="0.15"/>
+      <text x="640" y="113" text-anchor="middle" dominant-baseline="central" font-size="9" fill="var(--fg)" font-family="var(--sans)">status = 'shipped'</text>
+      <rect x="550" y="126" width="180" height="22" rx="2" fill="var(--info)" opacity="0.15"/>
+      <text x="640" y="139" text-anchor="middle" dominant-baseline="central" font-size="9" fill="var(--fg)" font-family="var(--sans)">status = 'pending'</text>
+      <rect x="550" y="152" width="180" height="22" rx="2" fill="var(--info)" opacity="0.15"/>
+      <text x="640" y="165" text-anchor="middle" dominant-baseline="central" font-size="9" fill="var(--fg)" font-family="var(--sans)">status = 'cancelled'</text>
+      <line x1="740" y1="100" x2="740" y2="195" stroke="var(--border)" stroke-dasharray="3"/>
+      <text x="750" y="150" text-anchor="middle" dominant-baseline="central" font-size="8" fill="var(--muted)" font-family="var(--sans)" transform="rotate(90,750,150)">sorted by status</text>
+    </svg>
+    <div class="caption">
+      Unpartitioned scan reads all rows (left). Partition pruning reads 2 days (center).
+      Clustering further prunes blocks within those 2 days by status (right).
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--good)"></span> Scanned</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--accent-dim);border:1px solid var(--border)"></span> Pruned</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--info)"></span> Cluster-sorted</span>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 2: BLOCK-BY-BLOCK CODE -->
+<section>
+  <h2>Block-by-block: How to use it</h2>
+
+  <h3>Create a partitioned table</h3>
+<pre>CREATE TABLE `project.dataset.orders`
+PARTITION BY DATE(order_ts)         <span style="color:var(--accent)">← partition column</span>
+CLUSTER BY status, region           <span style="color:var(--info)">← sort within partition</span>
+OPTIONS(
+  partition_expiration_days = 90,   <span style="color:var(--good)">← auto-delete old partitions</span>
+  require_partition_filter = true   <span style="color:var(--warn)">← safety: force WHERE on partition</span>
+) AS
+SELECT * FROM raw_orders;</pre>
+
+  <h3>Query that benefits from both</h3>
+<pre>SELECT order_id, amount, status
+FROM `project.dataset.orders`
+WHERE order_ts >= '2025-04-01'      <span style="color:var(--good)">← partition prune: reads 1 day → ~3% of data</span>
+  AND status = 'shipped'             <span style="color:var(--info)">← cluster prune: scans blocks matching 'shipped'</span>
+  AND amount > 100;                  <span style="color:var(--muted)">← no index help: full filter on cluster-pruned set</span></pre>
+
+  <h3>Check how much you scanned</h3>
+<pre><span style="color:var(--muted)">-- Before running: estimate bytes</span>
+SELECT SUM(total_bytes_processed)
+FROM `region-us`.INFORMATION_SCHEMA.JOBS
+WHERE job_id = 'your-job-id';
+
+<span style="color:var(--muted)">-- Better: use the Query Validator in console
+-- Green check = good pruning · Orange = no partition filter</span></pre>
+</section>
+
+<!-- SECTION 3: COMMON MISTAKES -->
+<section>
+  <h2>Common Mistakes</h2>
+
+  <div class="mistake-card">
+    <h4>Partitioning on a non-date column</h4>
+    <p>You can only partition by DATE, TIMESTAMP, DATETIME, INT64 range, or ingestion time.
+       Partitioning by STRING or FLOAT is not supported.</p>
+    <span class="fix">✓ Use DATE(transaction_ts) or ingestion_time-based partitioning</span>
+  </div>
+
+  <div class="mistake-card">
+    <h4>Too many partitions</h4>
+    <p>BigQuery limits tables to 4,000 partitions. Daily partitioning with data older than 10 years
+       will hit this limit. Old data gets rejected.</p>
+    <span class="fix">✓ Use monthly partitioning or set partition_expiration_days</span>
+  </div>
+
+  <div class="mistake-card">
+    <h4>Clustering on high-cardinality columns</h4>
+    <p>Clustering sorts blocks. If a column has too many distinct values (like order_id),
+       each block still contains most values — no pruning benefit.</p>
+    <span class="fix">✓ Cluster on columns with 10–500 distinct values (status, region, category)</span>
+  </div>
+
+  <div class="mistake-card">
+    <h4>Partitioning small tables</h4>
+    <p>Tables under 10 GB get no benefit from partitioning. You pay for metadata ops
+       without meaningful scan reduction.</p>
+    <span class="fix">✓ Only partition tables &gt; 10 GB, or when partition_filter is a safety requirement</span>
+  </div>
+</section>
+
+<!-- SECTION 4: COMPARISON -->
+<section>
+  <h2>Partitioning vs Clustering</h2>
+
+  <table class="compare">
+    <tr><th></th><th>Partitioning</th><th>Clustering</th></tr>
+    <tr><td><strong>What it does</strong></td><td>Splits table into date-based slices</td><td>Sorts rows within each slice</td></tr>
+    <tr><td><strong>Column type</strong></td><td>DATE, TIMESTAMP, INT64 range</td><td>Any type (max 4 columns)</td></tr>
+    <tr><td><strong>Limit</strong></td><td>4,000 partitions max</td><td>No hard limit</td></tr>
+    <tr><td><strong>Cost model</strong></td><td>Metadata ops per partition</td><td>Storage sort cost (free on write)</td></tr>
+    <tr><td><strong>Pruning granularity</strong></td><td>Partition-level (date range)</td><td>Block-level (distinct values)</td></tr>
+    <tr><td><strong>Maintenance</strong></td><td>Auto-expire via partition_expiration_days</td><td>Auto-managed</td></tr>
+    <tr><td><strong>DML impact</strong></td><td>DELETE/UPDATE target specific partitions</td><td>No special DML behavior</td></tr>
+    <tr><td><strong>Best for</strong></td><td>Time-range queries</td><td>Filter + sort queries</td></tr>
+  </table>
+
+  <div class="card-grid" style="margin-top:1rem">
+    <div class="card">
+      <h4><span class="badge" style="background:var(--good);color:#fff">RULE</span> Partition first</h4>
+      <p>Date-based queries get 90%+ pruning with partitioning alone.
+         Add clustering only when you also filter by a non-date column.</p>
+    </div>
+    <div class="card">
+      <h4><span class="badge" style="background:var(--info);color:#fff">RULE</span> Cluster columns: low cardinality</h4>
+      <p>Status (shipped/pending/cancelled), region (US/EU/APAC), category.
+         NOT order_id, user_id, or other high-cardinality fields.</p>
+    </div>
+    <div class="card">
+      <h4><span class="badge" style="background:var(--warn);color:#fff">RULE</span> require_partition_filter = true</h4>
+      <p>Forces every query to specify a partition filter. Prevents accidental
+         full-table scans that cost thousands of dollars.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 5: INTERVIEW ANSWERS -->
+<section>
+  <h2>Interview Answers</h2>
+
+  <div class="interview-section">
+    <div class="depth-label">30-second answer</div>
+    <h3>What are partitioning and clustering in BigQuery?</h3>
+    <p>
+      "Partitioning divides a table into date-based slices so queries only scan
+      relevant time ranges — reducing bytes and cost. Clustering sorts rows within
+      each slice by specified columns so block-level pruning also works on non-date
+      filters. Together they can reduce scanned bytes from 100% to under 2% for
+      typical time-range queries with status filters."
+    </p>
+  </div>
+
+  <div class="interview-section">
+    <div class="depth-label">90-second STAR</div>
+    <h3>Tell me about a time you optimized a slow query</h3>
+    <div class="star-box">
+      <strong>S:</strong> Our nightly analytics pipeline scanned 120 GB per run across 2 years of order data.<br>
+      <strong>T:</strong> The query filtered by order_date and status, but the table had no partitioning or clustering.<br>
+      <strong>A:</strong> I partitioned by DATE(order_ts) (daily) and clustered by status (shipped/pending/cancelled).
+               Set <code>partition_expiration_days = 90</code> and <code>require_partition_filter = true</code> for safety.<br>
+      <strong>R:</strong> Scan dropped from 120 GB to 1.8 GB per run — 98.5% reduction. Query time went from 45s to 4s.
+               Pipeline now runs within the free tier on most days.<br>
+      <strong>I:</strong> I now make partitioning the first question in any table design review.
+    </div>
+    <p>
+      <strong>Key metrics to quote:</strong> 120 GB → 1.8 GB (98.5% reduction). 45s → 4s query time.
+      <code>require_partition_filter</code> as a safety net.
+    </p>
+  </div>
+
+  <div class="interview-section">
+    <div class="depth-label">3-minute technical walkthrough</div>
+    <h3>How does BigQuery storage pruning work under the hood?</h3>
+    <p>
+      BigQuery uses a columnar storage format called Capacitor — similar to Parquet.
+      Data is organized in storage blocks of ~100 MB, each storing metadata about
+      the min/max values of sorted columns within that block.
+    </p>
+    <p>
+      When you run a query, the query planner reads the table's <strong>partition metadata</strong>
+      first — a small table listing all partition boundaries. It eliminates partitions
+      that don't match your WHERE clause. This is partition pruning.
+    </p>
+    <p>
+      Within surviving partitions, the planner reads <strong>cluster metadata</strong> —
+      the min/max of each clustering column per block. If you query WHERE status = 'shipped'
+      and blocks cluster rows by status, blocks whose min/max doesn't include 'shipped'
+      are skipped entirely. This is cluster pruning.
+    </p>
+    <p>
+      The two form a cascade: partition pruning eliminates ~99% of storage at the
+      date level, then cluster pruning eliminates another ~70% of remaining blocks
+      at the filter level. The result: instead of scanning 100 blocks, you scan 1-2.
+    </p>
+    <p>
+      <strong>Key constraints:</strong> Clustering only works on the first 4 columns in
+      cluster order. Clustering efficiency degrades with DML (INSERT/UPDATE/DELETE)
+      because new rows may not be perfectly sorted — automatic re-clustering happens
+      in the background but takes time. For real-time streaming tables, expect
+      temporary cluster degradation.
+    </p>
+  </div>
+</section>
+
+<!-- SECTION 6: GLOSSARY -->
+<section>
+  <h2>Quick Reference</h2>
+  <table class="compare">
+    <tr><th>Term</th><th>Meaning</th></tr>
+    <tr><td>Partition pruning</td><td>Eliminating entire date slices based on WHERE clause</td></tr>
+    <tr><td>Cluster pruning</td><td>Skipping storage blocks whose min/max don't match filter</td></tr>
+    <tr><td>require_partition_filter</td><td>Table option that forces all queries to specify a partition filter</td></tr>
+    <tr><td>partition_expiration_days</td><td>Auto-deletes partitions older than N days</td></tr>
+    <tr><td>Capacitor</td><td>BigQuery's internal columnar storage format (similar to Parquet)</td></tr>
+    <tr><td>Block</td><td>~100 MB storage unit; the granularity of cluster pruning</td></tr>
+    <tr><td>Pruning ratio</td><td>Bytes scanned ÷ total bytes. Lower is better.</td></tr>
+  </table>
+</section>
+
+<footer class="footer">
+  Interview Explainer · GCP-GenAI Prep Day 14 ·
+  <a href="#" style="color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-dim)">Edit on GitHub</a>
+</footer>
+
+</div><!-- /wrap -->
+
+<script>
+(function() {
+  const slider = document.getElementById('partSlider');
+  const readout = document.getElementById('partReadout');
+  const usePart = document.getElementById('usePart');
+  const useCluster = document.getElementById('useCluster');
+  const bytesPane = document.getElementById('bytesPane');
+  const sqlPane = document.getElementById('sqlPane');
+  const statusBar = document.getElementById('statusBar');
+  const costTag = document.getElementById('costTag');
+
+  function totalBytes() {
+    const daysTotal = 365; // 1 year of data
+    let daysScanned;
+    let ratio;
+    const n = parseInt(slider.value, 10);
+    const p = usePart.checked;
+    const c = useCluster.checked;
+
+    if (!p && !c) {
+      // Full table scan
+      daysScanned = daysTotal;
+      ratio = 1.0;
+    } else if (p && !c) {
+      // Partition only: reads only the partitions matching the filter
+      // With daily partitioning and a 30-day range filter
+      const filterDays = Math.max(1, Math.min(n, 90));
+      daysScanned = filterDays;
+      ratio = filterDays / daysTotal;
+    } else if (!p && c) {
+      // Cluster only (no partition) — blocks sorted by status
+      // ~20% of blocks because status has cardinality ~5
+      daysScanned = daysTotal;
+      ratio = 0.2;
+    } else {
+      // Both active
+      const filterDays = Math.max(1, Math.min(n, 30));
+      daysScanned = filterDays;
+      // cluster further prunes by ~70%
+      ratio = (filterDays / daysTotal) * 0.3;
+    }
+
+    const totalGB = daysTotal * 0.35; // ~128 GB total
+    const scannedGB = totalGB * ratio;
+    const prunedPct = (1 - ratio) * 100;
+    const cost = scannedGB * 0.005; // $0.005/GB
+
+    let costLabel;
+    if (cost < 0.005) costLabel = '<$0.01';
+    else costLabel = '$' + cost.toFixed(3);
+
+    return { scannedGB, cost, prunedPct, costLabel, daysScanned };
+  }
+
+  function updateSQL(n, partOn, clusterOn) {
+    let sql = '';
+    if (partOn && clusterOn) {
+      sql = `SELECT order_id, amount, status\nFROM \`project.dataset.orders\`\nWHERE order_ts >= '2025-03-13'\n  AND status = 'shipped'\n  AND amount > 100`;
+    } else if (partOn && !clusterOn) {
+      sql = `SELECT order_id, amount, status\nFROM \`project.dataset.orders\`\nWHERE order_ts >= '2025-03-13'\n  AND amount > 100`;
+    } else if (!partOn && clusterOn) {
+      sql = `SELECT order_id, amount, status\nFROM \`project.dataset.orders\`\nWHERE status = 'shipped'\n  AND amount > 100`;
+    } else {
+      sql = `SELECT order_id, amount, status\nFROM \`project.dataset.orders\`\nWHERE amount > 100`;
+    }
+    return sql;
+  }
+
+  function update() {
+    const n = parseInt(slider.value, 10);
+    readout.textContent = n;
+
+    const { scannedGB, cost, prunedPct, costLabel, daysScanned } = totalBytes();
+    const p = usePart.checked;
+    const c = useCluster.checked;
+
+    let scannedStr, costStr, prunedStr;
+    if (scannedGB >= 1) {
+      scannedStr = scannedGB.toFixed(1) + ' GB';
+    } else {
+      scannedStr = (scannedGB * 1024).toFixed(0) + ' MB';
+    }
+
+    if (cost < 0.005) costStr = '< $0.01';
+    else costStr = '$' + cost.toFixed(3);
+
+    bytesPane.innerHTML = `Scanned: ${scannedStr}\nCost:   ${costStr}\nPruned: ${prunedPct.toFixed(1)}%`;
+    sqlPane.textContent = updateSQL(n, p, c);
+    costTag.textContent = costStr + '/query';
+
+    if (p && c) {
+      statusBar.textContent = 'Partition + cluster active — optimal performance';
+      statusBar.className = 'status-bar';
+    } else if (p && !c) {
+      statusBar.textContent = 'Partition only — good for date range, non-date filters still scan all blocks';
+      statusBar.className = 'status-bar info';
+    } else if (!p && c) {
+      statusBar.textContent = 'Cluster only (no partition) — blocks sorted but no date pruning';
+      statusBar.className = 'status-bar warn';
+    } else {
+      statusBar.textContent = '⚠ Neither active — full table scan on every query (expensive!)';
+      statusBar.className = 'status-bar warn';
+    }
+  }
+
+  slider.addEventListener('input', update);
+  usePart.addEventListener('change', update);
+  useCluster.addEventListener('change', update);
+  update();
+
+  // Keyboard shortcuts for playground
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+      slider.value = Math.min(100, parseInt(slider.value, 10) + 5);
+      update();
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+      slider.value = Math.max(0, parseInt(slider.value, 10) - 5);
+      update();
+    }
+  });
+})();
+</script>
+</body>
+</html>
