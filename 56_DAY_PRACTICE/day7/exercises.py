@@ -63,9 +63,22 @@ def call_gemini(prompt, api_key):
 
     Return the generated text
     """
-    # TODO: Build the request and extract the answer from response
-    # Response format: result['candidates'][0]['content']['parts'][0]['text']
-    pass
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
+
+    headers = {"Content-Type": "application/json"}
+    data = {
+        "contents": [{
+            "parts": [{"text": prompt}]
+        }]
+    }
+
+    response = requests.post(url, headers=headers, json=data, timeout=30)
+
+    if response.status_code != 200:
+        raise Exception(f"API Error: {response.status_code} — {response.text}")
+
+    result = response.json()
+    return result['candidates'][0]['content']['parts'][0]['text']
 
 
 # Exercise 5: Query Parameters
@@ -73,10 +86,11 @@ def call_gemini(prompt, api_key):
 def search_posts(query):
     """
     Search posts containing the query word.
-    Use: https://jsonplaceholder.typicode.com/posts?title={query}
+    Uses full-text search: https://jsonplaceholder.typicode.com/posts?q={query}
     """
-    # TODO: Use params= in requests.get() for query parameters
-    pass
+    params = {"q": query}
+    response = requests.get("https://jsonplaceholder.typicode.com/posts", params=params)
+    return response.json()
 
 
 # Run all completed exercises
@@ -93,3 +107,20 @@ if __name__ == "__main__":
     print("\n=== Exercise 3: Error Handling ===")
     result = fetch_with_error_handling("https://jsonplaceholder.typicode.com/posts/1")
     print(result)
+
+    print("\n=== Exercise 4: Gemini API ===")
+    try:
+        key = os.environ.get("GEMINI_API_KEY", "")
+        if key:
+            gemini_result = call_gemini("Explain RAG in one sentence.", key)
+            print(f"Gemini says: {gemini_result[:100]}...")
+        else:
+            print("Skipped — no GEMINI_API_KEY set. Run: export GEMINI_API_KEY=your_key")
+    except Exception as e:
+        print(f"Gemini call failed: {e}")
+
+    print("\n=== Exercise 5: Query Parameters ===")
+    results = search_posts("qui")
+    print(f"Found {len(results)} posts matching 'qui'")
+    if results:
+        print(f"First result title: {results[0]['title']}")

@@ -67,7 +67,7 @@ def call_gemini(prompt, api_key):
 # Exercise 5: Query Parameters
 def search_posts(query):
     """Search posts containing the query word"""
-    params = {"title": query}
+    params = {"q": query}
     response = requests.get("https://jsonplaceholder.typicode.com/posts", params=params)
     return response.json()
 
