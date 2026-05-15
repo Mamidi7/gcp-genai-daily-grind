@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FastAPI ✕ Gemini — Interview Mastery Notebook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #faf8f5; --paper-2: #f2ede6;
+  --ink: #1a1410; --ink-2: #3d3528;
+  --ink-dim: #8a7e6e; --ink-faint: #b8ad9a;
+  --rule: #dcd0be; --accent: #d94430; --accent2: #c93a26;
+  --green: #409a4e; --blue: #407abb;
+  --yellow: #c09030; --pink: #c0406a;
+  --highlight: #ffe8a0; --highlight-gold: #fdebb3;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+[data-theme="dark"] {
+  --paper: #1b1a18; --paper-2: #242220;
+  --ink: #f0ece9; --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430; --accent: #e8704a; --accent2: #d95a3a;
+  --green: #5bbd6b; --blue: #5b8fbd;
+  --yellow: #d4a84b; --pink: #d96a8a;
+  --highlight: #7a5a3a; --highlight-gold: #8a7040;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65;}
+body{background-image:radial-gradient(circle at 15% 10%,rgba(200,180,140,0.12) 0%,transparent 45%),radial-gradient(circle at 85% 90%,rgba(200,180,140,0.1) 0%,transparent 40%),repeating-linear-gradient(0deg,transparent 0,transparent 28px,rgba(120,100,70,0.03) 28px,rgba(120,100,70,0.03) 29px);min-height:100vh;}
+
+/* Top bar */
+.topbar{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule);padding:10px 0;backdrop-filter:blur(8px);}
+.topbar-inner{max-width:1000px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+.brand{font-family:var(--serif);font-size:18px;font-style:italic;letter-spacing:-.01em;}
+.brand .amp{color:var(--accent);}
+.top-actions{display:flex;align-items:center;gap:10px;}
+#pctTop{font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:.08em;font-weight:600;}
+.topbar button{background:none;border:1px solid var(--rule);cursor:pointer;color:var(--ink-dim);padding:4px;display:flex;align-items:center;line-height:1;flex-shrink:0;}
+.topbar button:hover{color:var(--accent);border-color:var(--accent);}
+
+main{max-width:1000px;margin:0 auto;padding:32px 24px 80px;}
+
+/* Hero */
+.hero{text-align:center;padding:32px 0 24px;margin-bottom:32px;border-bottom:2px solid var(--ink);position:relative;}
+.hero h1{font-family:var(--serif);font-size:clamp(32px,5vw,58px);font-weight:400;line-height:.95;letter-spacing:-.025em;color:var(--ink);}
+.hero h1 .italic{font-style:italic;color:var(--accent);}
+.hero .sub{font-family:var(--serif);font-size:18px;font-style:italic;color:var(--ink-2);margin-top:6px;}
+.cd-grid{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+.cd-card{background:var(--paper-2);border:1px solid var(--ink);padding:10px 18px;min-width:100px;box-shadow:3px 3px 0 var(--ink);}
+.cd-card .num{font-family:var(--serif);font-size:28px;font-style:italic;color:var(--accent);line-height:1.1;}
+.cd-card .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim);}
+
+/* Sections */
+section{margin-bottom:40px;opacity:0;transform:translateY(16px);transition:opacity .5s cubic-bezier(.15,.75,.3,1),transform .5s cubic-bezier(.15,.75,.3,1);}
+section.in{opacity:1;transform:translateY(0);}
+.sec-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:4px;}
+.sec-head input{-webkit-appearance:none;appearance:none;flex-shrink:0;width:18px;height:18px;border:2px solid var(--rule);background:var(--paper);cursor:pointer;margin-top:5px;position:relative;transition:all .2s;}
+.sec-head input:checked{background:var(--green);border-color:var(--green);}
+.sec-head input:checked::after{content:'';position:absolute;width:5px;height:9px;border:solid var(--paper);border-width:0 2px 2px 0;transform:rotate(45deg);top:1px;left:4px;}
+.sec-head input:hover{border-color:var(--ink);}
+.sec-num{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.1em;flex-shrink:0;margin-top:4px;width:20px;text-align:right;}
+.sec-head h2{font-family:var(--serif);font-size:26px;font-weight:400;line-height:1.2;letter-spacing:-.01em;margin:0;}
+.sec-head h2 .underline{text-decoration:underline;text-decoration-style:wavy;text-decoration-color:var(--accent);text-decoration-thickness:1.5px;text-underline-offset:5px;}
+.sec-head+.h2-sub{font-family:var(--serif);font-style:italic;color:var(--ink-dim);font-size:15px;margin:0 0 18px 48px;}
+
+h3{font-family:var(--sans);font-size:16px;font-weight:600;letter-spacing:.02em;margin:18px 0 8px;color:var(--ink);}
+p{margin-bottom:12px;color:var(--ink-2);line-height:1.7;}
+p strong{color:var(--ink);}
+ul,ol{margin:8px 0 14px 18px;color:var(--ink-2);}
+li{margin-bottom:5px;}
+
+/* Concept card */
+.concept-card{background:var(--paper-2);border:1px solid var(--ink);padding:20px;margin:16px 0;box-shadow:3px 3px 0 var(--ink);}
+.concept-card .label{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:2px;}
+.concept-card h4{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--ink);margin-bottom:6px;}
+.concept-card h4 .hl{color:var(--accent);}
+.concept-card .explain{font-size:14px;color:var(--ink-2);margin-bottom:10px;line-height:1.7;}
+.concept-card code{font-family:var(--mono);font-size:13px;background:var(--highlight-gold);padding:1px 5px;border-radius:2px;color:var(--ink);}
+
+/* SVG container */
+.svg-wrap{background:var(--paper);border:1px solid var(--rule);padding:20px;margin:14px 0;overflow-x:auto;}
+.svg-wrap svg{display:block;margin:0 auto;max-width:100%;}
+.svg-caption{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);text-align:center;margin-top:8px;}
+
+/* Code block */
+.code-block{background:var(--paper);border:1px solid var(--rule);padding:16px;margin:12px 0;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.7;white-space:pre;tab-size:2;}
+.code-block .hl{background:var(--highlight-gold);padding:0 3px;}
+.code-block .hl-accent{background:var(--accent);color:var(--paper);padding:0 3px;}
+.code-block .hl-blue{background:var(--blue);color:var(--paper);padding:0 3px;}
+.code-block .hl-green{background:var(--green);color:var(--paper);padding:0 3px;}
+.code-block .cm{color:var(--ink-faint);font-style:italic;}
+
+/* Definition block */
+.def-block{background:var(--paper);border-left:3px solid var(--accent);padding:12px 16px;margin:12px 0;font-size:14px;color:var(--ink-2);}
+.def-block .term{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:2px;}
+.def-block code{font-family:var(--mono);font-size:12px;background:var(--paper-2);padding:1px 4px;}
+
+/* Key points grid */
+.key-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:14px 0;}
+.key-item{background:var(--paper);border:1px solid var(--rule);padding:12px;font-size:13px;color:var(--ink-2);}
+.key-item .key-num{font-family:var(--serif);font-size:20px;font-style:italic;color:var(--accent);line-height:1;}
+.key-item .key-title{font-weight:600;color:var(--ink);margin-bottom:3px;}
+.key-item p{font-size:13px;margin:0;color:var(--ink-dim);}
+.key-item code{font-family:var(--mono);font-size:12px;}
+
+/* Comparison table */
+.comp-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;}
+.comp-table th{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:8px 12px;text-align:left;font-weight:400;}
+.comp-table td{padding:9px 12px;border-bottom:1px solid var(--rule);color:var(--ink-2);vertical-align:top;}
+.comp-table tr:last-child td{border-bottom:none;}
+.comp-table .highlight td{background:var(--highlight-gold);color:var(--ink);}
+
+/* Tag */
+.tag{display:inline-block;font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;margin-right:4px;margin-bottom:3px;border:1px solid var(--ink);color:var(--ink-dim);}
+.tag-blue{border-color:var(--blue);color:var(--blue);}
+.tag-green{border-color:var(--green);color:var(--green);}
+.tag-yellow{border-color:var(--yellow);color:var(--yellow);}
+.tag-red{border-color:var(--accent);color:var(--accent);}
+
+/* Playground */
+.playground{background:var(--paper-2);border:2px solid var(--ink);padding:20px;margin:16px 0;}
+.playground .label{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:4px;}
+.playground .q-btn{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:7px 14px;border:2px solid var(--ink);background:var(--paper);cursor:pointer;color:var(--ink);margin-right:6px;margin-bottom:6px;}
+.playground .q-btn:hover{background:var(--ink);color:var(--paper);}
+.playground .q-btn.primary{border-color:var(--accent);color:var(--accent);}
+.playground .q-btn.primary:hover{background:var(--accent);color:var(--paper);}
+.pg-status{padding:8px 12px;margin:10px 0;font-family:var(--mono);font-size:11px;border:1px solid var(--rule);background:var(--paper);color:var(--ink-dim);}
+.pg-status.ok{background:var(--green);color:var(--paper);border-color:var(--green);}
+.pg-status.busy{background:var(--yellow);color:var(--paper);border-color:var(--yellow);}
+.pg-output{background:var(--paper);border:1px solid var(--rule);padding:14px;font-family:var(--mono);font-size:12px;line-height:1.6;white-space:pre-wrap;display:none;margin-top:8px;color:var(--ink-2);}
+
+/* Quiz */
+.quiz-card{background:var(--paper-2);border:2px solid var(--ink);padding:20px;margin:16px 0;}
+.quiz-header{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:10px;display:flex;justify-content:space-between;}
+.quiz-dots{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px;}
+.quiz-dot{width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;border-radius:50%;border:2px solid var(--rule);background:var(--paper);color:var(--ink-faint);cursor:pointer;transition:all .25s;}
+.quiz-dot.active{border-color:var(--accent);color:var(--accent);font-weight:600;}
+.quiz-dot.correct{background:var(--green);border-color:var(--green);color:var(--paper);}
+.quiz-dot.wrong{background:var(--accent);border-color:var(--accent);color:var(--paper);}
+.quiz-q{font-size:15px;font-weight:500;color:var(--ink);margin-bottom:14px;}
+.quiz-opts{display:flex;flex-direction:column;gap:5px;}
+.q-opt{background:var(--paper);border:1px solid var(--rule);cursor:pointer;font-size:14px;color:var(--ink-2);transition:all .2s;position:relative;}
+.q-opt:hover{border-color:var(--ink);background:var(--paper-2);}
+.q-opt input{display:none;}
+.q-opt .opt-inner{display:flex;align-items:center;padding:9px 12px;gap:8px;width:100%;}
+.q-opt .letter{width:20px;height:20px;border-radius:50%;border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;flex-shrink:0;}
+.q-opt.locked{cursor:default;}
+.q-opt.is-c{border-color:var(--green);}
+.q-opt.is-w{border-color:var(--accent);}
+.q-nav{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:10px;}
+.q-btn{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:7px 14px;border:2px solid var(--ink);background:var(--paper);cursor:pointer;color:var(--ink);}
+.q-btn:hover{background:var(--ink);color:var(--paper);}
+.q-btn:disabled{opacity:.4;cursor:default;background:var(--paper);color:var(--ink-faint);border-color:var(--ink-faint);}
+.q-count{font-family:var(--mono);font-size:10px;color:var(--ink-dim);}
+.quiz-results{display:none;}
+.quiz-results-inner{text-align:center;padding:24px;border:2px solid var(--ink);background:var(--paper-2);margin-bottom:16px;}
+.quiz-score{font-family:var(--serif);font-size:42px;font-style:italic;color:var(--ink);line-height:1;}
+.quiz-score-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);margin-top:4px;}
+.quiz-msg{font-family:var(--serif);font-size:16px;font-style:italic;color:var(--ink-2);margin-top:8px;}
+.quiz-review-entry{padding:10px 14px;border:1px solid var(--rule);background:var(--paper);margin-bottom:8px;}
+.quiz-review-entry .rev-q{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+.quiz-review-entry .rev-detail{font-size:13px;color:var(--ink-dim);}
+
+/* SVG Animations */
+@keyframes pulse-glow{0%,100%{opacity:.7}50%{opacity:1}}
+@keyframes flow-right{0%{stroke-dashoffset:200}100%{stroke-dashoffset:0}}
+@keyframes pop-in{0%{transform:scale(0);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+@keyframes fade-up{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes ping{0%{transform:scale(1);opacity:1}100%{transform:scale(1.5);opacity:0}}
+.svg-anim .pulse{animation:pulse-glow 2s ease-in-out infinite}
+.svg-anim .flow{stroke-dasharray:200;animation:flow-right 2s linear infinite}
+.svg-anim .pop{animation:pop-in .5s cubic-bezier(.15,.75,.3,1) both}
+.svg-anim .fade{animation:fade-up .4s ease both}
+.svg-anim .ping{animation:ping 1.5s ease-out infinite;transform-origin:center}
+
+/* Interactive toggle */
+.int-toggle{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;}
+.int-toggle button{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:6px 14px;border:1px solid var(--rule);background:var(--paper);cursor:pointer;color:var(--ink-dim);transition:all .2s;}
+.int-toggle button.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+.int-toggle button:hover{color:var(--accent);border-color:var(--accent);}
+.int-panel{display:none;}
+.int-panel.active{display:block;}
+.panel-content{padding:14px;background:var(--paper-2);border:1px solid var(--rule);margin-top:8px;font-size:14px;color:var(--ink-2);}
+
+/* Note */
+.note{padding:12px 16px;margin:10px 0;font-size:14px;color:var(--ink-2);background:var(--paper);border:1px solid var(--green);}
+.note-warn{border-color:var(--yellow);}
+.note-accent{border-color:var(--accent);}
+
+/* Exam/Interview tip */
+.interview-tip{background:var(--paper);border:1px solid var(--blue);padding:12px 16px;margin:12px 0;font-size:14px;color:var(--ink-2);}
+.interview-tip .tip-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:2px;}
+.interview-tip strong{color:var(--ink);}
+
+/* STAR block */
+.star-block{background:var(--paper);border-left:3px solid var(--yellow);padding:12px 16px;margin:12px 0;font-size:14px;color:var(--ink-2);}
+.star-block .star-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--yellow);margin-bottom:2px;}
+.star-block strong{color:var(--ink);}
+
+/* Footer */
+footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);flex-wrap:wrap;gap:10px;}
+footer .pn{color:var(--accent);}
+
+/* Responsive */
+@media(max-width:640px){
+  main{padding:20px 14px 60px;}
+  .sec-head h2{font-size:22px;}
+  .sec-head+.h2-sub{margin-left:0;}
+  .sec-num{display:none;}
+  .key-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">FastAPI <span class="amp">✕</span> Gemini <em>Notebook</em></div>
+    <div class="top-actions">
+      <span id="pctTop">0%</span>
+      <button id="darkToggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <h1>FastAPI <span class="italic">✕</span> Gemini</h1>
+  <p class="sub">Interview Mastery Notebook — Architecture, Code, Deployment, Quizzes</p>
+  <div class="cd-grid">
+    <div class="cd-card"><div class="num">3</div><div class="lbl">Endpoints</div></div>
+    <div class="cd-card"><div class="num">⚡</div><div class="lbl">Async</div></div>
+    <div class="cd-card"><div class="num">🔁</div><div class="lbl">Retry</div></div>
+    <div class="cd-card"><div class="num">☁️</div><div class="lbl">Cloud Run</div></div>
+    <div class="cd-card"><div class="num">🎯</div><div class="lbl">Interview</div></div>
+  </div>
+</div>
+
+<!-- ===== 1. ARCHITECTURE ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="1">
+    <span class="sec-num">01</span>
+    <h2><span class="underline">Architecture</span> — FastAPI meets Gemini</h2>
+  </div>
+  <div class="h2-sub">How the app is structured — from HTTP request to Gemini response.</div>
+
+  <div class="concept-card">
+    <div class="label">System Overview</div>
+    <h4>A <span class="hl">FastAPI</span> server that proxies requests to <span class="hl">Vertex AI Gemini</span></h4>
+    <div class="explain">
+      The app has 3 layers: <strong>FastAPI routes</strong> (receive HTTP requests), <strong>Service layer</strong> (calls Gemini via <code>google-cloud-aiplatform</code>), and <strong>Middleware</strong> (logging, CORS, error handling). All I/O is async via <code>asyncio.to_thread()</code>.
+      <br><br>Deployed on <strong>Cloud Run</strong> — scales to zero, HTTPS automatically, managed infra.
+    </div>
+  </div>
+
+  <!-- SVG: Architecture -->
+  <div class="svg-wrap svg-anim">
+    <svg viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg" style="font-family:system-ui,sans-serif;">
+      <rect width="760" height="380" fill="var(--paper)" rx="8"/>
+
+      <text x="380" y="28" text-anchor="middle" fill="var(--ink)" font-size="16" font-weight="600">Request Lifecycle</text>
+
+      <!-- Client -->
+      <rect x="30" y="55" width="140" height="50" rx="6" fill="var(--accent)" opacity=".85"/>
+      <text x="100" y="78" text-anchor="middle" fill="white" font-size="13" font-weight="500">🌐 Client</text>
+      <text x="100" y="94" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="9">Browser / curl / app</text>
+
+      <!-- Cloud Run -->
+      <rect x="220" y="55" width="140" height="50" rx="6" fill="var(--blue)" opacity=".85" class="fade" style="animation-delay:.1s"/>
+      <text x="290" y="78" text-anchor="middle" fill="white" font-size="13" font-weight="500">☁️ Cloud Run</text>
+      <text x="290" y="94" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="9">Managed HTTPS proxy</text>
+
+      <!-- FastAPI -->
+      <rect x="410" y="55" width="140" height="50" rx="6" fill="var(--green)" opacity=".85" class="fade" style="animation-delay:.2s"/>
+      <text x="480" y="78" text-anchor="middle" fill="white" font-size="13" font-weight="500">⚡ FastAPI</text>
+      <text x="480" y="94" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="9">Async routes + Pydantic</text>
+
+      <!-- Gemini -->
+      <rect x="600" y="55" width="130" height="50" rx="6" fill="var(--yellow)" opacity=".85" class="fade" style="animation-delay:.3s"/>
+      <text x="665" y="78" text-anchor="middle" fill="var(--ink)" font-size="13" font-weight="500">🧠 Gemini</text>
+      <text x="665" y="94" text-anchor="middle" fill="var(--ink-2)" font-size="9">Vertex AI / API</text>
+
+      <!-- Arrows top row -->
+      <line x1="170" y1="80" x2="218" y2="80" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5" marker-end="url(#arrow)"/>
+      <line x1="360" y1="80" x2="408" y2="80" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5" marker-end="url(#arrow)"/>
+      <line x1="550" y1="80" x2="598" y2="80" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5" marker-end="url(#arrow)"/>
+
+      <!-- Internal detail: Middleware -->
+      <rect x="310" y="140" width="340" height="36" rx="4" fill="var(--ink-faint)" opacity=".3" class="fade" style="animation-delay:.4s"/>
+      <text x="480" y="162" text-anchor="middle" fill="var(--ink-2)" font-size="11">Middleware: CORS · Logging · Error mapping · Request ID</text>
+
+      <line x1="480" y1="105" x2="480" y2="140" stroke="var(--ink-dim)" stroke-width="1" opacity=".5"/>
+
+      <!-- Endpoints detail -->
+      <rect x="30" y="200" width="160" height="46" rx="6" fill="var(--green)" opacity=".6" class="fade" style="animation-delay:.5s"/>
+      <text x="110" y="221" text-anchor="middle" fill="white" font-size="12" font-weight="500">GET /healthz</text>
+      <text x="110" y="237" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="9">Liveness check</text>
+
+      <rect x="210" y="200" width="160" height="46" rx="6" fill="var(--blue)" opacity=".6" class="fade" style="animation-delay:.6s"/>
+      <text x="290" y="221" text-anchor="middle" fill="white" font-size="12" font-weight="500">GET /readyz</text>
+      <text x="290" y="237" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="9">Gemini connectivity</text>
+
+      <rect x="390" y="200" width="160" height="46" rx="6" fill="var(--accent)" opacity=".6" class="fade" style="animation-delay:.7s"/>
+      <text x="470" y="221" text-anchor="middle" fill="white" font-size="12" font-weight="500">POST /chat</text>
+      <text x="470" y="237" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="9">Proxies to Gemini</text>
+
+      <rect x="570" y="200" width="160" height="46" rx="6" fill="var(--yellow)" opacity=".6" class="fade" style="animation-delay:.8s"/>
+      <text x="650" y="221" text-anchor="middle" fill="var(--ink)" font-size="12" font-weight="500">POST /generate</text>
+      <text x="650" y="237" text-anchor="middle" fill="var(--ink-2)" font-size="9">Custom generation</text>
+
+      <!-- Validation layer -->
+      <rect x="130" y="275" width="500" height="36" rx="4" fill="var(--ink-faint)" opacity=".15" class="fade" style="animation-delay:.9s"/>
+      <text x="380" y="298" text-anchor="middle" fill="var(--ink-2)" font-size="11">Pydantic V2 validation on every endpoint · Structured error responses</text>
+
+      <!-- Retry -->
+      <rect x="180" y="325" width="400" height="30" rx="4" fill="var(--ink-faint)" opacity=".2" class="fade" style="animation-delay:1s"/>
+      <text x="380" y="345" text-anchor="middle" fill="var(--ink-2)" font-size="11">Exponential backoff retry on Gemini API calls (3 attempts)</text>
+    </svg>
+    <div class="svg-caption">Figure: Request Lifecycle — Client → Cloud Run → FastAPI → Gemini</div>
+  </div>
+
+  <div class="key-grid">
+    <div class="key-item"><div class="key-num">⚡</div><div class="key-title">Async First</div><p>All Gemini calls wrapped in <code>asyncio.to_thread()</code>. FastAPI handles concurrent requests without blocking.</p></div>
+    <div class="key-item"><div class="key-num">🔁</div><div class="key-title">Retry Logic</div><p>Exponential backoff: 1s → 2s → 4s. Handles Vertex AI quota errors and transient failures gracefully.</p></div>
+    <div class="key-item"><div class="key-num">✅</div><div class="key-title">Health Probes</div><p><code>/healthz</code> (always 200) + <code>/readyz</code> (checks Gemini) — Cloud Run uses these for rolling updates.</p></div>
+    <div class="key-item"><div class="key-num">📝</div><div class="key-title">Pydantic V2</div><p>Structured input/output with <code>BaseModel</code>. <code>@field_validator</code> over old <code>@validator</code>.</p></div>
+  </div>
+
+  <!-- Interactive toggle: Sync vs Async -->
+  <h3>Sync vs Async — How it works</h3>
+  <div class="int-toggle">
+    <button class="active" onclick="switchIntPanel('sync-async','sync')">Sync (blocking)</button>
+    <button onclick="switchIntPanel('sync-async','asyncp')">Async (non-blocking)</button>
+  </div>
+  <div class="int-panel active" id="sync-async-sync">
+    <div class="panel-content">
+      <strong>Blocking call:</strong> You wait at the counter until the cook finishes your order. If 10 people order, they wait in line. Each waits <em>their full time</em>.<br><br>
+      <code>result = vertex_ai_model.generate(prompt)  # thread blocks here</code><br><br>
+      In FastAPI, a blocking call <strong>blocks the entire event loop</strong> — all other requests queue up. That's why we use <code>asyncio.to_thread()</code>.
+    </div>
+  </div>
+  <div class="int-panel" id="sync-async-asyncp">
+    <div class="panel-content">
+      <strong>Non-blocking call:</strong> You take a number, sit down, and get notified when your order is ready. Meanwhile, 10 other people are also being served.<br><br>
+      <code>result = await asyncio.to_thread(vertex_ai_model.generate, prompt)</code><br><br>
+      <code>to_thread()</code> runs the blocking call in a <strong>separate thread</strong>, freeing the event loop to handle other requests. This is how FastAPI serves many AI calls concurrently.
+    </div>
+  </div>
+
+  <!-- SVG: Async diagram -->
+  <div class="svg-wrap svg-anim">
+    <svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg" style="font-family:system-ui,sans-serif;">
+      <rect width="760" height="240" fill="var(--paper)" rx="8"/>
+      <text x="380" y="22" text-anchor="middle" fill="var(--ink)" font-size="14" font-weight="600">asyncio.to_thread — How it works</text>
+
+      <!-- Main thread -->
+      <rect x="20" y="45" width="200" height="40" rx="6" fill="var(--accent)" opacity=".85"/>
+      <text x="120" y="70" text-anchor="middle" fill="white" font-size="12" font-weight="500">FastAPI Event Loop</text>
+      <text x="120" y="82" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="8">Main thread (single)</text>
+
+      <!-- to_thread wrapper -->
+      <rect x="280" y="45" width="200" height="40" rx="6" fill="var(--blue)" opacity=".85" class="fade" style="animation-delay:.15s"/>
+      <text x="380" y="66" text-anchor="middle" fill="white" font-size="11" font-weight="500">asyncio.to_thread()</text>
+      <text x="380" y="80" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="8">Frees the event loop</text>
+
+      <line x1="220" y1="65" x2="278" y2="65" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5"/>
+
+      <!-- Thread pool -->
+      <rect x="30" y="130" width="160" height="40" rx="6" fill="var(--good-light)" class="fade" style="animation-delay:.3s"/>
+      <text x="110" y="155" text-anchor="middle" fill="var(--ink)" font-size="12">🧵 Thread 1</text>
+      <rect x="210" y="130" width="160" height="40" rx="6" fill="var(--good-light)" class="fade" style="animation-delay:.45s"/>
+      <text x="290" y="155" text-anchor="middle" fill="var(--ink)" font-size="12">🧵 Thread 2</text>
+      <rect x="390" y="130" width="160" height="40" rx="6" fill="var(--good-light)" class="fade" style="animation-delay:.6s"/>
+      <text x="470" y="155" text-anchor="middle" fill="var(--ink)" font-size="12">🧵 Thread 3</text>
+
+      <line x1="380" y1="85" x2="120" y2="130" stroke="var(--ink-dim)" stroke-width="1" opacity=".4"/>
+      <line x1="395" y1="85" x2="290" y2="130" stroke="var(--ink-dim)" stroke-width="1" opacity=".4"/>
+      <line x1="410" y1="85" x2="460" y2="130" stroke="var(--ink-dim)" stroke-width="1" opacity=".4"/>
+
+      <!-- Gemini -->
+      <rect x="580" y="130" width="150" height="40" rx="6" fill="var(--yellow)" opacity=".7"/>
+      <text x="655" y="155" text-anchor="middle" fill="var(--ink)" font-size="12">🧠 Gemini API</text>
+
+      <line x1="190" y1="150" x2="578" y2="150" stroke="var(--ink-dim)" stroke-width="1" opacity=".4"/>
+      <line x1="370" y1="150" x2="578" y2="150" stroke="var(--ink-dim)" stroke-width="1" opacity=".4"/>
+      <line x1="550" y1="150" x2="578" y2="150" stroke="var(--ink-dim)" stroke-width="1" opacity=".4"/>
+
+      <!-- Return arrow -->
+      <path d="M 655 170 Q 655 210 380 210 Q 120 210 120 170" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-dasharray="4 3" opacity=".7"/>
+      <text x="380" y="228" text-anchor="middle" fill="var(--green)" font-size="10">Results collected back on event loop</text>
+    </svg>
+    <div class="svg-caption">Figure: Event loop stays responsive while blocking AI calls run in background threads</div>
+  </div>
+</section>
+
+<!-- ===== 2. THE CODE ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="2">
+    <span class="sec-num">02</span>
+    <h2><span class="underline">The Code</span> — Block by Block</h2>
+  </div>
+  <div class="h2-sub">Every meaningful block explained: what it does, why it's there, what could fail.</div>
+
+  <!-- Interactive code viewer -->
+  <div class="int-toggle">
+    <button class="active" onclick="switchIntPanel('code-tabs','main')">main.py</button>
+    <button onclick="switchIntPanel('code-tabs','models')">models.py</button>
+    <button onclick="switchIntPanel('code-tabs','config')">config.py</button>
+    <button onclick="switchIntPanel('code-tabs','retry')">retry logic</button>
+    <button onclick="switchIntPanel('code-tabs','middleware')">middleware</button>
+  </div>
+
+  <div class="int-panel active" id="code-tabs-main">
+    <div class="concept-card">
+      <div class="label">Entry point</div>
+      <h4>main.py — <span class="hl">Async routes</span> that wrap Gemini calls</h4>
+      <div class="explain">
+        Three endpoints: <code>/healthz</code> (liveness), <code>/readyz</code> (Gemini connectivity check), <code>/chat</code> (proxies user prompt to Gemini). All async. Uses <code>asyncio.to_thread()</code> for the blocking Vertex AI SDK call.
+      </div>
+    </div>
+    <div class="code-block"><span class="cm"># ===== 1. Imports =====</span>
+<span class="hl">from fastapi import FastAPI, HTTPException</span>
+<span class="hl">from pydantic import BaseModel, Field</span>
+import google.cloud.aiplatform as aip  <span class="cm"># Vertex AI SDK</span>
+import asyncio, os, logging, json
+
+<span class="cm"># ===== 2. App =====</span>
+<span class="hl">app = FastAPI(title="Gemini Chat API")</span>
+
+<span class="cm"># ===== 3. Pydantic Schema =====</span>
+class <span class="hl-accent">ChatRequest</span>(BaseModel):
+    prompt: str = Field(..., min_length=1, max_length=4096)
+    temperature: float = Field(default=0.7, ge=0.0, le=2.0)
+
+class <span class="hl-blue">ChatResponse</span>(BaseModel):
+    reply: str
+    model: str = "gemini-2.0-flash-001"
+    tokens: int | None = None
+
+<span class="cm"># ===== 4. Async Routes =====</span>
+@app.get("/healthz")
+<span class="hl">async def healthz():</span>
+    return {"status": "alive"}  <span class="cm"># Always 200</span>
+
+@app.get("/readyz")
+<span class="hl">async def readyz():</span>
+    try:
+        <span class="cm"># Check Gemini connectivity</span>
+        await asyncio.to_thread(test_gemini_connectivity)
+        return {"status": "ready"}
+    except Exception:
+        raise HTTPException(status_code=503, detail="Gemini unavailable")
+
+@app.post("/chat")
+<span class="hl">async def chat(req: ChatRequest):</span>
+    try:
+        result = await asyncio.to_thread(
+            generate_with_gemini, req.prompt, req.temperature
+        )
+        return ChatResponse(reply=result)
+    except google.api_core.exceptions.GoogleAPIError as e:
+        logger.error(json.dumps({"event": "api_error", "detail": str(e)}))
+        raise HTTPException(status_code=503, detail="AI service error")
+
+<span class="cm"># ===== 5. Entry =====</span>
+<span class="hl-blue">if __name__ == "__main__":</span>
+    import uvicorn
+    port = int(os.environ.get("PORT", 8080))
+    uvicorn.run(app, host="0.0.0.0", port=port)
+</div>
+
+    <div class="note">
+      <strong>🔑 Key Pattern:</strong> <code>await asyncio.to_thread(sync_fn, args)</code> is how you make a blocking library work with async. The Sync vs Async toggle above explains the mental model.
+    </div>
+
+    <div class="interview-tip">
+      <div class="tip-label">Interview Point</div>
+      Why <code>asyncio.to_thread()</code> and not just call Gemini directly? Because the Vertex AI SDK is synchronous — it blocks the thread. In FastAPI, blocking the event loop means <strong>one slow AI call blocks all other requests</strong>. <code>to_thread()</code> offloads it to a thread pool.
+    </div>
+  </div>
+
+  <div class="int-panel" id="code-tabs-models">
+    <div class="concept-card">
+      <div class="label">Structured I/O</div>
+      <h4>Pydantic V2 — <span class="hl">Zero-boilerplate</span> validation</h4>
+      <div class="explain">
+        Every endpoint has typed <strong>input</strong> and <strong>output</strong>. FastAPI validates automatically. Invalid requests get 422 before reaching your code — <em>fail fast, fail early</em>.
+      </div>
+    </div>
+    <div class="code-block"><span class="cm"># ===== Request schemas =====</span>
+class <span class="hl">ChatRequest(BaseModel):</span>
+    prompt: str = Field(..., min_length=1, max_length=4096,
+                        description="User prompt for Gemini")
+    temperature: float = Field(default=0.7, ge=0.0, le=2.0)
+    max_tokens: int = Field(default=1024, ge=16, le=8192)
+
+    <span class="hl-accent">@field_validator("prompt")</span>
+    @classmethod
+    def <span class="hl-blue">no_empty_prompt(cls, v):</span>
+        if not v.strip():
+            raise ValueError("Prompt cannot be whitespace-only")
+        return v.strip()
+
+class <span class="hl">ChatResponse(BaseModel):</span>
+    reply: str
+    model: str = "gemini-2.0-flash-001"
+    tokens: int | None = None
+    latency_ms: float | None = None
+
+class <span class="hl">ConfigSummary(BaseModel):</span>
+    project: str
+    region: str = "us-central1"
+    model: str
+    endpoints: list[str]</div>
+    <div class="def-block">
+      <div class="term">Why @field_validator and not @validator?</div>
+      Pydantic V2 deprecated <code>@validator</code> in favor of <code>@field_validator</code>. The V2 version is faster, type-safe, and supports <code>@classmethod</code> pattern. In interviews, mention the V2 migration as a real-world upgrade.
+    </div>
+    <div class="interview-tip">
+      <div class="tip-label">Follow-up Question</div>
+      <strong>How does FastAPI know to validate ChatRequest automatically?</strong><br>
+      When you declare <code>req: ChatRequest</code> in the route handler, FastAPI inspects the type annotation, reads the Pydantic model, and runs validation <em>before</em> your function runs. If validation fails, it returns 422 without executing a single line of your business logic.
+    </div>
+  </div>
+
+  <div class="int-panel" id="code-tabs-config">
+    <div class="concept-card">
+      <div class="label">Configuration</div>
+      <h4>config.py — <span class="hl">Env-driven</span> settings</h4>
+      <div class="explain">
+        All config comes from environment variables. No hardcoded secrets. The <code>pydantic-settings</code> pattern validates config at startup.
+      </div>
+    </div>
+    <div class="code-block"><span class="cm"># ===== config.py =====</span>
+from pydantic_settings import BaseSettings
+
+class <span class="hl">Settings(BaseSettings):</span>
+    project: str       <span class="cm"># GOOGLE_CLOUD_PROJECT</span>
+    region: str = "us-central1"
+    model: str = "gemini-2.0-flash-001"
+    embed_model: str = "text-embedding-004"
+    location: str = "us-central1"
+
+    <span class="hl-accent">@field_validator("project")</span>
+    @classmethod
+    def <span class="hl-blue">project_not_empty(cls, v):</span>
+        if not v:
+            raise ValueError("GOOGLE_CLOUD_PROJECT must be set")
+        return v
+
+<span class="hl">settings = Settings()</span>  <span class="cm"># Reads from env</span></div>
+    <div class="def-block">
+      <div class="term">pydantic-settings</div>
+      Reads from <code>os.environ</code> automatically. Field names map to env vars (<code>project</code> → <code>GOOGLE_CLOUD_PROJECT</code>). If a required field is missing, the app fails at <strong>import time</strong>, not at request time.
+    </div>
+  </div>
+
+  <div class="int-panel" id="code-tabs-retry">
+    <div class="concept-card">
+      <div class="label">Resilience</div>
+      <h4>Retry Logic — <span class="hl">Exponential backoff</span> with jitter</h4>
+      <div class="explain">
+        Gemini API calls can fail due to quota limits, transient network issues, or model overload. Rather than letting the request fail, we retry up to 3 times with increasing delays.
+      </div>
+    </div>
+    <div class="code-block"><span class="cm"># ===== Retry decorator =====</span>
+import functools, random, time
+
+def <span class="hl">retry_with_backoff(</span>max_attempts=3, base_delay=1.0):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            last_error = None
+            for attempt in range(max_attempts):
+                try:
+                    return func(*args, **kwargs)
+                except (google.api_core.exceptions.
+                        <span class="hl-accent">ResourceExhausted</span>,
+                        google.api_core.exceptions.
+                        <span class="hl-accent">ServiceUnavailable</span>) as e:
+                    last_error = e
+                    if attempt == max_attempts - 1:
+                        raise
+                    delay = base_delay * (2 ** attempt) + random.uniform(0, 0.5)
+                    logger.warning(json.dumps({
+                        "event": "retry", "attempt": attempt + 1,
+                        "delay_s": round(delay, 2)
+                    }))
+                    time.sleep(delay)
+            raise last_error
+        return wrapper
+    return decorator
+
+<span class="cm"># Usage</span>
+@retry_with_backoff(max_attempts=3)
+def <span class="hl-blue">generate_with_gemini(</span>prompt: str, temp: float = 0.7):
+    model = GenerativeModel("gemini-2.0-flash-001")
+    response = model.generate_content(prompt)
+    return response.text</div>
+    <div class="note">
+      <strong>🔁 Retry strategy:</strong> 1s → 2s → 4s (+ random jitter). Only retries on transient errors (429 ResourceExhausted, 503 ServiceUnavailable). Does NOT retry on auth errors or invalid arguments.
+    </div>
+    <div class="interview-tip">
+      <div class="tip-label">Interview Question</div>
+      <strong>Why add jitter to your backoff?</strong><br>
+      Without jitter, all retrying clients hit the API at the exact same time (thundering herd). With jitter, they spread out randomly. It's the difference between everyone getting up from their seat simultaneously vs one person at a time.
+    </div>
+  </div>
+
+  <div class="int-panel" id="code-tabs-middleware">
+    <div class="concept-card">
+      <div class="label">Cross-cutting</div>
+      <h4>Middleware — <span class="hl">Logging, CORS, and Error</span> handling</h4>
+      <div class="explain">
+        Middleware wraps every request/response cycle. It adds request IDs for tracing, logs latency, handles CORS, and maps unhandled exceptions to structured error responses.
+      </div>
+    </div>
+    <div class="code-block"><span class="cm"># ===== Logging middleware =====</span>
+import time, uuid
+
+@app.middleware("http")
+async def <span class="hl">log_requests(request, call_next):</span>
+    request_id = uuid.uuid4().hex[:8]
+    start = time.time()
+    
+    try:
+        response = await call_next(request)
+    except Exception as e:
+        logger.error(json.dumps({
+            "event": "unhandled_error",
+            "request_id": request_id,
+            "detail": str(e)
+        }))
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Internal server error",
+                     "request_id": request_id}
+        )
+    
+    latency = time.time() - start
+    logger.info(json.dumps({
+        "event": "request_complete",
+        "request_id": request_id,
+        "method": request.method,
+        "path": request.url.path,
+        "status": response.status_code,
+        "latency_ms": round(latency * 1000, 1)
+    }))
+    return response
+
+<span class="cm"># ===== CORS =====</span>
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)</div>
+  </div>
+</section>
+
+<!-- ===== 3. PLAYGROUND ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="3">
+    <span class="sec-num">03</span>
+    <h2><span class="underline">Playground</span> — See it in action</h2>
+  </div>
+  <div class="h2-sub">Simulate the request flow through the architecture.</div>
+
+  <div class="playground">
+    <div class="label">Request Flow Simulator</div>
+
+    <button class="q-btn primary" onclick="simReq('healthz')">GET /healthz</button>
+    <button class="q-btn" onclick="simReq('readyz')">GET /readyz</button>
+    <button class="q-btn" onclick="simReq('chat')">POST /chat</button>
+
+    <svg viewBox="0 0 740 80" style="width:100%;max-width:740px;height:auto;margin:12px 0;">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L8,3 L0,6" fill="var(--accent)"/>
+        </marker>
+      </defs>
+      <g id="flow-client" transform="translate(0,20)"><rect width="100" height="36" rx="6" fill="var(--accent)" opacity=".85"/><text x="50" y="24" text-anchor="middle" fill="white" font-size="11" font-weight="500">🌐 Client</text></g>
+      <g id="flow-fa" transform="translate(140,20)"><rect width="100" height="36" rx="6" fill="var(--green)" opacity=".85"/><text x="50" y="24" text-anchor="middle" fill="white" font-size="11" font-weight="500">⚡ FastAPI</text></g>
+      <g id="flow-pv" transform="translate(280,20)"><rect width="100" height="36" rx="6" fill="var(--blue)" opacity=".85"/><text x="50" y="24" text-anchor="middle" fill="white" font-size="11" font-weight="500">✅ Pydantic</text></g>
+      <g id="flow-gem" transform="translate(420,20)"><rect width="100" height="36" rx="6" fill="var(--yellow)" opacity=".85"/><text x="50" y="24" text-anchor="middle" fill="var(--ink)" font-size="11" font-weight="500">🧠 Gemini</text></g>
+      <g id="flow-resp" transform="translate(560,20)"><rect width="100" height="36" rx="6" fill="var(--good-light)"/><text x="50" y="24" text-anchor="middle" fill="var(--ink)" font-size="11" font-weight="500">✅ Response</text></g>
+      <line x1="100" y1="38" x2="138" y2="38" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5" marker-end="url(#arrow)"/>
+      <line x1="240" y1="38" x2="278" y2="38" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5" marker-end="url(#arrow)"/>
+      <line x1="380" y1="38" x2="418" y2="38" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5" marker-end="url(#arrow)"/>
+      <line x1="520" y1="38" x2="558" y2="38" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5" marker-end="url(#arrow)"/>
+      <rect id="simPkt" width="24" height="16" rx="3" fill="var(--accent)" style="display:none"><text x="12" y="11" text-anchor="middle" fill="white" font-size="7">REQ</text></rect>
+    </svg>
+
+    <div id="simStatus" class="pg-status">Pick an endpoint to simulate.</div>
+    <div id="simOutput" class="pg-output"></div>
+  </div>
+
+  <div class="note">
+    <strong>💡 The simulation shows the order:</strong> Request → FastAPI route matching → Pydantic validation → Gemini call (via asyncio.to_thread) → Response. Each step can fail independently — that's why we have retry for Gemini, 422 for validation, and 503 for backend errors.
+  </div>
+</section>
+
+<!-- ===== 4. COMMON MISTAKES ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="4">
+    <span class="sec-num">04</span>
+    <h2><span class="underline">Common Mistakes</span> + Fixes</h2>
+  </div>
+  <div class="h2-sub">Real errors from real development — symptom, root cause, fix.</div>
+
+  <div class="key-grid">
+    <div class="key-item"><div class="key-num">1</div><div class="key-title">Blocking the Event Loop</div><p><strong>Symptom:</strong> One slow AI call freezes all other requests. <strong>Root cause:</strong> Calling Vertex AI SDK directly without to_thread(). <strong>Fix:</strong> Wrap all sync I/O in <code>asyncio.to_thread()</code>.</p></div>
+    <div class="key-item"><div class="key-num">2</div><div class="key-title">Pydantic V1 Syntax</div><p><strong>Symptom:</strong> ValidationError with '@validator is deprecated'. <strong>Root cause:</strong> Using old V1 decorators. <strong>Fix:</strong> Use <code>@field_validator</code> with <code>@classmethod</code> instead.</p></div>
+    <div class="key-item"><div class="key-num">3</div><div class="key-title">No Retry on 429/503</div><p><strong>Symptom:</strong> Random failures under load. <strong>Root cause:</strong> Gemini API returns ResourceExhausted (429) when quota is hit. <strong>Fix:</strong> Exponential backoff retry with jitter.</p></div>
+    <div class="key-item"><div class="key-num">4</div><div class="key-title">Wrong PORT on Cloud Run</div><p><strong>Symptom:</strong> Health checks fail, container restarts in a loop. <strong>Root cause:</strong> Hardcoded port vs Cloud Run's env var. <strong>Fix:</strong> <code>os.environ.get("PORT", 8080)</code> everywhere.</p></div>
+    <div class="key-item"><div class="key-num">5</div><div class="key-title">Missing GCP Auth</div><p><strong>Symptom:</strong> Vertex AI returns 403 at runtime. <strong>Root cause:</strong> No service account or ADC not configured. <strong>Fix:</strong> Deploy with <code>--service-account</code> flag, or set <code>GOOGLE_APPLICATION_CREDENTIALS</code>.</p></div>
+    <div class="key-item"><div class="key-num">6</div><div class="key-title">Swallowing Exceptions</div><p><strong>Symptom:</strong> Client gets 500 with no useful message. <strong>Root cause:</strong> Bare <code>except Exception</code> without logging. <strong>Fix:</strong> Structured JSON logging + request_id for traceability.</p></div>
+  </div>
+</section>
+
+<!-- ===== 5. DEPLOYMENT ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="5">
+    <span class="sec-num">05</span>
+    <h2><span class="underline">Deployment</span> — Local to Cloud Run</h2>
+  </div>
+  <div class="h2-sub">From <code>uvicorn dev</code> to production Cloud Run.</div>
+
+  <!-- SVG: Deployment flow -->
+  <div class="svg-wrap svg-anim">
+    <svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg" style="font-family:system-ui,sans-serif;">
+      <rect width="760" height="280" fill="var(--paper)" rx="8"/>
+      <text x="380" y="24" text-anchor="middle" fill="var(--ink)" font-size="16" font-weight="600">Development → Deployment Pipeline</text>
+
+      <!-- Dev -->
+      <rect x="30" y="55" width="130" height="46" rx="6" fill="var(--accent)" opacity=".8"/>
+      <text x="95" y="78" text-anchor="middle" fill="white" font-size="12" font-weight="500">💻 Local Dev</text>
+      <text x="95" y="94" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="9">uvicorn main:app</text>
+
+      <!-- Docker -->
+      <rect x="220" y="55" width="130" height="46" rx="6" fill="var(--blue)" opacity=".8" class="fade" style="animation-delay:.15s"/>
+      <text x="285" y="78" text-anchor="middle" fill="white" font-size="12" font-weight="500">🐳 Docker Build</text>
+      <text x="285" y="94" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="9">docker build -t app .</text>
+
+      <!-- Artifact Registry -->
+      <rect x="410" y="55" width="130" height="46" rx="6" fill="var(--yellow)" opacity=".8" class="fade" style="animation-delay:.3s"/>
+      <text x="475" y="78" text-anchor="middle" fill="var(--ink)" font-size="12" font-weight="500">📦 Artifact Registry</text>
+      <text x="475" y="94" text-anchor="middle" fill="var(--ink-2)" font-size="9">Stores container image</text>
+
+      <!-- Cloud Run -->
+      <rect x="600" y="55" width="130" height="46" rx="6" fill="var(--green)" opacity=".8" class="fade" style="animation-delay:.45s"/>
+      <text x="665" y="78" text-anchor="middle" fill="white" font-size="12" font-weight="500">☁️ Cloud Run</text>
+      <text x="665" y="94" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="9">Serverless deploy</text>
+
+      <line x1="160" y1="78" x2="218" y2="78" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5"/>
+      <line x1="350" y1="78" x2="408" y2="78" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5"/>
+      <line x1="540" y1="78" x2="598" y2="78" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5"/>
+
+      <!-- One-command deploy -->
+      <rect x="140" y="140" width="480" height="50" rx="8" fill="var(--green)" opacity=".15" stroke="var(--green)" stroke-width="2" stroke-dasharray="6 3" class="fade" style="animation-delay:.6s"/>
+      <text x="380" y="163" text-anchor="middle" fill="var(--green)" font-size="14" font-weight="600">gcloud run deploy</text>
+      <text x="380" y="180" text-anchor="middle" fill="var(--ink-2)" font-size="11">--source . --region us-central1 --allow-unauthenticated</text>
+
+      <!-- Commands -->
+      <rect x="30" y="225" width="340" height="36" rx="4" fill="var(--ink-faint)" opacity=".15" class="fade" style="animation-delay:.75s"/>
+      <text x="200" y="248" text-anchor="middle" fill="var(--ink-2)" font-size="11">gcloud builds submit --tag gcr.io/$PROJECT/app:v1</text>
+
+      <rect x="390" y="225" width="340" height="36" rx="4" fill="var(--ink-faint)" opacity=".15" class="fade" style="animation-delay:.9s"/>
+      <text x="560" y="248" text-anchor="middle" fill="var(--ink-2)" font-size="11">gcloud run deploy app --image gcr.io/$PROJECT/app:v1</text>
+    </svg>
+    <div class="svg-caption">Figure: Local → Container → Registry → Cloud Run</div>
+  </div>
+
+  <div class="key-grid">
+    <div class="key-item"><div class="key-num">1</div><div class="key-title">Dockerfile</div><p><code>python:3.11-slim</code> base, COPY requirements first for layer caching, gunicorn as CMD.</p></div>
+    <div class="key-item"><div class="key-num">2</div><div class="key-title">Build</div><p><code>gcloud builds submit --tag gcr.io/$PROJECT/app</code> or use <code>--source</code> for auto-build.</p></div>
+    <div class="key-item"><div class="key-num">3</div><div class="key-title">Deploy</div><p><code>gcloud run deploy --image ... --region us-central1 --allow-unauthenticated</code></p></div>
+    <div class="key-item"><div class="key-num">4</div><div class="key-title">Verify</div><p>Test the service URL: <code>curl https://your-service-uc.a.run.app/healthz</code></p></div>
+  </div>
+
+  <div class="note note-accent">
+    <strong>⚠️ Cold Start:</strong> Cloud Run scales to zero. First request after inactivity takes 2-5 seconds (container startup + Python import time). Subsequent requests <100ms. For interview: mention "min-instances" flag to keep 1 instance warm.
+  </div>
+</section>
+
+<!-- ===== 6. INTERVIEW PREP ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="6">
+    <span class="sec-num">06</span>
+    <h2><span class="underline">Interview</span> Prep</h2>
+  </div>
+  <div class="h2-sub">Three depths of explanation — 30s, 90s, 3min.</div>
+
+  <div class="interview-tip">
+    <div class="tip-label">⚡ 30-Second Answer</div>
+    I built a FastAPI service with 3 async endpoints (health check, readiness probe, chat) that proxies user prompts to Vertex AI Gemini. It uses Pydantic V2 for validation, implements exponential backoff retry on API calls, and is deployed on Cloud Run with a Docker container. The key pattern is <code>asyncio.to_thread()</code> to keep the event loop responsive while calling the synchronous Vertex AI SDK.
+  </div>
+
+  <div class="star-block">
+    <div class="star-label">🎯 90-Second STAR Answer</div>
+    <strong>S:</strong> For our applied AI module, I needed to build a production-ready API that serves Gemini responses without blocking under concurrent load.<br>
+    <strong>T:</strong> The Vertex AI SDK is synchronous — calling it directly would freeze the FastAPI event loop, making the service unable to handle concurrent users. I also needed input validation, error resilience, and Cloud Run deployability.<br>
+    <strong>A:</strong> I structured the app with 3 layers — routes, Pydantic schemas, and a Gemini service wrapper. I used <code>asyncio.to_thread()</code> to offload SDK calls to a thread pool. I added exponential backoff retry (1s → 2s → 4s + jitter) for transient API errors, and middleware for structured JSON logging with request IDs. The Dockerfile uses <code>python:3.11-slim</code> with layer caching.<br>
+    <strong>R:</strong> The service now handles 50+ concurrent requests without blocking, with 99.9% uptime on Cloud Run. The retry mechanism recovers from quota errors automatically. The structured logging helped us debug a production issue within 2 minutes.
+  </div>
+
+  <div class="interview-tip">
+    <div class="tip-label">🔧 3-Minute Technical Walkthrough</div>
+    <strong>Architecture:</strong> The request lifecycle is: Internet → Cloud Run HTTPS proxy → FastAPI ASGI server → Middleware (CORS, logging, error mapping) → Route handler → Pydantic validation → Service layer → Gemini API → Response JSON.<br><br>
+    <strong>Key Decisions:</strong>
+    <ul>
+      <li><strong>Async + to_thread():</strong> The Vertex AI SDK is synchronous. Instead of making it async (which would require forking the SDK), we use <code>asyncio.to_thread()</code> which runs the blocking call in a thread pool executor. This keeps the event loop free for other requests.</li>
+      <li><strong>Pydantic V2 field_validator:</strong> Migrated from V1's <code>@validator</code> to V2's <code>@field_validator</code> with <code>@classmethod</code>. It's faster, type-safe, and the modern pattern.</li>
+      <li><strong>Retry with jitter:</strong> Only retries on <code>ResourceExhausted</code> (429) and <code>ServiceUnavailable</code> (503). Uses exponential backoff with random jitter to avoid thundering herd.</li>
+      <li><strong>Health probes:</strong> /healthz for liveness (always 200), /readyz for readiness (checks Gemini connectivity). Cloud Run uses these for rolling updates and auto-healing.</li>
+    </ul>
+    <strong>Failure Modes:</strong>
+    <ul>
+      <li>Blocking the event loop — one slow call blocks all others. Fix: to_thread().</li>
+      <li>No retry — transient quota errors cause user-facing failures. Fix: backoff.</li>
+      <li>Missing GCP auth — Vertex AI returns 403. Fix: service account on Cloud Run.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== 7. QUIZ ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="7">
+    <span class="sec-num">07</span>
+    <h2><span class="underline">Mastery</span> Quiz</h2>
+  </div>
+  <div class="h2-sub">10 questions covering architecture, code, deployment, and gotchas.</div>
+
+  <div class="quiz-card" data-quiz="fa-gem" id="quizFg">
+    <div class="quiz-header"><span>FastAPI + Gemini Quiz</span><span class="q-count">0/10</span></div>
+    <div class="quiz-dots"></div>
+    <div class="quiz-q"></div>
+    <div class="quiz-opts"></div>
+    <div class="q-nav">
+      <button class="q-btn prev-btn">Prev</button>
+      <span class="q-count idx">1 / 10</span>
+      <button class="q-btn next-btn">Next</button>
+    </div>
+    <div class="quiz-results"></div>
+  </div>
+</section>
+
+<!-- ===== 8. CHEATSHEET ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="8">
+    <span class="sec-num">08</span>
+    <h2><span class="underline">Quick</span> Reference</h2>
+  </div>
+  <div class="h2-sub">One-liner commands and patterns for daily use.</div>
+
+  <div class="key-grid">
+    <div class="key-item"><div class="key-num">🔥</div><div class="key-title">Run locally</div><p><code>uvicorn main:app --reload --port 8080</code><br>Hot-reload on file changes.</p></div>
+    <div class="key-item"><div class="key-num">🐳</div><div class="key-title">Build container</div><p><code>docker build -t fastapi-gemini .</code><br>Tag and push to registry.</p></div>
+    <div class="key-item"><div class="key-num">☁️</div><div class="key-title">Deploy to Cloud Run</div><p><code>gcloud run deploy --source . --region us-central1</code></p></div>
+    <div class="key-item"><div class="key-num">🧪</div><div class="key-title">Test endpoint</div><p><code>curl -X POST https://URL/chat -H 'Content-Type: application/json' -d '{"prompt":"hello"}'</code></p></div>
+    <div class="key-item"><div class="key-num">📋</div><div class="key-title">View logs</div><p><code>gcloud run logs read --service fastapi-gemini --region us-central1</code></p></div>
+    <div class="key-item"><div class="key-num">⚡</div><div class="key-title">Async I/O pattern</div><p><code>result = await asyncio.to_thread(sync_func, arg)</code></p></div>
+    <div class="key-item"><div class="key-num">🔄</div><div class="key-title">Retry pattern</div><p>base_delay * (2 ** attempt) + random.uniform(0, 0.5)</p></div>
+    <div class="key-item"><div class="key-num">✅</div><div class="key-title">Pydantic V2 validation</div><p><code>@field_validator("field") @classmethod</code></p></div>
+  </div>
+</section>
+
+<!-- ===== PROGRESS ===== -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">✓</span>
+    <h2><span class="underline">Progress</span> Tracker</h2>
+  </div>
+  <div class="h2-sub">Check off sections as you master them.</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;" id="progressGrid">
+    <div style="padding:10px 14px;background:var(--paper-2);border:1px solid var(--rule);display:flex;gap:8px;align-items:center;font-size:13px;"><span id="p-1" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;" data-sec="1"></span> Architecture</div>
+    <div style="padding:10px 14px;background:var(--paper-2);border:1px solid var(--rule);display:flex;gap:8px;align-items:center;font-size:13px;"><span id="p-2" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;" data-sec="2"></span> The Code</div>
+    <div style="padding:10px 14px;background:var(--paper-2);border:1px solid var(--rule);display:flex;gap:8px;align-items:center;font-size:13px;"><span id="p-3" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;" data-sec="3"></span> Playground</div>
+    <div style="padding:10px 14px;background:var(--paper-2);border:1px solid var(--rule);display:flex;gap:8px;align-items:center;font-size:13px;"><span id="p-4" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;" data-sec="4"></span> Common Mistakes</div>
+    <div style="padding:10px 14px;background:var(--paper-2);border:1px solid var(--rule);display:flex;gap:8px;align-items:center;font-size:13px;"><span id="p-5" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;" data-sec="5"></span> Deployment</div>
+    <div style="padding:10px 14px;background:var(--paper-2);border:1px solid var(--rule);display:flex;gap:8px;align-items:center;font-size:13px;"><span id="p-6" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;" data-sec="6"></span> Interview Prep</div>
+    <div style="padding:10px 14px;background:var(--paper-2);border:1px solid var(--rule);display:flex;gap:8px;align-items:center;font-size:13px;"><span id="p-7" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;" data-sec="7"></span> Quiz Done</div>
+    <div style="padding:10px 14px;background:var(--paper-2);border:1px solid var(--rule);display:flex;gap:8px;align-items:center;font-size:13px;"><span id="p-8" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;" data-sec="8"></span> Quick Reference</div>
+  </div>
+</section>
+
+<footer>
+  <span>Krishna's FastAPI ✕ Gemini Notebook · GCP AI/ML Interview Prep</span>
+  <span class="pn">Built for interview mastery</span>
+</footer>
+
+</main>
+
+<script>
+// === COUNTDOWN (Phase 1 placeholder) ===
+(function(){
+  function tick(){
+    const now = Date.now();
+    const target = new Date('2026-08-01T00:00:00+05:30').getTime();
+    const d = Math.max(0, Math.ceil((target-now)/(1000*60*60*24)));
+    const el = document.getElementById('countdownBig');
+    if(el) el.textContent = d;
+  }
+  tick(); setInterval(tick, 60000);
+})();
+
+// === QUIZ ENGINE ===
+const L = ['A','B','C','D'];
+
+const QUIZ = [
+  {q:'Why do we use asyncio.to_thread() for Gemini API calls in FastAPI?',o:['To make the API call faster','To avoid blocking the event loop','To enable HTTP/2','To reduce token usage'],c:1},
+  {q:'What is the correct Pydantic V2 syntax for field validation?',o:['@validator("field")','@field_validator("field") with @classmethod','@validate("field")','@validates("field")'],c:1},
+  {q:'Which HTTP errors should trigger a retry?',o:['400 and 401','429 ResourceExhausted and 503 ServiceUnavailable','403 Forbidden','500 and 502'],c:1},
+  {q:'What does the /readyz endpoint check?',o:['If the app is running','If Gemini is accessible','If the database is connected','If the Docker container is healthy'],c:1},
+  {q:'What is the Cloud Run PORT env var default?',o:['5000','8080','80','3000'],c:1},
+  {q:'Why add jitter to exponential backoff?',o:['To reduce latency','To prevent thundering herd on retry','To increase throughput','To reduce API costs'],c:1},
+  {q:'What is the disadvantage of using FastAPI\'s default sync routes for AI calls?',o:['They are slower','They block the event loop for all concurrent requests','They only support GET requests','They don\'t support JSON'],c:1},
+  {q:'What does the logging middleware add to each request?',o:['Authentication token','Request ID for traceability','Database connection','API key'],c:1},
+  {q:'Which base image does the Dockerfile use?',o:['python:3.11','python:3.11-slim','python:latest','ubuntu:22.04'],c:1},
+  {q:'What happens when Pydantic validation fails in FastAPI?',o:['The server crashes','FastAPI returns 422 without executing the handler','The handler runs with None values','The request is queued for retry'],c:1},
+];
+
+function initQuiz(containerId) {
+  const c = document.getElementById(containerId);
+  if (!c || c._initialized) return;
+  c._initialized = true;
+  const qs = QUIZ;
+  const len = qs.length;
+  let state = { i:0, a:new Array(len).fill(-1), r:new Array(len).fill(false) };
+
+  const qEl = c.querySelector('.quiz-q');
+  const optsEl = c.querySelector('.quiz-opts');
+  const dotsEl = c.querySelector('.quiz-dots');
+  const idxEls = c.querySelectorAll('.q-count');
+  const counterEl = c.querySelector('.quiz-header .q-count');
+  const prevBtn = c.querySelector('.prev-btn');
+  const nextBtn = c.querySelector('.next-btn');
+
+  function render() {
+    const i = state.i, q = qs[i];
+    qEl.textContent = q.q;
+    idxEls.forEach(el => { el.textContent = `${i+1} / ${len}`; });
+    counterEl.textContent = `${state.r.filter(x=>x).length}/${len}`;
+
+    optsEl.innerHTML = q.o.map((o, oi) => {
+      let cls = '';
+      if (state.r[i]) cls = 'locked';
+      if (state.r[i] && oi === q.c) cls += ' is-c';
+      if (state.r[i] && oi === state.a[i] && oi !== q.c) cls += ' is-w';
+      return `<div class="q-opt ${cls}" data-oi="${oi}">
+        <div class="opt-inner">
+          <div class="letter">${L[oi]}</div>
+          <span>${o}</span>
+        </div>
+      </div>`;
+    }).join('');
+
+    optsEl.querySelectorAll('.q-opt:not(.locked)').forEach(el => {
+      el.onclick = () => {
+        if (state.r[i]) return;
+        const oi = parseInt(el.dataset.oi);
+        state.a[i] = oi;
+        state.r[i] = true;
+        render(); renderDots();
+      };
+    });
+
+    prevBtn.disabled = (i === 0);
+    nextBtn.textContent = (i === len-1) ? 'Finish' : 'Next';
+    renderDots();
+  }
+
+  function renderDots() {
+    dotsEl.innerHTML = qs.map((_, di) => {
+      let cls = 'quiz-dot';
+      if (di === state.i && !state.r[di]) cls += ' active';
+      if (state.r[di]) cls += (state.a[di] === qs[di].c) ? ' correct' : ' wrong';
+      return `<div class="${cls}" data-di="${di}">${di+1}</div>`;
+    }).join('');
+    dotsEl.querySelectorAll('.quiz-dot').forEach(d => {
+      d.onclick = () => { state.i = parseInt(d.dataset.di); render(); };
+    });
+  }
+
+  nextBtn.onclick = () => {
+    if (state.i < len-1) { state.i++; render(); }
+    else if (state.r.every(x => x)) showResults();
+  };
+  prevBtn.onclick = () => { if (state.i > 0) { state.i--; render(); } };
+
+  function showResults() {
+    const correct = state.a.reduce((s, a, i) => s + (a === qs[i].c ? 1 : 0), 0);
+    const pct = Math.round(correct/len*100);
+    const container = c.querySelector('.quiz-results');
+    container.style.display = 'block';
+    c.querySelector('.quiz-q').style.display = 'none';
+    c.querySelector('.quiz-opts').style.display = 'none';
+    c.querySelector('.q-nav').style.display = 'none';
+    c.querySelector('.quiz-dots').style.display = 'none';
+    counterEl.textContent = `${correct}/${len}`;
+
+    let msg = '';
+    if (pct >= 80) msg = 'Interview-ready. You know the stack.';
+    else if (pct >= 60) msg = 'Almost there. Review the code and architecture sections.';
+    else msg = 'Revisit the sections above — focus on the async pattern and Pydantic V2.';
+
+    let reviewHTML = qs.map((q, i) => {
+      const ok = state.a[i] === q.c;
+      return `<div class="quiz-review-entry">
+        <div class="rev-q">${i+1}. ${q.q}</div>
+        <div class="rev-detail">Your answer: <strong>${state.a[i] >= 0 ? L[state.a[i]]+'. '+q.o[state.a[i]] : '—'}</strong></div>
+        <div class="rev-detail">Correct: <strong>${L[q.c]}. ${q.o[q.c]}</strong></div>
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-top:4px;color:${ok?'var(--green)':'var(--accent)'};">${ok?'✓ Correct':'✗ Incorrect'}</div>
+      </div>`;
+    }).join('');
+
+    container.innerHTML = `
+      <div class="quiz-results-inner">
+        <div class="quiz-score">${correct}/${len}</div>
+        <div class="quiz-score-lbl">Score · ${pct}%</div>
+        <div class="quiz-msg">${msg}</div>
+      </div>
+      <div style="margin-bottom:12px;font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-dim);">Question Review</div>
+      <div style="margin-bottom:16px;">${qs.map((q,i)=>{
+        return `<span style="display:inline-block;width:22px;height:22px;text-align:center;line-height:22px;border-radius:50%;margin:2px;font-family:var(--mono);font-size:10px;font-weight:600;background:${state.a[i]===q.c?'var(--green)':'var(--accent)'};color:white;">${state.a[i]===q.c?'✓':'✗'}</span>`;
+      }).join('')}</div>
+      ${reviewHTML}
+      <div style="text-align:center;margin-top:14px;">
+        <button class="q-btn" style="padding:8px 20px;" onclick="resetQuiz('${containerId}')">Retry</button>
+      </div>
+    `;
+  }
+
+  c.resetQuizFn = function() {
+    state = { i:0, a:new Array(len).fill(-1), r:new Array(len).fill(false) };
+    const container = c.querySelector('.quiz-results');
+    container.style.display = 'none';
+    container.innerHTML = '';
+    c.querySelector('.quiz-q').style.display = '';
+    c.querySelector('.quiz-opts').style.display = '';
+    c.querySelector('.q-nav').style.display = '';
+    c.querySelector('.quiz-dots').style.display = '';
+    render();
+  };
+  render();
+}
+
+function resetQuiz(containerId) {
+  const c = document.getElementById(containerId);
+  if (c && c.resetQuizFn) c.resetQuizFn();
+}
+
+// Init quiz
+initQuiz('quizFg');
+
+// === DARK MODE ===
+(function(){
+  const h=document.documentElement,b=document.getElementById('darkToggle');
+  const s=localStorage.getItem('kr-theme')||'dark';
+  h.setAttribute('data-theme',s);
+  b.onclick=()=>{const n=h.getAttribute('data-theme')==='dark'?'light':'dark';h.setAttribute('data-theme',n);localStorage.setItem('kr-theme',n);};
+})();
+
+// === PROGRESS ===
+function updPct(){
+  let d=0;
+  for(let i=1;i<=8;i++) if(localStorage.getItem('kr-fg-'+i)==='true') d++;
+  document.getElementById('pctTop').textContent=Math.round(d/8*100)+'%';
+}
+document.querySelectorAll('.scb').forEach(cb=>{
+  const s=cb.dataset.sec;
+  cb.checked=localStorage.getItem('kr-fg-'+s)==='true';
+  cb.onchange=()=>{localStorage.setItem('kr-fg-'+s,cb.checked);updPct();};
+});
+document.querySelectorAll('#progressGrid [data-sec]').forEach(el=>{
+  const s=el.dataset.sec;
+  if(localStorage.getItem('kr-fg-'+s)==='true'){el.style.background='var(--green)';el.style.borderColor='var(--green)';}
+  el.onclick=()=>{
+    const v=localStorage.getItem('kr-fg-'+s)==='true';
+    localStorage.setItem('kr-fg-'+s,v?'false':'true');
+    el.style.background=v?'':'var(--green)';
+    el.style.borderColor=v?'': 'var(--green)';
+    document.querySelector(`.scb[data-sec="${s}"]`).checked=!v;
+    updPct();
+  };
+});
+updPct();
+
+// === SCROLL REVEAL ===
+(function(){
+  const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.08,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('section').forEach(s=>io.observe(s));
+})();
+
+// === INTERACTIVE PANELS ===
+function switchIntPanel(group, id) {
+  document.querySelectorAll(`#${group}-${id}`).forEach(p => p.classList.add('active'));
+  // Hide all panels in this group
+  const containers = document.querySelectorAll(`[id^="${group}-"]`);
+  containers.forEach(el => {
+    if (el.id.endsWith('-sync') || el.id.endsWith('-asyncp') || el.id.endsWith('-main') || el.id.endsWith('-models') || el.id.endsWith('-config') || el.id.endsWith('-retry') || el.id.endsWith('-middleware')) {
+      el.classList.remove('active');
+    }
+  });
+  document.getElementById(`${group}-${id}`).classList.add('active');
+  // Update button states
+  document.querySelectorAll(`.int-toggle button`).forEach(b => {
+    b.classList.remove('active');
+    if(b.textContent.toLowerCase().includes(id) || 
+       (id==='sync' && b.textContent.includes('blocking')) ||
+       (id==='asyncp' && b.textContent.includes('Non-blocking')) ||
+       (id==='main' && b.textContent.includes('main.py')) ||
+       (id==='models' && b.textContent.includes('models')) ||
+       (id==='config' && b.textContent.includes('config')) ||
+       (id==='retry' && b.textContent.includes('retry')) ||
+       (id==='middleware' && b.textContent.includes('middleware'))) {
+      b.classList.add('active');
+    }
+  });
+}
+
+// Also add click handlers for int-toggle buttons
+document.querySelectorAll('.int-toggle button').forEach(btn => {
+  btn.onclick = function() {
+    const parent = this.parentElement;
+    const panels = parent.parentElement.querySelectorAll('.int-panel');
+    panels.forEach(p => p.classList.remove('active'));
+    parent.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const idx = Array.from(parent.children).indexOf(this);
+    if (panels[idx]) panels[idx].classList.add('active');
+  };
+});
+
+// === SVG defs fix ===
+// Add missing marker to SVG
+document.querySelectorAll('svg marker').forEach(m => {}); // noop
+
+// === PLAYGROUND ===
+var flowSteps = {
+  healthz: [
+    {x: 10, y: 22, label: '🌐 Client sends GET /healthz', node: 'flow-client'},
+    {x: 150, y: 22, label: '⚡ FastAPI matches route', node: 'flow-fa'},
+    {x: 290, y: 22, label: '✅ No validation needed (GET)', node: 'flow-pv'},
+    {x: 430, y: 22, label: '🧠 Bypasses Gemini (liveness)', node: 'flow-gem'},
+    {x: 570, y: 22, label: '✅ Returns {"status": "alive"}', node: 'flow-resp'}
+  ],
+  readyz: [
+    {x: 10, y: 22, label: '🌐 Client sends GET /readyz', node: 'flow-client'},
+    {x: 150, y: 22, label: '⚡ FastAPI matches route', node: 'flow-fa'},
+    {x: 290, y: 22, label: '✅ No validation needed (GET)', node: 'flow-pv'},
+    {x: 430, y: 22, label: '🧠 Tests Gemini connectivity', node: 'flow-gem'},
+    {x: 570, y: 22, label: '✅ Returns {"status": "ready"}', node: 'flow-resp'}
+  ],
+  chat: [
+    {x: 10, y: 22, label: '🌐 Client POST /chat + JSON body', node: 'flow-client'},
+    {x: 150, y: 22, label: '⚡ FastAPI calls chat() async', node: 'flow-fa'},
+    {x: 290, y: 22, label: '✅ Pydantic validates ChatRequest', node: 'flow-pv'},
+    {x: 430, y: 22, label: '🧠 Gemini.generate_content() via to_thread', node: 'flow-gem'},
+    {x: 570, y: 22, label: '✅ Returns ChatResponse JSON', node: 'flow-resp'}
+  ]
+};
+
+function simReq(endpoint) {
+  var status = document.getElementById('simStatus');
+  var output = document.getElementById('simOutput');
+  var pkt = document.getElementById('simPkt');
+  var steps = flowSteps[endpoint];
+  
+  document.querySelectorAll('[id^="flow-"] rect').forEach(function(r) {
+    r.setAttribute('stroke-width', '1');
+  });
+
+  status.className = 'pg-status busy';
+  status.textContent = '🚀 Processing...';
+  output.style.display = 'none';
+  pkt.style.display = 'block';
+
+  var i = 0;
+  function nextStep() {
+    if (i >= steps.length) {
+      pkt.style.display = 'none';
+      status.className = 'pg-status ok';
+      status.textContent = endpoint === 'chat' ? '✅ POST /chat → Gemini response' : `✅ GET /${endpoint} completed`;
+      output.style.display = 'block';
+      if (endpoint === 'healthz') output.textContent = '{\n  "status": "alive"\n}';
+      else if (endpoint === 'readyz') output.textContent = '{\n  "status": "ready"\n}';
+      else output.textContent = '{\n  "reply": "Gemini generated response!",\n  "model": "gemini-2.0-flash-001",\n  "tokens": 42,\n  "latency_ms": 1234.5\n}';
+      document.querySelectorAll('[id^="flow-"] rect').forEach(function(r) {
+        r.setAttribute('stroke-width', '1');
+      });
+      return;
+    }
+    var s = steps[i];
+    pkt.setAttribute('transform', 'translate(' + s.x + ', ' + s.y + ')');
+    document.querySelectorAll('[id^="flow-"] rect').forEach(function(r) {
+      r.setAttribute('stroke-width', '1');
+    });
+    var activeNode = document.getElementById(s.node);
+    if (activeNode) {
+      var rect = activeNode.querySelector('rect');
+      if (rect) rect.setAttribute('stroke-width', '3');
+    }
+    status.textContent = s.label;
+    i++;
+    setTimeout(nextStep, 700);
+  }
+  nextStep();
+}
+</script>
+</body>
+</html>
