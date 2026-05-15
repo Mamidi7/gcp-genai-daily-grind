@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RBI Grade B 2026 ─ Concept Notebook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #faf8f5; --paper-2: #f2ede6;
+  --ink: #1a1410; --ink-2: #3d3528;
+  --ink-dim: #8a7e6e; --ink-faint: #b8ad9a;
+  --rule: #dcd0be; --accent: #d94430; --accent2: #c93a26;
+  --green: #409a4e; --blue: #407abb;
+  --yellow: #c09030; --pink: #c0406a;
+  --highlight: #ffe8a0; --highlight-gold: #fdebb3;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+[data-theme="dark"] {
+  --paper: #1b1a18; --paper-2: #242220;
+  --ink: #f0ece9; --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430; --accent: #e8704a; --accent2: #d95a3a;
+  --green: #5bbd6b; --blue: #5b8fbd;
+  --yellow: #d4a84b; --pink: #d96a8a;
+  --highlight: #7a5a3a; --highlight-gold: #8a7040;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65;}
+body{background-image:radial-gradient(circle at 15% 10%,rgba(200,180,140,0.12) 0%,transparent 45%),radial-gradient(circle at 85% 90%,rgba(200,180,140,0.1) 0%,transparent 40%),repeating-linear-gradient(0deg,transparent 0,transparent 28px,rgba(120,100,70,0.03) 28px,rgba(120,100,70,0.03) 29px);min-height:100vh;}
+
+/* Top bar */
+.topbar{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule);padding:10px 0;backdrop-filter:blur(8px);}
+.topbar-inner{max-width:1000px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+.brand{font-family:var(--serif);font-size:18px;font-style:italic;letter-spacing:-.01em;}
+.brand .amp{color:var(--accent);}
+.top-actions{display:flex;align-items:center;gap:10px;}
+#pctTop{font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:.08em;font-weight:600;}
+.topbar button{background:none;border:1px solid var(--rule);cursor:pointer;color:var(--ink-dim);padding:4px;display:flex;align-items:center;line-height:1;flex-shrink:0;}
+.topbar button:hover{color:var(--accent);border-color:var(--accent);}
+
+main{max-width:1000px;margin:0 auto;padding:32px 24px 80px;}
+
+/* Hero */
+.hero{text-align:center;padding:32px 0 24px;margin-bottom:32px;border-bottom:2px solid var(--ink);position:relative;}
+.hero h1{font-family:var(--serif);font-size:clamp(36px,5vw,64px);font-weight:400;line-height:.95;letter-spacing:-.025em;color:var(--ink);}
+.hero h1 .italic{font-style:italic;color:var(--accent);}
+.hero .sub{font-family:var(--serif);font-size:18px;font-style:italic;color:var(--ink-2);margin-top:6px;}
+.cd-grid{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+.cd-card{background:var(--paper-2);border:1px solid var(--ink);padding:10px 18px;min-width:100px;box-shadow:3px 3px 0 var(--ink);}
+.cd-card .num{font-family:var(--serif);font-size:28px;font-style:italic;color:var(--accent);line-height:1.1;}
+.cd-card .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim);}
+
+/* Sections */
+section{margin-bottom:40px;opacity:0;transform:translateY(16px);transition:opacity .5s cubic-bezier(.15,.75,.3,1),transform .5s cubic-bezier(.15,.75,.3,1);}
+section.in{opacity:1;transform:translateY(0);}
+.sec-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:4px;}
+.sec-head input{-webkit-appearance:none;appearance:none;flex-shrink:0;width:18px;height:18px;border:2px solid var(--rule);background:var(--paper);cursor:pointer;margin-top:5px;position:relative;transition:all .2s;}
+.sec-head input:checked{background:var(--green);border-color:var(--green);}
+.sec-head input:checked::after{content:'';position:absolute;width:5px;height:9px;border:solid var(--paper);border-width:0 2px 2px 0;transform:rotate(45deg);top:1px;left:4px;}
+.sec-head input:hover{border-color:var(--ink);}
+.sec-num{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.1em;flex-shrink:0;margin-top:4px;width:20px;text-align:right;}
+.sec-head h2{font-family:var(--serif);font-size:26px;font-weight:400;line-height:1.2;letter-spacing:-.01em;margin:0;}
+.sec-head h2 .underline{text-decoration:underline;text-decoration-style:wavy;text-decoration-color:var(--accent);text-decoration-thickness:1.5px;text-underline-offset:5px;}
+.sec-head+.h2-sub{font-family:var(--serif);font-style:italic;color:var(--ink-dim);font-size:15px;margin:0 0 18px 48px;}
+
+h3{font-family:var(--sans);font-size:16px;font-weight:600;letter-spacing:.02em;margin:18px 0 8px;color:var(--ink);}
+p{margin-bottom:12px;color:var(--ink-2);line-height:1.7;}
+p strong{color:var(--ink);}
+ul,ol{margin:8px 0 14px 18px;color:var(--ink-2);}
+li{margin-bottom:5px;}
+
+/* Concept card */
+.concept-card{background:var(--paper-2);border:1px solid var(--ink);padding:20px;margin:16px 0;box-shadow:3px 3px 0 var(--ink);}
+.concept-card .label{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:2px;}
+.concept-card h4{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--ink);margin-bottom:6px;}
+.concept-card h4 .hl{color:var(--accent);}
+.concept-card .explain{font-size:14px;color:var(--ink-2);margin-bottom:10px;line-height:1.7;}
+
+/* SVG container */
+.svg-wrap{background:var(--paper);border:1px solid var(--rule);padding:20px;margin:14px 0;overflow-x:auto;}
+.svg-wrap svg{display:block;margin:0 auto;max-width:100%;}
+.svg-caption{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);text-align:center;margin-top:8px;}
+
+/* Definition block */
+.def-block{background:var(--paper);border-left:3px solid var(--accent);padding:12px 16px;margin:12px 0;font-size:14px;color:var(--ink-2);}
+.def-block .term{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:2px;}
+
+/* Key points grid */
+.key-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:14px 0;}
+.key-item{background:var(--paper);border:1px solid var(--rule);padding:12px;font-size:13px;color:var(--ink-2);}
+.key-item .key-num{font-family:var(--serif);font-size:20px;font-style:italic;color:var(--accent);line-height:1;}
+.key-item .key-title{font-weight:600;color:var(--ink);margin-bottom:3px;}
+.key-item p{font-size:13px;margin:0;color:var(--ink-dim);}
+
+/* Comparison table */
+.comp-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;}
+.comp-table th{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:8px 12px;text-align:left;font-weight:400;}
+.comp-table td{padding:9px 12px;border-bottom:1px solid var(--rule);color:var(--ink-2);vertical-align:top;}
+.comp-table tr:last-child td{border-bottom:none;}
+.comp-table .highlight td{background:var(--highlight-gold);color:var(--ink);}
+
+/* Rate card */
+.rate-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:14px 0;}
+.rate-card{background:var(--paper);border:1px solid var(--rule);padding:12px;text-align:center;}
+.rate-card .rate-val{font-family:var(--serif);font-size:28px;font-style:italic;color:var(--accent);line-height:1;}
+.rate-card .rate-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:2px;}
+.rate-card .rate-note{font-size:11px;color:var(--ink-faint);margin-top:2px;}
+
+/* Tag */
+.tag{display:inline-block;font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;margin-right:4px;margin-bottom:3px;border:1px solid var(--ink);color:var(--ink-dim);}
+.tag-blue{border-color:var(--blue);color:var(--blue);}
+.tag-green{border-color:var(--green);color:var(--green);}
+.tag-yellow{border-color:var(--yellow);color:var(--yellow);}
+.tag-red{border-color:var(--accent);color:var(--accent);}
+
+/* Quiz */
+.quiz-card{background:var(--paper-2);border:2px solid var(--ink);padding:20px;margin:16px 0;}
+.quiz-header{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:10px;display:flex;justify-content:space-between;}
+.quiz-dots{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px;}
+.quiz-dot{width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;border-radius:50%;border:2px solid var(--rule);background:var(--paper);color:var(--ink-faint);cursor:pointer;transition:all .25s;}
+.quiz-dot.active{border-color:var(--accent);color:var(--accent);font-weight:600;}
+.quiz-dot.correct{background:var(--green);border-color:var(--green);color:var(--paper);}
+.quiz-dot.wrong{background:var(--accent);border-color:var(--accent);color:var(--paper);}
+.quiz-q{font-size:15px;font-weight:500;color:var(--ink);margin-bottom:14px;}
+.quiz-opts{display:flex;flex-direction:column;gap:5px;}
+.q-opt{background:var(--paper);border:1px solid var(--rule);cursor:pointer;font-size:14px;color:var(--ink-2);transition:all .2s;position:relative;}
+.q-opt:hover{border-color:var(--ink);background:var(--paper-2);}
+.q-opt input{display:none;}
+.q-opt .opt-inner{display:flex;align-items:center;padding:9px 12px;gap:8px;width:100%;}
+.q-opt .letter{width:20px;height:20px;border-radius:50%;border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;flex-shrink:0;}
+.q-opt .bar{position:absolute;left:0;top:0;bottom:0;transition:width .8s ease;}
+.q-opt.locked{cursor:default;}
+.q-opt.locked .bar{background:rgba(26,22,18,0.06);}
+[data-theme="dark"] .q-opt.locked .bar{background:rgba(255,255,255,0.06);}
+.q-opt.is-c{border-color:var(--green);}
+.q-opt.is-w{border-color:var(--accent);}
+.q-nav{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:10px;}
+.q-btn{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:7px 14px;border:2px solid var(--ink);background:var(--paper);cursor:pointer;color:var(--ink);}
+.q-btn:hover{background:var(--ink);color:var(--paper);}
+.q-btn:disabled{opacity:.4;cursor:default;background:var(--paper);color:var(--ink-faint);border-color:var(--ink-faint);}
+.q-count{font-family:var(--mono);font-size:10px;color:var(--ink-dim);}
+.quiz-results{display:none;}
+.quiz-results-inner{text-align:center;padding:24px;border:2px solid var(--ink);background:var(--paper-2);margin-bottom:16px;}
+.quiz-score{font-family:var(--serif);font-size:42px;font-style:italic;color:var(--ink);line-height:1;}
+.quiz-score-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);margin-top:4px;}
+.quiz-msg{font-family:var(--serif);font-size:16px;font-style:italic;color:var(--ink-2);margin-top:8px;}
+.quiz-review-entry{padding:10px 14px;border:1px solid var(--rule);background:var(--paper);margin-bottom:8px;}
+.quiz-review-entry .rev-q{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+.quiz-review-entry .rev-detail{font-size:13px;color:var(--ink-dim);}
+
+/* SVG Animations */
+@keyframes pulse-glow {
+  0%, 100% { opacity: .7; }
+  50% { opacity: 1; }
+}
+@keyframes flow-right {
+  0% { stroke-dashoffset: 200; }
+  100% { stroke-dashoffset: 0; }
+}
+@keyframes pop-in {
+  0% { transform: scale(0); opacity: 0; }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes fade-up {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.svg-anim .pulse{animation:pulse-glow 2s ease-in-out infinite;}
+.svg-anim .flow{stroke-dasharray:200;animation:flow-right 2s linear infinite;}
+.svg-anim .pop{animation:pop-in .5s cubic-bezier(.15,.75,.3,1) both;}
+.svg-anim .fade{animation:fade-up .4s ease both;}
+
+/* Interactive toggle */
+.interactive-toggle{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;}
+.interactive-toggle button{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:6px 14px;border:1px solid var(--rule);background:var(--paper);cursor:pointer;color:var(--ink-dim);transition:all .2s;}
+.interactive-toggle button.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+.interactive-toggle button:hover{color:var(--accent);border-color:var(--accent);}
+.interactive-panel{display:none;}
+.interactive-panel.active{display:block;}
+.panel-content{padding:14px;background:var(--paper-2);border:1px solid var(--rule);margin-top:8px;font-size:14px;color:var(--ink-2);}
+
+/* Note */
+.note{padding:12px 16px;margin:10px 0;font-size:14px;color:var(--ink-2);background:var(--paper);border:1px solid var(--green);}
+.note-warn{border-color:var(--yellow);}
+.note-accent{border-color:var(--accent);}
+
+/* Formula */
+.formula{font-family:var(--serif);font-size:22px;font-style:italic;text-align:center;padding:16px;background:var(--paper);border:1px solid var(--rule);margin:12px 0;color:var(--ink);letter-spacing:-.01em;}
+
+/* Exam tip */
+.exam-tip{background:var(--paper);border:1px solid var(--blue);padding:12px 16px;margin:12px 0;font-size:14px;color:var(--ink-2);}
+.exam-tip .tip-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:2px;}
+
+/* Footer */
+footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);flex-wrap:wrap;gap:10px;}
+footer .pn{color:var(--accent);}
+
+/* Responsive */
+@media(max-width:640px){
+  main{padding:20px 14px 60px;}
+  .sec-head h2{font-size:22px;}
+  .sec-head+.h2-sub{margin-left:0;}
+  .sec-num{display:none;}
+  .key-grid{grid-template-columns:1fr;}
+  .rate-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">RBI <span class="amp">Grade</span> <em>B 2026</em></div>
+    <div class="top-actions">
+      <span id="pctTop">0%</span>
+      <button id="darkToggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div style="font-family:var(--serif);font-size:clamp(40px,7vw,80px);font-style:italic;color:var(--accent);line-height:1;" id="countdownBig">29</div>
+  <div style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);">Days to Phase 1 · 13 June 2026</div>
+  <h1>Concept <span class="italic">Notebook</span></h1>
+  <p class="sub">Explanations · Diagrams · Quizzes — built for RBI Grade B.</p>
+</div>
+
+<!-- ===== 1. MONETARY POLICY ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="1">
+    <span class="sec-num">01</span>
+    <h2><span class="underline">Monetary</span> Policy</h2>
+  </div>
+  <div class="h2-sub">RBI's most important function. High-weight topic in GA + Finance.</div>
+
+  <div class="concept-card">
+    <div class="label">What is it?</div>
+    <h4>Monetary Policy = RBI's <span class="hl">control</span> over money supply & interest rates</h4>
+    <div class="explain">
+      Monetary Policy is how RBI manages the economy by adjusting interest rates and money supply. 
+      <strong>Objective:</strong> Price stability (inflation control) + Growth. Since 2016, India uses 
+      <strong>Flexible Inflation Targeting (FIT)</strong> where inflation target is the primary goal.
+    </div>
+  </div>
+
+  <!-- SVG: Monetary Policy Transmission -->
+  <div class="svg-wrap svg-anim">
+    <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg" style="font-family:system-ui,sans-serif;">
+      <!-- Background -->
+      <rect width="800" height="320" fill="var(--paper)" rx="8"/>
+
+      <!-- Center: RBI -->
+      <rect x="320" y="10" width="160" height="56" rx="8" fill="var(--accent)" opacity=".9"/>
+      <text x="400" y="44" text-anchor="middle" fill="white" font-size="16" font-weight="600">RBI</text>
+      <text x="400" y="58" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="10">Monetary Policy Committee</text>
+
+      <!-- Tool: Repo Rate -->
+      <rect x="110" y="90" width="170" height="50" rx="6" fill="var(--blue)" opacity=".85" class="fade" style="animation-delay:.1s"/>
+      <text x="195" y="120" text-anchor="middle" fill="white" font-size="14" font-weight="500">Repo Rate</text>
+      <text x="195" y="133" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="9">Policy rate → banks' cost</text>
+
+      <!-- Tool: CRR/SLR -->
+      <rect x="310" y="90" width="170" height="50" rx="6" fill="var(--green)" opacity=".85" class="fade" style="animation-delay:.25s"/>
+      <text x="395" y="120" text-anchor="middle" fill="white" font-size="14" font-weight="500">CRR / SLR</text>
+      <text x="395" y="133" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="9">Reserve requirements</text>
+
+      <!-- Tool: OMO/MSF -->
+      <rect x="510" y="90" width="170" height="50" rx="6" fill="var(--yellow)" opacity=".85" class="fade" style="animation-delay:.4s"/>
+      <text x="595" y="120" text-anchor="middle" fill="white" font-size="14" font-weight="500">OMO / MSF</text>
+      <text x="595" y="133" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="9">Open market / emergency</text>
+
+      <!-- Arrows: RBI → Tools -->
+      <line x1="400" y1="66" x2="195" y2="90" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 4" opacity=".4"/>
+      <line x1="400" y1="66" x2="395" y2="90" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 4" opacity=".4"/>
+      <line x1="400" y1="66" x2="595" y2="90" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 4" opacity=".4"/>
+
+      <!-- Intermediary: Banks -->
+      <rect x="250" y="170" width="300" height="46" rx="6" fill="var(--ink)" opacity=".85" class="fade" style="animation-delay:.55s"/>
+      <text x="400" y="198" text-anchor="middle" fill="var(--paper)" font-size="14" font-weight="500">Banks & Financial Institutions</text>
+
+      <!-- Arrows: Tools → Banks -->
+      <line x1="195" y1="140" x2="340" y2="170" stroke="var(--ink-dim)" stroke-width="1" opacity=".5"/>
+      <line x1="395" y1="140" x2="400" y2="170" stroke="var(--ink-dim)" stroke-width="1" opacity=".5"/>
+      <line x1="595" y1="140" x2="470" y2="170" stroke="var(--ink-dim)" stroke-width="1" opacity=".5"/>
+
+      <!-- Outcome: Economy -->
+      <rect x="150" y="245" width="170" height="46" rx="6" fill="var(--green)" opacity=".7" class="fade" style="animation-delay:.7s"/>
+      <text x="235" y="272" text-anchor="middle" fill="white" font-size="13" font-weight="500">Inflation Control</text>
+      <text x="235" y="285" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="9">Price stability</text>
+
+      <rect x="460" y="245" width="170" height="46" rx="6" fill="var(--blue)" opacity=".7" class="fade" style="animation-delay:.85s"/>
+      <text x="545" y="272" text-anchor="middle" fill="white" font-size="13" font-weight="500">Economic Growth</text>
+      <text x="545" y="285" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="9">Output & employment</text>
+
+      <!-- Arrows: Banks → Outcomes -->
+      <line x1="330" y1="216" x2="250" y2="245" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".4"/>
+      <line x1="470" y1="216" x2="530" y2="245" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".4"/>
+
+      <!-- Arrows connecting dual objectives -->
+      <path d="M 320 268 Q 400 268 460 268" fill="none" stroke="var(--ink-faint)" stroke-width="1" stroke-dasharray="3 3"/>
+      <text x="400" y="262" text-anchor="middle" fill="var(--ink-faint)" font-size="9">Dual objective: Price stability + Growth</text>
+    </svg>
+    <div class="svg-caption">Figure: Monetary Policy Transmission — Tools → Banks → Economy</div>
+  </div>
+
+  <!-- Key Rates -->
+  <h3>Key RBI Policy Rates</h3>
+  <div class="rate-grid">
+    <div class="rate-card"><div class="rate-lbl">Repo Rate</div><div class="rate-val">6.50%</div><div class="rate-note">RBI lends to banks</div></div>
+    <div class="rate-card"><div class="rate-lbl">Reverse Repo</div><div class="rate-val">3.35%</div><div class="rate-note">RBI borrows from banks</div></div>
+    <div class="rate-card"><div class="rate-lbl">CRR</div><div class="rate-val">4.50%</div><div class="rate-note">Cash reserve (no interest)</div></div>
+    <div class="rate-card"><div class="rate-lbl">SLR</div><div class="rate-val">18.00%</div><div class="rate-note">Govt securities</div></div>
+    <div class="rate-card"><div class="rate-lbl">MSF</div><div class="rate-val">6.75%</div><div class="rate-note">Repo + 0.25%</div></div>
+    <div class="rate-card"><div class="rate-lbl">Bank Rate</div><div class="rate-val">6.75%</div><div class="rate-note">Penal rate</div></div>
+  </div>
+  <div class="exam-tip">
+    <div class="tip-label">Exam Tip</div>
+    Track MPC meetings (Feb, Apr, Jun, Aug, Oct, Dec). Know the <strong>current repo rate</strong> and <strong>policy stance</strong> — 100% asked in GA.
+  </div>
+
+  <!-- MPC Structure SVG -->
+  <h3>MPC Structure</h3>
+  <div class="svg-wrap svg-anim">
+    <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" style="font-family:system-ui,sans-serif;">
+      <rect width="700" height="220" fill="var(--paper)" rx="8"/>
+      <!-- MPC Box -->
+      <rect x="220" y="10" width="260" height="42" rx="6" fill="var(--accent)" opacity=".9"/>
+      <text x="350" y="37" text-anchor="middle" fill="white" font-size="16" font-weight="600">Monetary Policy Committee</text>
+
+      <!-- 3 RBI members -->
+      <rect x="30" y="100" width="190" height="46" rx="6" fill="var(--blue)" opacity=".85" class="fade" style="animation-delay:.15s"/>
+      <text x="125" y="123" text-anchor="middle" fill="white" font-size="13" font-weight="500">3 RBI Members</text>
+      <text x="125" y="138" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="9">Governor + Dy Gov + Board Nominee</text>
+
+      <!-- 3 External members -->
+      <rect x="480" y="100" width="190" height="46" rx="6" fill="var(--green)" opacity=".85" class="fade" style="animation-delay:.35s"/>
+      <text x="575" y="123" text-anchor="middle" fill="white" font-size="13" font-weight="500">3 External Members</text>
+      <text x="575" y="138" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="9">Appointed by Govt of India</text>
+
+      <line x1="280" y1="52" x2="130" y2="100" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5"/>
+      <line x1="420" y1="52" x2="570" y2="100" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5"/>
+
+      <!-- Vote -->
+      <rect x="220" y="175" width="260" height="30" rx="4" fill="var(--ink)" opacity=".8"/>
+      <text x="350" y="194" text-anchor="middle" fill="var(--paper)" font-size="11">Each member has 1 vote · Governor has casting vote on tie</text>
+    </svg>
+    <div class="svg-caption">Figure: MPC Composition — 3 RBI + 3 External (Section 45ZB, RBI Act 1934)</div>
+  </div>
+
+  <!-- Monetary Policy Stances -->
+  <h3>Policy Stances</h3>
+  <div class="key-grid">
+    <div class="key-item"><div class="key-num">A</div><div class="key-title">Accommodative</div><p>Easing rates to boost growth. Low repo rate to encourage borrowing.</p></div>
+    <div class="key-item"><div class="key-num">N</div><div class="key-title">Neutral</div><p>Flexible. Can move either direction based on data. Room to act.</p></div>
+    <div class="key-item"><div class="key-num">W</div><div class="key-title">Withdrawal of Accommodation</div><p>Gradual removal of stimulus. Signals tightening without being hawkish.</p></div>
+    <div class="key-item"><div class="key-num">H</div><div class="key-title">Hawkish / Dovish</div><p>Hawkish = prioritize inflation. Dovish = prioritize growth. Informal labels.</p></div>
+  </div>
+
+  <!-- Formula -->
+  <div class="formula">
+    Repo Rate → Lending Rate → Consumption → Inflation / Growth
+  </div>
+
+  <!-- Quick Quiz: Monetary Policy -->
+  <div class="quiz-card" data-quiz="mp">
+    <div class="quiz-header"><span>Quick Quiz: Monetary Policy</span><span class="q-count">0/5</span></div>
+    <div class="quiz-dots"></div>
+    <div class="quiz-q"></div>
+    <div class="quiz-opts"></div>
+    <div class="q-nav">
+      <button class="q-btn prev-btn">Prev</button>
+      <span class="q-count idx">1 / 5</span>
+      <button class="q-btn next-btn">Next</button>
+    </div>
+    <div class="quiz-results"></div>
+  </div>
+</section>
+
+<!-- ===== 2. INFLATION ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="2">
+    <span class="sec-num">02</span>
+    <h2><span class="underline">Inflation</span> — CPI vs WPI</h2>
+  </div>
+  <div class="h2-sub">RBI's primary mandate. Core of Flexible Inflation Targeting.</div>
+
+  <div class="concept-card">
+    <div class="label">Core Concept</div>
+    <h4>Inflation = rate at which <span class="hl">prices rise</span> over time</h4>
+    <div class="explain">
+      RBI targets <strong>CPI (Consumer Price Index)</strong> inflation at 4% with ±2% tolerance band. 
+      <strong>WPI (Wholesale Price Index)</strong> measures factory-gate prices. The key difference: 
+      CPI includes services, WPI does not. RBI's mandate is CPI inflation control.
+    </div>
+  </div>
+
+  <!-- SVG: Inflation Framework -->
+  <div class="svg-wrap svg-anim">
+    <svg viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg" style="font-family:system-ui,sans-serif;">
+      <rect width="760" height="380" fill="var(--paper)" rx="8"/>
+
+      <!-- Title -->
+      <text x="380" y="28" text-anchor="middle" fill="var(--ink)" font-size="16" font-weight="600">Flexible Inflation Targeting (FIT) Framework</text>
+
+      <!-- CPI Box -->
+      <rect x="50" y="50" width="300" height="80" rx="6" fill="var(--accent)" opacity=".85"/>
+      <text x="200" y="80" text-anchor="middle" fill="white" font-size="15" font-weight="600">CPI (Consumer Price Index)</text>
+      <text x="200" y="97" text-anchor="middle" fill="rgba(255,255,255,.8)" font-size="11">Measures retail prices — includes services</text>
+      <text x="200" y="113" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="10">Base Year: 2012 | Published by: NSO/MOSPI</text>
+
+      <!-- WPI Box -->
+      <rect x="410" y="50" width="300" height="80" rx="6" fill="var(--blue)" opacity=".85"/>
+      <text x="560" y="80" text-anchor="middle" fill="white" font-size="15" font-weight="600">WPI (Wholesale Price Index)</text>
+      <text x="560" y="97" text-anchor="middle" fill="rgba(255,255,255,.8)" font-size="11">Measures wholesale prices — NO services</text>
+      <text x="560" y="113" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="10">Base Year: 2011-12 | Published by: DPIIT</text>
+
+      <!-- Target Band -->
+      <rect x="140" y="170" width="480" height="60" rx="30" fill="var(--green)" opacity=".2" stroke="var(--green)" stroke-width="2" stroke-dasharray="6 3"/>
+      <text x="380" y="195" text-anchor="middle" fill="var(--green)" font-size="14" font-weight="600">Tolerance Band: 2% — 4% — 6%</text>
+      <text x="380" y="214" text-anchor="middle" fill="var(--ink-2)" font-size="11">RBI targets <tspan fill="var(--accent)" font-weight="600">4% CPI</tspan> — must explain if outside 2-6% for 3 consecutive quarters</text>
+
+      <!-- Section 45ZN -->
+      <rect x="170" y="265" width="420" height="46" rx="6" fill="var(--yellow)" opacity=".7"/>
+      <text x="380" y="284" text-anchor="middle" fill="var(--ink)" font-size="13" font-weight="500">Section 45ZN — Failure Clause</text>
+      <text x="380" y="301" text-anchor="middle" fill="var(--ink-2)" font-size="10">If inflation outside band for 3 quarters → RBI must submit report to Govt</text>
+
+      <!-- Arrows -->
+      <line x1="200" y1="130" x2="300" y2="170" stroke="var(--ink-dim)" stroke-width="1" opacity=".4"/>
+      <line x1="560" y1="130" x2="460" y2="170" stroke="var(--ink-dim)" stroke-width="1" opacity=".4"/>
+      <line x1="380" y1="230" x2="380" y2="265" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5"/>
+
+      <!-- Inflation types -->
+      <g class="fade" style="animation-delay:.4s">
+        <rect x="50" y="335" width="210" height="30" rx="4" fill="var(--ink-faint)" opacity=".3"/>
+        <text x="155" y="354" text-anchor="middle" fill="var(--ink-2)" font-size="11">❝ Core Inflation ❞ — excludes food & fuel</text>
+        <rect x="290" y="335" width="210" height="30" rx="4" fill="var(--ink-faint)" opacity=".3"/>
+        <text x="395" y="354" text-anchor="middle" fill="var(--ink-2)" font-size="11">❝ Headline Inflation ❞ — includes everything</text>
+        <rect x="530" y="335" width="200" height="30" rx="4" fill="var(--ink-faint)" opacity=".3"/>
+        <text x="630" y="354" text-anchor="middle" fill="var(--ink-2)" font-size="11">❝ Food Inflation ❞ — CPI Food index</text>
+      </g>
+    </svg>
+    <div class="svg-caption">Figure: FIT Framework — Target, Band, Failure Clause</div>
+  </div>
+
+  <!-- Types of Inflation -->
+  <h3>Types of Inflation</h3>
+  <div class="key-grid">
+    <div class="key-item"><div class="key-num">1</div><div class="key-title">Demand-Pull</div><p>Too much money chasing too few goods. Economy overheating. Solved by hiking rates.</p></div>
+    <div class="key-item"><div class="key-num">2</div><div class="key-title">Cost-Push</div><p>Input costs rise (oil, raw materials). Supply-side. Harder for RBI to control via rates alone.</p></div>
+    <div class="key-item"><div class="key-num">3</div><div class="key-title">Built-in</div><p>Workers demand higher wages → higher costs → higher prices → cycle repeats.</p></div>
+    <div class="key-item"><div class="key-num">4</div><div class="key-title">Imported</div><p>Global commodity prices, forex depreciation. E.g., crude oil price spike → domestic inflation.</p></div>
+  </div>
+
+  <!-- Comparison table -->
+  <h3>CPI vs WPI: Key Differences</h3>
+  <table class="comp-table">
+    <tr><th style="width:18%">Aspect</th><th style="width:41%">CPI</th><th style="width:41%">WPI</th></tr>
+    <tr><td><strong>Full Form</strong></td><td>Consumer Price Index</td><td>Wholesale Price Index</td></tr>
+    <tr><td><strong>What it measures</strong></td><td>Retail prices paid by consumers</td><td>Wholesale prices at factory gate</td></tr>
+    <tr><td><strong>Services included</strong></td><td class="highlight">Yes</td><td>No (goods only)</td></tr>
+    <tr><td><strong>Published by</strong></td><td>NSO/MOSPI</td><td>DPIIT</td></tr>
+    <tr><td><strong>RBI target</strong></td><td class="highlight">Yes — primary mandate</td><td>No (reference only)</td></tr>
+    <tr><td><strong>Base Year</strong></td><td>2012</td><td>2011-12</td></tr>
+    <tr><td><strong>Food weight</strong></td><td>~46% (high)</td><td>~24%</td></tr>
+    <tr><td><strong>Fuel weight</strong></td><td>~7%</td><td>~13%</td></tr>
+  </table>
+
+  <div class="exam-tip">
+    <div class="tip-label">Exam Tip</div>
+    Know the <strong>inflation numbers</strong>: Current CPI (track last 3 months), the difference between core & headline, and when the failure clause was triggered (2022).
+  </div>
+
+  <!-- Quiz: Inflation -->
+  <div class="quiz-card" data-quiz="inf">
+    <div class="quiz-header"><span>Quick Quiz: Inflation</span><span class="q-count">0/5</span></div>
+    <div class="quiz-dots"></div>
+    <div class="quiz-q"></div>
+    <div class="quiz-opts"></div>
+    <div class="q-nav">
+      <button class="q-btn prev-btn">Prev</button>
+      <span class="q-count idx">1 / 5</span>
+      <button class="q-btn next-btn">Next</button>
+    </div>
+    <div class="quiz-results"></div>
+  </div>
+</section>
+
+<!-- ===== 3. RBI FUNCTIONS ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="3">
+    <span class="sec-num">03</span>
+    <h2><span class="underline">RBI</span> Functions</h2>
+  </div>
+  <div class="h2-sub">Central banking functions — statutory basis, direct GA questions.</div>
+
+  <div class="concept-card">
+    <div class="label">RBI Act, 1934</div>
+    <h4>RBI = <span class="hl">Central Bank</span> of India</h4>
+    <div class="explain">
+      Established: <strong>April 1, 1935</strong> (Act passed 1934). Nationalized: <strong>Jan 1, 1949</strong>. 
+      Head office: Mumbai (moved from Kolkata in 1937). Governed by Central Board of Directors — 21 members 
+      (1 Governor + 4 Dy Governors + 4 Directors nominated by Govt + 4 nominated from local boards + others).
+    </div>
+  </div>
+
+  <!-- SVG: RBI Functions Tree -->
+  <div class="svg-wrap svg-anim">
+    <svg viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg" style="font-family:system-ui,sans-serif;">
+      <rect width="760" height="440" fill="var(--paper)" rx="8"/>
+
+      <!-- Root -->
+      <rect x="300" y="12" width="160" height="46" rx="6" fill="var(--accent)" opacity=".9"/>
+      <text x="380" y="34" text-anchor="middle" fill="white" font-size="15" font-weight="600">RBI Functions</text>
+      <text x="380" y="49" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="10">Central Bank of India</text>
+
+      <!-- Branch: Monetary -->
+      <rect x="30" y="90" width="220" height="46" rx="6" fill="var(--blue)" opacity=".85" class="fade" style="animation-delay:.15s"/>
+      <text x="140" y="113" text-anchor="middle" fill="white" font-size="13" font-weight="500">Monetary Authority</text>
+      <text x="140" y="128" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="9">MPC · Repo Rate · Inflation control</text>
+
+      <!-- Branch: Regulator -->
+      <rect x="270" y="90" width="220" height="46" rx="6" fill="var(--green)" opacity=".85" class="fade" style="animation-delay:.3s"/>
+      <text x="380" y="113" text-anchor="middle" fill="white" font-size="13" font-weight="500">Regulator & Supervisor</text>
+      <text x="380" y="128" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="9">Banks · NBFCs · Payment systems</text>
+
+      <!-- Branch: Currency -->
+      <rect x="510" y="90" width="220" height="46" rx="6" fill="var(--yellow)" opacity=".85" class="fade" style="animation-delay:.45s"/>
+      <text x="620" y="113" text-anchor="middle" fill="var(--ink)" font-size="13" font-weight="500">Currency Issuer</text>
+      <text x="620" y="128" text-anchor="middle" fill="var(--ink-2)" font-size="9">Sole authority · Note printing</text>
+
+      <!-- Arrows -->
+      <line x1="340" y1="58" x2="150" y2="90" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5"/>
+      <line x1="380" y1="58" x2="380" y2="90" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5"/>
+      <line x1="420" y1="58" x2="610" y2="90" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5"/>
+
+      <!-- Sub-functions row 1 -->
+      <rect x="30" y="170" width="160" height="36" rx="4" fill="var(--ink-faint)" opacity=".3" class="fade" style="animation-delay:.5s"/>
+      <text x="110" y="192" text-anchor="middle" fill="var(--ink-2)" font-size="11">Banker to Govt</text>
+      <rect x="210" y="170" width="160" height="36" rx="4" fill="var(--ink-faint)" opacity=".3" class="fade" style="animation-delay:.55s"/>
+      <text x="290" y="192" text-anchor="middle" fill="var(--ink-2)" font-size="11">Banker to Banks</text>
+      <rect x="390" y="170" width="160" height="36" rx="4" fill="var(--ink-faint)" opacity=".3" class="fade" style="animation-delay:.6s"/>
+      <text x="470" y="192" text-anchor="middle" fill="var(--ink-2)" font-size="11">Lender of Last Resort</text>
+      <rect x="570" y="170" width="160" height="36" rx="4" fill="var(--ink-faint)" opacity=".3" class="fade" style="animation-delay:.65s"/>
+      <text x="650" y="192" text-anchor="middle" fill="var(--ink-2)" font-size="11">Payment Settlement</text>
+
+      <!-- Section: Developmental -->
+      <rect x="150" y="240" width="220" height="46" rx="6" fill="var(--pink)" opacity=".7" class="fade" style="animation-delay:.7s"/>
+      <text x="260" y="263" text-anchor="middle" fill="white" font-size="13" font-weight="500">Developmental Role</text>
+      <text x="260" y="278" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="9">Financial inclusion · NABARD · SIDBI</text>
+
+      <rect x="390" y="240" width="220" height="46" rx="6" fill="var(--pink)" opacity=".7" class="fade" style="animation-delay:.8s"/>
+      <text x="500" y="263" text-anchor="middle" fill="white" font-size="13" font-weight="500">Foreign Exchange Manager</text>
+      <text x="500" y="278" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="9">Forex reserves · FEMA · NEER/REER</text>
+
+      <!-- Quick facts -->
+      <g class="fade" style="animation-delay:.9s">
+        <text x="50" y="330" fill="var(--ink-2)" font-size="11">🏛 Established: 1935 · Nationalized: 1949</text>
+        <text x="50" y="350" fill="var(--ink-2)" font-size="11">🏛 Head Office: Mumbai</text>
+        <text x="50" y="370" fill="var(--ink-2)" font-size="11">🏛 Governor: appointed by Govt for up to 5 years</text>
+        <text x="50" y="390" fill="var(--ink-2)" font-size="11">🏛 Printing: RBI owns 100% of BRBNMPL (Bharatiya Reserve Bank Note Mudran)</text>
+
+        <rect x="460" y="325" width="250" height="70" rx="6" fill="var(--ink-faint)" opacity=".15"/>
+        <text x="585" y="346" text-anchor="middle" fill="var(--ink-2)" font-size="11">💡 Dual oversight model:</text>
+        <text x="585" y="364" text-anchor="middle" fill="var(--ink-2)" font-size="11">Board for Financial Supervision (BFS)</text>
+        <text x="585" y="382" text-anchor="middle" fill="var(--ink-2)" font-size="11">Board for Payment & Settlement (BPSS)</text>
+      </g>
+    </svg>
+    <div class="svg-caption">Figure: RBI Functions — 6 key roles + supporting institutions</div>
+  </div>
+
+  <!-- Key Facts -->
+  <h3>Must-Know RBI Facts</h3>
+  <div class="key-grid">
+    <div class="key-item"><div class="key-num">35</div><div class="key-title">RBI Act, 1934 — Section</div><p>Section 45Z-45ZN = Monetary Policy chapter (added 2016 via amendment).<br/>Section 17 = Core functions.</p></div>
+    <div class="key-item"><div class="key-num">4</div><div class="key-title">Deputy Governors</div><p>4 Dy Governors — usually 2 from RBI, 1 from commercial bank, 1 economist/academic. Currently: M. Patra, M. Jain, T. R. Seth, R. M. Rao.</p></div>
+    <div class="key-item"><div class="key-num">21</div><div class="key-title">Central Board Members</div><p>Governor + 4 Dy Gov + 4 nominated directors + 4 representatives from local boards + others.</p></div>
+    <div class="key-item"><div class="key-num">₹</div><div class="key-title">Currency Management</div><p>RBI issues all currency except 1-rupee note (issued by Ministry of Finance). ₹500 and ₹2000 notes in circulation.</p></div>
+  </div>
+
+  <!-- Quiz: RBI Functions -->
+  <div class="quiz-card" data-quiz="rbi">
+    <div class="quiz-header"><span>Quick Quiz: RBI Functions</span><span class="q-count">0/5</span></div>
+    <div class="quiz-dots"></div>
+    <div class="quiz-q"></div>
+    <div class="quiz-opts"></div>
+    <div class="q-nav">
+      <button class="q-btn prev-btn">Prev</button>
+      <span class="q-count idx">1 / 5</span>
+      <button class="q-btn next-btn">Next</button>
+    </div>
+    <div class="quiz-results"></div>
+  </div>
+</section>
+
+<!-- ===== 4. BANKING REGULATION ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="4">
+    <span class="sec-num">04</span>
+    <h2><span class="underline">Banking</span> Regulation</h2>
+  </div>
+  <div class="h2-sub">NPAs, Basel Norms, IBC — a heavy Finance section topic.</div>
+
+  <div class="concept-card">
+    <div class="label">Key Context</div>
+    <h4>Bank Health = <span class="hl">NPA management</span> + Capital Adequacy</h4>
+    <div class="explain">
+      The RBI supervises banks through inspections (ONSITE + OFFSITE surveillance). Key metrics:
+      <strong>NPA Ratio</strong> (bad loans / total loans), <strong>CRAR</strong> (capital / risk-weighted assets),
+      and <strong>Basel III</strong> compliance. The IBC (Insolvency & Bankruptcy Code, 2016) is the legal framework 
+      for resolving bad loans.
+    </div>
+  </div>
+
+  <!-- SVG: NPA Resolution Framework -->
+  <div class="svg-wrap svg-anim">
+    <svg viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg" style="font-family:system-ui,sans-serif;">
+      <rect width="760" height="340" fill="var(--paper)" rx="8"/>
+
+      <!-- Title -->
+      <text x="380" y="24" text-anchor="middle" fill="var(--ink)" font-size="16" font-weight="600">NPA Resolution — Key Concepts</text>
+
+      <!-- Classification -->
+      <rect x="30" y="45" width="220" height="86" rx="6" fill="var(--accent)" opacity=".85"/>
+      <text x="140" y="70" text-anchor="middle" fill="white" font-size="14" font-weight="500">NPA Classification</text>
+      <text x="140" y="88" text-anchor="middle" fill="rgba(255,255,255,.8)" font-size="11">Substandard: ≤12 months</text>
+      <text x="140" y="106" text-anchor="middle" fill="rgba(255,255,255,.8)" font-size="11">Doubtful: &gt;12 months</text>
+      <text x="140" y="122" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="10">Loss: identified by bank</text>
+
+      <!-- Regulation -->
+      <rect x="270" y="45" width="220" height="86" rx="6" fill="var(--blue)" opacity=".85"/>
+      <text x="380" y="70" text-anchor="middle" fill="white" font-size="14" font-weight="500">Regulatory Framework</text>
+      <text x="380" y="88" text-anchor="middle" fill="rgba(255,255,255,.8)" font-size="11">IBC 2016: 180+90 day resolution</text>
+      <text x="380" y="106" text-anchor="middle" fill="rgba(255,255,255,.8)" font-size="11">SARFAESI 2002: Asset seizure</text>
+      <text x="380" y="122" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="10">Debt Recovery Tribunal (DRT)</text>
+
+      <!-- Instruments -->
+      <rect x="510" y="45" width="220" height="86" rx="6" fill="var(--green)" opacity=".85"/>
+      <text x="620" y="70" text-anchor="middle" fill="white" font-size="14" font-weight="500">Resolution Tools</text>
+      <text x="620" y="88" text-anchor="middle" fill="rgba(255,255,255,.8)" font-size="11">ARC: Asset Reconstruction Co.</text>
+      <text x="620" y="106" text-anchor="middle" fill="rgba(255,255,255,.8)" font-size="11">NARCL: National ARC (Bad Bank)</text>
+      <text x="620" y="122" text-anchor="middle" fill="rgba(255,255,255,.6)" font-size="10">Insolvency resolution (IBC)</text>
+
+      <!-- Basel III -->
+      <rect x="170" y="180" width="420" height="60" rx="6" fill="var(--yellow)" opacity=".7" class="fade" style="animation-delay:.2s"/>
+      <text x="380" y="204" text-anchor="middle" fill="var(--ink)" font-size="14" font-weight="600">Basel III Norms</text>
+      <text x="380" y="222" text-anchor="middle" fill="var(--ink-2)" font-size="11">CRAR ≥ 11.5% · CET-1 ≥ 5.5% · CCB: 2.5% · Leverage Ratio: 4%</text>
+
+      <!-- Key metric -->
+      <rect x="170" y="265" width="420" height="50" rx="6" fill="var(--pink)" opacity=".7" class="fade" style="animation-delay:.4s"/>
+      <text x="380" y="288" text-anchor="middle" fill="white" font-size="14">❝ NPA Ratio = Gross NPAs / Gross Advances × 100 ❞</text>
+      <text x="380" y="304" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="10">Gross NPA vs Net NPA (after provisions)</text>
+    </svg>
+    <div class="svg-caption">Figure: NPA Framework — Classification → Regulation → Resolution → Basel</div>
+  </div>
+
+  <!-- Key terms -->
+  <h3>Must-Know Banking Terms</h3>
+  <div class="def-block"><div class="term">NPA — Non-Performing Asset</div>If interest or principal is overdue for &gt;90 days. Sub-classified: Substandard (≤12 mo), Doubtful (&gt;12 mo), Loss.</div>
+  <div class="def-block"><div class="term">CRAR — Capital to Risk-Weighted Assets Ratio</div>Bank's capital as % of risk-weighted assets. Current minimum: 11.5% (including CCB). Also called CAR.</div>
+  <div class="def-block"><div class="term">IBC — Insolvency & Bankruptcy Code, 2016</div>Time-bound resolution (330 days max). NCLT for companies, DRT for individuals. Priority: secured creditors → employees → unsecured → equity.</div>
+  <div class="def-block"><div class="term">Basel Committee</div>Based in Basel, Switzerland (BIS). Basel I (1988) → Basel II (2004) → Basel III (2010, implemented in India from 2013). Focus: Capital adequacy, stress testing, liquidity ratios.</div>
+
+  <!-- Quiz: Banking -->
+  <div class="quiz-card" data-quiz="bank">
+    <div class="quiz-header"><span>Quick Quiz: Banking Regulation</span><span class="q-count">0/5</span></div>
+    <div class="quiz-dots"></div>
+    <div class="quiz-q"></div>
+    <div class="quiz-opts"></div>
+    <div class="q-nav">
+      <button class="q-btn prev-btn">Prev</button>
+      <span class="q-count idx">1 / 5</span>
+      <button class="q-btn next-btn">Next</button>
+    </div>
+    <div class="quiz-results"></div>
+  </div>
+</section>
+
+<!-- ===== 5. FISCAL POLICY ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="5">
+    <span class="sec-num">05</span>
+    <h2><span class="underline">Fiscal</span> Policy & Budget</h2>
+  </div>
+  <div class="h2-sub">Government's budget management. 100% overlap with Budget 2026-27.</div>
+
+  <div class="concept-card">
+    <div class="label">Distinction</div>
+    <h4>Fiscal Policy = <span class="hl">Government's</span> spending & taxation</h4>
+    <div class="explain">
+      <strong>Fiscal Policy</strong> = Government (Ministry of Finance). <strong>Monetary Policy</strong> = RBI. 
+      Fiscal policy uses the Budget (taxation + expenditure) to manage the economy.
+      Budget 2026-27 is the most heavily tested GA topic every year.
+    </div>
+  </div>
+
+  <!-- SVG: Budget = Fiscal Policy -->
+  <div class="svg-wrap svg-anim">
+    <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" style="font-family:system-ui,sans-serif;">
+      <rect width="760" height="320" fill="var(--paper)" rx="8"/>
+
+      <!-- Central: Budget -->
+      <rect x="260" y="10" width="240" height="46" rx="6" fill="var(--green)" opacity=".9"/>
+      <text x="380" y="33" text-anchor="middle" fill="white" font-size="16" font-weight="600">Union Budget 2026-27</text>
+      <text x="380" y="48" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="10">Fiscal Policy vs Monetary Policy</text>
+
+      <!-- Fiscal: left -->
+      <rect x="30" y="85" width="220" height="60" rx="6" fill="var(--blue)" opacity=".85" class="fade" style="animation-delay:.15s"/>
+      <text x="140" y="108" text-anchor="middle" fill="white" font-size="14" font-weight="500">Fiscal Policy (MoF)</text>
+      <text x="140" y="126" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="10">Taxation + Govt spending + Borrowing</text>
+
+      <!-- Monetary: right -->
+      <rect x="510" y="85" width="220" height="60" rx="6" fill="var(--accent)" opacity=".85" class="fade" style="animation-delay:.3s"/>
+      <text x="620" y="108" text-anchor="middle" fill="white" font-size="14" font-weight="500">Monetary Policy (RBI)</text>
+      <text x="620" y="126" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="10">Interest rates + Money supply + Inflation</text>
+
+      <line x1="250" y1="40" x2="140" y2="85" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".4"/>
+      <line x1="510" y1="40" x2="620" y2="85" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".4"/>
+
+      <!-- Deficit types -->
+      <rect x="30" y="180" width="340" height="60" rx="6" fill="var(--ink)" opacity=".15" class="fade" style="animation-delay:.45s"/>
+      <text x="200" y="205" text-anchor="middle" fill="var(--ink)" font-size="13" font-weight="600">3 Key Deficits</text>
+      <text x="200" y="224" text-anchor="middle" fill="var(--ink-2)" font-size="11">Revenue Deficit = Rev Exp − Rev Receipt</text>
+      <text x="200" y="239" text-anchor="middle" fill="var(--ink-2)" font-size="11">Fiscal Deficit = Total Exp − Total Receipt (ex borrowings)</text>
+      <text x="200" y="254" text-anchor="middle" fill="var(--ink-2)" font-size="11">Primary Deficit = Fiscal Deficit − Interest Payments</text>
+
+      <!-- Budget 2026 target -->
+      <rect x="460" y="180" width="270" height="60" rx="6" fill="var(--green)" opacity=".2" class="fade" style="animation-delay:.6s"/>
+      <text x="595" y="205" text-anchor="middle" fill="var(--green)" font-size="13" font-weight="600">FY27 Targets</text>
+      <text x="595" y="224" text-anchor="middle" fill="var(--ink-2)" font-size="11">Fiscal deficit: ~4.4% of GDP</text>
+      <text x="595" y="239" text-anchor="middle" fill="var(--ink-2)" font-size="11">Capex: ₹11.11 lakh crore</text>
+
+      <!-- GDP formula -->
+      <rect x="190" y="275" width="380" height="30" rx="4" fill="var(--ink-faint)" opacity=".2"/>
+      <text x="380" y="294" text-anchor="middle" fill="var(--ink-2)" font-size="12">❝ GDP = C + I + G + (X − M) ❞ — G component is fiscal policy</text>
+    </svg>
+    <div class="svg-caption">Figure: Fiscal vs Monetary — the two policy arms of the economy</div>
+  </div>
+
+  <!-- Budget Key Numbers from 2025-26 -->
+  <h3>Budget 2026-27: Key Numbers (Must Memorize)</h3>
+  <div class="key-grid">
+    <div class="key-item"><div class="key-num">₹</div><div class="key-title">Total Expenditure</div><p>~₹51.61 lakh crore (+6.8% YoY). Revenue: ~₹36.11 lakh crore.</p></div>
+    <div class="key-item"><div class="key-num">%</div><div class="key-title">Fiscal Deficit</div><p>~4.4% of GDP. Target: 4.5% (FY26) → 4.4% (FY27) → 3% by FY31.</p></div>
+    <div class="key-item"><div class="key-num">₹</div><div class="key-title">Capital Expenditure</div><p>₹11.11 lakh crore (+11.1% YoY). Infrastructure + Railways + Defence.</p></div>
+    <div class="key-item"><div class="key-num">₹</div><div class="key-title">Tax Revenue</div><p>Gross tax revenue target: ~₹42.7 lakh crore (+11.6% YoY).</p></div>
+  </div>
+
+  <!-- Quiz: Fiscal -->
+  <div class="quiz-card" data-quiz="fis">
+    <div class="quiz-header"><span>Quick Quiz: Fiscal Policy</span><span class="q-count">0/5</span></div>
+    <div class="quiz-dots"></div>
+    <div class="quiz-q"></div>
+    <div class="quiz-opts"></div>
+    <div class="q-nav">
+      <button class="q-btn prev-btn">Prev</button>
+      <span class="q-count idx">1 / 5</span>
+      <button class="q-btn next-btn">Next</button>
+    </div>
+    <div class="quiz-results"></div>
+  </div>
+</section>
+
+<!-- ===== 6. COMPREHENSIVE QUIZ ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="6">
+    <span class="sec-num">06</span>
+    <h2><span class="underline">Full</span> Practice Quiz</h2>
+  </div>
+  <div class="h2-sub">15 questions — mixed topics. Test your retention across all concepts.</div>
+
+  <p style="text-align:center;margin-top:8px;">
+    <button id="startFullQuiz" class="q-btn" style="padding:12px 28px;font-size:12px;">Start Full Quiz (15 Questions)</button>
+  </p>
+
+  <div class="quiz-card" id="fullQuiz" data-quiz="full" style="display:none;">
+    <div class="quiz-header"><span>Full Practice</span><span class="q-count">0/15</span></div>
+    <div class="quiz-dots"></div>
+    <div class="quiz-q"></div>
+    <div class="quiz-opts"></div>
+    <div class="q-nav">
+      <button class="q-btn prev-btn">Prev</button>
+      <span class="q-count idx">1 / 15</span>
+      <button class="q-btn next-btn">Next</button>
+    </div>
+    <div class="quiz-results"></div>
+  </div>
+</section>
+
+<!-- ===== FORMULA SHEET ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="7">
+    <span class="sec-num">07</span>
+    <h2><span class="underline">Formula</span> Sheet</h2>
+  </div>
+  <div class="h2-sub">Quick revision — key formulas for Phase 1 GA + Finance.</div>
+
+  <div class="key-grid">
+    <div class="key-item"><div class="key-num">1</div><div class="key-title">GDP = C + I + G + (X-M)</div><p>Consumption + Investment + Govt Spending + Net Exports</p></div>
+    <div class="key-item"><div class="key-num">2</div><div class="key-title">GDP Deflator = (Nominal GDP / Real GDP) × 100</div><p>Measures price level change in GDP</p></div>
+    <div class="key-item"><div class="key-num">3</div><div class="key-title">Inflation = (CPIₜ − CPIₜ₋₁) / CPIₜ₋₁ × 100</div><p>Period-over-period price change</p></div>
+    <div class="key-item"><div class="key-num">4</div><div class="key-title">Fiscal Deficit = Total Exp − Total Receipts (ex borrowings)</div><p>Key budget health indicator</p></div>
+    <div class="key-item"><div class="key-num">5</div><div class="key-title">Revenue Deficit = Rev Exp − Rev Receipts</div><p>Shortfall in current income vs expenses</p></div>
+    <div class="key-item"><div class="key-num">6</div><div class="key-title">NPA Ratio = Gross NPAs / Gross Advances × 100</div><p>Bank asset quality metric</p></div>
+    <div class="key-item"><div class="key-num">7</div><div class="key-title">CRAR = Capital / Risk-Weighted Assets × 100</div><p>Basel III minimum: 11.5%</p></div>
+    <div class="key-item"><div class="key-num">8</div><div class="key-title">MSF = Repo Rate + 0.25%</div><p>Emergency borrowing rate</p></div>
+    <div class="key-item"><div class="key-num">9</div><div class="key-title">Money Multiplier = 1 / CRR</div><p>Maximum deposit creation capacity</p></div>
+    <div class="key-item"><div class="key-num">10</div><div class="key-title">Fisher Equation: Real Rate ≈ Nominal Rate − Inflation</div><p>Real interest rate approximation</p></div>
+  </div>
+</section>
+
+<!-- ===== PROGRESS ===== -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">✓</span>
+    <h2><span class="underline">Progress</span> tracker</h2>
+  </div>
+  <div class="h2-sub">Check off topics as you master them. SM-2 deck does the rest.</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;" id="progressGrid">
+    <div style="padding:10px 14px;background:var(--paper-2);border:1px solid var(--rule);display:flex;gap:8px;align-items:center;font-size:13px;"><span id="p-1" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;" data-sec="1"></span> Monetary Policy</div>
+    <div style="padding:10px 14px;background:var(--paper-2);border:1px solid var(--rule);display:flex;gap:8px;align-items:center;font-size:13px;"><span id="p-2" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;" data-sec="2"></span> Inflation</div>
+    <div style="padding:10px 14px;background:var(--paper-2);border:1px solid var(--rule);display:flex;gap:8px;align-items:center;font-size:13px;"><span id="p-3" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;" data-sec="3"></span> RBI Functions</div>
+    <div style="padding:10px 14px;background:var(--paper-2);border:1px solid var(--rule);display:flex;gap:8px;align-items:center;font-size:13px;"><span id="p-4" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;" data-sec="4"></span> Banking Regulation</div>
+    <div style="padding:10px 14px;background:var(--paper-2);border:1px solid var(--rule);display:flex;gap:8px;align-items:center;font-size:13px;"><span id="p-5" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;" data-sec="5"></span> Fiscal Policy</div>
+    <div style="padding:10px 14px;background:var(--paper-2);border:1px solid var(--rule);display:flex;gap:8px;align-items:center;font-size:13px;"><span id="p-6" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;" data-sec="6"></span> Full Quiz Done</div>
+  </div>
+</section>
+
+<footer>
+  <span>Threeja's Concept Notebook · RBI Grade B 2026</span>
+  <span class="pn">Made with explanation-first approach</span>
+</footer>
+
+</main>
+
+<script>
+// === COUNTDOWN ===
+(function(){
+  function tick(){
+    const now = Date.now();
+    const ph1 = new Date('2026-06-13T09:00:00+05:30').getTime();
+    const d = Math.max(0, Math.ceil((ph1-now)/(1000*60*60*24)));
+    document.getElementById('countdownBig').textContent = d;
+  }
+  tick(); setInterval(tick, 60000);
+})();
+
+// === QUIZ ENGINE ===
+const L = ['A','B','C','D'];
+
+const ALL_QUIZZES = {
+  // Monetary Policy
+  mp: [
+    {q:'What is the current inflation target under India\'s FIT framework?',o:['2-6% range','4% exactly, with ±2% band','4-6% range','2% exactly'],c:1},
+    {q:'How many members does the Monetary Policy Committee have?',o:['5 members','6 members','7 members','3 members'],c:1},
+    {q:'What is the Repo Rate?',o:['Rate RBI pays on deposits','Rate RBI lends to banks at','Rate banks lend to each other','Rate for government bonds'],c:1},
+    {q:'Which stance means RBI is gradually removing stimulus?',o:['Hawkish','Accommodative','Withdrawal of Accommodation','Neutral'],c:2},
+    {q:'When was the FIT framework established in India?',o:['2014','2016','2019','2021'],c:1},
+  ],
+  // Inflation
+  inf: [
+    {q:'Which index does RBI target for inflation?',o:['WPI','CPI','GDP Deflator','PPI'],c:1},
+    {q:'What happens if inflation stays outside tolerance band for 3 consecutive quarters?',o:['RBI Governor resigns','RBI must submit report to Govt','MPC is dissolved','Repo rate automatically hiked'],c:1},
+    {q:'Which of these is NOT a type of inflation?',o:['Demand-Pull','Cost-Push','Supply-Drag','Imported'],c:2},
+    {q:'What is Core Inflation?',o:['Inflation including food & fuel','Inflation excluding food & fuel','Average of CPI & WPI','Wholesale inflation'],c:1},
+    {q:'Which has higher food weight — CPI or WPI?',o:['CPI','WPI','Both equal','Neither'],c:0},
+  ],
+  // RBI Functions
+  rbi: [
+    {q:'When was RBI established?',o:['1934','1935','1949','1951'],c:1},
+    {q:'RBI was nationalized in which year?',o:['1935','1947','1949','1950'],c:2},
+    {q:'Who has the casting vote in MPC if there is a tie?',o:['Finance Minister','RBI Governor','President of India','Chief Economic Advisor'],c:1},
+    {q:'Which section of RBI Act covers Monetary Policy?',o:['Section 7','Section 17','Section 45Z-45ZN','Section 58'],c:2},
+    {q:'Where is RBI\'s head office located?',o:['New Delhi','Kolkata','Mumbai','Chennai'],c:2},
+  ],
+  // Banking Regulation
+  bank: [
+    {q:'After how many days overdue is a loan classified as NPA?',o:['30 days','60 days','90 days','180 days'],c:2},
+    {q:'What is the minimum CRAR requirement under Basel III in India?',o:['9%','10.5%','11.5%','12.5%'],c:2},
+    {q:'IBC 2016 provides for resolution within how many days?',o:['180 days','270 days','330 days','365 days'],c:2},
+    {q:'Which of these is NOT a Basel III pillar?',o:['Minimum Capital','Supervisory Review','Market Discipline','Interest Rate Cap'],c:3},
+    {q:'What is NARCL?',o:['New banking regulator','Asset Reconstruction Company','National ARC (Bad Bank)','NBFC regulator'],c:2},
+  ],
+  // Fiscal Policy
+  fis: [
+    {q:'Fiscal Policy is managed by:',o:['RBI','Ministry of Finance','NITI Aayog','SEBI'],c:1},
+    {q:'Fiscal Deficit = ?',o:['Total Exp − Total Rev (ex borrowings)','Total Exp − Total Rev (incl borrowings)','Rev Exp − Rev Rec','Total Debt − Total Assets'],c:0},
+    {q:'Budget 2026-27 fiscal deficit target:',o:['3.5% of GDP','4.4% of GDP','5.5% of GDP','6.0% of GDP'],c:1},
+    {q:'Primary Deficit = ?',o:['Fiscal Deficit − Revenue Deficit','Fiscal Deficit − Interest Payments','Revenue Deficit − Interest Payments','Capital Expenditure − Revenue'],c:1},
+    {q:'In the GDP formula C+I+G+(X-M), which is affected by Fiscal Policy?',o:['Only G','C, I, and G','Only C and G','All components'],c:1},
+  ]
+};
+
+// Full quiz = mix of all
+ALL_QUIZZES.full = [...ALL_QUIZZES.mp, ...ALL_QUIZZES.inf, ...ALL_QUIZZES.rbi, ...ALL_QUIZZES.bank, ...ALL_QUIZZES.fis];
+ALL_QUIZZES.full.forEach((q,i)=>{
+  q._id = i;
+  q._topic = ['MP','INF','RBI','BANK','FIS'][Math.floor(i/5)];
+});
+
+// Initialize all quiz cards
+function initQuiz(containerId) {
+  const c = document.getElementById(containerId);
+  if (!c || c._initialized) return;
+  c._initialized = true;
+  const key = c.dataset.quiz;
+  const qs = ALL_QUIZZES[key];
+  if (!qs) return;
+  const len = qs.length;
+  let state = { i:0, a:new Array(len).fill(-1), r:new Array(len).fill(false) };
+
+  const qEl = c.querySelector('.quiz-q');
+  const optsEl = c.querySelector('.quiz-opts');
+  const dotsEl = c.querySelector('.quiz-dots');
+  const idxEl = c.querySelectorAll('.q-count');
+  const prevBtn = c.querySelector('.prev-btn');
+  const nextBtn = c.querySelector('.next-btn');
+
+  function render() {
+    const i = state.i, q = qs[i];
+    qEl.textContent = q.q;
+    idxEl.forEach(el => { el.textContent = `${i+1} / ${len}`; });
+
+    c.querySelector('.quiz-header .q-count').textContent = `${state.r.filter(x=>x).length}/${len}`;
+
+    optsEl.innerHTML = q.o.map((o, oi) => {
+      let cls = '';
+      if (state.r[i]) cls = 'locked';
+      if (state.r[i] && oi === q.c) cls += ' is-c';
+      if (state.r[i] && oi === state.a[i] && oi !== q.c) cls += ' is-w';
+      return `<div class="q-opt ${cls}" data-oi="${oi}">
+        <div class="bar"></div>
+        <div class="opt-inner">
+          <div class="letter">${L[oi]}</div>
+          <span>${o}</span>
+        </div>
+      </div>`;
+    }).join('');
+
+    optsEl.querySelectorAll('.q-opt:not(.locked)').forEach(el => {
+      el.onclick = () => {
+        if (state.r[i]) return;
+        const oi = parseInt(el.dataset.oi);
+        state.a[i] = oi;
+        state.r[i] = true;
+        render(); renderDots();
+      };
+    });
+
+    prevBtn.disabled = (i === 0);
+    nextBtn.textContent = (i === len-1) ? 'Finish' : 'Next';
+    renderDots();
+  }
+
+  function renderDots() {
+    dotsEl.innerHTML = qs.map((_, di) => {
+      let cls = 'quiz-dot';
+      if (di === state.i && !state.r[di]) cls += ' active';
+      if (state.r[di]) cls += (state.a[di] === qs[di].c) ? ' correct' : ' wrong';
+      return `<div class="${cls}" data-di="${di}">${di+1}</div>`;
+    }).join('');
+    dotsEl.querySelectorAll('.quiz-dot').forEach(d => {
+      d.onclick = () => { state.i = parseInt(d.dataset.di); render(); };
+    });
+  }
+
+  nextBtn.onclick = () => {
+    if (state.i < len-1) { state.i++; render(); }
+    else if (state.r.every(x => x)) showResults();
+  };
+  prevBtn.onclick = () => { if (state.i > 0) { state.i--; render(); } };
+
+  function showResults() {
+    const correct = state.a.reduce((s, a, i) => s + (a === qs[i].c ? 1 : 0), 0);
+    const pct = Math.round(correct/len*100);
+    const container = c.querySelector('.quiz-results');
+    container.style.display = 'block';
+    c.querySelector('.quiz-q').style.display = 'none';
+    c.querySelector('.quiz-opts').style.display = 'none';
+    c.querySelector('.q-nav').style.display = 'none';
+    c.querySelector('.quiz-dots').style.display = 'none';
+    c.querySelector('.quiz-header .q-count').textContent = `${correct}/${len}`;
+
+    let msg = '';
+    if (pct >= 80) msg = 'Strong. You\'re on track for Phase 1.';
+    else if (pct >= 60) msg = 'Good. Review the missed ones.';
+    else msg = 'Keep studying — revisit the concept above.';
+
+    let reviewHTML = qs.map((q, i) => {
+      const ok = state.a[i] === q.c;
+      return `<div class="quiz-review-entry">
+        <div class="rev-q">${i+1}. ${q.q}</div>
+        <div class="rev-detail">Your answer: <strong>${state.a[i] >= 0 ? L[state.a[i]]+'. '+q.o[state.a[i]] : '—'}</strong></div>
+        <div class="rev-detail">Correct: <strong>${L[q.c]}. ${q.o[q.c]}</strong></div>
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-top:4px;color:${ok?'var(--green)':'var(--accent)'};">${ok?'✓ Correct':'✗ Incorrect'}</div>
+      </div>`;
+    }).join('');
+
+    container.innerHTML = `
+      <div class="quiz-results-inner">
+        <div class="quiz-score">${correct}/${len}</div>
+        <div class="quiz-score-lbl">Score · ${pct}%</div>
+        <div class="quiz-msg">${msg}</div>
+      </div>
+      <div style="margin-bottom:12px;font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-dim);">Mastery Checklist</div>
+      <div style="margin-bottom:16px;">${qs.map((q,i)=>{
+        return `<span style="display:inline-block;width:22px;height:22px;text-align:center;line-height:22px;border-radius:50%;margin:2px;font-family:var(--mono);font-size:10px;font-weight:600;background:${state.a[i]===q.c?'var(--green)':'var(--accent)'};color:white;">${state.a[i]===q.c?'✓':'✗'}</span>`;
+      }).join('')}</div>
+      ${reviewHTML}
+      <div style="text-align:center;margin-top:14px;">
+        <button class="q-btn" style="padding:8px 20px;" onclick="resetQuiz('${containerId}')">Retry</button>
+      </div>
+    `;
+  }
+
+  c.resetQuizFn = function() {
+    state = { i:0, a:new Array(len).fill(-1), r:new Array(len).fill(false) };
+    const container = c.querySelector('.quiz-results');
+    container.style.display = 'none';
+    container.innerHTML = '';
+    c.querySelector('.quiz-q').style.display = '';
+    c.querySelector('.quiz-opts').style.display = '';
+    c.querySelector('.q-nav').style.display = '';
+    c.querySelector('.quiz-dots').style.display = '';
+    render();
+  };
+
+  render();
+}
+
+function resetQuiz(containerId) {
+  const c = document.getElementById(containerId);
+  if (c && c.resetQuizFn) c.resetQuizFn();
+}
+
+// Initialize all quizzes
+document.querySelectorAll('.quiz-card').forEach(el => {
+  initQuiz(el.id || (el.dataset.quiz ? (el.id = 'qz-'+el.dataset.quiz+'-'+Math.random().toString(36).slice(2,6)) : null));
+});
+
+// Full Quiz trigger
+document.getElementById('startFullQuiz').onclick = function() {
+  const fq = document.getElementById('fullQuiz');
+  fq.style.display = 'block';
+  this.style.display = 'none';
+  initQuiz('fullQuiz');
+};
+
+// === DARK MODE ===
+(function(){
+  const h=document.documentElement,b=document.getElementById('darkToggle');
+  const s=localStorage.getItem('rbi-theme')||'dark';
+  h.setAttribute('data-theme',s);
+  b.onclick=()=>{const n=h.getAttribute('data-theme')==='dark'?'light':'dark';h.setAttribute('data-theme',n);localStorage.setItem('rbi-theme',n);};
+})();
+
+// === PROGRESS ===
+function updPct(){
+  let d=0;
+  for(let i=1;i<=7;i++) if(localStorage.getItem('rbi-cn-'+i)==='true') d++;
+  document.getElementById('pctTop').textContent=Math.round(d/7*100)+'%';
+}
+document.querySelectorAll('.scb').forEach(cb=>{
+  const s=cb.dataset.sec;
+  cb.checked=localStorage.getItem('rbi-cn-'+s)==='true';
+  cb.onchange=()=>{localStorage.setItem('rbi-cn-'+s,cb.checked);updPct();};
+});
+// Dot progress
+document.querySelectorAll('#progressGrid [data-sec]').forEach(el=>{
+  const s=el.dataset.sec;
+  if(localStorage.getItem('rbi-cn-'+s)==='true'){el.style.background='var(--green)';el.style.borderColor='var(--green)';}
+  el.onclick=()=>{
+    const v=localStorage.getItem('rbi-cn-'+s)==='true';
+    localStorage.setItem('rbi-cn-'+s,v?'false':'true');
+    el.style.background=v?'':'var(--green)';
+    el.style.borderColor=v?'': 'var(--green)';
+    document.querySelector(`.scb[data-sec="${s}"]`).checked=!v;
+    updPct();
+  };
+});
+updPct();
+
+// === SCROLL REVEAL ===
+(function(){
+  const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.08,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('section').forEach(s=>io.observe(s));
+})();
+</script>
+</body>
+</html>
