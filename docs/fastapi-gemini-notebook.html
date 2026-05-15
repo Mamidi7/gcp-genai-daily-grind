@@ -268,6 +268,11 @@ footer .pn{color:var(--accent);}
   <div class="svg-wrap svg-anim">
     <svg viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg" style="font-family:system-ui,sans-serif;">
       <rect width="760" height="380" fill="var(--paper)" rx="8"/>
+      <defs>
+        <marker id="archArrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L8,3 L0,6" fill="var(--ink-dim)"/>
+        </marker>
+      </defs>
 
       <text x="380" y="28" text-anchor="middle" fill="var(--ink)" font-size="16" font-weight="600">Request Lifecycle</text>
 
@@ -292,9 +297,9 @@ footer .pn{color:var(--accent);}
       <text x="665" y="94" text-anchor="middle" fill="var(--ink-2)" font-size="9">Vertex AI / API</text>
 
       <!-- Arrows top row -->
-      <line x1="170" y1="80" x2="218" y2="80" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5" marker-end="url(#arrow)"/>
-      <line x1="360" y1="80" x2="408" y2="80" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5" marker-end="url(#arrow)"/>
-      <line x1="550" y1="80" x2="598" y2="80" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5" marker-end="url(#arrow)"/>
+      <line x1="170" y1="80" x2="218" y2="80" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5" marker-end="url(#archArrow)"/>
+      <line x1="360" y1="80" x2="408" y2="80" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5" marker-end="url(#archArrow)"/>
+      <line x1="550" y1="80" x2="598" y2="80" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5" marker-end="url(#archArrow)"/>
 
       <!-- Internal detail: Middleware -->
       <rect x="310" y="140" width="340" height="36" rx="4" fill="var(--ink-faint)" opacity=".3" class="fade" style="animation-delay:.4s"/>
@@ -340,8 +345,8 @@ footer .pn{color:var(--accent);}
   <!-- Interactive toggle: Sync vs Async -->
   <h3>Sync vs Async — How it works</h3>
   <div class="int-toggle">
-    <button class="active" onclick="switchIntPanel('sync-async','sync')">Sync (blocking)</button>
-    <button onclick="switchIntPanel('sync-async','asyncp')">Async (non-blocking)</button>
+    <button class="active">Sync (blocking)</button>
+    <button>Async (non-blocking)</button>
   </div>
   <div class="int-panel active" id="sync-async-sync">
     <div class="panel-content">
@@ -415,11 +420,11 @@ footer .pn{color:var(--accent);}
 
   <!-- Interactive code viewer -->
   <div class="int-toggle">
-    <button class="active" onclick="switchIntPanel('code-tabs','main')">main.py</button>
-    <button onclick="switchIntPanel('code-tabs','models')">models.py</button>
-    <button onclick="switchIntPanel('code-tabs','config')">config.py</button>
-    <button onclick="switchIntPanel('code-tabs','retry')">retry logic</button>
-    <button onclick="switchIntPanel('code-tabs','middleware')">middleware</button>
+    <button class="active">main.py</button>
+    <button>models.py</button>
+    <button>config.py</button>
+    <button>retry logic</button>
+    <button>middleware</button>
   </div>
 
   <div class="int-panel active" id="code-tabs-main">
@@ -701,7 +706,10 @@ app.add_middleware(CORSMiddleware,
       <line x1="240" y1="38" x2="278" y2="38" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5" marker-end="url(#arrow)"/>
       <line x1="380" y1="38" x2="418" y2="38" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5" marker-end="url(#arrow)"/>
       <line x1="520" y1="38" x2="558" y2="38" stroke="var(--ink-dim)" stroke-width="1.5" opacity=".5" marker-end="url(#arrow)"/>
-      <rect id="simPkt" width="24" height="16" rx="3" fill="var(--accent)" style="display:none"><text x="12" y="11" text-anchor="middle" fill="white" font-size="7">REQ</text></rect>
+      <g id="simPkt" style="display:none">
+        <rect width="24" height="16" rx="3" fill="var(--accent)"/>
+        <text x="12" y="11" text-anchor="middle" fill="white" font-size="7">REQ</text>
+      </g>
     </svg>
 
     <div id="simStatus" class="pg-status">Pick an endpoint to simulate.</div>
@@ -1150,32 +1158,28 @@ document.querySelectorAll('.int-toggle button').forEach(btn => {
   };
 });
 
-// === SVG defs fix ===
-// Add missing marker to SVG
-document.querySelectorAll('svg marker').forEach(m => {}); // noop
-
 // === PLAYGROUND ===
 var flowSteps = {
   healthz: [
-    {x: 10, y: 22, label: '🌐 Client sends GET /healthz', node: 'flow-client'},
-    {x: 150, y: 22, label: '⚡ FastAPI matches route', node: 'flow-fa'},
-    {x: 290, y: 22, label: '✅ No validation needed (GET)', node: 'flow-pv'},
-    {x: 430, y: 22, label: '🧠 Bypasses Gemini (liveness)', node: 'flow-gem'},
-    {x: 570, y: 22, label: '✅ Returns {"status": "alive"}', node: 'flow-resp'}
+    {x: 30, y: 30, label: 'Client sends GET /healthz', node: 'flow-client'},
+    {x: 145, y: 30, label: 'FastAPI matches /healthz route', node: 'flow-fa'},
+    {x: 285, y: 30, label: 'No body validation (GET)', node: 'flow-pv'},
+    {x: 425, y: 30, label: 'Skips Gemini — returns immediately', node: 'flow-gem'},
+    {x: 565, y: 30, label: 'Returns {"status": "alive"}', node: 'flow-resp'}
   ],
   readyz: [
-    {x: 10, y: 22, label: '🌐 Client sends GET /readyz', node: 'flow-client'},
-    {x: 150, y: 22, label: '⚡ FastAPI matches route', node: 'flow-fa'},
-    {x: 290, y: 22, label: '✅ No validation needed (GET)', node: 'flow-pv'},
-    {x: 430, y: 22, label: '🧠 Tests Gemini connectivity', node: 'flow-gem'},
-    {x: 570, y: 22, label: '✅ Returns {"status": "ready"}', node: 'flow-resp'}
+    {x: 30, y: 30, label: 'Client sends GET /readyz', node: 'flow-client'},
+    {x: 145, y: 30, label: 'FastAPI matches /readyz route', node: 'flow-fa'},
+    {x: 285, y: 30, label: 'No body validation (GET)', node: 'flow-pv'},
+    {x: 425, y: 30, label: 'Tests Gemini connectivity', node: 'flow-gem'},
+    {x: 565, y: 30, label: 'Returns {"status": "ready"}', node: 'flow-resp'}
   ],
   chat: [
-    {x: 10, y: 22, label: '🌐 Client POST /chat + JSON body', node: 'flow-client'},
-    {x: 150, y: 22, label: '⚡ FastAPI calls chat() async', node: 'flow-fa'},
-    {x: 290, y: 22, label: '✅ Pydantic validates ChatRequest', node: 'flow-pv'},
-    {x: 430, y: 22, label: '🧠 Gemini.generate_content() via to_thread', node: 'flow-gem'},
-    {x: 570, y: 22, label: '✅ Returns ChatResponse JSON', node: 'flow-resp'}
+    {x: 30, y: 30, label: 'Client POST /chat + JSON body', node: 'flow-client'},
+    {x: 145, y: 30, label: 'FastAPI calls chat() async handler', node: 'flow-fa'},
+    {x: 285, y: 30, label: 'Pydantic validates ChatRequest', node: 'flow-pv'},
+    {x: 425, y: 30, label: 'Gemini.generate_content() via to_thread', node: 'flow-gem'},
+    {x: 565, y: 30, label: 'Returns ChatResponse JSON', node: 'flow-resp'}
   ]
 };
 
@@ -1190,9 +1194,9 @@ function simReq(endpoint) {
   });
 
   status.className = 'pg-status busy';
-  status.textContent = '🚀 Processing...';
+  status.textContent = 'Processing...';
   output.style.display = 'none';
-  pkt.style.display = 'block';
+  pkt.style.display = 'inline';
 
   var i = 0;
   function nextStep() {
