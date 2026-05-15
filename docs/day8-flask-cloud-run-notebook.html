@@ -675,14 +675,14 @@ venv/
 
 <script>
 const QUIZ = [
-  {q:'Why should you use gunicorn instead of Flask\\'s built-in server on Cloud Run?',o:['Gunicorn is faster','Flask can\\'t handle concurrent requests under load','Gunicorn supports Python 3.13','Flask requires gunicorn to run'],c:1},
+  {q:'Why should you use gunicorn instead of Flask\'s built-in server on Cloud Run?',o:['Gunicorn is faster','Flask can\'t handle concurrent requests under load','Gunicorn supports Python 3.13','Flask requires gunicorn to run'],c:1},
   {q:'What is the correct Dockerfile CMD for production?',o:['CMD python main.py','CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]','CMD gunicorn --bind 0.0.0.0:8080 main:app','CMD run flask app'],c:1},
-  {q:'Why do we COPY requirements.txt before the rest of the code?',o:['To avoid syntax errors','For Docker layer caching — code changes don\\'t reinstall deps','Because Docker requires it','To reduce image size'],c:1},
+  {q:'Why do we COPY requirements.txt before the rest of the code?',o:['To avoid syntax errors','For Docker layer caching — code changes don\'t reinstall deps','Because Docker requires it','To reduce image size'],c:1},
   {q:'What does the /health endpoint do for Cloud Run?',o:['Returns user data','Liveness check — Cloud Run kills instance if it fails','Triggers autoscaling','Logs request count'],c:1},
   {q:'Which IP should Flask bind to inside a container on Cloud Run?',o:['127.0.0.1','0.0.0.0','localhost','container IP'],c:1},
   {q:'What happens if you deploy without gunicorn?',o:['It works fine','Container crashes under concurrent load','Build fails','Deployment is rejected'],c:1},
   {q:'What base image is recommended for the Dockerfile?',o:['python:latest','python:3.11-slim','ubuntu:22.04','alpine:latest'],c:1},
-  {q:'Why add a .dockerignore file?',o:['It\\'s required by Docker','Prevents venv, .git, __pycache__ from bloating the build','Improves security only','Speeds up runtime'],c:1},
+  {q:'Why add a .dockerignore file?',o:['It\'s required by Docker','Prevents venv, .git, __pycache__ from bloating the build','Improves security only','Speeds up runtime'],c:1},
   {q:'Which command deploys to Cloud Run from source in one step?',o:['gcloud run deploy --source .','gcloud builds submit','docker run gcloud','kubectl apply'],c:0},
   {q:'What does the `if __name__ == "__main__"` block ensure?',o:['App only runs when executed directly, not when imported by gunicorn','App runs faster','Prevents import errors','Enables hot reload'],c:0},
 ];
