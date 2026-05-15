@@ -1,0 +1,14 @@
+# ──────────────────────────────────────────────
+# Terraform Variables — EDIT THIS FILE
+# Copy to terraform.tfvars and fill in your values
+# ──────────────────────────────────────────────
+
+project_id      = "your-gcp-project-id"
+region          = "us-central1"
+service_name    = "ai-model-serving"
+container_image = "us-central1-docker.pkg.dev/your-project/cloud-run-source-deploy/ai-api:latest"
+alert_email     = "your-email@gmail.com"
+
+# Optional overrides (defaults are fine for demo)
+# bq_dataset_id  = "vector_store"
+# gcs_bucket_name = "ai-documents-storage"
