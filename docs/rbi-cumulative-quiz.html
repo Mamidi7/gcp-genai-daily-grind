@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RBI Grade B — Cumulative Quiz (All Topics)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3EEE4;--paper-2:#EBE4D4;--ink:#1A1612;--ink-2:#3D3528;--ink-dim:#6B5D49;--ink-faint:#A89A83;--rule:#C8B99E;--accent:#C0392B;--accent2:#A93226;--green:#2D7D46;--blue:#2B6CB0;--gold:#B8860B;--serif:Georgia,'Times New Roman',serif;--sans:'Inter',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;}
+[data-theme="dark"]{--paper:#1B1917;--paper-2:#242220;--ink:#F0ECE9;--ink-2:#C5BBB2;--ink-dim:#9A9088;--ink-faint:#6B625C;--rule:#3A3430;--accent:#E8704A;--green:#5BBD6B;--blue:#5B8FBD;--gold:#D4A84B;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6;}
+body{background-image:radial-gradient(circle at 15% 10%,rgba(200,180,140,.12) 0%,transparent 45%),repeating-linear-gradient(0deg,transparent 0,transparent 28px,rgba(120,100,70,.03) 28px,rgba(120,100,70,.03) 29px);min-height:100vh;}
+.topbar{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule);padding:10px 0;backdrop-filter:blur(8px);}
+.topbar-inner{max-width:700px;margin:0 auto;padding:0 20px;display:flex;justify-content:space-between;align-items:center;}
+.brand{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim);}
+.brand .ac{color:var(--accent);}
+.topbar button{background:none;border:1px solid var(--rule);cursor:pointer;color:var(--ink-dim);padding:3px;display:flex;}
+.topbar button:hover{color:var(--accent);border-color:var(--accent);}
+main{max-width:700px;margin:0 auto;padding:20px 20px 60px;}
+
+/* Telegram chat style header */
+.chat-header{background:var(--paper-2);border:1px solid var(--rule);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.chat-avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);color:var(--paper);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:18px;font-style:italic;flex-shrink:0;}
+.chat-name{font-size:13px;font-weight:600;color:var(--ink);}
+.chat-status{font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:var(--green);}
+.chat-count{font-family:var(--mono);font-size:8px;color:var(--ink-faint);margin-left:auto;}
+
+/* Message bubbles */
+.msg{display:flex;gap:8px;margin-bottom:10px;animation:fadeIn .3s ease;}
+.msg-avatar{width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:12px;font-style:italic;flex-shrink:0;margin-top:2px;}
+.msg-bubble{background:var(--paper);border:1px solid var(--rule);padding:10px 14px;max-width:85%;box-shadow:2px 2px 0 var(--rule);}
+.msg-bubble .sender{font-family:var(--mono);font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:3px;}
+.msg-bubble .text{font-size:14px;color:var(--ink-2);line-height:1.6;}
+.msg-bubble .text strong{color:var(--ink);}
+.msg-right{flex-direction:row-reverse;}
+.msg-right .msg-bubble{background:var(--ink);border-color:var(--ink);}
+.msg-right .msg-bubble .sender{color:var(--ink-faint);}
+.msg-right .msg-bubble .text{color:var(--paper);}
+.msg-right .msg-bubble .text strong{color:#fff;}
+
+/* Quiz inside bubble */
+.bubble-quiz{margin:6px 0 0;}
+.bubble-q{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+.msg-right .bubble-q{color:var(--paper);}
+.bubble-opts{display:flex;flex-direction:column;gap:3px;}
+.b-opt{background:var(--paper-2);border:1px solid var(--rule);cursor:pointer;font-size:13px;transition:all .2s;overflow:hidden;}
+.b-opt:hover{border-color:var(--ink);}
+.b-opt input{display:none;}
+.b-opt-inner{display:flex;align-items:center;padding:7px 10px;gap:7px;width:100%;}
+.b-opt .letter{width:16px;height:16px;border-radius:50%;border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;flex-shrink:0;background:var(--paper);}
+.msg-right .b-opt{background:var(--paper-2);border-color:var(--rule);}
+.msg-right .b-opt .letter{background:var(--paper);}
+.b-opt.locked{cursor:default;}
+.b-opt.is-c{border-color:var(--green);}
+.b-opt.is-w{border-color:var(--accent);}
+.b-opt.is-c .letter{background:var(--green);border-color:var(--green);color:var(--paper);}
+.b-opt.is-w .letter{background:var(--accent);border-color:var(--accent);color:var(--paper);}
+.b-exp{font-size:12px;color:var(--ink-dim);margin-top:6px;padding:6px 8px;background:var(--paper-2);border-left:2px solid var(--accent);display:none;}
+.b-exp.show{display:block;}
+.msg-right .b-exp{background:var(--paper-2);color:var(--ink-2);}
+
+.q-nav{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:8px;padding:8px 0;}
+.q-btn{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;padding:5px 10px;border:2px solid var(--ink);background:var(--paper);cursor:pointer;color:var(--ink);}
+.q-btn:hover{background:var(--ink);color:var(--paper);}
+.q-btn:disabled{opacity:.4;cursor:default;background:var(--paper);color:var(--ink-faint);border-color:var(--ink-faint);}
+.q-count{font-family:var(--mono);font-size:8px;color:var(--ink-dim);}
+
+/* Dots row */
+.dot-row{display:flex;gap:3px;flex-wrap:wrap;margin:8px 0 14px;padding:8px 0;border-top:1px solid var(--rule);}
+.dot{width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:7px;border-radius:50%;border:2px solid var(--rule);background:var(--paper);color:var(--ink-faint);cursor:pointer;transition:all .2s;}
+.dot.active{border-color:var(--accent);color:var(--accent);font-weight:600;}
+.dot.done-c{background:var(--green);border-color:var(--green);color:var(--paper);}
+.dot.done-w{background:var(--accent);border-color:var(--accent);color:var(--paper);}
+
+/* Results */
+.results{display:none;margin-top:10px;}
+.res-inner{text-align:center;padding:20px;border:2px solid var(--ink);background:var(--paper-2);margin-bottom:14px;}
+.res-score{font-family:var(--serif);font-size:36px;font-style:italic;color:var(--ink);line-height:1;}
+.res-label{font-family:var(--mono);font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);margin-top:3px;}
+.res-msg{font-family:var(--serif);font-size:14px;font-style:italic;color:var(--ink-2);margin-top:6px;}
+.rev-entry{padding:8px 10px;border:1px solid var(--rule);background:var(--paper);margin-bottom:4px;font-size:12px;}
+.rev-q{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px;}
+.rev-detail{font-size:12px;color:var(--ink-dim);}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:500px){main{padding:14px 12px 40px;}.msg-bubble{padding:8px 10px;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="ac">RBI</span> Grade B · Cumulative Quiz</div>
+    <button id="darkToggle" title="Toggle">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</div>
+
+<main>
+
+<!-- Chat header -->
+<div class="chat-header">
+  <div class="chat-avatar">T</div>
+  <div>
+    <div class="chat-name">Prudhvini (Threeja)</div>
+    <div class="chat-status">● Online · Studying RBI Grade B</div>
+  </div>
+  <div class="chat-count" id="progCount">0/25</div>
+</div>
+
+<!-- Dots row -->
+<div class="dot-row" id="dotRow"></div>
+
+<!-- Message area -->
+<div id="msgArea"></div>
+
+<!-- Nav -->
+<div class="q-nav">
+  <button class="q-btn" id="prevBtn" onclick="prevQ()">← Prev</button>
+  <span class="q-count" id="qCount">1 / 25</span>
+  <button class="q-btn" id="nextBtn" onclick="nextQ()">Next →</button>
+</div>
+
+<!-- Results -->
+<div class="results" id="resArea">
+  <div class="res-inner">
+    <div class="res-score" id="resScore">0/25</div>
+    <div class="res-label" id="resPct">0%</div>
+    <div class="res-msg" id="resMsg">—</div>
+  </div>
+  <div id="resReview"></div>
+  <div style="text-align:center;margin-top:14px;">
+    <button class="q-btn" onclick="location.reload()">Restart Quiz</button>
+  </div>
+</div>
+
+<!-- Done msg -->
+<p style="text-align:center;margin-top:16px;font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--ink-faint);">All 25 topics covered · Click dots to jump · Answers explained</p>
+
+</main>
+
+<script>
+var Q = [
+  // === MONETARY POLICY (Q1-3) ===
+  {t:"Monetary Policy", q:"RBI uses Flexible Inflation Targeting (FIT) since 2016. What is the inflation target band under FIT?", o:["2-4%","2-6%","4-6%","3-5%"], a:1, e:"Flexible Inflation Targeting target = 4% CPI with +/-2% band (so 2-6%). Introduced in 2016. Monetary Policy Committee (MPC) sets the repo rate every 2 months to achieve this."},
+  {t:"MPC", q:"How many members are in the Monetary Policy Committee (MPC), and who appoints them?", o:["5 members, RBI Governor appoints","6 members, Central Government appoints","7 members, Finance Minister appoints","4 members, PM appoints"], a:1, e:"MPC has 6 members: 3 from RBI (Governor, Deputy Governor in charge, one more RBI official) + 3 external members appointed by Central Government. Governor has casting vote in case of tie."},
+  {t:"Policy Rates", q:"Which RBI rate is the penal rate for banks that fail to maintain SLR or CRR?", o:["Repo Rate","Reverse Repo","Bank Rate","MSF"], a:2, e:"Bank Rate = penal rate charged by RBI for default in SLR/CRR maintenance. Currently Repo + 0.25%. MSF = emergency lending (Repo + 0.25% too, but different purpose). Reverse Repo = RBI borrows from banks (Repo - 0.65%)."},
+
+  // === INFLATION (Q4-5) ===
+  {t:"Inflation", q:"Which inflation index does RBI primarily target under the FIT framework?", o:["WPI","CPI-C (Combined)","CPI-IW","GDP Deflator"], a:1, e:"RBI targets CPI-C (Combined) — the consumer price index covering rural + urban. WPI is wholesale (producer side). Core inflation = CPI minus food and fuel. Headline inflation = full CPI including everything."},
+  {t:"Inflation Types", q:"Cost-Push inflation is caused by:", o:["Excess demand in economy","Rise in production costs","Increase in money supply","Government spending"], a:1, e:"Cost-push = production costs rise (oil prices, wages, raw materials) → supply side. Demand-pull = too much money chasing too few goods → demand side. Core inflation = CPI minus volatile food & fuel items."},
+
+  // === RBI FUNCTIONS (Q6) ===
+  {t:"RBI Functions", q:"Which of the following is NOT a function of the RBI?", o:["Issuing currency notes","Managing foreign exchange reserves","Regulating stock markets","Acting as banker to government"], a:2, e:"SEBI regulates stock markets, NOT RBI. RBI functions: Monetary Authority, Regulator of Banking System, Issuer of Currency, Banker to Govt/Banks, Manager of Forex, Developmental role."},
+
+  // === FISCAL POLICY (Q7-8) ===
+  {t:"Fiscal Policy", q:"Fiscal Deficit is calculated as:", o:["Total expenditure - Total revenue","Revenue expenditure - Revenue receipts","Total expenditure - Total receipts (excluding borrowings)","Total expenditure - Total receipts"], a:2, e:"Fiscal Deficit = Total Expenditure - Total Receipts excluding borrowings. Revenue Deficit = Revenue Expenditure - Revenue Receipts. Budget 2026-27 fiscal deficit target = 4.4% of GDP."},
+  {t:"Budget", q:"India's Union Budget is presented under which constitutional article?", o:["Article 112","Article 110","Article 280","Article 74"], a:0, e:"Article 112 = Annual Financial Statement (Budget). Article 110 = Money Bill definition. Article 280 = Finance Commission. Budget is presented on Feb 1, with Economic Survey the day before (Jan 31)."},
+
+  // === FINANCIAL MARKETS (Q9-11) ===
+  {t:"Money Market", q:"Commercial Paper (CP) can be issued by:", o:["Only banks","Only NBFCs","Corporates and NBFCs","Only RBI"], a:2, e:"CP = unsecured promissory note issued by corporates AND NBFCs. Min 7 days, Max 1 year. Must be rated by CRISIL/ICRA/CARE. CD (Certificate of Deposit) = issued by banks/FIs only. CBLO = fully collateralized, operated by CCIL."},
+  {t:"Capital Market", q:"Which organization regulates India's Capital Market?", o:["RBI","SEBI","IRDAI","PFRDA"], a:1, e:"SEBI (Securities & Exchange Board of India) — established 1988, statutory in 1992. Regulates stock exchanges, mutual funds, FIIs. RBI regulates Money Market. IRDAI = insurance, PFRDA = pensions."},
+  {t:"G-Sec", q:"G-SAP (Government Securities Acquisition Program) is:", o:["RBI selling G-Secs to absorb liquidity","RBI buying G-Secs from market to inject liquidity","Government issuing new securities","SEBI regulating bond markets"], a:1, e:"G-SAP = RBI's open market purchase of government securities to inject liquidity into the banking system. Part of the government's borrowing program management."},
+
+  // === NPA & BANKING (Q12-14) ===
+  {t:"NPA", q:"An asset becomes NPA when interest/principal remains unpaid for how many days?", o:["30 days","60 days","90 days","180 days"], a:2, e:"90-day norm. If a loan is not paid for 90 days → NPA. Sub-standard = NPA <12 months. Doubtful = NPA >12 months. Loss = 100% uncollectible. Provisioning for Standard = 0.4%, Sub-standard (secured) = 15%."},
+  {t:"IBC", q:"What is the maximum time allowed for corporate insolvency resolution under IBC 2016?", o:["90 days","180 days + 90 day extension","270 days","365 days"], a:1, e:"IBC (Insolvency & Bankruptcy Code) 2016: 180 days initial + 90 day extension = total 270 days max. Resolution plan approved by NCLT. Biggest NPA recovery tool. Replaced earlier fragmented laws."},
+  {t:"SARFAESI", q:"SARFAESI Act, 2002 allows banks to:", o:["File insolvency at NCLT","Seize and sell secured assets without court intervention","Merger of weak banks","Write off all NPAs automatically"], a:1, e:"SARFAESI (Securitisation and Reconstruction of Financial Assets and Enforcement of Security Interest Act) 2002. Banks can seize & sell secured assets WITHOUT court. 60-day notice. Only for secured NPAs."},
+
+  // === EXTERNAL SECTOR (Q15-17) ===
+  {t:"BoP", q:"If India's imports exceed exports, the Current Account will show:", o:["Surplus","Deficit","Balance","Cannot determine"], a:1, e:"CA Deficit (CAD) = Imports > Exports. India historically runs a CAD (oil imports > exports). Financed by Capital Account surplus (FDI, FPI, ECB, NRI deposits). CAD > 3% GDP = warning zone."},
+  {t:"Forex", q:"Which component accounts for ~90% of India's Forex Reserves?", o:["Gold","SDR","Foreign Currency Assets (FCA)","Reserve Tranche Position"], a:2, e:"FCA = ~90% of India's forex reserves — held in USD, EUR, GBP, JPY. Gold = ~5-6% (~800 tonnes). SDR = IMF's reserve asset. India's total forex ~$680B (2025)."},
+  {t:"CAC", q:"Regarding Capital Account Convertibility (CAC), which is correct?", o:["India has full CAC since 1994","India has partial CAC, full current account convertibility","India has no CAC at all","India has full CAC for individuals only"], a:1, e:"India achieved full Current Account convertibility in 1994 (Article VIII of IMF). But CAPITAL account is only partially convertible. Tarapore Committee (1997, 2006) recommended full CAC but not implemented fully."},
+
+  // === REASONING (Q18-19) ===
+  {t:"Syllogism", q:"Statements: All Banks are Companies. Some Companies are PSBs. Which conclusion definitely follows?", o:["Some Banks are PSBs","All PSBs are Companies","Some Companies are Banks","No Banks are PSBs"], a:2, e:"Banks fully inside Companies circle. PSBs partly overlapping Companies — but may NOT touch Banks. So 'Some Companies are Banks' is always true (Banks inside Companies). 'Some Banks are PSBs' — not certain, the overlap could miss Banks."},
+  {t:"Syllogism Rule", q:"In syllogism, if one premise is negative, the conclusion MUST be:", o:["Positive","Negative","Particular","Universal"], a:1, e:"Golden rule: Negative premise → Negative conclusion. Two negative premises → no conclusion. One particular premise → particular conclusion. Two particular premises → no conclusion."},
+
+  // === GDP / ESI (Q20-21) ===
+  {t:"GDP", q:"India's GDP is primarily calculated using which method?", o:["Expenditure Method (C+I+G+X-M)","Income Method","Production Method (GVA approach)","PPP Method"], a:2, e:"India's CSO/NSO uses Production/GVA method. GVA = Output - Intermediate Consumption. GDP = Sum of GVA + Taxes - Subsidies. Base year: 2011-12 (recommended shift to 2020-21)."},
+  {t:"GDP Deflator", q:"GDP Deflator measures:", o:["Consumer price inflation only","Wholesale price inflation only","Economy-wide inflation across all goods","Only food inflation"], a:2, e:"GDP Deflator = Nominal GDP / Real GDP × 100. Broader than CPI (consumer basket only) or WPI (wholesale only). Covers ALL goods/services produced domestically."},
+
+  // === PROBABILITY (Q22-25) ===
+  {t:"Probability", q:"Two fair dice are rolled. What is P(sum = 7)?", o:["1/12","1/6","1/9","1/36"], a:1, e:"Total = 36. Sum 7 pairs: (1,6)(2,5)(3,4)(4,3)(5,2)(6,1) = 6. 6/36 = 1/6. Sum 7 has the most outcomes. Sum 2 and 12 have the least (1 each)."},
+  {t:"Cards", q:"One card drawn from a standard 52-card deck. P(Red King)?", o:["1/52","1/26","2/52","4/52"], a:1, e:"Red Kings = King of Hearts + King of Diamonds = 2. Total = 52. 2/52 = 1/26. There are 4 Kings total (1 per suit), but only 2 are Red (Hearts & Diamonds)."},
+  {t:"Cards - OR", q:"One card drawn. P(Heart or King)?", o:["4/13","5/13","1/13","16/52"], a:0, e:"P(Heart) = 13/52. P(King) = 4/52. But King of Hearts counted twice. So = 13 + 4 - 1 = 16. 16/52 = 4/13."},
+  {t:"Complement", q:"Two dice rolled. P(at least one 6)?", o:["11/36","1/6","1/3","5/36"], a:0, e:"Complement is easier: P(no 6) = 5/6 × 5/6 = 25/36. So P(at least one 6) = 1 - 25/36 = 11/36. Count verify: (6,1)(6,2)(6,3)(6,4)(6,5)(6,6)(1,6)(2,6)(3,6)(4,6)(5,6) = 11."}
+];
+
+var cur = 0, ans = new Array(Q.length).fill(-1);
+
+function render(){
+  var area = document.getElementById('msgArea');
+  var d = Q[cur];
+  var msg = '';
+  // Bot question
+  msg += '<div class="msg" style="animation-delay:0s"><div class="msg-avatar">T</div><div class="msg-bubble"><div class="sender">Threeja · '+d.t+'</div><div class="text"><strong>Q'+(cur+1)+'.</strong> '+d.q+'</div>';
+  // Options
+  var letters = ['A','B','C','D'];
+  msg += '<div class="bubble-quiz"><div class="bubble-opts">';
+  for(var i=0;i<d.o.length;i++){
+    var cls = 'b-opt';
+    if(ans[cur]>=0){
+      cls += ' locked';
+      if(i===d.a) cls += ' is-c';
+      if(i===ans[cur] && i!==d.a) cls += ' is-w';
+    }
+    msg += '<label class="'+cls+'"><input type="radio" name="q" value="'+i+'" onchange="pick('+cur+','+i+')"'+(ans[cur]===i?' checked':'')+(ans[cur]>=0?' disabled':'')+'><span class="b-opt-inner"><span class="letter">'+letters[i]+'</span>'+d.o[i]+'</span></label>';
+  }
+  msg += '</div>';
+  // Explanation
+  if(ans[cur]>=0){
+    msg += '<div class="b-exp show"><strong>Explanation:</strong> '+d.e+'</div>';
+  }
+  msg += '</div></div></div>';
+
+  // Progress
+  if(ans[cur]>=0){
+    var done = ans.filter(function(a){return a>=0;}).length;
+    msg += '<div class="msg msg-right"><div class="msg-bubble"><div class="sender">You</div><div class="text">'+(ans[cur]===d.a?'Correct! ✅':'Wrong ❌ — chose '+d.o[ans[cur]]+', correct was '+d.o[d.a])+'</div></div></div>';
+  }
+
+  area.innerHTML = msg;
+  area.scrollTop = area.scrollHeight;
+  document.getElementById('qCount').textContent = (cur+1)+' / '+Q.length;
+  document.getElementById('prevBtn').disabled = (cur===0);
+  document.getElementById('nextBtn').disabled = (cur===Q.length-1);
+  updateDots();
+}
+
+function pick(n, opt){
+  ans[n] = opt;
+  // Auto-check after picking
+  if(n < Q.length-1 && opt>=0) setTimeout(function(){if(cur===n) nextQ();},700);
+  else if(n===Q.length-1 && opt>=0) setTimeout(showResults,700);
+  render();
+}
+
+function prevQ(){if(cur>0){cur--;render();}}
+function nextQ(){if(cur<Q.length-1){cur++;render();}}
+function jumpQ(n){cur=n;render();}
+
+function updateDots(){
+  var row = document.getElementById('dotRow');
+  var h = '';
+  for(var i=0;i<Q.length;i++){
+    var cls='dot';
+    if(i===cur) cls+=' active';
+    if(ans[i]>=0) cls+= ans[i]===Q[i].a?' done-c':' done-w';
+    h += '<div class="'+cls+'" onclick="jumpQ('+i+')">'+(i+1)+'</div>';
+  }
+  row.innerHTML = h;
+  var done = ans.filter(function(a){return a>=0;}).length;
+  document.getElementById('progCount').textContent = done+'/'+Q.length;
+}
+
+function showResults(){
+  var correct=0;
+  for(var i=0;i<Q.length;i++) if(ans[i]===Q[i].a) correct++;
+  var pct=Math.round(correct/Q.length*100);
+  var msg = pct>=80?'Excellent! All topics strong. Go take a full mock test!':pct>=60?'Good foundation. Review weak topics from the list below.':pct>=40?'Getting there. Re-study the topics you missed.':'Start over from Batch 1. Read each topic again slowly.';
+  document.getElementById('resScore').textContent = correct+'/'+Q.length;
+  document.getElementById('resPct').textContent = pct+'%';
+  document.getElementById('resMsg').textContent = msg;
+  // Review
+  var rev='';
+  for(var i=0;i<Q.length;i++){
+    if(ans[i]!==Q[i].a){
+      rev += '<div class="rev-entry"><div class="rev-q">Q'+(i+1)+' ['+Q[i].t+'] '+Q[i].q+'</div><div class="rev-detail">Your: <strong>'+(ans[i]>=0?Q[i].o[ans[i]]:'Skipped')+'</strong> | Correct: <strong style="color:var(--green)">'+Q[i].o[Q[i].a]+'</strong><br>'+Q[i].e+'</div></div>';
+    }
+  }
+  document.getElementById('resReview').innerHTML = rev || '<p style="text-align:center;color:var(--green);">All 25 correct!</p>';
+  document.getElementById('resArea').style.display='block';
+  document.getElementById('resArea').scrollIntoView({behavior:'smooth'});
+}
+
+render();
+</script>
+
+<script>
+document.getElementById('darkToggle').addEventListener('click',function(){
+  var d=document.documentElement;
+  d.setAttribute('data-theme',d.getAttribute('data-theme')==='dark'?'light':'dark');
+});
+</script>
+
+</body>
+</html>
