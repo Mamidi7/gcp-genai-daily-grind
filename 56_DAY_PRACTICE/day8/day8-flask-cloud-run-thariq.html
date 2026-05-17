@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flask → Docker → Cloud Run — Deployment Guide</title>
+<style>
+:root {
+  --ivory: #FAF9F5; --slate: #141413; --clay: #D97757; --clay-d: #B85C3E;
+  --oat: #E3DACC; --olive: #788C5D; --rust: #B04A3F;
+  --gray-50: #F0EEE6; --gray-200: #D1CFC5; --gray-500: #87867F; --gray-800: #3D3D3A;
+  --white: #FFFFFF;
+  --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  --radius: 12px; --radius-sm: 8px;
+}
+[data-theme="dark"] {
+  --ivory: #1A1917; --slate: #F0ECE9; --clay: #D97757; --clay-d: #E8704A;
+  --oat: #3A3430; --olive: #788C5D; --rust: #CC6B5A;
+  --gray-50: #242220; --gray-200: #3A3430; --gray-500: #9A9088; --gray-800: #C5BBB2;
+  --white: #242220;
+  --radius: 12px; --radius-sm: 8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--ivory);color:var(--slate);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;padding:0 0 120px}
+.sheet{max-width:1120px;margin:0 auto;padding:0 32px}
+
+/* ── Top bar ── */
+.topbar{position:sticky;top:0;z-index:50;background:var(--ivory);border-bottom:1.5px solid var(--gray-200);padding:12px 0;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.topbar-inner{display:flex;align-items:center;gap:16px;flex:1;max-width:1120px;margin:0 auto;padding:0 32px}
+.brand{font-family:var(--serif);font-size:20px;font-weight:500;letter-spacing:-0.01em}
+.brand em{color:var(--clay);font-style:italic}
+.spacer{flex:1}
+
+/* ── TOC sidebar ── */
+.layout{display:grid;grid-template-columns:200px minmax(0,1fr);gap:48px;padding-top:48px}
+@media(max-width:960px){.layout{grid-template-columns:1fr}}
+nav.toc{position:sticky;top:80px;align-self:start;font-size:13px}
+@media(max-width:960px){nav.toc{display:none}}
+nav.toc .label{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray-500);margin-bottom:12px}
+nav.toc a{display:block;padding:5px 0 5px 12px;border-left:2px solid var(--gray-200);color:var(--gray-500);text-decoration:none;transition:color 120ms,border-color 120ms}
+nav.toc a:hover{color:var(--slate);border-color:var(--slate)}
+nav.toc a.l2{padding-left:24px;font-size:12px;color:var(--gray-500)}
+
+/* ── Common ── */
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-500);margin-bottom:10px}
+h1{font-family:var(--serif);font-weight:500;font-size:clamp(38px,5vw,56px);letter-spacing:-0.015em;line-height:1.06;margin:4px 0 8px}
+.sub{color:var(--gray-500);max-width:620px;margin-bottom:8px;font-size:15px}p{color:var(--gray-800);margin-bottom:12px;max-width:680px}
+code{font-family:var(--mono);font-size:0.88em;background:var(--gray-50);padding:1px 4px;border-radius:4px}
+h2{font-family:var(--serif);font-weight:500;font-size:27px;letter-spacing:-0.012em;margin:0 0 6px;scroll-margin-top:80px}
+h3{font-family:var(--serif);font-weight:500;font-size:19px;margin:24px 0 8px;scroll-margin-top:80px}
+.rule{border:none;border-top:1px solid var(--gray-200);margin:0 0 22px}
+section{margin-bottom:56px;scroll-margin-top:80px}
+.sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:10px}
+.sec-head .idx{font-family:var(--mono);font-size:13px;color:var(--clay);font-weight:600;width:34px;flex-shrink:0}
+.sec-head h2{margin:0}
+
+/* ── Header meta ── */
+.meta-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:14px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;border-radius:999px;padding:4px 11px;line-height:1}
+.pill.sev{background:var(--clay);color:var(--white)}
+.pill.green{background:var(--olive);color:var(--white)}
+.pill.neutral{background:var(--gray-50);color:var(--gray-800);border:1.5px solid var(--gray-200)}
+.pill.neutral .v{font-family:var(--mono)}
+.summary-band{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0 24px}
+@media(max-width:720px){.summary-band{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:18px 20px}
+.stat-num{font-family:var(--serif);font-size:36px;font-weight:500;line-height:1;color:var(--slate);margin-bottom:6px}
+.stat-label{font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--gray-500)}
+.stat-delta{font-family:var(--mono);font-size:11px;margin-top:4px;color:var(--olive)}
+
+/* ── TL;DR ── */
+.tldr{border:1.5px solid var(--gray-200);border-left:3px solid var(--clay);border-radius:10px;background:var(--white);padding:16px 18px;margin-bottom:24px}
+.tldr b{color:var(--slate)}
+.tldr code{background:var(--gray-50);border:1px solid var(--gray-200)}
+
+/* ── Cards ── */
+.card{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:20px 24px;margin:16px 0;transition:transform 150ms,box-shadow 150ms,border-color 150ms}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(20,20,19,0.1);border-color:var(--slate)}
+.card .card-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gray-500);margin-bottom:8px}
+.card .flow-box{margin-top:12px;padding:10px 14px;background:var(--ivory);border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:var(--mono);font-size:11px;color:var(--gray-500)}
+
+/* ── SVG Diagram ── */
+.diagram-panel{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:24px;margin:16px 0;overflow-x:auto}
+.diagram-panel svg{display:block;width:100%;height:auto}
+.snode rect{stroke:var(--gray-200);stroke-width:1.5;rx:8}
+.snode text{fill:var(--slate);font-size:13px;text-anchor:middle;dominant-baseline:central}
+.snode.sub text{font-size:11px;font-family:var(--mono);fill:var(--gray-500)}
+.snode.clay rect{fill:var(--clay);fill-opacity:.95;stroke:var(--clay)}
+.snode.clay text{fill:#fff}
+.snode.oat rect{fill:var(--oat);fill-opacity:.95;stroke:var(--oat)}
+.snode.oat text{fill:var(--slate)}
+.snode.slate rect{fill:var(--slate);fill-opacity:.95;stroke:var(--slate)}
+.snode.slate text{fill:#fff}
+.snode.olive rect{fill:var(--olive);fill-opacity:.95;stroke:var(--olive)}
+.snode.olive text{fill:#fff}
+.sedge{stroke:var(--gray-500);stroke-width:2;fill:none;marker-end:url(#arr);stroke-linecap:round}
+.sedge.rsp{stroke:var(--gray-200);stroke-dasharray:4 4}
+.figlabel{font-family:var(--mono);font-size:10px;color:var(--gray-500);text-align:center;margin-top:8px}
+
+/* ── Code blocks ── */
+.code-panel{background:var(--slate);color:#E8E6DE;border-radius:var(--radius);padding:18px 20px;margin:14px 0;font-family:var(--mono);font-size:13px;line-height:1.7;overflow-x:auto;position:relative;white-space:pre;tab-size:2}
+.code-panel .c{color:var(--gray-500);font-style:italic}
+.code-panel .k{color:var(--clay)}
+.code-panel .v{color:#B8C99D}
+.code-panel .s{color:#C4B28A}
+.code-panel .fn{color:#C9B98A}
+.diff{background:var(--slate);color:#E8E6DE;border-radius:var(--radius);padding:18px 20px;font-family:var(--mono);font-size:13px;line-height:1.7;overflow-x:auto;margin:14px 0}
+.diff .ctx{color:var(--gray-500)}
+.diff .add{color:#A3B88A}
+.diff .del{color:#E0897A}
+.copy-btn{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);cursor:pointer;color:var(--gray-500);padding:5px;border-radius:4px;display:flex;line-height:1;transition:all 120ms}
+.copy-btn:hover{color:#E8E6DE;border-color:rgba(255,255,255,.3)}
+.copy-btn svg{width:13px;height:13px;display:block}
+.copy-btn.copied{color:var(--olive);border-color:var(--olive)}
+
+/* ── Tabs ── */
+.tabs{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius);margin:14px 0;overflow:hidden}
+.tabbar{display:flex;border-bottom:1px solid var(--gray-200);background:var(--gray-50);overflow-x:auto}
+.tabbar button{appearance:none;border:none;background:none;font-family:var(--mono);font-size:12px;color:var(--gray-500);padding:10px 16px;cursor:pointer;border-right:1px solid var(--gray-200);white-space:nowrap;transition:color 120ms}
+.tabbar button.on{background:var(--white);color:var(--slate);border-bottom:2px solid var(--clay);margin-bottom:-1px}
+.tabs pre{display:none;margin:0;padding:18px 20px;font-family:var(--mono);font-size:12.5px;line-height:1.65;color:var(--slate);overflow-x:auto;background:var(--ivory)}
+.tabs pre.on{display:block}
+.tabs pre code{background:none;padding:0;font-size:inherit}
+
+/* ── Collapsible steps ── */
+details{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius);margin:12px 0;overflow:hidden}
+summary{list-style:none;cursor:pointer;padding:14px 18px;font-family:var(--serif);font-size:16px;color:var(--slate);display:flex;align-items:baseline;gap:10px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸";color:var(--clay);font-family:var(--sans);font-size:12px;transition:transform 120ms}
+details[open] summary::before{transform:rotate(90deg)}
+summary .meta{font-family:var(--mono);font-size:11px;color:var(--gray-500);margin-left:auto}
+details .body{padding:0 18px 16px}
+details .body p{font-size:14px}
+details .body .code-panel{margin:8px 0}
+
+/* ── Tables ── */
+table{width:100%;max-width:640px;border-collapse:separate;border-spacing:0;background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;margin:12px 0}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--gray-50);font-size:14px}
+th{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-500);font-weight:500;background:var(--gray-50)}
+tr:last-child td{border-bottom:none}
+td.good{color:var(--olive)}
+td.bad{color:var(--rust)}
+td code{font-size:12px}
+
+/* ── Key grid ── */
+.key-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin:14px 0}
+.key-item{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);padding:14px 16px}
+.key-item .key-num{font-family:var(--serif);font-size:18px;font-weight:500;color:var(--clay);line-height:1}
+.key-item .key-title{font-weight:600;color:var(--slate);margin-bottom:2px}
+.key-item p{font-size:13px;color:var(--gray-500);margin:0;line-height:1.5}
+
+/* ── Telugu card ── */
+.tel-card{background:var(--white);border:1.5px solid var(--gray-200);border-left:3px solid var(--clay);border-radius:var(--radius);padding:20px 24px;margin:16px 0}
+.tel-card .tc-label{font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--clay);margin-bottom:10px}
+.tel-card p{font-size:14px;color:var(--gray-800);margin-bottom:10px;line-height:1.65}
+.tel-card p strong{color:var(--slate)}
+.tel-card .flow-box{margin-top:12px;padding:10px 14px;background:var(--ivory);border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:var(--mono);font-size:11px;color:var(--gray-500)}
+
+/* ── Callout ── */
+.callout{display:flex;gap:12px;border:1.5px solid var(--oat);background:rgba(227,218,204,0.35);border-radius:10px;padding:14px 16px;margin:14px 0;font-size:14px;color:var(--gray-800)}
+.callout .ico{color:var(--clay);font-weight:600}
+.warn-box{border:1.5px solid var(--clay);background:rgba(217,119,87,0.06);border-radius:10px;padding:14px 16px;margin:14px 0}
+
+/* ── Deploy status ── */
+.status-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:14px 0}
+.status-item{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);padding:14px;display:flex;align-items:center;gap:12px}
+.status-item .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.status-item .dot.pass{background:var(--olive)}
+.status-item .dot.warn{background:var(--clay)}
+
+/* ── Quiz ── */
+.quiz-shell{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;margin:16px 0}
+.quiz-head{display:flex;align-items:baseline;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--gray-200);background:var(--gray-50);font-family:var(--mono);font-size:11px;color:var(--gray-500)}
+.quiz-body{padding:20px 18px}
+.quiz-dots{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.q-dot{width:24px;height:24px;border-radius:50%;border:2px solid var(--gray-200);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;color:var(--gray-500);cursor:pointer;transition:all 120ms}
+.q-dot.active{border-color:var(--clay);color:var(--clay);font-weight:600}
+.q-dot.correct{background:var(--olive);border-color:var(--olive);color:var(--white)}
+.q-dot.wrong{background:var(--clay);border-color:var(--clay);color:var(--white)}
+.q-q{font-size:16px;font-weight:500;color:var(--slate);margin-bottom:14px}
+.q-opts{display:flex;flex-direction:column;gap:6px}
+.q-opt{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);background:var(--ivory);cursor:pointer;transition:all 120ms;font-size:14px;color:var(--gray-800)}
+.q-opt:hover{border-color:var(--gray-500)}
+.q-opt .letter{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--gray-200);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;flex-shrink:0;background:var(--white);transition:all 120ms}
+.q-opt.selected{border-color:var(--clay);border-width:2px}
+.q-opt.selected .letter{background:var(--clay);border-color:var(--clay);color:var(--white)}
+.q-opt.correct{border-color:var(--olive)}
+.q-opt.correct .letter{background:var(--olive);color:var(--white)}
+.q-opt.wrong{border-color:var(--rust)}
+.q-opt.wrong .letter{background:var(--rust);color:var(--white)}
+.q-opt.locked{cursor:default}
+.q-explain{display:none;padding:12px 14px;margin-top:10px;font-size:13px;line-height:1.55;border-radius:var(--radius-sm)}
+.q-explain.show{display:block}
+.q-explain.ok{border:1.5px solid var(--olive);background:rgba(120,140,93,0.06);color:var(--gray-800)}
+.q-explain.no{border:1.5px solid var(--clay);background:rgba(217,119,87,0.06);color:var(--gray-800)}
+.q-explain .ex-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
+.q-explain.ok .ex-lbl{color:var(--olive)}
+.q-explain.no .ex-lbl{color:var(--clay)}
+.q-nav{display:flex;align-items:center;justify-content:space-between;margin-top:14px;gap:10px}
+.q-btn{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border:1.5px solid var(--gray-200);border-radius:999px;background:var(--white);cursor:pointer;color:var(--gray-800);transition:all 120ms}
+.q-btn:hover{background:var(--slate);color:var(--ivory);border-color:var(--slate)}
+.q-btn:disabled{opacity:.4;cursor:default;background:var(--white);color:var(--gray-500);border-color:var(--gray-200)}
+.q-btn.primary{background:var(--slate);color:var(--ivory);border-color:var(--slate)}
+.q-btn.primary:hover{background:var(--gray-800)}
+.q-meta{font-family:var(--mono);font-size:11px;color:var(--gray-500)}
+.q-results{display:none;text-align:center;padding:20px;border-top:1px solid var(--gray-200)}
+.qr-score{font-family:var(--serif);font-size:36px;color:var(--slate);line-height:1}
+.qr-msg{font-size:14px;color:var(--gray-500);margin-top:4px}
+.qr-review{border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:12px 14px;margin:8px 0;text-align:left}
+.qr-review .rv-q{font-size:14px;font-weight:500;color:var(--slate);margin-bottom:3px}
+.qr-review .rv-d{font-size:12px;color:var(--gray-500)}
+.qr-review .rv-e{font-size:12px;color:var(--gray-800);font-style:italic;margin-top:4px;padding-top:4px;border-top:1px solid var(--gray-50)}
+
+/* ── Interview ── */
+.int-block{border:1.5px solid var(--gray-200);border-left:3px solid var(--olive);border-radius:var(--radius);padding:18px 22px;margin:12px 0;background:var(--white)}
+.int-block .int-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--olive);margin-bottom:6px}
+.int-block p{font-size:14px;margin-bottom:6px}
+.int-block strong{color:var(--slate)}
+.int-block .int-code{font-family:var(--mono);font-size:12px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:6px;padding:8px 12px;margin-top:6px}
+
+/* ── Footer ── */
+footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--gray-200);display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--gray-500);flex-wrap:wrap;gap:12px}
+footer .pn{color:var(--clay)}
+#darkToggle{background:none;border:1.5px solid var(--gray-200);border-radius:6px;cursor:pointer;color:var(--gray-500);padding:5px;display:flex;align-items:center;line-height:1;flex-shrink:0;transition:all 120ms}
+#darkToggle:hover{color:var(--slate);border-color:var(--slate)}
+#darkToggle svg{width:16px;height:16px;display:block}
+
+@media(max-width:720px){
+  .sheet{padding:0 16px}
+  h1{font-size:clamp(32px,8vw,44px)}
+  .summary-band{grid-template-columns:repeat(2,1fr)}
+  .key-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Flask <em>→</em> Cloud Run</div>
+    <div class="spacer"></div>
+    <button id="darkToggle" title="Toggle theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="sheet">
+<div class="layout">
+
+<nav class="toc">
+  <div class="label">On this page</div>
+  <a href="#overview">Overview</a>
+  <a href="#arch" class="l2">Architecture</a>
+  <a href="#telugu" class="l2">Telugu lo</a>
+  <a href="#code">3 Files</a>
+  <a href="#deploy">Deploy</a>
+  <a href="#compare">Local vs Cloud Run</a>
+  <a href="#interview">Interview</a>
+  <a href="#quiz" class="l2">30s / STAR / 3min</a>
+  <a href="#quiz">Quiz</a>
+</nav>
+
+<main>
+
+<!-- ===== HEADER ===== -->
+<header style="margin-bottom:32px">
+  <div class="eyebrow">Deployment Guide</div>
+  <h1>Flask → Docker → Cloud Run</h1>
+  <p class="sub">A Flask web server with gunicorn in a Docker container, deployed to Cloud Run. 3 files, 1 command, zero server management.</p>
+  <div class="meta-row">
+    <span class="pill sev">Flask 3.x</span>
+    <span class="pill green">Docker</span>
+    <span class="pill neutral"><span class="k">Runtime</span> <span class="v">python:3.11-slim</span></span>
+    <span class="pill neutral"><span class="k">Deploy</span> <span class="v">gcloud run deploy</span></span>
+  </div>
+  <div class="summary-band">
+    <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Files</div><div class="stat-delta">main.py + Dockerfile + requirements.txt</div></div>
+    <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">Endpoints</div><div class="stat-delta">/ /health /info</div></div>
+    <div class="stat-card"><div class="stat-num">1</div><div class="stat-label">Command</div><div class="stat-delta">gcloud run deploy --source .</div></div>
+    <div class="stat-card"><div class="stat-num">~120</div><div class="stat-label">Image (MB)</div><div class="stat-delta">python:3.11-slim</div></div>
+  </div>
+</header>
+
+<div class="tldr">
+  <b>TL;DR</b> — Three files define the app. <code>main.py</code> has the Flask routes, <code>requirements.txt</code> lists dependencies, <code>Dockerfile</code> packages it. <code>gcloud run deploy --source .</code> builds, pushes, and deploys in one shot. Gunicorn handles multiple concurrent requests (Flask's dev server can't). Cloud Run auto-scales to zero when idle.
+</div>
+
+<!-- ===== SECTION: ARCHITECTURE ===== -->
+<section id="overview">
+  <div class="sec-head"><span class="idx">01</span><h2>Architecture</h2></div>
+  <div class="rule"></div>
+  <p>When a user hits your Cloud Run URL, the request travels through four layers. Each layer has one job — nothing more.</p>
+
+  <div class="diagram-panel">
+    <svg viewBox="0 0 760 260">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0 0 L8 3 L0 6Z" fill="var(--gray-500)"/></marker>
+        <marker id="arr-rsp" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0 0 L8 3 L0 6Z" fill="var(--gray-200)"/></marker>
+      </defs>
+      <text x="380" y="20" text-anchor="middle" fill="var(--slate)" font-family="var(--serif)" font-size="15" font-style="italic" font-weight="500">Request pipeline</text>
+
+      <!-- Top flow: request left-to-right -->
+      <g class="snode slate"><rect x="30" y="46" width="120" height="48" rx="8"/><text x="90" y="70">Browser</text><text x="90" y="86" font-family="var(--mono)" font-size="10px" fill="rgba(255,255,255,.7)">curl / app</text></g>
+      <path class="sedge" d="M150,70 L190,70" marker-end="url(#arr)"/>
+
+      <g class="snode oat"><rect x="200" y="46" width="120" height="48" rx="8"/><text x="260" y="70">Cloud Run</text><text x="260" y="86" font-family="var(--mono)" font-size="10px" fill="var(--gray-500)">HTTPS proxy</text></g>
+      <path class="sedge" d="M320,70 L360,70" marker-end="url(#arr)"/>
+
+      <g class="snode clay"><rect x="370" y="46" width="120" height="48" rx="8"/><text x="430" y="70">Gunicorn</text><text x="430" y="86" font-family="var(--mono)" font-size="10px" fill="rgba(255,255,255,.7)">WSGI workers</text></g>
+      <path class="sedge" d="M490,70 L530,70" marker-end="url(#arr)"/>
+
+      <g class="snode olive"><rect x="540" y="46" width="120" height="48" rx="8"/><text x="600" y="70">Flask App</text><text x="600" y="86" font-family="var(--mono)" font-size="10px" fill="rgba(255,255,255,.7)">Routes + JSON</text></g>
+
+      <!-- Response flow right-to-left (dashed) -->
+      <path class="sedge rsp" d="M600,100 L540,100" marker-end="url(#arr-rsp)"/>
+      <path class="sedge rsp" d="M490,100 L370,100" marker-end="url(#arr-rsp)"/>
+      <path class="sedge rsp" d="M320,100 L200,100" marker-end="url(#arr-rsp)"/>
+      <path class="sedge rsp" d="M150,100 L30,100" marker-end="url(#arr-rsp)"/>
+      <text x="380" y="118" text-anchor="middle" fill="var(--gray-500)" font-family="var(--mono)" font-size="10px">← Response path (dashed)</text>
+
+      <!-- Bottom: 3 files -->
+      <g class="snode"><rect x="80" y="148" width="160" height="42" rx="8" fill="var(--white)" stroke="var(--gray-200)"/><text x="160" y="170" font-family="var(--mono)" font-size="12px">main.py</text><text x="160" y="183" font-family="var(--mono)" font-size="9px" fill="var(--gray-500)">3 routes</text></g>
+      <g class="snode"><rect x="300" y="148" width="160" height="42" rx="8" fill="var(--white)" stroke="var(--gray-200)"/><text x="380" y="170" font-family="var(--mono)" font-size="12px">requirements.txt</text><text x="380" y="183" font-family="var(--mono)" font-size="9px" fill="var(--gray-500)">flask + gunicorn</text></g>
+      <g class="snode"><rect x="520" y="148" width="160" height="42" rx="8" fill="var(--white)" stroke="var(--gray-200)"/><text x="600" y="170" font-family="var(--mono)" font-size="12px">Dockerfile</text><text x="600" y="183" font-family="var(--mono)" font-size="9px" fill="var(--gray-500)">python:3.11-slim</text></g>
+
+      <!-- Deploy box -->
+      <rect x="180" y="212" width="400" height="34" rx="8" fill="rgba(120,140,93,.08)" stroke="var(--olive)" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <text x="380" y="234" text-anchor="middle" font-family="var(--mono)" font-size="12px" fill="var(--olive)" font-weight="600">gcloud run deploy --source .</text>
+    </svg>
+    <div class="figlabel">Pipeline: User → Cloud Run → Gunicorn → Flask → JSON response (dashed = response)</div>
+  </div>
+</section>
+
+<!-- ===== SECTION: TELUGU LO (MULTI-RUNG) ===== -->
+<section id="telugu">
+  <div class="sec-head"><span class="idx">02</span><h2>Telugu lo — Full Stack</h2></div>
+  <div class="rule"></div>
+
+  <div class="tel-card">
+    <div class="tc-label">Telugu lo — Request Lifecycle</div>
+    <p><strong>Browser = Nuvvu mobile pattukuni app open chesav la.</strong> "Data kavali" ani request pampistav. Browser ki vere pani ledu — adi request ni Cloud Run ki forward chestadi. Idantha browser though start avutundi.</p>
+    <p><strong>Cloud Run = Gate keep la untadi.</strong> Nee request ostundi, adi chusukuni — "sarigga undi, security clear" ani verify chestundi. Reverse proxy, HTTPS termination, autoscaling — idantha Cloud Run automatic ga chestadi. Nee code ki direct ga request raakunda, Cloud Run madhya lo filter la untadi.</p>
+    <p><strong>Gunicorn = Manager la untadi.</strong> Nee request wochindi. Gunicorn daggara ready ga 4-5 workers untaru (default). Evariki pani takkuvo vallaki ee request assign chestadu. Concurrency handle cheyadaniki — okadu busy ante inko worker untadi. Flask dev server single-threaded — adi handle cheyaledu, but gunicorn cheyagaladu.</p>
+    <p><strong>Flask App = Chef la untadi.</strong> Request vachindi, specific route batti logic run chestadu. "/health" ante "ok" returns, "/" ante metadata JSON returns. Pure application logic — input thisko, output ivvali.</p>
+    <p><strong>Problem solve chestundi:</strong> Without gunicorn, Flask handles one request at a time. Under load, requests queue up, timeouts occur, Cloud Run kills the instance. With gunicorn, concurrent requests are handled by separate workers — no timeout.</p>
+    <p><strong>Problem kuda undi:</strong> Gunicorn sync workers block on I/O. For long database queries or external API calls, all workers can block. Async workers (uvicorn) or async routes solve that — but that's a different stack.</p>
+    <div class="flow-box">
+      <strong>Flow:</strong> Nuvvu → Cloud Run (gate) → Gunicorn (manager) → Flask (chef) → Response back → Nuvvu chuskovadam
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: 3 FILES ===== -->
+<section id="code">
+  <div class="sec-head"><span class="idx">03</span><h2>3 Files, Block by Block</h2></div>
+  <div class="rule"></div>
+  <p>Every file explained: what it does, why it's there, what goes wrong without it.</p>
+
+  <h3>main.py — Application Logic</h3>
+  <div class="card">
+    <div class="card-eyebrow">Application Logic</div>
+    <p>Three endpoints: <code>/</code> returns metadata, <code>/health</code> for liveness probes, <code>/info</code> with dynamic config. Uses <code>jsonify()</code>. The <code>if __name__ == "__main__"</code> block runs only in dev — gunicorn imports the module and this block is skipped.</p>
+  </div>
+  <div class="code-panel">
+<span class="c"># 1. Imports — Flask and jsonify for JSON responses</span>
+<span class="k">from flask import Flask, jsonify</span>
+import os
+
+<span class="c"># 2. App instance — single Flask application</span>
+<span class="k">app = Flask(__name__)</span>
+
+<span class="c"># 3. Routes — / for metadata, /health for probes, /info for config</span>
+<span class="fn">@app.route('/')</span>
+<span class="k">def</span> <span class="fn">hello</span>():
+    return jsonify({
+        <span class="s">"message"</span>: <span class="s">"Hello from Cloud Run!"</span>,
+        <span class="s">"status"</span>: <span class="s">"deployed"</span>,
+        <span class="s">"platform"</span>: <span class="s">"Google Cloud Run"</span>
+    })
+
+<span class="fn">@app.route('/health')</span>
+<span class="k">def</span> <span class="fn">health</span>():
+    return jsonify({<span class="s">"status"</span>: <span class="s">"healthy"</span>})
+
+<span class="fn">@app.route('/info')</span>
+<span class="k">def</span> <span class="fn">info</span>():
+    return jsonify({
+        <span class="s">"app"</span>: <span class="s">"Flask on Cloud Run"</span>,
+        <span class="s">"port"</span>: os.environ.get(<span class="s">"PORT"</span>, 8080)
+    })
+
+<span class="c"># 4. Dev entry point — skipped when gunicorn imports this module</span>
+<span class="k">if</span> __name__ == <span class="s">"__main__"</span>:
+    port = int(os.environ.get(<span class="s">"PORT"</span>, 8080))
+    app.run(host=<span class="s">"0.0.0.0"</span>, port=port)
+    <button class="copy-btn" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+  </div>
+  <div class="callout"><span class="ico">!</span> <b>Pattern:</b> <code>os.environ.get("PORT", 8080)</code> — Cloud Run sets <code>$PORT</code> dynamically. Must match <code>app.run()</code>, <code>EXPOSE</code>, and gunicorn <code>--bind</code>. If they disagree, the container starts but Cloud Run health checks fail.</div>
+
+  <h3>requirements.txt — Dependencies</h3>
+  <div class="card">
+    <div class="card-eyebrow">Two Packages</div>
+    <p>Flask (routing) + gunicorn (production server). Flask dev server handles one request at a time — gunicorn forks multiple workers for concurrency.</p>
+  </div>
+  <div class="code-panel">flask>=2.0.0
+gunicorn>=20.0.0
+<button class="copy-btn" onclick="copyCode(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+  <div class="warn-box"><b>Common Mistake:</b> Deploying without gunicorn. Flask's dev server is single-threaded. Under Cloud Run's load balancer, concurrent requests queue up, time out, and Cloud Run kills the instance as unhealthy.</div>
+
+  <h3>Dockerfile — Container Recipe</h3>
+  <div class="card">
+    <div class="card-eyebrow">Layer Caching Strategy</div>
+    <p>Base image <code>python:3.11-slim</code> (~120MB vs 1GB+ full). Dependencies install BEFORE code copy — code-only changes rebuild in seconds (layer cache hit).</p>
+  </div>
+  <div class="diff"><span class="ctx"># 1. Base image — minimal OS layer</span>
+FROM python:3.11-slim
+
+<span class="ctx"># 2. Working directory — inside the container</span>
+WORKDIR /app
+
+<span class="ctx"># 3. Copy deps first — layer caching means this step is cached until requirements.txt changes</span>
+COPY requirements.txt .
+
+<span class="ctx"># 4. Install — cached until step 3 changes</span>
+RUN pip install --no-cache-dir -r requirements.txt
+
+<span class="ctx"># 5. Copy the app code — this changes every deploy</span>
+COPY . .
+
+<span class="ctx"># 6. Document the port (documentation only — Cloud Run sets the actual port)</span>
+EXPOSE 8080
+
+<span class="ctx"># 7. Run — gunicorn with 4 workers, binding to $PORT</span>
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "app:app"]</div>
+  <div class="callout"><span class="ico">!</span> <b>Order matters:</b> Line 3-4 (copy deps + install) before line 5 (copy code). If deps haven't changed, Docker uses the cached layer. If you copy code first, every deploy re-installs everything — 2-3 minutes extra per deploy.</div>
+</section>
+
+<!-- ===== SECTION: COMPARISON TABLE ===== -->
+<section id="compare">
+  <div class="sec-head"><span class="idx">04</span><h2>Local vs Cloud Run</h2></div>
+  <div class="rule"></div>
+  <p>Same code, different runtime. What changes?</p>
+
+  <table>
+    <thead><tr><th>Dimension</th><th>Local Dev</th><th>Cloud Run</th></tr></thead>
+    <tbody>
+      <tr><td>Server</td><td>Flask dev (<code>app.run()</code>)</td><td>gunicorn with 4 workers</td></tr>
+      <tr><td>Concurrency</td><td class="bad">Single-threaded</td><td class="good">Multi-worker</td></tr>
+      <tr><td>Port</td><td><code>8080</code> hardcoded</td><td><code>$PORT</code> dynamic env</td></tr>
+      <tr><td>HTTPS</td><td class="bad">None</td><td class="good">Auto (managed)</td></tr>
+      <tr><td>Scaling</td><td class="bad">Manual</td><td class="good">Auto 0→N</td></tr>
+      <tr><td>Image size</td><td>—</td><td><code>~120MB</code></td></tr>
+      <tr><td>Cold start</td><td>—</td><td><code>~1-2s</code> on first request</td></tr>
+    </tbody>
+  </table>
+
+  <div class="tel-card">
+    <div class="tc-label">Telugu lo — Local vs Cloud Run</div>
+    <p><strong>Local dev = Kitchen lo biryani tayaru chestunnav la.</strong> Nuvvu personal ga taste test chestav, ingredients adjust chestav. But ade biryani ni 1000 guests ki serve cheyali ante, professional kitchen kavali — gunicorn + Cloud Run.</p>
+    <p><strong>Flask dev server = Single burner stove.</strong> Oka pan matrame. Rendu requests okesari vaste, okati wait lo untadi. Dev lo parledu — production lo problem. Gunicorn tho 4 burners untai — 4 requests parallel ga handle cheyagalam.</p>
+    <p><strong>Cloud Run = Restaurant counter la.</strong> Customer request vachindi, automatic ga cook start chestadi. 0 customers ante, counter close, zero cost. 1000 customers sudden ga vaste, instant ga 1000 cooks auto-scale avutaru. Nee code docker image lo ready ga undali — ade container.</p>
+    <div class="flow-box">
+      <strong>Flow:</strong> Local kitchen → Docker box → Artifact Registry godown → Cloud Run counter → Customer ki serve
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: DEPLOY STEPS ===== -->
+<section id="deploy">
+  <div class="sec-head"><span class="idx">05</span><h2>Deploy Steps</h2></div>
+  <div class="rule"></div>
+
+  <details>
+    <summary>1 · Build and test locally <span class="meta">~1 min</span></summary>
+    <div class="body">
+      <p>Run the Flask dev server to verify routes work:</p>
+      <div class="code-panel">python main.py
+<span class="c"># Visit http://localhost:8080, /health, /info</span></div>
+      <p>Test each endpoint with curl or browser. Check that JSON responses are correct. If routes fail locally, they'll fail on Cloud Run too — and logs are harder to read on Cloud Run.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>2 · Docker build and run locally <span class="meta">~2 min</span></summary>
+    <div class="body">
+      <p>Containerize and verify the Docker image works:</p>
+      <div class="code-panel">docker build -t flask-app .
+docker run -p 8080:8080 flask-app</div>
+      <p>This catches Dockerfile bugs before deployment — wrong base image, missing dependencies, wrong CMD syntax.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>3 · Deploy to Cloud Run <span class="meta">~3 min</span></summary>
+    <div class="body">
+      <p>One command builds, pushes to Artifact Registry, and deploys:</p>
+      <div class="code-panel">gcloud run deploy flask-app \
+  --source . \
+  --region us-central1 \
+  --allow-unauthenticated</div>
+      <p>Cloud Build reads the Dockerfile, installs deps, copies code, pushes the image, and deploys. Output includes the live URL (ending in <code>.run.app</code>).</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>4 · Verify production <span class="meta">~30s</span></summary>
+    <div class="body">
+      <p>Test the live Cloud Run URL:</p>
+      <div class="code-panel">curl https://flask-app-xxxxx-uc.a.run.app/
+curl https://flask-app-xxxxx-uc.a.run.app/health
+curl https://flask-app-xxxxx-uc.a.run.app/info</div>
+      <p>Check Cloud Run dashboard for request count, latency, and errors. Verify no cold start issues by hitting the URL after 15 minutes of idle.</p>
+    </div>
+  </details>
+
+  <div class="status-grid">
+    <div class="status-item"><span class="dot pass"></span> <span>Local build — verify routes</span></div>
+    <div class="status-item"><span class="dot pass"></span> <span>Docker build — verify container</span></div>
+    <div class="status-item"><span class="dot pass"></span> <span>Deploy — one command</span></div>
+    <div class="status-item"><span class="dot warn"></span> <span>Production — check cold start</span></div>
+  </div>
+</section>
+
+<!-- ===== SECTION: INTERVIEW ===== -->
+<section id="interview">
+  <div class="sec-head"><span class="idx">06</span><h2>Interview Prep</h2></div>
+  <div class="rule"></div>
+  <p>Three depths — pick the one that fits the question.</p>
+
+  <div class="int-block">
+    <div class="int-label">30-Second Answer</div>
+    <p>Flask + Docker + Cloud Run is a 3-file pattern: <code>main.py</code> defines the API routes, <code>requirements.txt</code> lists Flask and Gunicorn, and <code>Dockerfile</code> packages everything in a Python 3.11-slim image. A single <code>gcloud run deploy --source .</code> builds, pushes, and deploys to Cloud Run. Gunicorn provides multi-worker concurrency (Flask dev server is single-threaded). Cloud Run auto-scales to zero when idle, charges only for request time.</p>
+  </div>
+
+  <div class="int-block">
+    <div class="int-label">90-Second STAR Answer</div>
+    <p><strong>Situation:</strong> Needed to deploy a lightweight API service that could scale from zero to handle traffic spikes without managing servers.</p>
+    <p><strong>Task:</strong> Build a containerized Python web service deployable with a single command, minimizing infrastructure overhead and cold-start latency.</p>
+    <p><strong>Action:</strong> Wrote a Flask app with three JSON endpoints (<code>/</code>, <code>/health</code>, <code>/info</code>). Used <code>python:3.11-slim</code> base image (~120MB vs 1GB+). Structured the Dockerfile with dependency caching (copy requirements.txt before code). Deployed with <code>gcloud run deploy --source .</code>. Configured Gunicorn with 4 workers for concurrency.</p>
+    <p><strong>Result:</strong> Deployed in under 3 minutes. Cold start ~1-2 seconds. Handles 100+ concurrent requests with zero provisioning. Reduced infrastructure management to zero — no VMs, no Kubernetes, no load balancers.</p>
+    <p><strong>Insight:</strong> The trick is layer caching in the Dockerfile. Copying deps before code means 90% of builds skip the pip install step — deploys go from 3 minutes to 30 seconds.</p>
+  </div>
+
+  <div class="int-block">
+    <div class="int-label">3-Minute Technical Walkthrough</div>
+    <p>Start with the 3-file structure. main.py defines Flask routes returning jsonify() — the <code>if __name__ == "__main__"</code> guard ensures gunicorn imports the module without starting the dev server. The <code>$PORT</code> environment variable must match across app.run(), EXPOSE, and gunicorn --bind — Cloud Run injects it dynamically, and if they disagree health checks fail.</p>
+    <p>The Dockerfile uses python:3.11-slim for minimal image size (fewer CVEs, faster pulls). Layer ordering is deliberate: COPY requirements.txt before code ensures pip install is cached across code-only rebuilds. Each layer change triggers a rebuild of all subsequent layers — so the most volatile layers (code) come last.</p>
+    <p>Gunicorn with 4 workers handles 4 concurrent requests. Flask dev server is single-threaded (1 at a time). Under Cloud Run's load balancer, concurrent requests queue up in the dev server, timeout, and Cloud Run marks the instance unhealthy. Gunicorn's pre-fork model spawns separate OS processes — each worker blocks independently on I/O (database, external API).</p>
+    <p>Limitations: Sync workers block on I/O. For 100+ concurrent requests needing DB queries, switch to async workers (uvicorn) or increase workers based on instance memory. Cold start is ~1-2s on first request after idle; use min-instances to keep one warm for zero cold start.</p>
+    <div class="int-code"><b>One-liner to remember:</b> <code>gcloud run deploy --source .</code> = build + push + deploy. No CI/CD needed for prototypes.</div>
+  </div>
+</section>
+
+<!-- ===== SECTION: QUIZ ===== -->
+<section id="quiz">
+  <div class="sec-head"><span class="idx">07</span><h2>Quiz</h2></div>
+  <div class="rule"></div>
+
+  <div class="quiz-shell">
+    <div class="quiz-head">
+      <span>Flask + Cloud Run</span>
+      <span class="q-count" id="qc">1 / 5</span>
+    </div>
+    <div class="quiz-body">
+      <div class="quiz-dots" id="qDots"></div>
+      <div class="q-q" id="qQ"></div>
+      <div class="q-opts" id="qOpts"></div>
+      <div class="q-explain" id="qExplain"></div>
+      <div class="q-nav">
+        <button class="q-btn" id="qPrev">Prev</button>
+        <span class="q-meta" id="qMeta">0 / 5 answered</span>
+        <button class="q-btn" id="qNext">Next</button>
+      </div>
+      <div class="q-results" id="qResults"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div><!-- /layout -->
+
+<footer>
+  <span>Flask → Cloud Run · Day 8</span>
+  <span class="pn">gcp-genai-daily-grind</span>
+</footer>
+</div><!-- /sheet -->
+
+<script>
+// ── Dark Mode ──
+(function(){
+  var h = document.documentElement;
+  var s = localStorage.getItem('theme') || 'light';
+  h.setAttribute('data-theme', s);
+  document.getElementById('darkToggle').onclick = function(){
+    var n = h.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    h.setAttribute('data-theme', n);
+    localStorage.setItem('theme', n);
+  };
+})();
+
+// ── Copy Code ──
+function copyCode(btn){
+  var pre = btn.closest('.code-panel') || btn.closest('.diff');
+  if(!pre) return;
+  var txt = pre.textContent.trim();
+  // Remove the button text
+  txt = txt.replace(/<\/?svg[^>]*>/g, '').replace(/Copy code/g, '').trim();
+  navigator.clipboard.writeText(txt).then(function(){
+    btn.classList.add('copied');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+    setTimeout(function(){
+      btn.classList.remove('copied');
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    }, 2000);
+  });
+}
+
+// ── Quiz ──
+var quizData = [
+  {
+    q: 'Why use gunicorn instead of Flask\'s built-in dev server?',
+    opts: ['Gunicorn is easier to install', 'Gunicorn handles multiple concurrent requests via worker processes', 'Flask\'s dev server can\'t handle JSON', 'Gunicorn automatically deploys to Cloud Run'],
+    correct: 1,
+    expl: 'Flask\'s dev server (`app.run()`) is single-threaded — it handles one request at a time. Gunicorn forks multiple OS processes (workers) that can handle concurrent requests. Without gunicorn, concurrent requests queue up, time out, and Cloud Run marks the instance unhealthy.'
+  },
+  {
+    q: 'What does `gcloud run deploy --source .` do?',
+    opts: ['Only builds the Docker image', 'Only pushes the image to Artifact Registry', 'Builds + pushes + deploys in one command', 'Installs Flask locally'],
+    correct: 2,
+    expl: 'The `--source .` flag triggers Cloud Build to read the Dockerfile, build the image, push it to Artifact Registry, and then deploy it to Cloud Run — all in one command. No separate `gcloud builds submit` or `gcloud run deploy --image` needed.'
+  },
+  {
+    q: 'Why should you copy requirements.txt BEFORE code in a Dockerfile?',
+    opts: ['Python requires it', 'Docker layer caching — pip install only re-runs when requirements.txt changes', 'It\'s faster to type', 'Cloud Run requires this order'],
+    correct: 1,
+    expl: 'Docker builds each instruction as a layer. If the layer hasn\'t changed (cache hit), Docker reuses it. By copying requirements.txt and running pip install before copying code, code-only changes don\'t trigger a full reinstall. This reduces rebuild time from ~3 minutes to ~30 seconds.'
+  },
+  {
+    q: 'What is a cold start in Cloud Run?',
+    opts: ['When the server crashes', 'The ~1-2 second latency on first request after idle — the container scales from zero', 'When you deploy without gunicorn', 'When Docker build fails'],
+    correct: 1,
+    expl: 'Cloud Run scales to zero when there are no requests. When a request comes in after idle time, Cloud Run needs to start a new container instance — pulling the image, starting the process, and running the app. This adds ~1-2 seconds of latency on the first request. Use `min-instances` to keep one instance warm.'
+  },
+  {
+    q: 'What happens if PORT environment variable doesn\'t match between app.run(), EXPOSE, and gunicorn --bind?',
+    opts: ['Nothing — they\'re independent', 'The container starts but health checks fail — Cloud Run kills and restarts it in a loop', 'Python throws a syntax error', 'Docker refuses to build'],
+    correct: 1,
+    expl: 'Cloud Run injects the PORT environment variable dynamically. If the app tries to bind to a different port, the container\'s gunicorn process starts but Cloud Run health probes (which target the PORT Cloud Run knows about) fail repeatedly. Cloud Run considers the instance unhealthy and restarts it — creating a crash loop.'
+  }
+];
+
+(function(){
+  var qc = 0, qa = {};
+  var qQ = document.getElementById('qQ');
+  var qOpts = document.getElementById('qOpts');
+  var qExplain = document.getElementById('qExplain');
+  var qDots = document.getElementById('qDots');
+  var qcSpan = document.getElementById('qc');
+  var qMeta = document.getElementById('qMeta');
+  var qPrev = document.getElementById('qPrev');
+  var qNext = document.getElementById('qNext');
+  var qResults = document.getElementById('qResults');
+
+  function renderDots(){
+    qDots.innerHTML = '';
+    for(var i=0; i<quizData.length; i++){
+      var d = document.createElement('span');
+      d.className = 'q-dot' + (i===qc ? ' active' : '') + (qa[i] !== undefined ? (qa[i] === quizData[i].correct ? ' correct' : ' wrong') : '');
+      d.textContent = i+1;
+      d.onclick = function(){ go(parseInt(this.textContent)-1); };
+      qDots.appendChild(d);
+    }
+  }
+
+  function render(){
+    var d = quizData[qc];
+    qcSpan.textContent = (qc+1) + ' / ' + quizData.length;
+    qQ.textContent = d.q;
+    qOpts.innerHTML = '';
+    qExplain.className = 'q-explain';
+    for(var i=0; i<d.opts.length; i++){
+      var opt = document.createElement('div');
+      opt.className = 'q-opt';
+      if(qa[qc] !== undefined) opt.classList.add('locked');
+      if(qa[qc] === i){
+        opt.classList.add(qa[qc] === d.correct ? 'correct' : 'wrong');
+        opt.classList.add('selected');
+      }
+      opt.innerHTML = '<span class="letter">' + String.fromCharCode(65+i) + '</span>' + d.opts[i];
+      opt.onclick = function(){
+        if(qa[qc] !== undefined) return;
+        var idx = Array.from(qOpts.children).indexOf(this);
+        select(idx);
+      };
+      qOpts.appendChild(opt);
+    }
+    if(qa[qc] !== undefined) showExplain();
+    renderDots();
+    updateMeta();
+    qPrev.disabled = qc === 0;
+    qNext.textContent = qc === quizData.length-1 ? 'Review' : 'Next';
+  }
+
+  function select(idx){
+    qa[qc] = idx;
+    render();
+  }
+
+  function showExplain(){
+    var d = quizData[qc];
+    var ok = qa[qc] === d.correct;
+    qExplain.className = 'q-explain show ' + (ok ? 'ok' : 'no');
+    qExplain.innerHTML = '<div class="ex-lbl">' + (ok ? 'Correct!' : 'Not quite') + '</div>' + d.expl;
+  }
+
+  function updateMeta(){
+    var answered = Object.keys(qa).length;
+    qMeta.textContent = answered + ' / ' + quizData.length + ' answered';
+  }
+
+  function go(idx){
+    if(idx < 0 || idx >= quizData.length) return;
+    qc = idx;
+    render();
+    window.scrollTo({top: document.getElementById('quiz').offsetTop - 100, behavior:'smooth'});
+  }
+
+  qPrev.onclick = function(){ go(qc-1); };
+  qNext.onclick = function(){
+    if(qc === quizData.length-1){
+      showResults();
+    } else {
+      go(qc+1);
+    }
+  };
+
+  function showResults(){
+    var correct = 0;
+    var html = '<div style="padding:18px 0 10px">';
+    html += '<div class="qr-score">' + Object.keys(qa).filter(function(k){return qa[k]===quizData[k].correct}).length + ' / ' + quizData.length + '</div>';
+    html += '<div class="qr-msg">' + (Object.keys(qa).filter(function(k){return qa[k]===quizData[k].correct}).length >= 4 ? 'Strong — you\'ve got this' : 'Review the explanations and try again') + '</div>';
+    html += '</div>';
+    for(var i=0; i<quizData.length; i++){
+      var d = quizData[i];
+      var a = qa[i];
+      var ok = a === d.correct;
+      html += '<div class="qr-review' + (ok ? '' : '') + '">';
+      html += '<div class="rv-q">Q' + (i+1) + ': ' + d.q + '</div>';
+      html += '<div class="rv-d">Your answer: ' + (a !== undefined ? d.opts[a] : 'Not answered') + ' — ' + (ok ? 'Correct' : 'Incorrect') + '</div>';
+      html += '<div class="rv-e">' + d.expl + '</div>';
+      html += '</div>';
+    }
+    html += '<button class="q-btn primary" onclick="location.reload()">Restart Quiz</button>';
+    qResults.innerHTML = html;
+    qResults.style.display = 'block';
+    document.querySelector('.quiz-body').style.display = 'none';
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
