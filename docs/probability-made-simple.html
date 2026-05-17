@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Probability — Made Simple (RBI Grade B)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #F3EEE4; --paper-2: #EBE4D4;
+  --ink: #1A1612; --ink-2: #3D3528;
+  --ink-dim: #6B5D49; --ink-faint: #A89A83;
+  --rule: #C8B99E;
+  --accent: #C0392B; --accent2: #A93226;
+  --green: #2D7D46; --blue: #2B6CB0;
+  --gold: #B8860B;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+[data-theme="dark"] {
+  --paper: #1B1917; --paper-2: #242220;
+  --ink: #F0ECE9; --ink-2: #C5BBB2;
+  --ink-dim: #9A9088; --ink-faint: #6B625C;
+  --rule: #3A3430;
+  --accent: #E8704A; --accent2: #D95A3A;
+  --green: #5BBD6B; --blue: #5B8FBD;
+  --gold: #D4A84B;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65;}
+body{background-image:radial-gradient(circle at 15% 10%,rgba(200,180,140,.12) 0%,transparent 45%),
+  radial-gradient(circle at 85% 90%,rgba(200,180,140,.1) 0%,transparent 40%),
+  repeating-linear-gradient(0deg,transparent 0,transparent 28px,rgba(120,100,70,.03) 28px,rgba(120,100,70,.03) 29px);
+  min-height:100vh;}
+.topbar{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule);padding:10px 0;backdrop-filter:blur(8px);}
+.topbar-inner{max-width:780px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;}
+.brand{font-family:var(--serif);font-size:16px;font-style:italic;color:var(--ink-dim);}
+.topbar button{background:none;border:1px solid var(--rule);cursor:pointer;color:var(--ink-dim);padding:4px;display:flex;}
+.topbar button:hover{color:var(--accent);border-color:var(--accent);}
+main{max-width:780px;margin:0 auto;padding:32px 24px 80px;}
+.hero{text-align:center;padding:20px 0;margin-bottom:28px;border-bottom:2px solid var(--ink);}
+.hero .tag{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+.hero h1{font-family:var(--serif);font-size:clamp(32px,5vw,52px);font-weight:400;line-height:1;letter-spacing:-.025em;color:var(--ink);}
+.hero h1 .italic{font-style:italic;color:var(--accent);}
+.hero .sub{font-family:var(--serif);font-size:15px;font-style:italic;color:var(--ink-2);margin-top:4px;}
+section{opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease;margin-bottom:32px;}
+section.in{opacity:1;transform:translateY(0);}
+.sec-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;border-bottom:1px solid var(--rule);padding-bottom:6px;}
+.sec-num{font-family:var(--mono);font-size:10px;color:var(--accent);flex-shrink:0;margin-top:5px;width:20px;text-align:right;}
+.sec-head h2{font-family:var(--serif);font-size:24px;font-weight:400;line-height:1.2;letter-spacing:-.01em;margin:0;}
+.sec-head h2 .underline{text-decoration:underline;text-decoration-style:wavy;text-decoration-color:var(--accent);text-underline-offset:4px;}
+h3{font-family:var(--sans);font-size:15px;font-weight:600;letter-spacing:.02em;margin:16px 0 6px;color:var(--ink);}
+p{margin-bottom:10px;color:var(--ink-2);line-height:1.7;}
+p strong{color:var(--ink);}
+ul,ol{margin:6px 0 12px 18px;color:var(--ink-2);}
+li{margin-bottom:4px;}
+.card{background:var(--paper-2);border:1px solid var(--ink);padding:16px 20px;margin:12px 0;box-shadow:3px 3px 0 var(--ink);}
+.card .label{font-family:var(--mono);font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:4px;}
+.card h4{font-family:var(--serif);font-size:20px;font-weight:400;color:var(--ink);margin-bottom:4px;}
+.card h4 .hl{color:var(--accent);}
+.formula{font-family:var(--serif);font-size:20px;font-style:italic;text-align:center;padding:14px;background:var(--paper);border:1px solid var(--rule);margin:10px 0;color:var(--ink);}
+.comp-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px;}
+.comp-table th{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;padding:7px 10px;text-align:left;font-weight:400;}
+.comp-table td{padding:8px 10px;border-bottom:1px solid var(--rule);color:var(--ink-2);vertical-align:top;}
+.comp-table tr:last-child td{border-bottom:none;}
+.tag{display:inline-block;font-family:var(--mono);font-size:7px;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;margin-right:3px;border:1px solid var(--ink);color:var(--ink-dim);}
+.tag-green{border-color:var(--green);color:var(--green);}
+.tag-blue{border-color:var(--blue);color:var(--blue);}
+.tag-gold{border-color:var(--gold);color:var(--gold);}
+.tag-red{border-color:var(--accent);color:var(--accent);}
+.key-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:12px 0;}
+.key-item{background:var(--paper);border:1px solid var(--rule);padding:10px 12px;font-size:13px;}
+.key-item .key-num{font-family:var(--serif);font-size:18px;font-style:italic;color:var(--accent);line-height:1;}
+.key-item .key-title{font-weight:600;color:var(--ink);margin-bottom:2px;font-size:14px;}
+.key-item p{font-size:13px;margin:0;color:var(--ink-dim);}
+.def-block{background:var(--paper);border-left:3px solid var(--accent);padding:10px 14px;margin:10px 0;font-size:14px;color:var(--ink-2);}
+.def-block .term{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:2px;}
+.note-warn{border:1px solid var(--gold);background:var(--paper);padding:10px 14px;margin:10px 0;font-size:13px;color:var(--ink-2);}
+.note{background:var(--paper);padding:10px 14px;margin:10px 0;font-size:13px;border:1px solid var(--green);color:var(--ink-2);}
+/* Quiz */
+.quiz-card{background:var(--paper-2);border:2px solid var(--ink);padding:18px;margin:14px 0;}
+.quiz-dots{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;}
+.quiz-dot{width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;border-radius:50%;border:2px solid var(--rule);background:var(--paper);color:var(--ink-faint);cursor:pointer;transition:all .25s;}
+.quiz-dot.active{border-color:var(--accent);color:var(--accent);font-weight:600;}
+.quiz-dot.correct{background:var(--green);border-color:var(--green);color:var(--paper);}
+.quiz-dot.wrong{background:var(--accent);border-color:var(--accent);color:var(--paper);}
+.quiz-q{font-size:15px;font-weight:500;color:var(--ink);margin-bottom:12px;}
+.quiz-opts{display:flex;flex-direction:column;gap:4px;}
+.q-opt{background:var(--paper);border:1px solid var(--rule);cursor:pointer;font-size:14px;color:var(--ink-2);transition:all .2s;position:relative;overflow:hidden;}
+.q-opt:hover{border-color:var(--ink);background:var(--paper-2);}
+.q-opt input{display:none;}
+.q-opt .opt-inner{display:flex;align-items:center;padding:8px 10px;gap:8px;width:100%;}
+.q-opt .letter{width:18px;height:18px;border-radius:50%;border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;flex-shrink:0;}
+.q-opt.locked{cursor:default;}
+.q-opt.is-c{border-color:var(--green);}
+.q-opt.is-w{border-color:var(--accent);}
+.q-opt.is-c .letter{background:var(--green);border-color:var(--green);color:var(--paper);}
+.q-opt.is-w .letter{background:var(--accent);border-color:var(--accent);color:var(--paper);}
+.q-nav{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px;}
+.q-btn{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:6px 12px;border:2px solid var(--ink);background:var(--paper);cursor:pointer;color:var(--ink);}
+.q-btn:hover{background:var(--ink);color:var(--paper);}
+.q-btn:disabled{opacity:.4;cursor:default;background:var(--paper);color:var(--ink-faint);border-color:var(--ink-faint);}
+.q-count{font-family:var(--mono);font-size:9px;color:var(--ink-dim);}
+.quiz-results{display:none;}
+.quiz-results-inner{text-align:center;padding:20px;border:2px solid var(--ink);background:var(--paper-2);margin-bottom:14px;}
+.quiz-score{font-family:var(--serif);font-size:38px;font-style:italic;color:var(--ink);line-height:1;}
+.quiz-score-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);margin-top:3px;}
+.quiz-msg{font-family:var(--serif);font-size:15px;font-style:italic;color:var(--ink-2);margin-top:6px;}
+.quiz-review-entry{padding:8px 12px;border:1px solid var(--rule);background:var(--paper);margin-bottom:6px;font-size:13px;}
+.quiz-review-entry .rev-q{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px;}
+.quiz-review-entry .rev-detail{font-size:13px;color:var(--ink-dim);}
+.anna-card{background:var(--paper);border:2px solid var(--accent);padding:20px;margin:16px 0;box-shadow:4px 4px 0 var(--accent);}
+.anna-card .anna-label{font-family:var(--mono);font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:3px;}
+.anna-card h3{font-family:var(--serif);font-size:20px;font-weight:400;font-style:italic;margin-bottom:8px;color:var(--ink);}
+.anna-card p{font-size:14px;color:var(--ink-2);}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Probability — Made Simple</div>
+    <button id="darkToggle" title="Toggle dark mode">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</div>
+
+<main>
+
+<div class="hero">
+  <div class="tag">Probability — Beginner-Friendly</div>
+  <h1>Probability <span class="italic">Made Simple</span></h1>
+  <p class="sub">Dice · Cards · Coins · Balls · Formulas — built from scratch for RBI Grade B Quant</p>
+</div>
+
+<!-- ===== 1. THE BASICS ===== -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <h2>The <span class="underline">Only Formula</span> You Need</h2>
+  </div>
+  <p style="font-family:var(--serif);font-size:17px;font-style:italic;color:var(--ink-dim);">Everything in Probability is just this one formula applied again and again.</p>
+
+  <div class="formula">P(Event) = <span style="color:var(--accent);">Favorable Outcomes</span> / <span style="color:var(--blue);">Total Possible Outcomes</span></div>
+
+  <div class="card">
+    <div class="label">Telugu Analogy</div>
+    <h4>Probability = <span class="hl">Bag eesi theesukunna</span> la</h4>
+    <p>Nuvvu oka bag lo 10 beads vesaru — 4 red, 6 blue. Nuvvu <strong>eyes close</strong> chesi oka bead teestav. Red bead vasthada? <strong>Favorable = 4</strong> (red beads count). <strong>Total = 10</strong> (total beads). Probability = 4/10 = 0.4 = 40%.</p>
+    <p>That's ALL probability is: <strong>Count what you want ÷ Count everything possible.</strong> Exam lo dice, cards, coins anni idi step 1: count favorable, step 2: divide by total.</p>
+  </div>
+
+  <div class="def-block">
+    <div class="term">Important: Range of Probability</div>
+    <p>Probability always between <strong>0 and 1</strong> (or 0% to 100%).</p>
+    <p>P = 0 → impossible ("pig will fly tomorrow")<br>P = 1 → certain ("sun will rise tomorrow")<br>P = 0.5 → even chance (coin toss heads)</p>
+  </div>
+</section>
+
+<!-- ===== 2. COIN ===== -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <h2>Coin <span class="underline">Toss</span></h2>
+  </div>
+  <p>The easiest topic. Once you understand this, dice and cards follow the same pattern.</p>
+
+  <div class="card">
+    <div class="label">Telugu Analogy</div>
+    <h4>Coin = <span class="hl">Decision ki kaanam</span> — head or tail, doota one!</h4>
+    <p>Oka coin ki <strong>2 sides</strong> = Head, Tail. Total possible outcomes = 2. That's it. All coin questions are just "how many heads count ÷ 2".</p>
+  </div>
+
+  <h3>Single Coin — Solved Examples</h3>
+  <div class="comp-table">
+    <thead><tr><th>Question</th><th>Favorable</th><th>Formula</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td>P(Heads)</td><td>1 (only Heads)</td><td>1 ÷ 2</td><td><strong>1/2</strong></td></tr>
+      <tr><td>P(Tails)</td><td>1 (only Tails)</td><td>1 ÷ 2</td><td><strong>1/2</strong></td></tr>
+      <tr><td>P(Not Heads)</td><td>1 (Tails)</td><td>1 ÷ 2</td><td><strong>1/2</strong></td></tr>
+    </tbody>
+  </div>
+
+  <h3>Two Coins — The 4-Outcome Grid</h3>
+  <p>Two coins ki itlu possible outcomes: <strong>HH, HT, TH, TT</strong> → Total = 4.</p>
+  <div class="comp-table">
+    <thead><tr><th>Question</th><th>Favorable Count</th><th>Favorable outcomes</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td>P(Both Heads)</td><td>1</td><td>HH</td><td><strong>1/4</strong></td></tr>
+      <tr><td>P(One Head, One Tail)</td><td>2</td><td>HT, TH</td><td><strong>2/4 = 1/2</strong></td></tr>
+      <tr><td>P(At least one Head)</td><td>3</td><td>HH, HT, TH</td><td><strong>3/4</strong></td></tr>
+      <tr><td>P(No Heads = Both Tails)</td><td>1</td><td>TT</td><td><strong>1/4</strong></td></tr>
+    </tbody>
+  </div>
+
+  <div class="note-warn">
+    <strong>Common Mistake:</strong> "P(One Head, One Tail)" lo students TH ni maripotharu. They think HT and TH are same — but they are DIFFERENT outcomes. First coin can be Head & Second Tails, OR First Tails & Second Head. Always count both.
+  </div>
+</section>
+
+<!-- ===== 3. DICE ===== -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <h2>Dice <span class="underline">Roll</span></h2>
+  </div>
+  <p>Oka dice ki 6 faces — numbers 1 to 6. Total outcomes = 6. This is the foundation.</p>
+
+  <div class="card">
+    <div class="label">Telugu Analogy</div>
+    <h4>Dice = <span class="hl">6-door cabinet</span> la — you open one door, find one number inside</h4>
+    <p>Nuvvu oka almirah lo 6 shelves unay. Nuvvu kalla mussi oka shelf open chestav. 3 number shelf raavadaniki probability = 1/6. Easy.</p>
+  </div>
+
+  <h3>Single Dice — Solved Examples</h3>
+  <div class="comp-table">
+    <thead><tr><th>Question</th><th>Favorable</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td>P(rolling a 5)</td><td>one 5 on dice</td><td><strong>1/6</strong></td></tr>
+      <tr><td>P(rolling an even number)</td><td>2,4,6 → 3 numbers</td><td><strong>3/6 = 1/2</strong></td></tr>
+      <tr><td>P(rolling number > 4)</td><td>5,6 → 2 numbers</td><td><strong>2/6 = 1/3</strong></td></tr>
+      <tr><td>P(rolling prime number)</td><td>2,3,5 → 3 numbers</td><td><strong>3/6 = 1/2</strong></td></tr>
+      <tr><td>P(rolling a 7)</td><td>0 (7 doesn't exist on dice)</td><td><strong>0</strong></td></tr>
+    </tbody>
+  </div>
+
+  <h3>Two Dice — The Most Important Table for RBI</h3>
+  <p>Rendi dice lu eskunte, total outcomes = 6 x 6 = <strong>36</strong>. Memorize this grid — it appears in RBI exams directly.</p>
+
+  <div class="card" style="overflow-x:auto;padding:12px;">
+    <div class="label">Two Dice — All 36 Outcomes Grid</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;text-align:center;">
+      <tr><td style="padding:5px;background:var(--ink);color:var(--paper);"></td><td style="background:var(--ink);color:var(--paper);padding:5px;"><strong>1</strong></td><td style="background:var(--ink);color:var(--paper);padding:5px;"><strong>2</strong></td><td style="background:var(--ink);color:var(--paper);padding:5px;"><strong>3</strong></td><td style="background:var(--ink);color:var(--paper);padding:5px;"><strong>4</strong></td><td style="background:var(--ink);color:var(--paper);padding:5px;"><strong>5</strong></td><td style="background:var(--ink);color:var(--paper);padding:5px;"><strong>6</strong></td></tr>
+      <tr><td style="background:var(--ink);color:var(--paper);padding:5px;"><strong>1</strong></td><td style="border:1px solid var(--rule);padding:5px;">1+1=2</td><td style="border:1px solid var(--rule);padding:5px;">1+2=3</td><td style="border:1px solid var(--rule);padding:5px;">1+3=4</td><td style="border:1px solid var(--rule);padding:5px;">1+4=5</td><td style="border:1px solid var(--rule);padding:5px;">1+5=6</td><td style="border:1px solid var(--rule);padding:5px;">1+6=7</td></tr>
+      <tr><td style="background:var(--ink);color:var(--paper);padding:5px;"><strong>2</strong></td><td style="border:1px solid var(--rule);padding:5px;">2+1=3</td><td style="border:1px solid var(--rule);padding:5px;">2+2=4</td><td style="border:1px solid var(--rule);padding:5px;">2+3=5</td><td style="border:1px solid var(--rule);padding:5px;">2+4=6</td><td style="border:1px solid var(--rule);padding:5px;">2+5=7</td><td style="border:1px solid var(--rule);padding:5px;">2+6=8</td></tr>
+      <tr><td style="background:var(--ink);color:var(--paper);padding:5px;"><strong>3</strong></td><td style="border:1px solid var(--rule);padding:5px;">3+1=4</td><td style="border:1px solid var(--rule);padding:5px;">3+2=5</td><td style="border:1px solid var(--rule);padding:5px;">3+3=6</td><td style="border:1px solid var(--rule);padding:5px;">3+4=7</td><td style="border:1px solid var(--rule);padding:5px;">3+5=8</td><td style="border:1px solid var(--rule);padding:5px;">3+6=9</td></tr>
+      <tr><td style="background:var(--ink);color:var(--paper);padding:5px;"><strong>4</strong></td><td style="border:1px solid var(--rule);padding:5px;">4+1=5</td><td style="border:1px solid var(--rule);padding:5px;">4+2=6</td><td style="border:1px solid var(--rule);padding:5px;">4+3=7</td><td style="border:1px solid var(--rule);padding:5px;">4+4=8</td><td style="border:1px solid var(--rule);padding:5px;">4+5=9</td><td style="border:1px solid var(--rule);padding:5px;">4+6=10</td></tr>
+      <tr><td style="background:var(--ink);color:var(--paper);padding:5px;"><strong>5</strong></td><td style="border:1px solid var(--rule);padding:5px;">5+1=6</td><td style="border:1px solid var(--rule);padding:5px;">5+2=7</td><td style="border:1px solid var(--rule);padding:5px;">5+3=8</td><td style="border:1px solid var(--rule);padding:5px;">5+4=9</td><td style="border:1px solid var(--rule);padding:5px;">5+5=10</td><td style="border:1px solid var(--rule);padding:5px;">5+6=11</td></tr>
+      <tr><td style="background:var(--ink);color:var(--paper);padding:5px;"><strong>6</strong></td><td style="border:1px solid var(--rule);padding:5px;">6+1=7</td><td style="border:1px solid var(--rule);padding:5px;">6+2=8</td><td style="border:1px solid var(--rule);padding:5px;">6+3=9</td><td style="border:1px solid var(--rule);padding:5px;">6+4=10</td><td style="border:1px solid var(--rule);padding:5px;">6+5=11</td><td style="border:1px solid var(--rule);padding:5px;">6+6=12</td></tr>
+    </table>
+  </div>
+
+  <h3>Two Dice — Common Exam Questions</h3>
+  <div class="comp-table">
+    <thead><tr><th>Question</th><th>Count from Grid</th><th>Favorable cells</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td>P(Sum = 7)</td><td>6</td><td>(1,6),(2,5),(3,4),(4,3),(5,2),(6,1)</td><td><strong>6/36 = 1/6</strong></td></tr>
+      <tr><td>P(Sum = 2)</td><td>1</td><td>(1,1)</td><td><strong>1/36</strong></td></tr>
+      <tr><td>P(Sum = 12)</td><td>1</td><td>(6,6)</td><td><strong>1/36</strong></td></tr>
+      <tr><td>P(Doubles)</td><td>6</td><td>(1,1),(2,2),(3,3),(4,4),(5,5),(6,6)</td><td><strong>6/36 = 1/6</strong></td></tr>
+      <tr><td>P(Sum &ge; 10)</td><td>6</td><td>(4,6),(5,5),(5,6),(6,4),(6,5),(6,6)</td><td><strong>6/36 = 1/6</strong></td></tr>
+    </tbody>
+  </div>
+
+  <div class="note-warn">
+    <strong>Sum 7 is special:</strong> It has the MOST outcomes (6 out of 36). That's why in board games, 7 is the most common dice total. The least common: 2 and 12 (only 1 way each).
+  </div>
+</section>
+
+<!-- ===== 4. CARDS ===== -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">04</span>
+    <h2>Playing <span class="underline">Cards</span></h2>
+  </div>
+  <p>Many students panic at cards. Don't. It's just a counting game. Memorize the 52-card structure once and you're done.</p>
+
+  <div class="card">
+    <div class="label">Telugu Analogy</div>
+    <h4>Cards = <span class="hl">52 beads in a bag</span> — but sorted by 4 groups, 13 each</h4>
+    <p>Nuvvu oka bag lo 52 beads vesaru. <strong>4 colors</strong> — Hearts, Diamonds, Clubs, Spades. Each color lo <strong>13 beads</strong> — Ace, 2 to 10, Jack, Queen, King. Alage. Drawing a card means taking one bead from this bag. Count what you want. Divide by 52.</p>
+  </div>
+
+  <h3>The Card Structure — Memorize This</h3>
+
+  <div class="comp-table">
+    <thead><tr><th>Category</th><th>Count</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Total Cards</strong></td><td><strong>52</strong></td><td>Standard deck</td></tr>
+      <tr><td>Suits</td><td>4</td><td>Hearts (♥), Diamonds (♦), Clubs (♣), Spades (♠)</td></tr>
+      <tr><td>Cards per Suit</td><td>13</td><td>A,2,3,4,5,6,7,8,9,10,J,Q,K</td></tr>
+      <tr><td>Face Cards (J/Q/K)</td><td>12 (= 3 x 4 suits)</td><td>Each suit has 3: Jack, Queen, King</td></tr>
+      <tr><td>Aces</td><td>4</td><td>One per suit</td></tr>
+      <tr><td>Red Cards</td><td>26</td><td>Hearts (13) + Diamonds (13)</td></tr>
+      <tr><td>Black Cards</td><td>26</td><td>Clubs (13) + Spades (13)</td></tr>
+    </tbody>
+  </div>
+
+  <h3>All Common Questions in One Table</h3>
+  <div class="comp-table">
+    <thead><tr><th>Question</th><th>Favorable</th><th>How to Count</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td>P(an Ace)</td><td>4</td><td>4 Aces in the deck</td><td><strong>4/52 = 1/13</strong></td></tr>
+      <tr><td>P(a Heart)</td><td>13</td><td>13 Hearts</td><td><strong>13/52 = 1/4</strong></td></tr>
+      <tr><td>P(a King)</td><td>4</td><td>4 Kings</td><td><strong>4/52 = 1/13</strong></td></tr>
+      <tr><td>P(a Face Card)</td><td>12</td><td>J(4)+Q(4)+K(4)=12</td><td><strong>12/52 = 3/13</strong></td></tr>
+      <tr><td>P(a Red Card)</td><td>26</td><td>13♥ + 13♦</td><td><strong>26/52 = 1/2</strong></td></tr>
+      <tr><td>P(King of Hearts)</td><td>1</td><td>Only one King of Hearts</td><td><strong>1/52</strong></td></tr>
+      <tr><td>P(a Black Queen)</td><td>2</td><td>Queen of ♣ + Queen of ♠</td><td><strong>2/52 = 1/26</strong></td></tr>
+      <tr><td>P(a Spade King)</td><td>1</td><td>Only one King of ♠</td><td><strong>1/52</strong></td></tr>
+    </tbody>
+  </div>
+
+  <div class="note-warn">
+    <strong>Face Card Trap:</strong> Many students count Ace as a face card. <strong>Ace is NOT a face card.</strong> Face cards = J, Q, K only (12 total). Ace is just Ace.
+  </div>
+
+  <h3>"Either ... Or" Type Questions</h3>
+  <div class="comp-table">
+    <thead><tr><th>Question</th><th>Count</th><th>Reasoning</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td>P(Ace or King)</td><td>8</td><td>4 Aces + 4 Kings = 8</td><td><strong>8/52 = 2/13</strong></td></tr>
+      <tr><td>P(Heart or King)</td><td>16</td><td>13 Hearts + 3 Kings (♥K already counted) = 16</td><td><strong>16/52 = 4/13</strong></td></tr>
+      <tr><td>P(Red Card or Ace)</td><td>28</td><td>26 Reds + 2 Black Aces = 28</td><td><strong>28/52 = 7/13</strong></td></tr>
+    </tbody>
+  </div>
+  <div class="note">
+    <strong>"OR" means add, but don't double-count!</strong> When a card falls in both categories (e.g., King of Hearts is both a King AND a Heart), count it only once.
+  </div>
+</section>
+
+<!-- ===== 5. BALLS / BAGS ===== -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">05</span>
+    <h2>Balls & <span class="underline">Urns</span></h2>
+  </div>
+  <p>Same formula. Count what you want ÷ Count everything.</p>
+
+  <div class="key-grid">
+    <div class="key-item">
+      <div class="key-num">1</div>
+      <div class="key-title">Without Replacement</div>
+      <p>Ball drawn and NOT put back. Total decreases by 1 every draw. Second draw has fewer options.</p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">2</div>
+      <div class="key-title">With Replacement</div>
+      <p>Ball drawn then PUT BACK. Total stays same every draw. Each draw is independent (like fresh start).</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label">Step-by-Step — Balls Problem</div>
+    <h4>Bag: 5 Red + 3 Blue = 8 Total</h4>
+    <p><strong>Q:</strong> Draw one ball. P(Red) = ?<br>
+    <strong>A:</strong> Red balls = 5. Total = 8. P(Red) = 5/8.</p>
+    <p><strong>Q:</strong> Draw one ball. P(Not Red) = ?<br>
+    <strong>A:</strong> Two approaches: (1) P(Blue) = 3/8. (2) 1 - P(Red) = 1 - 5/8 = 3/8. Same answer.</p>
+    <p><strong>Q:</strong> Draw two balls WITHOUT replacement. P(Both Red) = ?<br>
+    <strong>A:</strong> Step 1: P(1st Red) = 5/8. Step 2: P(2nd Red | 1st was Red) = 4/7 (one red removed). Answer = 5/8 x 4/7 = 20/56 = 5/14.</p>
+  </div>
+</section>
+
+<!-- ===== 6. P(A or B) ===== -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">06</span>
+    <h2>Addition Rule — <span class="underline">P(A or B)</span></h2>
+  </div>
+
+  <div class="formula">P(A or B) = P(A) + P(B) - P(A and B)</div>
+
+  <div class="card">
+    <div class="label">Applied to Dice</div>
+    <h4>P(Even number <span class="hl">or</span> Number > 4) on single dice</h4>
+    <p><strong>P(Even):</strong> 2,4,6 = 3/6 = 1/2</p>
+    <p><strong>P(>4):</strong> 5,6 = 2/6 = 1/3</p>
+    <p><strong>P(Even AND >4):</strong> 6 (the number common in both) = 1/6</p>
+    <p><strong>P(Even OR >4):</strong> 1/2 + 1/3 - 1/6 = 3/6 + 2/6 - 1/6 = <strong>4/6 = 2/3</strong></p>
+    <p style="margin-top:6px;color:var(--ink-dim);">Quick check: Numbers 2,4,5,6 = 4 out of 6 = 2/3. Correct!</p>
+  </div>
+</section>
+
+<!-- ===== 7. COMPLEMENT RULE ===== -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">07</span>
+    <h2>Complement <span class="underline">Rule</span></h2>
+  </div>
+
+  <div class="formula">P(Not A) = 1 - P(A)</div>
+
+  <p>If something is hard to count directly, count its opposite and subtract from 1.</p>
+
+  <div class="card">
+    <div class="label">Example — "At least one" trick</div>
+    <h4>Two dice. P(At least one 6) = ?</h4>
+    <p><strong>Direct approach:</strong> Count all pairs where at least one dice shows 6. Many cases.</p>
+    <p><strong>Complement approach (easier):</strong> P(No 6) = P(both are NOT 6) = 5/6 x 5/6 = 25/36<br>
+    P(At least one 6) = 1 - 25/36 = <strong>11/36</strong></p>
+    <p><strong>Verify:</strong> Total = 36. Pairs with at least one 6: (6,1)(6,2)(6,3)(6,4)(6,5)(6,6)(1,6)(2,6)(3,6)(4,6)(5,6) = 11. 11/36 ✓</p>
+  </div>
+
+  <div class="note-warn">
+    <strong>When to use complement:</strong> Whenever you see "at least one" or "none" in the question. It's almost always easier to find P(none) first, then subtract from 1.
+  </div>
+</section>
+
+<!-- ===== 8. QUIZ ===== -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">08</span>
+    <h2>Probability <span class="underline">Quiz</span></h2>
+  </div>
+  <p>12 questions — 3 coins, 3 dice, 3 cards, 3 mixed. Take your time, draw the grid if needed.</p>
+  <div id="quizWrap" class="quiz-card"></div>
+</section>
+
+<!-- ===== 9. SIGN-OFF ===== -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">✔</span>
+    <h2>Final <span class="underline">Word</span></h2>
+  </div>
+  <div class="anna-card">
+    <div class="anna-label">Your Neighbourhood Tutor</div>
+    <h3>Probability is just counting.</h3>
+    <p>Three simple steps for ANY probability question:</p>
+    <p><strong>Step 1:</strong> Understand what the Event is (what do you want to happen?)<br>
+    <strong>Step 2:</strong> Count Favorable outcomes (how many ways that event can happen?)<br>
+    <strong>Step 3:</strong> Count Total outcomes (what's everything that could possibly happen?)<br>
+    <strong>Step 4:</strong> Favorable ÷ Total. Done.</p>
+    <p>Dice = 6 faces. Cards = 52 deck, 4 suits of 13 each. Coins = 2 sides. Two dice = 36 pairs. This is ALL the memorization you need. Everything else is just applying these numbers.</p>
+    <p style="font-family:var(--mono);font-size:8px;color:var(--accent);margin-top:12px;letter-spacing:.1em;">PRACTICE = CONFIDENCE. DO THE QUIZ.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <span>Probability Made Simple — RBI Grade B</span>
+  <span>12 Question Quiz</span>
+</footer>
+
+<!-- =============== QUIZ DATA & ENGINE =============== -->
+<script>
+var quizData = [
+  // Coins (Q1-3)
+  {q:"A fair coin is tossed once. What is P(Heads)?", opts:["1/4","1/3","1/2","2/3"], ans:2, exp:"1/2. Only 2 outcomes (H,T). Favorable = 1 (Heads). 1 ÷ 2 = 1/2."},
+  {q:"Two fair coins are tossed. What is P(one Head, one Tail)?", opts:["1/4","1/3","1/2","3/4"], ans:2, exp:"Possible = HH, HT, TH, TT = 4. Favorable = HT, TH = 2. 2/4 = 1/2. HT and TH are DIFFERENT outcomes — don't count them as one!"},
+  {q:"Two fair coins tossed. P(at least one Head)?", opts:["1/4","1/2","3/4","1"], ans:2, exp:"Possible = HH, HT, TH, TT = 4. At least one H = HH, HT, TH = 3. 3/4. Or complement: P(No Heads) = P(TT) = 1/4. So 1 - 1/4 = 3/4."},
+  // Dice (Q4-6)
+  {q:"A single fair dice is rolled. P(odd number)?", opts:["1/6","1/3","1/2","2/3"], ans:2, exp:"Odd numbers on dice = 1,3,5 = 3. Total = 6. 3/6 = 1/2."},
+  {q:"Two fair dice rolled. P(sum = 7)?", opts:["1/12","1/6","1/9","1/36"], ans:1, exp:"Total = 36. Pairs adding to 7: (1,6)(2,5)(3,4)(4,3)(5,2)(6,1) = 6. 6/36 = 1/6. Sum 7 has the MOST combinations."},
+  {q:"Two dice rolled. P(doubles)?", opts:["1/36","1/12","1/6","1/3"], ans:2, exp:"Doubles = (1,1)(2,2)(3,3)(4,4)(5,5)(6,6) = 6. Total = 36. 6/36 = 1/6."},
+  // Cards (Q7-9)
+  {q:"One card drawn from 52. P(Ace)?", opts:["1/52","1/26","1/13","1/4"], ans:2, exp:"4 Aces in 52 cards. 4/52 = 1/13. Not face card! Face cards = J,Q,K only (12 total)."},
+  {q:"One card drawn. P(Red Card)?", opts:["1/4","1/2","13/52","2/13"], ans:1, exp:"26 Red cards (13 Hearts + 13 Diamonds) out of 52. 26/52 = 1/2. Black cards also 26."},
+  {q:"One card drawn. P(King or Queen)?", opts:["1/13","2/13","4/13","1/26"], ans:1, exp:"4 Kings + 4 Queens = 8. Total = 52. 8/52 = 2/13. King and Queen are both face cards — no overlap."},
+  // Mixed (Q10-12)
+  {q:"Bag: 4 Red, 5 Blue, 1 Green (10 total). Draw one. P(Not Blue)?", opts:["1/2","1/5","1/10","3/5"], ans:0, exp:"Not Blue = Red(4) + Green(1) = 5. Total = 10. 5/10 = 1/2. Or complement: P(Blue) = 5/10 = 1/2. So 1 - 1/2 = 1/2."},
+  {q:"Two fair dice rolled. P(sum &ge; 10)?", opts:["1/12","1/9","1/6","1/3"], ans:2, exp:"Sums &ge; 10: (4,6)(5,5)(5,6)(6,4)(6,5)(6,6) = 6. Total = 36. 6/36 = 1/6."},
+  {q:"One card drawn. P(Heart or King)?", opts:["1/13","4/13","5/13","16/52"], ans:1, exp:"13 Hearts + 4 Kings - 1 King of Hearts (double counted) = 16. 16/52 = 4/13. ALWAYS subtract the overlap in OR questions!"}
+];
+
+var currentQ = 0;
+var answers = new Array(quizData.length).fill(-1);
+
+function initQuiz(){
+  var w = document.getElementById('quizWrap');
+  var dots = '<div class="quiz-dots">';
+  for(var i=0; i<quizData.length; i++){
+    dots += '<div class="quiz-dot" id="dot'+i+'" onclick="jumpQ('+i+')">'+(i+1)+'</div>';
+  }
+  dots += '</div>';
+  w.innerHTML = dots +
+    '<div class="quiz-q" id="quizQ"></div>' +
+    '<div class="quiz-opts" id="quizOpts"></div>' +
+    '<div class="q-nav">' +
+    '<button class="q-btn" id="prevBtn" onclick="prevQ()">Prev</button>' +
+    '<span class="q-count" id="qCount">1 / '+quizData.length+'</span>' +
+    '<button class="q-btn" id="nextBtn" onclick="nextQ()">Next</button>' +
+    '</div>' +
+    '<div class="quiz-results" id="quizRes">' +
+    '<div class="quiz-results-inner"></div>' +
+    '<div id="quizReview"></div>' +
+    '</div>';
+  loadQ(0);
+  document.getElementById('f0').style.display='none';
+}
+function loadQ(n){
+  currentQ = n;
+  var d = quizData[n];
+  document.getElementById('quizQ').innerHTML = '<strong>Q'+(n+1)+'.</strong> '+d.q;
+  var opts = '';
+  var letters = ['A','B','C','D'];
+  for(var i=0; i<d.opts.length; i++){
+    var classes = 'q-opt';
+    if(answers[n] >= 0){
+      classes += ' locked';
+      if(i === d.ans) classes += ' is-c';
+      if(i === answers[n] && i !== d.ans) classes += ' is-w';
+    }
+    opts += '<label class="'+classes+'"><input type="radio" name="q' + n + '" value="' + i + '" onchange="answerQ(' + n + ',' + i + ')"' + (answers[n]===i?' checked':'') + (answers[n]>=0?' disabled':'') + '><span class="opt-inner"><span class="letter">'+letters[i]+'</span>'+d.opts[i]+'</span></label>';
+  }
+  document.getElementById('quizOpts').innerHTML = opts;
+  document.getElementById('prevBtn').disabled = (n===0);
+  document.getElementById('nextBtn').disabled = (n===quizData.length-1);
+  document.getElementById('qCount').textContent = (n+1)+' / '+quizData.length;
+  updateDots();
+}
+function answerQ(n, opt){
+  answers[n] = opt;
+  loadQ(n);
+  if(n < quizData.length-1 && opt >= 0){
+    var allDone = answers.every(function(a){return a>=0;});
+    if(allDone) showResults();
+    else setTimeout(function(){ if(currentQ===n) nextQ(); }, 600);
+  } else if(n === quizData.length-1 && opt >= 0){
+    setTimeout(showResults, 600);
+  }
+}
+function prevQ(){ if(currentQ>0) loadQ(currentQ-1); }
+function nextQ(){ if(currentQ<quizData.length-1) loadQ(currentQ+1); }
+function jumpQ(n){ loadQ(n); }
+function updateDots(){
+  for(var i=0; i<quizData.length; i++){
+    var dot = document.getElementById('dot'+i);
+    dot.className = 'quiz-dot';
+    if(i===currentQ) dot.classList.add('active');
+    if(answers[i] >= 0){
+      if(answers[i] === quizData[i].ans) dot.classList.add('correct');
+      else dot.classList.add('wrong');
+    }
+  }
+}
+function showResults(){
+  var correct = 0;
+  for(var i=0; i<quizData.length; i++){
+    if(answers[i] === quizData[i].ans) correct++;
+  }
+  var pct = Math.round(correct/quizData.length*100);
+  var msg = pct>=80 ? 'Excellent! You understand Probability.' : pct>=60 ? 'Good foundation. Review the ones you missed.' : pct>=40 ? 'Getting there. Re-read the section you struggled with.' : 'No problem — re-read and try the quiz again.';
+  document.getElementById('quizRes').style.display = 'block';
+  document.getElementById('quizRes').querySelector('.quiz-results-inner').innerHTML =
+    '<div class="quiz-score">'+correct+'/'+quizData.length+'</div>' +
+    '<div class="quiz-score-lbl">Score: '+pct+'%</div>' +
+    '<div class="quiz-msg">'+msg+'</div>';
+  var review = '';
+  for(var i=0; i<quizData.length; i++){
+    if(answers[i] !== quizData[i].ans){
+      review += '<div class="quiz-review-entry"><div class="rev-q">Q'+(i+1)+'. '+quizData[i].q+'</div><div class="rev-detail">Your: <strong>'+(answers[i]>=0?quizData[i].opts[answers[i]]:'Skipped')+'</strong> | Correct: <strong style="color:var(--green)">'+quizData[i].opts[quizData[i].ans]+'</strong><br>'+quizData[i].exp+'</div></div>';
+    }
+  }
+  document.getElementById('quizReview').innerHTML = review || '<p style="color:var(--green);text-align:center;">All correct! You got this!</p>';
+  document.getElementById('quizRes').scrollIntoView({behavior:'smooth'});
+}
+initQuiz();
+</script>
+
+<script>
+var observer = new IntersectionObserver(function(e){
+  e.forEach(function(entry){
+    if(entry.isIntersecting) entry.target.classList.add('in');
+  });
+},{threshold:0.1});
+document.querySelectorAll('section').forEach(function(el){observer.observe(el);});
+</script>
+
+<script>
+document.getElementById('darkToggle').addEventListener('click', function(){
+  var d=document.documentElement;
+  d.setAttribute('data-theme', d.getAttribute('data-theme')==='dark'?'light':'dark');
+});
+</script>
+
+</body>
+</html>
