@@ -130,7 +130,8 @@ code:not(.code-block code){font-family:var(--mono);font-size:.88em;background:va
 .snode.muted rect{fill:var(--nm);stroke:var(--rule);}
 .snode.muted text{fill:var(--ink);}
 .snode.muted .sub{fill:var(--ink-dim);}
-.sarrow{stroke:var(--ink-dim);stroke-width:1.5;opacity:.4;marker-end:url(#aArrow);}
+.sarrow{stroke:var(--ink);stroke-width:2;stroke-dasharray:6 3;fill:none;animation:pipeFlow .8s linear infinite;marker-end:url(#aArrow)}
+@keyframes pipeFlow{to{stroke-dashoffset:-18}}
 .deploy-box{fill:var(--dbg);stroke:var(--dbr);stroke-width:2;stroke-dasharray:6 3;rx:8;}
 .deploy-t{fill:var(--dtx);font-size:13px;font-weight:600;text-anchor:middle;}
 .deploy-s{fill:var(--ink-2);font-size:10px;text-anchor:middle;}
@@ -278,8 +279,14 @@ footer .pn{color:var(--accent);}
     <div class="h2-sub">How main.py, requirements.txt, and Dockerfile fit together.</div>
 
     <div class="card">
-      <div class="card-label">System Overview</div>
-      <p style="margin-bottom:0;">3 files with distinct jobs: <strong>main.py</strong> (app logic, 3 routes), <strong>requirements.txt</strong> (flask + gunicorn), and <strong>Dockerfile</strong> (slim Python image, layer caching). Deployed to <strong>Cloud Run</strong> for HTTPS, auto-scaling, health checks.</p>
+      <div class="card-label">Telugu lo — Full Pipeline</div>
+      <p><strong>Browser = Nuvvu.</strong> Phone pattukuni mana app open chesav. "Data kavali" ani request pampistav — ala. Browser leads the request.</p>
+      <p><strong>Cloud Run = Gate keep la untadi.</strong> Nee request ostundi, adi chusukuni "sarigga undi, security clear" ani allow chestundi, tarvata correct worker ki redirect chestundi. Reverse proxy, autoscaling, HTTPS — idantha Cloud Run chestadi.</p>
+      <p><strong>Gunicorn = Okadu manager la.</strong> Nee request vachindi, Gunicorn daggara ready ga 4-5 workers untaru. Evariki pani takkuvo vallaki ee request assign chestadu. Concurrency handle cheyadaniki — okadu busy ante inko worker untadi.</p>
+      <p><strong>Flask App = Chef la.</strong> Request vachindi, specific route batti logic run chestadu. /health ante "ok" returns, / ante "Hello" returns. Pure application logic.</p>
+      <div style="margin-top:10px;padding:8px 12px;background:var(--paper);border:1px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--dim)">
+        <strong>Flow:</strong> Nuvvu → Cloud Run (gate) → Gunicorn (manager) → Flask (chef) → Nuvvu ki response back
+      </div>
     </div>
 
     <div class="svg-wrap">
@@ -484,6 +491,17 @@ venv/
         <g class="snode muted"><rect x="160" y="200" width="440" height="30" rx="4"/><text x="380" y="218" font-size="11">curl https://service-xxxxx-uc.a.run.app/health</text></g>
       </svg>
       <div class="svg-caption">Figure: 4 stages — Dev → Docker → Registry → Cloud Run</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Telugu lo — Deployment Pipeline</div>
+      <p><strong>Local Dev = Nuvvu kitchen lo biryani tayaru chestunnav la.</strong> Ingredients anni ready cheskuntav, taste test chestav. Alane, <code>python main.py</code> lo app ni local ga test chestav.</p>
+      <p><strong>Docker = Biryani ni box lo pack chestunnav la.</strong> Container lo anni dependencies, code, config anni fix chestav. Ekkada theeskellina oke taste — same behavior.</p>
+      <p><strong>Artifact Registry = Godown lo pettadam la.</strong> Docker image ni store chestadi. Tarvata Cloud Run deggara nunchi pull chestadi deploy cheyadaniki.</p>
+      <p><strong>Cloud Run = Restaurant counter la.</strong> Customer request vachindi, image ni instant ga serve chestadi. 0 to 1000 auto-scale. Pay only when running.</p>
+      <div style="margin-top:10px;padding:8px 12px;background:var(--paper);border:1px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--dim)">
+        <strong>Flow:</strong> Local Dev → Docker (pack) → Artifact Registry (store) → Cloud Run (serve) → Live at *.run.app
+      </div>
     </div>
 
     <div class="key-grid">
