@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RBI Grade B 2026 — Concept Notebook Batch 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #F3EEE4; --paper-2: #EBE4D4;
+  --ink: #1A1612; --ink-2: #3D3528;
+  --ink-dim: #6B5D49; --ink-faint: #A89A83;
+  --rule: #C8B99E;
+  --accent: #C0392B; --accent2: #A93226;
+  --green: #2D7D46; --blue: #2B6CB0;
+  --gold: #B8860B;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+[data-theme="dark"] {
+  --paper: #1B1917; --paper-2: #242220;
+  --ink: #F0ECE9; --ink-2: #C5BBB2;
+  --ink-dim: #9A9088; --ink-faint: #6B625C;
+  --rule: #3A3430;
+  --accent: #E8704A; --accent2: #D95A3A;
+  --green: #5BBD6B; --blue: #5B8FBD;
+  --gold: #D4A84B;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65;}
+body{background-image:radial-gradient(circle at 15% 10%,rgba(200,180,140,.12) 0%,transparent 45%),
+  radial-gradient(circle at 85% 90%,rgba(200,180,140,.1) 0%,transparent 40%),
+  repeating-linear-gradient(0deg,transparent 0,transparent 28px,rgba(120,100,70,.03) 28px,rgba(120,100,70,.03) 29px);
+  min-height:100vh;}
+
+.topbar{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule);padding:10px 0;backdrop-filter:blur(8px);}
+.topbar-inner{max-width:1000px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+.brand{font-family:var(--serif);font-size:18px;font-style:italic;letter-spacing:-.01em;}
+.brand .amp{color:var(--accent);}
+.top-actions{display:flex;align-items:center;gap:10px;}
+#pctTop{font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:.08em;font-weight:600;}
+.topbar button{background:none;border:1px solid var(--rule);cursor:pointer;color:var(--ink-dim);padding:4px;display:flex;align-items:center;line-height:1;flex-shrink:0;}
+.topbar button:hover{color:var(--accent);border-color:var(--accent);}
+
+main{max-width:1000px;margin:0 auto;padding:32px 24px 80px;}
+
+.hero{text-align:center;padding:24px 0 20px;margin-bottom:32px;border-bottom:2px solid var(--ink);position:relative;}
+.hero .batch-tag{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.hero h1{font-family:var(--serif);font-size:clamp(32px,5vw,56px);font-weight:400;line-height:.95;letter-spacing:-.025em;color:var(--ink);}
+.hero h1 .italic{font-style:italic;color:var(--accent);}
+.hero .sub{font-family:var(--serif);font-size:16px;font-style:italic;color:var(--ink-2);margin-top:4px;}
+.cd-grid{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.cd-card{background:var(--paper-2);border:1px solid var(--ink);padding:9px 16px;min-width:80px;box-shadow:3px 3px 0 var(--ink);}
+.cd-card .num{font-family:var(--serif);font-size:24px;font-style:italic;color:var(--accent);line-height:1.1;}
+.cd-card .lbl{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim);}
+
+section{opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease;margin-bottom:40px;}
+section.in{opacity:1;transform:translateY(0);}
+.sec-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:4px;}
+.sec-head input{-webkit-appearance:none;appearance:none;flex-shrink:0;width:18px;height:18px;border:2px solid var(--rule);background:var(--paper);cursor:pointer;margin-top:5px;position:relative;transition:all .2s;}
+.sec-head input:checked{background:var(--green);border-color:var(--green);}
+.sec-head input:checked::after{content:'';position:absolute;width:5px;height:9px;border:solid var(--paper);border-width:0 2px 2px 0;transform:rotate(45deg);top:1px;left:5px;}
+.sec-head input:hover{border-color:var(--ink);}
+.sec-num{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.1em;flex-shrink:0;margin-top:4px;width:20px;text-align:right;}
+.sec-head h2{font-family:var(--serif);font-size:26px;font-weight:400;line-height:1.2;letter-spacing:-.01em;margin:0;}
+.sec-head h2 .underline{text-decoration:underline;text-decoration-style:wavy;text-decoration-color:var(--accent);text-decoration-thickness:1.5px;text-underline-offset:5px;}
+.sec-head+.h2-sub{font-family:var(--serif);font-style:italic;color:var(--ink-dim);font-size:15px;margin:0 0 18px 48px;}
+h3{font-family:var(--sans);font-size:16px;font-weight:600;letter-spacing:.02em;margin:18px 0 8px;color:var(--ink);}
+p{margin-bottom:12px;color:var(--ink-2);line-height:1.7;}
+p strong{color:var(--ink);}
+ul,ol{margin:8px 0 14px 18px;color:var(--ink-2);}
+li{margin-bottom:5px;}
+
+.concept-card{background:var(--paper-2);border:1px solid var(--ink);padding:20px;margin:16px 0;box-shadow:3px 3px 0 var(--ink);}
+.concept-card .label{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:2px;}
+.concept-card h4{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--ink);margin-bottom:6px;}
+.concept-card h4 .hl{color:var(--accent);}
+.concept-card .explain{font-size:14px;color:var(--ink-2);margin-bottom:10px;line-height:1.7;}
+
+.svg-wrap{background:var(--paper);border:1px solid var(--rule);padding:20px;margin:14px 0;overflow-x:auto;}
+.svg-wrap svg{display:block;margin:0 auto;max-width:100%;}
+.svg-caption{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);text-align:center;margin-top:8px;}
+
+.def-block{background:var(--paper);border-left:3px solid var(--accent);padding:12px 16px;margin:12px 0;font-size:14px;color:var(--ink-2);}
+.def-block .term{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:2px;}
+
+.key-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:14px 0;}
+.key-item{background:var(--paper);border:1px solid var(--rule);padding:12px;font-size:13px;color:var(--ink-2);}
+.key-item .key-num{font-family:var(--serif);font-size:20px;font-style:italic;color:var(--accent);line-height:1;}
+.key-item .key-title{font-weight:600;color:var(--ink);margin-bottom:3px;}
+.key-item p{font-size:13px;margin:0;color:var(--ink-dim);}
+
+.comp-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;}
+.comp-table th{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:8px 12px;text-align:left;font-weight:400;}
+.comp-table td{padding:9px 12px;border-bottom:1px solid var(--rule);color:var(--ink-2);vertical-align:top;}
+.comp-table tr:last-child td{border-bottom:none;}
+.comp-table .highlight td{background:var(--paper-2);color:var(--ink);font-weight:500;}
+
+.tag{display:inline-block;font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;margin-right:4px;margin-bottom:3px;border:1px solid var(--ink);color:var(--ink-dim);}
+.tag-blue{border-color:var(--blue);color:var(--blue);}
+.tag-green{border-color:var(--green);color:var(--green);}
+.tag-red{border-color:var(--accent);color:var(--accent);}
+.tag-gold{border-color:var(--gold);color:var(--gold);}
+
+.note{padding:12px 16px;margin:10px 0;font-size:14px;color:var(--ink-2);background:var(--paper);border:1px solid var(--green);}
+.note-warn{border-color:var(--gold);}
+
+.formula{font-family:var(--serif);font-size:22px;font-style:italic;text-align:center;padding:16px;background:var(--paper);border:1px solid var(--rule);margin:12px 0;color:var(--ink);letter-spacing:-.01em;}
+
+.rate-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:14px 0;}
+.rate-card{background:var(--paper);border:1px solid var(--rule);padding:12px;text-align:center;}
+.rate-card .rate-val{font-family:var(--serif);font-size:28px;font-style:italic;color:var(--accent);line-height:1;}
+.rate-card .rate-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:2px;}
+.rate-card .rate-note{font-size:11px;color:var(--ink-faint);margin-top:2px;}
+
+/* Quiz */
+.quiz-card{background:var(--paper-2);border:2px solid var(--ink);padding:20px;margin:16px 0;}
+.quiz-dots{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px;}
+.quiz-dot{width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;border-radius:50%;border:2px solid var(--rule);background:var(--paper);color:var(--ink-faint);cursor:pointer;transition:all .25s;}
+.quiz-dot.active{border-color:var(--accent);color:var(--accent);font-weight:600;}
+.quiz-dot.correct{background:var(--green);border-color:var(--green);color:var(--paper);}
+.quiz-dot.wrong{background:var(--accent);border-color:var(--accent);color:var(--paper);}
+.quiz-q{font-size:15px;font-weight:500;color:var(--ink);margin-bottom:14px;}
+.quiz-opts{display:flex;flex-direction:column;gap:5px;}
+.q-opt{background:var(--paper);border:1px solid var(--rule);cursor:pointer;font-size:14px;color:var(--ink-2);transition:all .2s;position:relative;overflow:hidden;}
+.q-opt:hover{border-color:var(--ink);background:var(--paper-2);}
+.q-opt input{display:none;}
+.q-opt .opt-inner{display:flex;align-items:center;padding:9px 12px;gap:8px;width:100%;}
+.q-opt .letter{width:20px;height:20px;border-radius:50%;border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;flex-shrink:0;}
+.q-opt.locked{cursor:default;}
+.q-opt.is-c{border-color:var(--green);}
+.q-opt.is-w{border-color:var(--accent);}
+.q-opt.is-c .letter{background:var(--green);border-color:var(--green);color:var(--paper);}
+.q-opt.is-w .letter{background:var(--accent);border-color:var(--accent);color:var(--paper);}
+.q-nav{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:10px;}
+.q-btn{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:7px 14px;border:2px solid var(--ink);background:var(--paper);cursor:pointer;color:var(--ink);}
+.q-btn:hover{background:var(--ink);color:var(--paper);}
+.q-btn:disabled{opacity:.4;cursor:default;background:var(--paper);color:var(--ink-faint);border-color:var(--ink-faint);}
+.q-count{font-family:var(--mono);font-size:10px;color:var(--ink-dim);}
+.quiz-results{display:none;}
+.quiz-results-inner{text-align:center;padding:24px;border:2px solid var(--ink);background:var(--paper-2);margin-bottom:16px;}
+.quiz-score{font-family:var(--serif);font-size:42px;font-style:italic;color:var(--ink);line-height:1;}
+.quiz-score-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);margin-top:4px;}
+.quiz-msg{font-family:var(--serif);font-size:16px;font-style:italic;color:var(--ink-2);margin-top:8px;}
+
+/* Anna sign-off */
+.anna-card{background:var(--paper);border:2px solid var(--accent);padding:24px;margin:16px 0;box-shadow:4px 4px 0 var(--accent);}
+.anna-card .anna-label{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;}
+.anna-card h3{font-family:var(--serif);font-size:22px;font-weight:400;font-style:italic;margin-bottom:10px;color:var(--ink);}
+.anna-card p{font-size:14px;color:var(--ink-2);}
+
+/* SVG animations */
+@keyframes pulse-glow {0%,100%{opacity:.7;}50%{opacity:1;}}
+@keyframes flow-right {0%{stroke-dashoffset:200;}100%{stroke-dashoffset:0;}}
+@keyframes pop-in {0%{transform:scale(0);opacity:0;}70%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+@keyframes fade-up {0%{opacity:0;transform:translateY(8px);}100%{opacity:1;transform:translateY(0);}}
+.svg-anim .pulse{animation:pulse-glow 2s ease-in-out infinite;}
+.svg-anim .flow{stroke-dasharray:200;animation:flow-right 2s linear infinite;}
+.svg-anim .pop{animation:pop-in .5s cubic-bezier(.15,.75,.3,1) both;}
+.svg-anim .fade{animation:fade-up .4s ease both;}
+
+footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);flex-wrap:wrap;gap:10px;}
+footer .pn{color:var(--accent);}
+
+@media print{body{background:white;color:black;}.sarrow{animation:none;}.card{border:1px solid #ccc;break-inside:avoid;}section{page-break-inside:avoid;}}
+@media(max-width:640px){
+  main{padding:20px 14px 60px;}
+  .sec-head h2{font-size:22px;}
+  .sec-head+.h2-sub{margin-left:0;}
+  .sec-num{display:none;}
+  .key-grid{grid-template-columns:1fr;}
+  .rate-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">RBI <span class="amp">Grade</span> <em>B 2026</em> — Batch 2</div>
+    <div class="top-actions">
+      <span id="pctTop">0%</span>
+      <button id="darkToggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ========== HERO ========== -->
+<div class="hero">
+  <div class="batch-tag">Batch 2 — Next Concepts</div>
+  <div style="font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-style:italic;color:var(--accent);line-height:1;">Days 8–14</div>
+  <h1>Concept <span class="italic">Notebook</span></h1>
+  <p class="sub">Financial Markets · NPA & Banking Health · External Sector · Reasoning Foundations</p>
+  <div class="cd-grid">
+    <div class="cd-card"><div class="num">5</div><div class="lbl">New Topics</div></div>
+    <div class="cd-card"><div class="num">20</div><div class="lbl">Quiz Qs</div></div>
+    <div class="cd-card"><div class="num">4</div><div class="lbl">SVG Diagrams</div></div>
+    <div class="cd-card"><div class="num">2wk</div><div class="lbl">To Cover</div></div>
+  </div>
+</div>
+
+<!-- ===== 08. FINANCIAL MARKETS ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="1">
+    <span class="sec-num">08</span>
+    <h2><span class="underline">Financial</span> Markets</h2>
+  </div>
+  <div class="h2-sub">Money Market vs Capital Market — the two halves of India's financial system. ~5-8 Qs in GA.</div>
+
+  <div class="concept-card">
+    <div class="label">Telugu Analogy</div>
+    <h4>Money Market = <span class="hl">short-term</span> loan la; Capital Market = <span class="hl">long-term</span> investment la</h4>
+    <div class="explain">
+      Nuvvu friend ki Rs.1000 ichav, next week return chestadu — adi <strong>Money Market</strong> la. Short term, < 1 year. Banks, RBI, NBFCs ila institutions madhya jarige lending/borrowing.
+      Kaani nuvvu oka company stock konnav — 5 years hold chestav, price perigaka ammestav — adi <strong>Capital Market</strong> la. Long term, companies ki capital raise cheyyadaniki.
+    </div>
+  </div>
+
+  <!-- SVG: Market Map -->
+  <div class="svg-wrap svg-anim">
+    <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" style="font-family:system-ui,sans-serif;">
+      <rect width="800" height="300" fill="var(--paper)" rx="8"/>
+      <!-- Title -->
+      <text x="400" y="36" text-anchor="middle" fill="var(--ink)" font-size="16" font-weight="600">Indian Financial Market — Structure</text>
+
+      <!-- Money Market box -->
+      <rect x="30" y="60" width="350" height="200" rx="10" fill="var(--blue)" opacity=".1" stroke="var(--blue)" stroke-width="1.5"/>
+      <text x="205" y="90" text-anchor="middle" fill="var(--blue)" font-size="15" font-weight="600">MONEY MARKET (Short Term)</text>
+      <text x="205" y="108" text-anchor="middle" fill="var(--ink-dim)" font-size="10">&lt; 1 year · Institutions only · No retail</text>
+
+      <rect x="55" y="120" width="90" height="36" rx="5" fill="var(--blue)" opacity=".7" class="fade" style="animation-delay:.1s"/>
+      <text x="100" y="142" text-anchor="middle" fill="white" font-size="11">CBLO</text>
+
+      <rect x="155" y="120" width="90" height="36" rx="5" fill="var(--blue)" opacity=".7" class="fade" style="animation-delay:.25s"/>
+      <text x="200" y="142" text-anchor="middle" fill="white" font-size="11">CP</text>
+
+      <rect x="255" y="120" width="90" height="36" rx="5" fill="var(--blue)" opacity=".7" class="fade" style="animation-delay:.4s"/>
+      <text x="300" y="142" text-anchor="middle" fill="white" font-size="11">CD</text>
+
+      <rect x="55" y="164" width="90" height="36" rx="5" fill="var(--blue)" opacity=".5" class="fade" style="animation-delay:.55s"/>
+      <text x="100" y="186" text-anchor="middle" fill="white" font-size="10">T-Bills</text>
+
+      <rect x="155" y="164" width="90" height="36" rx="5" fill="var(--blue)" opacity=".5" class="fade" style="animation-delay:.7s"/>
+      <text x="200" y="186" text-anchor="middle" fill="white" font-size="10">Repo</text>
+
+      <rect x="255" y="164" width="90" height="36" rx="5" fill="var(--blue)" opacity=".5" class="fade" style="animation-delay:.85s"/>
+      <text x="300" y="186" text-anchor="middle" fill="white" font-size="10">Call Money</text>
+
+      <!-- Capital Market box -->
+      <rect x="420" y="60" width="350" height="200" rx="10" fill="var(--accent)" opacity=".1" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="595" y="90" text-anchor="middle" fill="var(--accent)" font-size="15" font-weight="600">CAPITAL MARKET (Long Term)</text>
+      <text x="595" y="108" text-anchor="middle" fill="var(--ink-dim)" font-size="10">&gt; 1 year · Retail + Institutions · Public</text>
+
+      <rect x="445" y="120" width="110" height="36" rx="5" fill="var(--accent)" opacity=".7" class="fade" style="animation-delay:.1s"/>
+      <text x="500" y="142" text-anchor="middle" fill="white" font-size="11">Equity / Shares</text>
+
+      <rect x="565" y="120" width="110" height="36" rx="5" fill="var(--accent)" opacity=".7" class="fade" style="animation-delay:.25s"/>
+      <text x="620" y="142" text-anchor="middle" fill="white" font-size="11">Bonds / G-Sec</text>
+
+      <rect x="445" y="164" width="110" height="36" rx="5" fill="var(--accent)" opacity=".5" class="fade" style="animation-delay:.4s"/>
+      <text x="500" y="186" text-anchor="middle" fill="white" font-size="10">Mutual Funds</text>
+
+      <rect x="565" y="164" width="110" height="36" rx="5" fill="var(--accent)" opacity=".5" class="fade" style="animation-delay:.55s"/>
+      <text x="620" y="186" text-anchor="middle" fill="white" font-size="10">Derivatives</text>
+
+      <!-- Regulators -->
+      <text x="205" y="220" text-anchor="middle" fill="var(--blue)" opacity=".7" font-size="9">Regulated by: RBI (Money Market Dept)</text>
+      <text x="595" y="220" text-anchor="middle" fill="var(--accent)" opacity=".7" font-size="9">Regulated by: SEBI</text>
+    </svg>
+    <div class="svg-caption">Figure: Two-market structure — Money Market (short, institutional) vs Capital Market (long, public)</div>
+  </div>
+
+  <h3>Money Market — Deep Dive (GA High Weight)</h3>
+
+  <div class="key-grid">
+    <div class="key-item">
+      <div class="key-num">1</div>
+      <div class="key-title">CBLO — Collateralized Borrowing & Lending Obligation</div>
+      <p>CCIL runs it. Fully collateralized (govt securities backing). 1-365 day maturity. Replaced the old "call money" unsecured system. <span style="color:var(--accent)">RBI exam fav.</span></p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">2</div>
+      <div class="key-title">CP — Commercial Paper</div>
+      <p>Unsecured promissory note. Issued by large corporates to raise short-term funds. Min: 7 days, Max: 1 year. Rated by CRISIL/ICRA/CARE. <em>NBFCs also now allowed to issue CP.</em></p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">3</div>
+      <div class="key-title">CD — Certificate of Deposit</div>
+      <p>Bank/FI issued negotiable instrument. Min: 7 days, Max: 1 year. Like a bank's own promissory note. Tradable in secondary market.</p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">4</div>
+      <div class="key-title">T-Bills — Treasury Bills</div>
+      <p>Govt issued, zero coupon (sold at discount). 91-day, 182-day, 364-day. Safest money market instrument. No default risk — sovereign backing.</p>
+    </div>
+  </div>
+
+  <h3>Capital Market — Key Bodies</h3>
+  <div class="key-grid">
+    <div class="key-item">
+      <div class="key-num">S</div>
+      <div class="key-title">SEBI</div>
+      <p>Est. 1988 (statutory 1992). Head: Madhabi Puri Buch. Regulates stock exchanges, mutual funds, FIIs, merchant bankers. <em>Not RBI — this is a common distractor trap.</em></p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">N</div>
+      <div class="key-title">NSE & BSE</div>
+      <p>NSE = 1992 (India's largest by volume). BSE = 1875 (Asia's oldest). Both under SEBI. NIFTY 50 (NSE), SENSEX 30 (BSE).</p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">G</div>
+      <div class="key-title">G-Sec Market</div>
+      <p>Government Securities — RBI manages issuance. G-SAP (Securities Acquisition Program) = RBI buys G-Secs from market to inject liquidity.</p>
+    </div>
+  </div>
+
+  <div class="note note-warn">
+    <strong>Exam Tip:</strong> Question often goes: "Which regulator oversees the Capital Market?" — SEBI. "Money Market?" — RBI. Don't mix them up. CPA auditor mind: think <em>jurisdiction boundaries</em>.
+  </div>
+</section>
+
+<!-- ===== 09. NPA & BANKING HEALTH ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="2">
+    <span class="sec-num">09</span>
+    <h2><span class="underline">NPA</span> & Banking Health</h2>
+  </div>
+  <div class="h2-sub">You already know NPAs from audit. Now learn them from RBI <em>regulator's</em> angle. ~10 Qs guaranteed across GA + Finance.</div>
+
+  <div class="concept-card">
+    <div class="label">Telugu Analogy</div>
+    <h4>NPA = Friend ki <span class="hl">loan ichav, 90 days</span> interest kooda ivvaledu</h4>
+    <div class="explain">
+      Bank oka customer ki loan ichindi. Customer EMI kattaledu. 90 days ayyaka — bank books lo adi NPA ayipoyindi. 
+      Nuvvu CA ga provisioning, write-offs ani chesav kada? Same concept, but RBI sets the rules. Ippudu bank "eh interest vastunnattu" chupinchakudadu — kattaleka pote NPA gurthinchali.
+    </div>
+  </div>
+
+  <h3>NPA Classification — The 90-Day Rule</h3>
+  <div class="key-grid">
+    <div class="key-item">
+      <div class="key-num">A</div>
+      <div class="key-title">Standard Asset</div>
+      <p>Regular payments. Provisioning: 0.4% (agri/SME: 0.25%). Normal loan.</p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">B</div>
+      <div class="key-title">Sub-Standard</div>
+      <p>NPA <strong>&lt; 12 months</strong>. Provisioning: 15% (secured), 25% (unsecured).</p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">C</div>
+      <div class="key-title">Doubtful</div>
+      <p>NPA <strong>&gt; 12 months</strong>. Higher provisioning. D1/D2/D3 tiers based on time + collateral.</p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">D</div>
+      <div class="key-title">Loss Asset</div>
+      <p>Uncollectible. 100% provisioning. Written off (but not forgiven — still recoverable legally).</p>
+    </div>
+  </div>
+
+  <h3>The 3 Weapons: IBC + SARFAESI + ARC</h3>
+
+  <div class="comp-table">
+    <thead><tr><th>Tool</th><th>Year</th><th>Who Uses It</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>IBC</strong> (Insolvency & Bankruptcy Code)</td>
+        <td>2016</td>
+        <td>Creditor / Corporate Debtor</td>
+        <td>Time-bound insolvency resolution (180 days + 90 ext). NCLT approves resolution plan. <strong>Biggest impact on NPA recovery.</strong></td>
+      </tr>
+      <tr>
+        <td><strong>SARFAESI Act</strong></td>
+        <td>2002</td>
+        <td>Banks / NBFCs / ARCs</td>
+        <td>Seize and sell secured assets WITHOUT court. 60 days notice. No DRT/Court needed. <strong>Used for secured NPAs.</strong></td>
+      </tr>
+      <tr>
+        <td><strong>ARC</strong> (Asset Reconstruction Company)</td>
+        <td>2003 (SARFAESI enabled)</td>
+        <td>Banks → sell NPAs to ARCs</td>
+        <td>Buy bad loans from banks at discount, then recover. Example: ARCIL (India's first), NARCL (Bad Bank). Clean up bank balance sheets.</td>
+      </tr>
+    </tbody>
+  </div>
+
+  <div class="def-block">
+    <div class="term">Key Formula — NPA Ratios (Exam Numericals)</div>
+    <p><strong>Gross NPA Ratio</strong> = Gross NPAs / Gross Advances x 100</p>
+    <p><strong>Net NPA Ratio</strong> = (Gross NPAs - Provisions) / Net Advances x 100</p>
+    <p style="font-size:13px;color:var(--ink-dim);margin-top:6px;">Net NPA ALWAYS lower than Gross NPA. Difference = provisioning quality. Smaller gap = better provisioned bank.</p>
+  </div>
+
+  <h3>Provisioning Coverage Ratio (PCR)</h3>
+  <div class="formula">PCR = Provisions held / Gross NPAs x 100</div>
+  <p>RBI wants PCR > 70%. Higher = safer bank. PSBs traditionally had low PCR (50-60%). Post-IBC, improving.</p>
+
+  <div class="note">
+    <strong>CA Advantage:</strong> You've seen NPA entries — debits to Provisions, credits to Loans. But the exam asks <em>policy questions:</em> "What should RBI do if PCR drops?" (Answer: restrict dividends, tighten lending limits). Think from regulator's desk, not auditor's working papers.
+  </div>
+</section>
+
+<!-- ===== 10. EXTERNAL SECTOR ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="3">
+    <span class="sec-num">10</span>
+    <h2><span class="underline">External</span> Sector</h2>
+  </div>
+  <div class="h2-sub">Balance of Payments, Forex, Capital Account — high weight in ESI Paper 1 + GA. ~8-12 Qs.</div>
+
+  <div class="concept-card">
+    <div class="label">Telugu Analogy</div>
+    <h4>BoP = Personal Budget la — <span class="hl">Income</span> (exports) vs <span class="hl">Expense</span> (imports) ka ledger</h4>
+    <div class="explain">
+      Nee personal ledger lo income side salary vuntadi, expense side rent, food vuntadi. Alane — India's Balance of Payments (BoP) ledger: Credit side lo exports, remittances, FDI. Debit side lo imports, foreign travel, interest payments. <strong>Current Account</strong> = day-to-day transactions; <strong>Capital Account</strong> = investment-type transactions.
+    </div>
+  </div>
+
+  <!-- SVG: BoP Structure -->
+  <div class="svg-wrap svg-anim">
+    <svg viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" style="font-family:system-ui,sans-serif;">
+      <rect width="800" height="280" fill="var(--paper)" rx="8"/>
+      <text x="400" y="32" text-anchor="middle" fill="var(--ink)" font-size="16" font-weight="600">Balance of Payments — Structure</text>
+
+      <!-- BoP trunk -->
+      <rect x="340" y="48" width="120" height="40" rx="6" fill="var(--ink)" opacity=".85"/>
+      <text x="400" y="73" text-anchor="middle" fill="var(--paper)" font-size="13" font-weight="600">BoP</text>
+
+      <!-- Current Account -->
+      <line x1="340" y1="88" x2="200" y2="110" stroke="var(--blue)" stroke-width="2" marker-end="url(#arrowBlue)"/>
+      <rect x="60" y="105" width="260" height="70" rx="8" fill="var(--blue)" opacity=".12" stroke="var(--blue)" stroke-width="1.5"/>
+      <text x="190" y="130" text-anchor="middle" fill="var(--blue)" font-size="13" font-weight="600">Current Account</text>
+      <text x="190" y="148" text-anchor="middle" fill="var(--ink-dim)" font-size="9">Exports - Imports + Remittances + Services</text>
+      <text x="190" y="162" text-anchor="middle" fill="var(--ink-dim)" font-size="9">CAD = Current Account Deficit (badge: imports > exports)</text>
+
+      <!-- Capital Account -->
+      <line x1="460" y1="88" x2="550" y2="110" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrowRed)"/>
+      <rect x="500" y="105" width="260" height="70" rx="8" fill="var(--accent)" opacity=".12" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="630" y="130" text-anchor="middle" fill="var(--accent)" font-size="13" font-weight="600">Capital Account</text>
+      <text x="630" y="148" text-anchor="middle" fill="var(--ink-dim)" font-size="9">FDI + FPI + ECB + NRI Deposits</text>
+      <text x="630" y="162" text-anchor="middle" fill="var(--ink-dim)" font-size="9">Long-term investment flows</text>
+
+      <!-- Forex bridge -->
+      <rect x="280" y="210" width="240" height="36" rx="6" fill="var(--green)" opacity=".15" stroke="var(--green)" stroke-width="1.5"/>
+      <text x="400" y="234" text-anchor="middle" fill="var(--green)" font-size="11" font-weight="500">Forex Reserves absorb surplus/deficit</text>
+      <line x1="400" y1="188" x2="400" y2="208" stroke="var(--ink-dim)" stroke-width="1" stroke-dasharray="4 3"/>
+
+      <defs>
+        <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="var(--blue)"/></marker>
+        <marker id="arrowRed" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="var(--accent)"/></marker>
+      </defs>
+    </svg>
+    <div class="svg-caption">Figure: Current Account + Capital Account = BoP. CAD vs Capital Flows — the twin deficit story.</div>
+  </div>
+
+  <h3>Forex Reserves — India's 4 Components</h3>
+  <div class="key-grid">
+    <div class="key-item">
+      <div class="key-num">F</div>
+      <div class="key-title">Foreign Currency Assets (FCA)</div>
+      <p>Biggest chunk (~90%). Held in USD, EUR, GBP, JPY. Also includes SDR holdings. Interest earned = part of reserves accretion.</p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">G</div>
+      <div class="key-title">Gold Reserves</div>
+      <p>~800 tonnes. Held at RBI + Bank of England + BIS. Revalued quarterly based on international gold prices.</p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">S</div>
+      <div class="key-title">SDR (Special Drawing Rights)</div>
+      <p>IMF's reserve asset. Like a "credit line" countries can draw against. India's SDR quota = ~2.75% of global. Not actual currency — a claim on freely usable currencies.</p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">R</div>
+      <div class="key-title">Reserve Tranche Position (RTP)</div>
+      <p>India's deposits with IMF. The 25% of quota that countries pay in reserve assets. Can borrow this instantly — no conditions.</p>
+    </div>
+  </div>
+
+  <h3>Capital Account Convertibility (CAC)</h3>
+  <div class="def-block">
+    <div class="term">EXAM DEFINITION — What is CAC?</div>
+    <p>Freedom to convert local financial assets into foreign financial assets and vice versa at market-determined exchange rates. India has <strong>partial/limited</strong> CAC — FDI allowed freely, but Indian residents can't freely invest abroad beyond LRS ($250K/year limit). Full CAC was recommended by Tarapore Committee (1997, 2006) but not yet implemented fully.</p>
+  </div>
+
+  <div class="note note-warn">
+    <strong>Exam Trap:</strong> "India has full Capital Account Convertibility" — <span style="color:var(--accent)">FALSE.</span> Only Current Account is fully convertible (since 1994 under Article VIII of IMF). Capital Account is partially convertible. This is a top-3 distractor in RBI exams.
+  </div>
+</section>
+
+<!-- ===== 11. REASONING — SYLLOGISM ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="4">
+    <span class="sec-num">11</span>
+    <h2><span class="underline">Reasoning</span> — Syllogism</h2>
+  </div>
+  <div class="h2-sub">Phase 1: 15-20 marks reasoning. Syllogism is the most formulaic — master it, and you get 5 guaranteed marks in 2 minutes.</div>
+
+  <div class="concept-card">
+    <div class="label">Telugu Analogy</div>
+    <h4>Syllogism = Venn diagram <span class="hl">game</span> — Statements → Diagram → Check Conclusion</h4>
+    <div class="explain">
+      Oka example: "All fruits are sweet. Mango is a fruit. Conclusion: Mango is sweet." Logic correct — diagram lo fruits circle lo mango vundi, sweet tag vundi. Idedo obvious ga vundi kada? But exam lo "All A are B. Some B are C. Conclusion: Some A are C" — idi wrong. Diagram draw chestene telustadi A and C overlap ledu ani.
+    </div>
+  </div>
+
+  <h3>The 4 Statement Types (Only-Only — No Variations)</h3>
+  <div class="comp-table">
+    <thead><tr><th>Type</th><th>Statement</th><th>Venn Diagram</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Universal Positive</strong></td><td>All A are B</td><td>A circle completely inside B</td><td>All banks are regulated</td></tr>
+      <tr><td><strong>Universal Negative</strong></td><td>No A are B</td><td>A and B circles separate</td><td>No bank is unregulated</td></tr>
+      <tr><td><strong>Particular Positive</strong></td><td>Some A are B</td><td>A and B overlapping partly</td><td>Some loans are NPAs</td></tr>
+      <tr><td><strong>Particular Negative</strong></td><td>Some A are NOT B</td><td>Part of A outside B</td><td>Some customers are not defaulters</td></tr>
+    </tbody>
+  </div>
+
+  <h3>The Golden Rules (Memorize These)</h3>
+  <div class="key-grid">
+    <div class="key-item">
+      <div class="key-num">1</div>
+      <div class="key-title">Negative Rule</div>
+      <p>If one premise is negative, the conclusion MUST be negative. Two negatives → no conclusion.</p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">2</div>
+      <div class="key-title">Middle Term Rule</div>
+      <p>Middle term (the term common to both premises) must be distributed at least once. Otherwise → no conclusion.</p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">3</div>
+      <div class="key-title">Particular Rule</div>
+      <p>If one premise is particular ("Some"), the conclusion MUST be particular. Two particular premises → no conclusion.</p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">4</div>
+      <div class="key-title">Complementary Pair</div>
+      <p>"Some A are B" + "Some A are NOT B" = one of them ALWAYS true (either-or case). Both particular = not automatically false.</p>
+    </div>
+  </div>
+
+  <div class="concept-card">
+    <div class="label">Solved Example — 3-Point Method</div>
+    <h4>Statements: All Banks are Companies. Some Companies are PSBs.</h4>
+    <div class="explain">
+      <strong>Step 1:</strong> Draw "Banks" circle inside "Companies" circle.<br>
+      <strong>Step 2:</strong> Draw "PSBs" circle partly overlapping "Companies" — but not necessarily entering "Banks".<br>
+      <strong>Step 3:</strong> Check each conclusion against the diagram.
+    </div>
+    <p style="margin-top:8px;"><strong>Wrong Conclusion:</strong> "Some Banks are PSBs" (diagram shows PSB could be outside Banks)<br>
+    <strong>Wrong Conclusion:</strong> "All PSBs are Banks" (PSBs could be partly outside)<br>
+    <strong>Correct (if asked):</strong> "Some Companies are Banks" (true — Banks entirely inside Companies) </p>
+  </div>
+
+  <div class="note">
+    <strong>RBI Exam Reality:</strong> Direct Syllogism is 3-4 questions. Plus "Reverse Syllogism" (given conclusions, pick matching statements) is another 3-4 questions. Total: ~7-8 reasoning marks from this one topic. Master it by drawing diagrams visually — never memorize rules alone.
+  </div>
+</section>
+
+<!-- ===== 12. ESI PREVIEW — GDP ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="5">
+    <span class="sec-num">12</span>
+    <h2><span class="underline">ESI Preview</span> — GDP & National Income</h2>
+  </div>
+  <div class="h2-sub">Phase 2's Paper 1 (Economic & Social Issues — 100 marks). Start building the macro framework now. GDP calculation is the foundation.</div>
+
+  <div class="concept-card">
+    <div class="label">Telugu Analogy</div>
+    <h4>GDP = India's <span class="hl">total income</span> — like family's combined annual salary</h4>
+    <div class="explain">
+      Oka family lo father business chestunnadu, mother job chestundi, son freelancing — combined income anedi family living standard ki indicator. Alane GDP: country lo one year lo produce chesina total goods & services value. India produced goods and services worth ~$3.9 trillion in 2025-26.
+    </div>
+  </div>
+
+  <!-- SVG: GDP Methods -->
+  <div class="svg-wrap svg-anim">
+    <svg viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg" style="font-family:system-ui,sans-serif;">
+      <rect width="800" height="220" fill="var(--paper)" rx="8"/>
+      <text x="400" y="28" text-anchor="middle" fill="var(--ink)" font-size="15" font-weight="600">GDP — 3 Ways to Measure Same Thing</text>
+
+      <!-- Production Method -->
+      <rect x="30" y="48" width="220" height="90" rx="8" fill="var(--green)" opacity=".12" stroke="var(--green)" stroke-width="1.5"/>
+      <text x="140" y="74" text-anchor="middle" fill="var(--green)" font-size="12" font-weight="600">Production Method</text>
+      <text x="140" y="94" text-anchor="middle" fill="var(--ink-dim)" font-size="9">GVA = Output - Input cost</text>
+      <text x="140" y="110" text-anchor="middle" fill="var(--ink-dim)" font-size="9">Sum of GVA across all sectors</text>
+      <text x="140" y="126" text-anchor="middle" fill="var(--ink-dim)" font-size="9">+ Taxes - Subsidies = GDP</text>
+
+      <!-- Income Method -->
+      <rect x="290" y="48" width="220" height="90" rx="8" fill="var(--blue)" opacity=".12" stroke="var(--blue)" stroke-width="1.5"/>
+      <text x="400" y="74" text-anchor="middle" fill="var(--blue)" font-size="12" font-weight="600">Income Method</text>
+      <text x="400" y="94" text-anchor="middle" fill="var(--ink-dim)" font-size="9">Wages + Rent + Interest + Profit</text>
+      <text x="400" y="110" text-anchor="middle" fill="var(--ink-dim)" font-size="9">All factor incomes summed</text>
+      <text x="400" y="126" text-anchor="middle" fill="var(--ink-dim)" font-size="9">(less used in India)</text>
+
+      <!-- Expenditure Method -->
+      <rect x="550" y="48" width="220" height="90" rx="8" fill="var(--accent)" opacity=".12" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="660" y="74" text-anchor="middle" fill="var(--accent)" font-size="12" font-weight="600">Expenditure Method</text>
+      <text x="660" y="94" text-anchor="middle" fill="var(--ink-dim)" font-size="9">GDP = C + I + G + (X - M)</text>
+      <text x="660" y="110" text-anchor="middle" fill="var(--ink-dim)" font-size="9">Consumption + Investment + Govt</text>
+      <text x="660" y="126" text-anchor="middle" fill="var(--ink-dim)" font-size="9">+ (Exports - Imports)</text>
+
+      <!-- Unity -->
+      <text x="400" y="175" text-anchor="middle" fill="var(--ink)" font-size="11" font-weight="500">All three methods MUST give the same GDP number</text>
+
+      <!-- GDP = at bottom -->
+      <rect x="310" y="185" width="180" height="26" rx="5" fill="var(--ink)" opacity=".85"/>
+      <text x="400" y="203" text-anchor="middle" fill="var(--paper)" font-size="11" font-weight="600">GDP ~ $3.9 Trillion (FY26)</text>
+    </svg>
+    <div class="svg-caption">Figure: GDP can be measured from 3 angles — all converge to same value. India primarily uses Production (GVA) method.</div>
+  </div>
+
+  <h3>India's GDP Calculation — GVA Approach</h3>
+
+  <div class="def-block">
+    <div class="term">KEY — What India Actually Uses</div>
+    <p>India (CSO/NSO) calculates GDP primarily by <strong>GVA (Gross Value Added)</strong> method — the Production method. For each sector, GVA = value of output minus value of intermediate consumption. Then GDP = sum of GVA + taxes - subsidies. Quarterly GDP estimates come from corporate filings, IIP data, and sector surveys.</p>
+  </div>
+
+  <h3>Must-Know Concepts</h3>
+  <div class="key-grid">
+    <div class="key-item">
+      <div class="key-num">R</div>
+      <div class="key-title">Real vs Nominal GDP</div>
+      <p><strong>Nominal = current price.</strong> <strong>Real = constant price</strong> (base year 2011-12). Real GDP removes inflation effect. "GDP Growth Rate" always means Real GDP Growth.</p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">D</div>
+      <div class="key-title">GDP Deflator</div>
+      <p>GDP Deflator = Nominal GDP / Real GDP x 100. It measures overall economy inflation — broader than CPI or WPI because it covers all goods/services produced domestically.</p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">B</div>
+      <div class="key-title">Base Year Revision</div>
+      <p>Current base: 2011-12. RBI has recommended shifting to 2020-21 base. Every revision changes GDP numbers (shows truer picture). Always check what's the latest.</p>
+    </div>
+    <div class="key-item">
+      <div class="key-num">G</div>
+      <div class="key-title">GNI vs GDP</div>
+      <p>GNI = GDP + net income from abroad (remittances, investment income). For India, GNI > GDP (we receive ~$125B in remittances — largest in world).</p>
+    </div>
+  </div>
+
+  <div class="formula">GDP = GVA (at basic prices) + Product Taxes - Product Subsidies</div>
+
+  <p style="text-align:center;font-size:13px;color:var(--ink-dim);">India's FY26 GDP growth estimated at 6.5-7.0% (RBI projection). FY25 actual: 6.6%.</p>
+
+  <div class="note">
+    <strong>Phase 2 ESI Strategy:</strong> GDP chapter is foundational — Monetary Policy, Fiscal Policy, Employment, and Inflation ALL connect back to GDP. If you understand GDP calculation by heart, the rest of ESI becomes "GDP ke extensions" — less new material to learn.
+  </div>
+</section>
+
+<!-- ===== 13. BATCH 2 QUIZ ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="6">
+    <span class="sec-num">13</span>
+    <h2><span class="underline">Batch 2</span> Full Quiz</h2>
+  </div>
+  <div class="h2-sub">20 questions — Financial Markets (4) + NPA/Banking (4) + External Sector (4) + Reasoning (4) + ESI/GDP (4).</div>
+
+  <div id="quizWrap" class="quiz-card"></div>
+</section>
+
+<!-- ===== 14. ANNA SIGN-OFF ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="7">
+    <span class="sec-num">✔</span>
+    <h2>What's <span class="underline">Next?</span></h2>
+  </div>
+
+  <div class="anna-card">
+    <div class="anna-label">From the Neighbourhood Anna</div>
+    <h3>Batch 2 — done and dusted!</h3>
+    <p>Financial Markets, NPA weaponry, External Sector math, and Syllogism fundamentals — all covered. This batch is heavier on <strong>Phase 2</strong> concepts (ESI — GDP, External) because those take longer to internalize.</p>
+    <p style="margin-top:10px;">Your CA brain should love the NPA section — provisioning, ratios, ARC structures. That's your turf. The new stuff: External Sector (BoP math) and Syllogism (logic, not numbers). Both need practice, not memorization.</p>
+    <p style="margin-top:10px;"><strong>Next batch (3):</strong> International Institutions (IMF, WTO, World Bank) + Government Schemes + Reasoning Puzzles + Quantitative Aptitude. And batch 3 gets a full 120-min mock test section.</p>
+    <p style="font-family:var(--mono);font-size:9px;color:var(--accent);margin-top:14px;letter-spacing:.1em;">BATCH 2 COMPLETE · 5 TOPICS · 20 QUIZ Qs · ON TO BATCH 3</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <span>RBI Grade B 2026 — Batch 2/4</span>
+  <span class="pn">Page 1</span>
+  <span>Phase 1: 13 June · 28 Days Left</span>
+</footer>
+
+<!-- =============== QUIZ DATA & ENGINE =============== -->
+<script>
+var quizData = [
+  // Financial Markets (Q1-4)
+  {q:"Which regulator oversees the Capital Market in India?", opts:["RBI","SEBI","IRDAI","PFRDA"], ans:1, exp:"SEBI (est. 1992) regulates India's capital markets — stock exchanges, mutual funds, FIIs. RBI regulates Money Market. IRDAI = insurance, PFRDA = pensions. Don't mix Money Market (RBI) with Capital Market (SEBI)."},
+  {q:"Commercial Paper (CP) can be issued for a maximum period of:", opts:["90 days","180 days","1 year","3 years"], ans:2, exp:"CP max maturity = 1 year (365 days). Min = 7 days. Issued by corporates and NBFCs. Unsecured, rated by CRISIL/ICRA/CARE. T-Bills max = 364 days. CD = up to 1 year too."},
+  {q:"Treasury Bills (T-Bills) are issued by:", opts:["RBI on behalf of Govt","SEBI","NSE","SBI"], ans:0, exp:"T-Bills are issued by RBI on behalf of the Central Government. They are zero-coupon (sold at discount, redeemed at par). Available in 91-day, 182-day, 364-day tenors. Safest money market instrument — sovereign guarantee."},
+  {q:"CBLO (Collateralized Borrowing & Lending Obligation) is operated by:", opts:["RBI","CCIL","SEBI","SBI"], ans:1, exp:"CCIL (Clearing Corporation of India Ltd) operates the CBLO platform. It's fully collateralized by government securities. Replaced the old uncollateralized call money system. CCIL is an RBI subsidiary."},
+
+  // NPA & Banking Health (Q5-8)
+  {q:"An asset becomes Sub-Standard when it remains NPA for:", opts:["Less than 6 months","Less than 12 months","12-24 months","More than 24 months"], ans:1, exp:"Sub-Standard = NPA for less than 12 months (provisioning 15% secured, 25% unsecured). Doubtful = NPA for more than 12 months. Standard = performing asset (0.4% provision). Loss = 100% provision."},
+  {q:"The SARFAESI Act, 2002 allows banks to:", opts:["File insolvency at NCLT","Seize secured assets without court","Recapitalize weak banks","Merge public sector banks"], ans:1, exp:"SARFAESI = Securitisation and Reconstruction of Financial Assets and Enforcement of Security Interest Act. Key power: banks can seize and sell secured assets WITHOUT going to court. 60-day notice required. Only for secured NPAs. IBC (2016) = insolvency resolution at NCLT — different tool."},
+  {q:"NARCL (National Asset Reconstruction Company Ltd) is commonly known as:", opts:["Bank Board Bureau","Bad Bank","Debt Recovery Tribunal","National Investment Fund"], ans:1, exp:"NARCL = India's 'Bad Bank'. It buys stressed assets from banks (primarily PSBs) to clean their balance sheets. IDRCL manages the resolution. Setup in 2021. ARC model: buy at discount → restructure/recover → profit."},
+  {q:"A bank's Provisioning Coverage Ratio (PCR) is calculated as:", opts:["Provisions / Net NPAs","Net NPAs / Gross NPAs","Provisions / Gross NPAs","Gross NPAs / Total Advances"], ans:2, exp:"PCR = Provisions held / Gross NPAs × 100. RBI wants PCR > 70%. Higher PCR = more conservative provisioning = safer bank. Gross NPA Ratio = Gross NPAs / Gross Advances. Net NPA Ratio = (GNPA - Provisions) / Net Advances."},
+
+  // External Sector (Q9-12)
+  {q:"Which component accounts for the largest share of India's Forex Reserves?", opts:["Gold","SDR","Foreign Currency Assets (FCA)","Reserve Tranche Position"], ans:2, exp:"FCA = ~90% of India's forex reserves. Held in USD, EUR, GBP, JPY. Includes SDR holdings and interest earnings. Gold = ~5-6%. SDR = ~1-2%. RTP = <1%. India's total forex ~$680B (2025)."},
+  {q:"India achieved full Current Account Convertibility in:", opts:["1991","1994","2000","Not yet achieved"], ans:1, exp:"Full current account convertibility achieved in August 1994 under Article VIII of IMF's Articles of Agreement. This means: free rupee convertibility for trade, services, remittances. CAPITAL account is only partially convertible. Tarapore Committees (1997, 2006) recommended full CAC but India hasn't implemented it fully."},
+  {q:"Special Drawing Rights (SDR) is a reserve asset created by:", opts:["RBI","World Bank","IMF","WTO"], ans:2, exp:"SDR is created by the IMF. It's not a currency — it's a potential claim on freely usable currencies (USD, EUR, CNY, JPY, GBP). India's SDR quota = 2.75% of global SDR pool. The 2021 SDR allocation of $650B was the largest IMF allocation in history."},
+  {q:"If a country runs a Current Account Deficit (CAD), it means:", opts:["Exports > Imports","Imports > Exports","FDI inflows > FDI outflows","Forex reserves increased"], ans:1, exp:"CAD = Current Account Deficit = the value of imports (goods + services + transfers) exceeds exports. India has historically run a CAD (we import more oil, electronics than we export). Financed by capital account surplus (FDI, FPI, NRI deposits). CAD > 3% of GDP = warning zone."},
+
+  // Reasoning — Syllogism (Q13-16)
+  {q:"Statements: All Banks are Companies. Some Companies are PSBs. Which conclusion follows?", opts:["Some Banks are PSBs","All PSBs are Banks","Some Companies are Banks","No Banks are PSBs"], ans:2, exp:"Draw: Banks circle fully inside Companies circle. PSBs circle partially overlapping Companies — but not necessarily going inside Banks. So 'Some Companies are Banks' is ALWAYS true (Banks inside Companies). 'Some Banks are PSBs' is NOT certain — the overlap might only touch Companies, not Banks."},
+  {q:"Statements: No book is a pen. All pens are pencils. Which conclusion definitely follows?", opts:["Some pencils are books","No book is a pencil","Some pencils are not books","All books are pencils"], ans:2, exp:"Draw: Books circle separate from Pens. Pens circle inside Pencils circle. Books could be partly overlapping Pencils or fully separate. So 'Some pencils are not books' is always true (the pens part of pencils is NOT books). 'No book is a pencil' is too strong — books could overlap pencils outside the pen circle."},
+  {q:"In syllogism, if one premise is negative, the conclusion MUST be:", opts:["Positive","Negative","Particular","Universal"], ans:1, exp:"Golden rule: Negative premise → Negative conclusion. If no premise is negative, conclusion cannot be negative. Also: two negative premises → no valid conclusion (fallacy of two negative premises)."},
+  {q:"Statements: All cats are animals. No dog is a cat. Which is the correct conclusion?", opts:["No dog is an animal","Some dogs are animals","No cat is a dog","All dogs are animals"], ans:2, exp:"'No dog is a cat' is the reversed form of 'No cat is a dog' — both say the same thing (universal negative is commutative). 'No dog is an animal' is too strong and not derivable. Dogs and animals could overlap outside the cat circle. Always draw the diagram!"},
+
+  // ESI — GDP & National Income (Q17-20)
+  {q:"India's GDP is primarily calculated using which method?", opts:["Expenditure Method","Income Method","Production/GVA Method","PPP Method"], ans:2, exp:"India's CSO/NSO uses the Production method (GVA approach). GDP = sum of GVA across 8 sectors + taxes - subsidies. GVA = output value - intermediate consumption. Base year currently 2011-12, recommended shift to 2020-21."},
+  {q:"The formula GDP = C + I + G + (X - M) represents which method?", opts:["Production Method","Income Method","Expenditure Method","Factor Cost Method"], ans:2, exp:"GDP = Consumption + Investment + Government Spending + (Exports - Imports). This is the Expenditure method — measures GDP by who spends. C = private consumption, I = capital formation, G = govt consumption, X-M = net exports. USA uses this; India primarily uses Production/GVA."},
+  {q:"GDP Deflator is calculated as:", opts:["CPI / WPI × 100","Nominal GDP / Real GDP × 100","Real GDP / Nominal GDP × 100","GVA / GDP × 100"], ans:1, exp:"GDP Deflator = Nominal GDP ÷ Real GDP × 100. It measures overall economy-wide inflation. Broader than CPI (consumer basket only) or WPI (wholesale prices only). Covers all goods & services produced domestically. If Nominal GDP growth = 10% and Real GDP growth = 7%, deflator = 3% (implied inflation)."},
+  {q:"India's GDP base year revision is important because:", opts:["It changes GST rates","It better reflects structural changes in the economy","It increases the fiscal deficit","It reduces tax collection"], ans:1, exp:"Base year revision updates the basket of goods and weights to better reflect the CURRENT structure of the economy. 2004-05 base missed e-commerce, startup economy. 2011-12 base captures some. 2020-21 base will capture GST-era economy, digital transactions, and post-pandemic structure. It doesn't change policy — it changes measurement accuracy."}
+];
+
+var currentQ = 0;
+var answers = new Array(quizData.length).fill(-1);
+
+function initQuiz(){
+  var w = document.getElementById('quizWrap');
+  var dots = '<div class="quiz-dots">';
+  for(var i=0; i<quizData.length; i++){
+    dots += '<div class="quiz-dot" id="dot'+i+'" onclick="jumpQ('+i+')">'+(i+1)+'</div>';
+  }
+  dots += '</div>';
+  w.innerHTML = dots +
+    '<div class="quiz-q" id="quizQ"></div>' +
+    '<div class="quiz-opts" id="quizOpts"></div>' +
+    '<div class="q-nav">' +
+    '<button class="q-btn" id="prevBtn" onclick="prevQ()">Prev</button>' +
+    '<span class="q-count" id="qCount">1 / '+quizData.length+'</span>' +
+    '<button class="q-btn" id="nextBtn" onclick="nextQ()">Next</button>' +
+    '</div>' +
+    '<div class="quiz-results" id="quizRes">' +
+    '<div class="quiz-results-inner"></div>' +
+    '<div id="quizReview"></div>' +
+    '</div>';
+  loadQ(0);
+}
+function loadQ(n){
+  currentQ = n;
+  var d = quizData[n];
+  document.getElementById('quizQ').innerHTML = '<strong>Q'+(n+1)+'.</strong> '+d.q;
+  var opts = '';
+  var letters = ['A','B','C','D'];
+  for(var i=0; i<d.opts.length; i++){
+    var classes = 'q-opt';
+    if(answers[n] >= 0){
+      classes += ' locked';
+      if(i === d.ans) classes += ' is-c';
+      if(i === answers[n] && i !== d.ans) classes += ' is-w';
+    }
+    opts += '<label class="'+classes+'"><input type="radio" name="q' + n + '" value="' + i + '" onchange="answerQ(' + n + ',' + i + ')"' + (answers[n]===i?' checked':'') + (answers[n]>=0?' disabled':'') + '><span class="opt-inner"><span class="letter">'+letters[i]+'</span>'+d.opts[i]+'</span></label>';
+  }
+  document.getElementById('quizOpts').innerHTML = opts;
+  document.getElementById('prevBtn').disabled = (n===0);
+  document.getElementById('nextBtn').disabled = (n===quizData.length-1);
+  document.getElementById('qCount').textContent = (n+1)+' / '+quizData.length;
+  updateDots();
+}
+function answerQ(n, opt){
+  answers[n] = opt;
+  loadQ(n);
+  // Auto-advance after short pause
+  if(n < quizData.length-1 && opt >= 0){
+    var allDone = answers.every(function(a){return a>=0;});
+    if(allDone) showResults();
+    else setTimeout(function(){ if(currentQ===n) nextQ(); }, 600);
+  } else if(n === quizData.length-1 && opt >= 0){
+    setTimeout(showResults, 600);
+  }
+}
+function prevQ(){ if(currentQ>0) loadQ(currentQ-1); }
+function nextQ(){ if(currentQ<quizData.length-1) loadQ(currentQ+1); }
+function jumpQ(n){ loadQ(n); }
+function updateDots(){
+  for(var i=0; i<quizData.length; i++){
+    var dot = document.getElementById('dot'+i);
+    dot.className = 'quiz-dot';
+    if(i===currentQ) dot.classList.add('active');
+    if(answers[i] >= 0){
+      if(answers[i] === quizData[i].ans) dot.classList.add('correct');
+      else dot.classList.add('wrong');
+    }
+  }
+}
+function showResults(){
+  var correct = 0;
+  for(var i=0; i<quizData.length; i++){
+    if(answers[i] === quizData[i].ans) correct++;
+  }
+  var pct = Math.round(correct/quizData.length*100);
+  var msg = pct>=80 ? 'Excellent! Phase 1 prep is on track.' : pct>=60 ? 'Good foundation. Review the wrong ones carefully.' : pct>=40 ? 'Solid start. Re-read the sections you missed.' : 'No problem. Batch 2 covers new ground — re-study and re-quiz.';
+  document.getElementById('quizRes').style.display = 'block';
+  document.getElementById('quizRes').querySelector('.quiz-results-inner').innerHTML =
+    '<div class="quiz-score">'+correct+'/'+quizData.length+'</div>' +
+    '<div class="quiz-score-lbl">Score: '+pct+'%</div>' +
+    '<div class="quiz-msg">'+msg+'</div>';
+  var review = '';
+  for(var i=0; i<quizData.length; i++){
+    if(answers[i] !== quizData[i].ans){
+      review += '<div class="quiz-review-entry" style="border-color:var(--accent)"><div class="rev-q" style="color:var(--accent)">Q'+(i+1)+'. '+quizData[i].q+'</div><div class="rev-detail">Your answer: <strong>'+(answers[i]>=0?quizData[i].opts[answers[i]]:'Skipped')+'</strong> | Correct: <strong style="color:var(--green)">'+quizData[i].opts[quizData[i].ans]+'</strong><br>'+quizData[i].exp+'</div></div>';
+    }
+  }
+  document.getElementById('quizReview').innerHTML = review || '<p style="color:var(--green);text-align:center;">All correct — solid batch!</p>';
+  document.getElementById('quizRes').scrollIntoView({behavior:'smooth'});
+}
+initQuiz();
+</script>
+
+<!-- =============== SCROLL ANIMATION =============== -->
+<script>
+(function(){
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting) e.target.classList.add('in');
+    });
+  }, {threshold:0.1});
+  document.querySelectorAll('section').forEach(function(el){ observer.observe(el); });
+  // Progress tracker
+  var totalSecs = document.querySelectorAll('section').length;
+  function updatePct(){
+    var inView = document.querySelectorAll('section.in').length;
+    var pct = totalSecs>0 ? Math.round(inView/totalSecs*100) : 0;
+    document.getElementById('pctTop').textContent = pct+'%';
+  }
+  var pctObserver = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('in'); updatePct(); }
+    });
+  }, {threshold:0.1});
+  document.querySelectorAll('section').forEach(function(el){ pctObserver.observe(el); });
+})();
+</script>
+
+<!-- =============== DARK MODE =============== -->
+<script>
+document.getElementById('darkToggle').addEventListener('click', function(){
+  var d = document.documentElement;
+  if(d.getAttribute('data-theme')==='dark'){
+    d.setAttribute('data-theme','light');
+  } else {
+    d.setAttribute('data-theme','dark');
+  }
+});
+</script>
+
+</body>
+</html>
