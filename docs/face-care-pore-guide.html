@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Face Care Guide — Homemade Mists & Large Pores</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ THEME ============ */
+:root {
+  --paper: #f3eee4;  --paper-2: #ebe4d4;
+  --ink: #1a1612;     --ink-2: #3d3528;
+  --ink-dim: #6b5d49; --ink-faint: #a89a83;
+  --rule: #c8b99e;
+  --accent: #c0392b;  --accent2: #a93226;
+  --green: #2d7d46;   --blue: #2b6cb0;
+  --gold: #b8860b;    --orange: #c4801f;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+[data-theme="dark"] {
+  --paper: #1b1917;  --paper-2: #242220;
+  --ink: #f0ece9;    --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430;
+  --accent: #e8704a;  --accent2: #d95a3a;
+  --green: #5bbd6b;   --blue: #5b8fbd;
+  --gold: #d4a84b;    --orange: #d9a043;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.65;
+  background-image:
+    radial-gradient(circle at 25% 15%, rgba(200,180,140,.12) 0%, transparent 40%),
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(200,185,158,.15) 27px, rgba(200,185,158,.15) 28px);
+}
+
+/* ============ LAYOUT ============ */
+main { max-width: 920px; margin: 0 auto; padding: 40px 24px 100px; }
+
+/* ============ HEADER ============ */
+.page-header{
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid var(--ink);
+}
+.eyebrow{
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink-dim);
+  margin-bottom: 8px;
+}
+.eyebrow .pill{
+  display: inline-block;
+  padding: 2px 10px;
+  border: 1px solid var(--ink);
+  font-size: 10px;
+  margin-right: 6px;
+  background: var(--paper-2);
+}
+h1{
+  font-family: var(--serif);
+  font-size: 44px;
+  font-weight: 400;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+h1 .italic{font-style:italic;color:var(--ink-dim)}
+.subtitle{
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 18px;
+  color: var(--ink-dim);
+  margin-bottom: 18px;
+}
+
+/* Meta cards grid */
+.meta-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+.meta-card{
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 12px 14px;
+}
+.meta-card .num{font-size:22px;font-weight:600;color:var(--accent)}
+.meta-card .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-dim);font-family:var(--mono)}
+
+/* ============ SECTIONS ============ */
+section{
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity .6s ease, transform .6s ease;
+  margin-bottom: 48px;
+}
+section.in{opacity:1;transform:translateY(0)}
+h2{
+  font-family: var(--serif);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1.15;
+  margin-bottom: 6px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--rule);
+}
+h2 .underline{
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 4px;
+}
+h2 + .h2-sub{
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--ink-dim);
+  font-size: 17px;
+  margin-bottom: 20px;
+}
+h3{
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+  margin-bottom: 8px;
+  margin-top: 20px;
+}
+h4{
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 6px;
+  margin-top: 16px;
+  color: var(--ink-2);
+}
+
+/* ============ CARDS ============ */
+.card{
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: all .3s;
+}
+.card:hover{
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.card-label{
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.card.red{border-color:var(--accent);box-shadow:3px 3px 0 var(--accent)}
+.card.green{border-color:var(--green);box-shadow:3px 3px 0 var(--green)}
+.card.blue{border-color:var(--blue);box-shadow:3px 3px 0 var(--blue)}
+.card.orange{border-color:var(--orange);box-shadow:3px 3px 0 var(--orange)}
+.card.gold{border-color:var(--gold);box-shadow:3px 3px 0 var(--gold)}
+
+/* ============ RECIPE GRID ============ */
+.recipe-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+@media(max-width:680px){.recipe-grid{grid-template-columns:1fr}}
+.recipe-card{
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  padding: 16px 18px;
+  transition: all .2s;
+}
+.recipe-card:hover{box-shadow:3px 3px 0 var(--ink)}
+.recipe-card .meta{
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--ink-dim);
+  margin-bottom: 4px;
+}
+.recipe-card h3{font-family:var(--serif);font-size:19px;margin:4px 0 8px}
+.recipe-card .tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.recipe-card .tags span{
+  font-size: 10px;
+  padding: 2px 8px;
+  border: 1px solid var(--ink);
+  text-transform: uppercase;
+  background: var(--paper-2);
+}
+.recipe-card .ingred{font-size:14px;margin-bottom:8px}
+.recipe-card .steps{font-size:14px}
+.recipe-card .steps li{margin-bottom:4px;list-style-type:disc;margin-left:18px}
+
+/* ============ TABLES ============ */
+table{
+  width:100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 14px;
+}
+th,td{
+  border: 1px solid var(--rule);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+th{
+  background: var(--paper-2);
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+tr.good td{background:rgba(45,125,70,.08)}
+tr.caution td{background:rgba(196,128,31,.08)}
+tr.danger td{background:rgba(192,57,43,.08)}
+tr.blue-row td{background:rgba(43,108,176,.08)}
+
+/* ============ CODE BLOCKS ============ */
+.code-block{
+  background: var(--ink);
+  color: #e8d9c0;
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 16px 20px;
+  overflow-x: auto;
+  margin: 8px 0;
+  line-height: 1.55;
+}
+.code-block .cm{color:#9a9088}
+.code-block .hl{color:#f0e68c}
+.code-block .gd{color:#e8704a}
+.code-block .gr{color:#5bbd6b}
+
+/* ============ BADGES ============ */
+.badge-row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.badge{
+  display: inline-block;
+  padding: 3px 12px;
+  border: 1px solid var(--ink);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  background: var(--paper-2);
+}
+
+/* ============ INFO LIST ============ */
+.info-list{list-style:none;padding:0}
+.info-list li{
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  gap: 8px;
+  font-size: 15px;
+}
+.info-list li::before{
+  content: '→';
+  color: var(--ink-dim);
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+/* ============ COMPARISON BOX ============ */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0}
+@media(max-width:680px){.compare-grid{grid-template-columns:1fr}}
+.compare-box{
+  padding:14px 16px;
+  border:1px solid var(--ink);
+}
+.compare-box.myth{background:rgba(192,57,43,.04)}
+.compare-box.fact{background:rgba(45,125,70,.04)}
+.compare-box h4{margin:0 0 4px}
+.compare-box.myth h4{color:var(--accent)}
+.compare-box.fact h4{color:var(--green)}
+
+/* ============ TABS ============ */
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--ink);margin-bottom:0}
+.tab{
+  padding:10px 22px;
+  background:var(--paper-2);
+  border:1px solid var(--ink);
+  border-bottom:none;
+  font-family:var(--mono);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  cursor:pointer;
+  color:var(--ink-dim);
+  margin-bottom:-2px;
+  transition:all .2s;
+}
+.tab.active{
+  background:var(--paper);
+  color:var(--ink);
+  border-bottom:2px solid var(--paper);
+}
+.tab:hover{color:var(--ink)}
+.tab-content{display:none;padding:18px 0;animation:fadeIn .4s ease}
+.tab-content.active{display:block}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ============ DARK TOGGLE ============ */
+#darkToggle{
+  position:fixed;
+  bottom:24px;
+  right:24px;
+  width:44px;
+  height:44px;
+  border:2px solid var(--ink);
+  background:var(--paper-2);
+  color:var(--ink);
+  font-size:18px;
+  cursor:pointer;
+  z-index:999;
+  transition:all .2s;
+  display:flex;align-items:center;justify-content:center;
+}
+#darkToggle:hover{background:var(--ink);color:var(--paper)}
+
+/* ============ WARNING BOX ============ */
+.warning-box{
+  background:rgba(192,57,43,.06);
+  border-left:4px solid var(--accent);
+  padding:14px 18px;
+  margin:16px 0;
+}
+.warning-box strong{color:var(--accent)}
+.info-box{
+  background:rgba(43,108,176,.06);
+  border-left:4px solid var(--blue);
+  padding:14px 18px;
+  margin:16px 0;
+}
+.tip-box{
+  background:rgba(45,125,70,.06);
+  border-left:4px solid var(--green);
+  padding:14px 18px;
+  margin:16px 0;
+}
+
+/* ============ SVG ============ */
+.svg-wrap{
+  margin:16px 0;
+  text-align:center;
+}
+.svg-wrap svg{max-width:100%;height:auto}
+.svg-caption{
+  font-family:var(--serif);
+  font-style:italic;
+  font-size:13px;
+  color:var(--ink-dim);
+  margin-top:4px;
+}
+
+/* ============ PRINT ============ */
+@media print{
+  body{background:white;color:black}
+  .card{box-shadow:none;border:1px solid #ccc;break-inside:avoid}
+  section{page-break-inside:avoid}
+  #darkToggle{display:none}
+  body{font-size:14pt;line-height:1.8}
+}
+
+/* ============ SCROLL BAR ============ */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--paper)}
+::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--ink-dim)}
+</style>
+</head>
+<body>
+<main>
+<!-- ============ HERO ============ -->
+<header class="page-header">
+  <div class="eyebrow"><span class="pill">Face Care</span> Homemade · Natural · Kadapa</div>
+  <h1>Face Mists &amp; <span class="italic">Large Pores</span></h1>
+  <p class="subtitle">Everything you need — recipes for Kadapa heat + honest pore guide (no doctor, naturally)</p>
+  <div class="meta-grid">
+    <div class="meta-card"><div class="num">3</div><div class="lbl">Recipes</div></div>
+    <div class="meta-card"><div class="num">🌿</div><div class="lbl">Natural Only</div></div>
+    <div class="meta-card"><div class="num">🔥</div><div class="lbl">Kadapa 35-42°C</div></div>
+    <div class="meta-card"><div class="num">📅</div><div class="lbl">May 2026</div></div>
+  </div>
+</header>
+
+<!-- ============ SECTION 1: Why Your Batch Failed ============ -->
+<section>
+  <h2>1. Why <span class="underline">Your Batch Failed</span></h2>
+  <p class="h2-sub">Quick postmortem so you don't repeat it</p>
+
+  <div class="card red">
+    <div class="card-label">Postmortem — Overnight Rice Water</div>
+    <p><strong>Symptom:</strong> White particles floating on top, sour smell after mixing rice water + aloe + rose water in spray bottle.</p>
+    <p><strong>Root Cause:</strong> Rice starch = sugar for bacteria. Overnight soak (12+ hours) at 35°C = fermentation. White floating colonies = bacterial biofilm starting. Aloe added more organic food.</p>
+    <p><strong>Fix:</strong> 20-minute soak only. Refrigerate. Use small batches. No aloe in long-stored sprays.</p>
+    <p><strong>Verdict:</strong> <strong style="color:var(--accent)">Throw that batch. Not worth the risk.</strong></p>
+  </div>
+
+  <p style="font-size:14px;color:var(--ink-dim);margin-top:8px;">For details: <em>Starch breaks down in water within 2-3 hours at room temp. By 8-12 hours, bacteria count can reach unsafe levels. Your face has pores and micro-abrasions — bacteria can enter and cause folliculitis or acne.</em></p>
+</section>
+
+<!-- ============ SECTION 2: The 3 Recipes ============ -->
+<section>
+  <h2>2. The <span class="underline">3 Recipes</span></h2>
+  <p class="h2-sub">For Kadapa heat — ranked by safety and effectiveness for your goals</p>
+
+  <div class="tabs" id="recipeTabs">
+    <div class="tab active" data-tab="tab-rose">01. Rose Mist (Safe Daily)</div>
+    <div class="tab" data-tab="tab-greentea">02. Green Tea (Best for Acne)</div>
+    <div class="tab" data-tab="tab-rice">03. Rice Water (Glow Only)</div>
+  </div>
+
+  <!-- TAB 1: Rose Mist -->
+  <div class="tab-content active" id="tab-rose">
+    <div class="recipe-card" style="background:var(--paper-2);border:none;padding:0">
+      <div class="meta">RECIPE 01 · SAFEST DAILY</div>
+      <h3>Simple Rose Water Mist</h3>
+      <div class="tags"><span>⭐ Every day</span><span>❄️ Fridge 5 days</span><span>🔥 Kadapa safe</span></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0">
+      <div class="card green">
+        <div class="card-label">Ingredients (100ml bottle)</div>
+        <ul class="info-list" style="list-style:none;padding:0">
+          <li style="border:none;padding:4px 0"><strong>Store-bought Rose Water</strong> — 80ml</li>
+          <li style="border:none;padding:4px 0"><strong>Boiled + cooled water</strong> — 20ml</li>
+          <li style="border:none;padding:4px 0"><strong>Glycerin</strong> — ½ tsp (skip if very oily)</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <div class="card-label">Method</div>
+        <ol style="margin-left:18px">
+          <li>Sterilize spray bottle (hot water + soap, dry fully)</li>
+          <li>Mix rose water + cooled boiled water</li>
+          <li>Add glycerin if using, shake well</li>
+          <li>Refrigerate immediately</li>
+        </ol>
+      </div>
+    </div>
+
+    <table>
+      <thead><tr><th>Detail</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Shelf life (fridge)</td><td><strong>4-5 days</strong></td></tr>
+        <tr><td>Shelf life (Kadapa room temp)</td><td><span style="color:var(--accent)">Same day only</span></td></tr>
+        <tr><td>Glow</td><td>⭐⭐</td></tr>
+        <tr><td>Acne control</td><td>⭐ (soothing only)</td></tr>
+        <tr><td>Pore effect</td><td>⭐ (hydration helps temporarily)</td></tr>
+        <tr class="good"><td>Safety in heat</td><td>✅ <strong>Best — store-bought rose water has preservatives</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TAB 2: Green Tea -->
+  <div class="tab-content" id="tab-greentea">
+    <div class="recipe-card" style="background:var(--paper-2);border:none;padding:0">
+      <div class="meta">RECIPE 02 · BEST FOR ACNE + OIL</div>
+      <h3>Green Tea &amp; Rose Mist</h3>
+      <div class="tags"><span>🎯 Best for acne</span><span>🔬 Published evidence</span><span>🔥 Kadapa oil control</span></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0">
+      <div class="card green">
+        <div class="card-label">Ingredients (100ml bottle)</div>
+        <ul class="info-list" style="list-style:none;padding:0">
+          <li style="border:none;padding:4px 0"><strong>Strong green tea (cooled)</strong> — 60ml</li>
+          <li style="border:none;padding:4px 0"><strong>Rose water</strong> — 35ml</li>
+          <li style="border:none;padding:4px 0"><strong>Fresh aloe gel</strong> — 5ml (optional, skip for longer life)</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <div class="card-label">Method</div>
+        <ol style="margin-left:18px">
+          <li>Brew 1 green tea bag in 70ml hot water for 5 min</li>
+          <li>Cool completely (very important — heat spoils rose water)</li>
+          <li>Strain tea well (no leaf bits)</li>
+          <li>Mix tea + rose water</li>
+          <li>Add aloe only if using within 24h</li>
+          <li>Refrigerate</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>Why green tea works for acne:</strong> Studies (PubMed 20846135, 16432600) show 2-3% green tea preparation <em>reduces sebum production by up to 60%</em> and decreases acne lesions. It's anti-inflammatory and antioxidant-rich. The starch from rice doesn't do any of this.
+    </div>
+
+    <table>
+      <thead><tr><th>Detail</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Shelf life (fridge, no aloe)</td><td><strong>48 hours</strong></td></tr>
+        <tr><td>Shelf life (fridge, with aloe)</td><td><strong>24 hours</strong></td></tr>
+        <tr><td>Glow</td><td>⭐⭐⭐</td></tr>
+        <tr><td>Acne control</td><td>⭐⭐⭐⭐ <strong>Best natural option</strong></td></tr>
+        <tr><td>Pore effect</td><td>⭐⭐⭐ (less oil = less visible pores)</td></tr>
+        <tr class="good"><td>Safety in heat</td><td>✅ Good — but must refrigerate</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TAB 3: Rice Water -->
+  <div class="tab-content" id="tab-rice">
+    <div class="recipe-card" style="background:var(--paper-2);border:none;padding:0">
+      <div class="meta">RECIPE 03 · GLOW ONLY · HANDLE WITH CARE</div>
+      <h3>Quick Rice Water Mist</h3>
+      <div class="tags"><span>✨ Temporary glow</span><span>⚠️ Spoils fast</span><span>❌ Weak for acne</span></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0">
+      <div class="card green">
+        <div class="card-label">Ingredients (80ml)</div>
+        <ul class="info-list" style="list-style:none;padding:0">
+          <li style="border:none;padding:4px 0"><strong>Raw rice</strong> — 1 tbsp</li>
+          <li style="border:none;padding:4px 0"><strong>Boiled + cooled water</strong> — 120ml (for soaking)</li>
+          <li style="border:none;padding:4px 0"><strong>Rose water</strong> — 30ml (add after straining)</li>
+        </ul>
+      </div>
+      <div class="card blue">
+        <div class="card-label">Method</div>
+        <ol style="margin-left:18px">
+          <li>Wash rice once (remove dust)</li>
+          <li>Add 120ml water, swirl for 10 seconds</li>
+          <li><strong>Soak 20 minutes MAX</strong> — set timer</li>
+          <li>Strain through fine muslin cloth (critical!)</li>
+          <li>Mix strained water + rose water</li>
+          <li>Refrigerate immediately</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="warning-box">
+      <strong>⚠️ DO NOT soak overnight.</strong> 20 minutes is enough to get the vitamins (ferulic acid, allantoin, B vitamins). Overnight = bacterial growth. The white particles you saw? Starch + bacteria = bad for skin. Also — <strong>rice water is NOT proven to help acne.</strong> It can give a temporary glow (starch smooths skin surface) but doesn't reduce oil or kill acne bacteria.
+    </div>
+
+    <table>
+      <thead><tr><th>Detail</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Shelf life (fridge)</td><td><strong>24 hours max</strong></td></tr>
+        <tr><td>Glow</td><td>⭐⭐⭐ (temporary, from starch)</td></tr>
+        <tr><td>Acne control</td><td>⭐ (not effective)</td></tr>
+        <tr><td>Pore effect</td><td>⭐ (no real benefit)</td></tr>
+        <tr class="danger"><td>Safety in heat</td><td>⚠️ <strong>Highest risk — use only when you can refrigerate</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ SECTION 3: Preservation Rules ============ -->
+<section>
+  <h2>3. <span class="underline">Preservation Rules</span> for Kadapa</h2>
+  <p class="h2-sub">Your face spray will spoil 3x faster in Kadapa than in Hyderabad or Bangalore. Follow these strictly.</p>
+
+  <div class="card red">
+    <div class="card-label">Golden Rules</div>
+    <ul class="info-list" style="list-style:none;padding:0">
+      <li style="border:none;padding:6px 0"><strong>Batch size:</strong> Never make more than 100ml. Smaller = fresher.</li>
+      <li style="border:none;padding:6px 0"><strong>Bottle:</strong> Sterilize with hot water + soap before every batch. Glass is better than plastic (doesn't harbor bacteria in scratches).</li>
+      <li style="border:none;padding:6px 0"><strong>Don't touch the nozzle to your face.</strong> Each touch introduces face bacteria into the bottle. Hold 6 inches away and spray into the air.</li>
+      <li style="border:none;padding:6px 0"><strong>Refrigerate immediately.</strong> Take out only to spray, return right away. Don't leave on bathroom shelf.</li>
+      <li style="border:none;padding:6px 0"><strong>Smell test before every use.</strong> If it smells sour, funky, or different — throw it. Don't gamble.</li>
+      <li style="border:none;padding:6px 0"><strong>Write date on bottle.</strong> Use masking tape + pen. "Made: 18-May" — helps you track.</li>
+    </ul>
+  </div>
+
+  <table>
+    <thead><tr><th>Recipe</th><th>Fridge Life</th><th>Room Temp (Kadapa)</th></tr></thead>
+    <tbody>
+      <tr class="good"><td>Rose Water Mist</td><td>4-5 days</td><td>Same day only</td></tr>
+      <tr><td>Green Tea (no aloe)</td><td>48 hours</td><td>Same day only</td></tr>
+      <tr class="caution"><td>Green Tea + Aloe</td><td>24 hours</td><td>4-6 hours</td></tr>
+      <tr class="danger"><td>Rice Water Mix</td><td>24 hours</td><td>2-3 hours</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ SECTION 4: LARGE PORES ============ -->
+<section>
+  <h2>4. Large Pores — <span class="underline">The Honest Truth</span></h2>
+  <p class="h2-sub">What actually makes pores look big, what doesn't work, and what naturally helps.</p>
+
+  <!-- MYTH VS FACT -->
+  <div class="compare-grid">
+    <div class="compare-box myth">
+      <h4>❌ Myth</h4>
+      <p>"Pores open and close like doors. Hot water opens them, cold water closes them."</p>
+    </div>
+    <div class="compare-box fact">
+      <h4>✅ Fact</h4>
+      <p>Pores have NO muscles. They don't open or close. Temperature changes cause <em>temporary</em> expansion/contraction of skin tissue around pores — lasting 30 minutes max. The effect is cosmetic, not structural.</p>
+    </div>
+  </div>
+
+  <div class="compare-grid">
+    <div class="compare-box myth">
+      <h4>❌ Myth</h4>
+      <p>"Pores shrink with home remedies like ice, egg whites, lemon, toothpaste."</p>
+    </div>
+    <div class="compare-box fact">
+      <h4>✅ Fact</h4>
+      <p>Nothing "shrinks" pores permanently. Pore size is determined by: genetics, collagen health around the pore, and how much oil (sebum) it produces. Ice gives temporary tightening (20 min). Lemon burns skin (pH 2 — too acidic).</p>
+    </div>
+  </div>
+
+  <!-- WHY PORES LOOK LARGE -->
+  <h3>Why Your Pores Look Bigger</h3>
+  <p style="margin-bottom:12px">Think of a pore like a well. It's not the well getting bigger — it's the stuff inside making it look wider.</p>
+
+  <div class="card">
+    <div class="card-label">4 Reasons Pores Look Large — Ranked</div>
+    <ol style="margin-left:18px">
+      <li><strong>💧 Excess oil (sebum) stretching the pore opening</strong> — Most common. Your body produces too much oil, the pore stretches to release it, and looks bigger. Kadapa heat makes this worse (heat = more oil).</li>
+      <li style="margin-top:8px"><strong>🧱 Clogged pores with dead skin + oil</strong> — The pore is full of solidified sebum (whiteheads/blackheads). The blockage pushes the walls outward. Clear the blockage → pore looks smaller.</li>
+      <li style="margin-top:8px"><strong>☀️ Sun damage breaking down collagen around pores</strong> — Collagen is the elastic "rubber band" around each pore. Sun destroys collagen → rubber band loosens → pore looks saggy and large. This is permanent without medical treatment.</li>
+      <li style="margin-top:8px"><strong>👴 Aging</strong> — Natural collagen loss over years. Same effect as sun damage, but slower.</li>
+    </ol>
+  </div>
+
+  <!-- WHAT NATURALLY HELPS -->
+  <h3>What Naturally Helps (By Evidence Level)</h3>
+
+  <table>
+    <thead><tr><th>#</th><th>Method</th><th>What It Does</th><th>How Often</th><th>Works?</th></tr></thead>
+    <tbody>
+      <tr class="good"><td>1</td><td><strong>Green tea topically</strong></td><td>Reduces oil production (sebum). Less oil = pore doesn't stretch as much.</td><td>Daily as mist</td><td>✅ Good evidence</td></tr>
+      <tr class="good"><td>2</td><td><strong>Aloe vera gel (fresh)</strong></td><td>Anti-inflammatory, mild astringent, soothes redness around pores.</td><td>2-3x/week mask</td><td>✅ Good evidence</td></tr>
+      <tr class="good"><td>3</td><td><strong>Sunscreen (daily)</strong></td><td>Prevents collagen breakdown around pores. Stops pore sagging.</td><td>Every morning</td><td>✅ Best prevention</td></tr>
+      <tr><td>4</td><td><strong>Multani mitti (Fuller's earth) mask</strong></td><td>Absorbs excess oil, mildly exfoliates. Makes pores look cleaner.</td><td>1-2x/week</td><td>⭐ Moderate (temporary)</td></tr>
+      <tr><td>5</td><td><strong>Clay masks + rose water</strong></td><td>Draws out oil and impurities from pores.</td><td>1x/week</td><td>⭐ Moderate (temporary)</td></tr>
+      <tr><td>6</td><td><strong>Ice/cold water rinse</strong></td><td>Temporarily constricts skin tissue around pores. Effect lasts ~30min.</td><td>Morning rinse</td><td>⭐ Low (temporary only)</td></tr>
+      <tr class="caution"><td>7</td><td><strong>Oatmeal + honey scrub</strong></td><td>Gentle physical exfoliation. Removes dead skin clogging pores.</td><td>1x/week (gently)</td><td>⭐ Low (gentle only)</td></tr>
+      <tr class="danger"><td>8</td><td><strong>Lemon juice, egg whites, baking soda</strong></td><td>Too acidic/alkaline. Burns skin, breaks moisture barrier. Makes pores look WORSE long-term.</td><td>Never</td><td>❌ Don't use</td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box" style="margin-top:16px">
+    <strong>Important:</strong> Pore size is largely genetic. You CAN make them look <em>smaller</em> — by reducing oil, clearing blockages, and maintaining collagen — but you cannot permanently shrink the pore structure itself. This is true of every skincare product, natural or medical. Anyone claiming "pore shrinking" is being imprecise. What they mean is "pore minimizing in appearance."
+  </div>
+</section>
+
+<!-- ============ SECTION 5: DAILY ROUTINE ============ -->
+<section>
+  <h2>5. <span class="underline">Daily Routine</span> for Kadapa</h2>
+  <p class="h2-sub">Simple. No fancy products. Just what works.</p>
+
+  <div class="card">
+    <div class="card-label">🌅 Morning (5 min)</div>
+    <div class="code-block"><span class="cm"># 1. Wash face with plain water (no soap — Kadapa heat dries skin)</span>
+<span class="cm"># 2. Spray Green Tea mist (Recipe 2) — oil control for the day</span>
+<span class="cm"># 3. Light moisturizer if skin feels dry (aloe gel works)</span>
+<span class="cm"># 4. SUNSCREEN — this is the #1 thing that prevents pore sagging</span>
+<span class="gr">NOTE: Even if you do nothing else, do sunscreen.</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">🌤️ Midday (when you come home from heat)</div>
+    <div class="code-block"><span class="cm"># 1. Wash face — removes sweat + oil + dust</span>
+<span class="cm"># 2. Spray Green Tea or Rose mist — cools skin</span>
+<span class="cm"># 3. Blot excess with clean cloth — don't let it drip</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">🌙 Night (before sleep)</div>
+    <div class="code-block"><span class="cm"># 1. Wash face with gentle cleanser or plain water</span>
+<span class="cm"># 2. (Optional) Multani mitti mask 1-2x / week</span>
+<span class="cm"># 3. Spray Rose mist for hydration overnight</span>
+<span class="cm"># 4. Clean pillowcase every 3 days — dirty pillowcase = acne</span></div>
+  </div>
+
+  <div class="card gold" style="margin-top:16px">
+    <div class="card-label">📌 Weekly Extra Treatments</div>
+    <table>
+      <thead><tr><th>Day</th><th>Treatment</th><th>How</th></tr></thead>
+      <tbody>
+        <tr><td>Sat</td><td><strong>Multani mitti + rose water mask</strong></td><td>Mix to paste, apply 15 min, wash off with cool water. Absorbs oil.</td></tr>
+        <tr><td>Wed</td><td><strong>Green tea spray + aloe gel</strong></td><td>After washing, apply thin layer of fresh aloe gel. Keep 20 min, rinse.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ SECTION 6: STOP SIGNS ============ -->
+<section>
+  <h2>6. <span class="underline">Stop Signs</span> — When to Throw &amp; When to See a Doctor</h2>
+  <p class="h2-sub">Not everything can be treated at home. Know when to stop.</p>
+
+  <table>
+    <thead><tr><th>Sign</th><th>What It Means</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr class="danger"><td>Sour/foul smell in your mist</td><td>Bacterial growth</td><td>Throw immediately. New batch.</td></tr>
+      <tr class="danger"><td>Green/black spots in bottle</td><td>Mold</td><td>Throw bottle. Sterilize or replace.</td></tr>
+      <tr class="danger"><td>Pus-filled pimples appearing after spraying</td><td>Bacterial folliculitis from contaminated spray</td><td>Stop spray. Wash face with plain water for 3 days.</td></tr>
+      <tr class="caution"><td>Redness + burning after aloe</td><td>Aloe allergy or latex contamination</td><td>Stop aloe. Use rose water only.</td></tr>
+      <tr class="caution"><td>Spray leaves sticky film on face</td><td>Too much glycerin or starch</td><td>Reduce quantity or skip that ingredient.</td></tr>
+      <tr><td>Spray feels good, no reaction</td><td>All clear!</td><td>Continue. Make fresh batch every time.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="warning-box">
+    <strong>🚨 When to see a dermatologist (parledu, find a doctor):</strong><br>
+    - Cystic acne (deep, painful bumps under skin)<br>
+    - Pores with dark blackheads that won't clear with any home method<br>
+    - Sudden worsening of skin in one area<br>
+    - Scarring from acne<br><br>
+    <em>These need medical treatment (retinoids, salicylic acid, professional extraction) that no home remedy can match. Seeing a doctor once is cheaper than buying 20 products that don't work.</em>
+  </div>
+</section>
+
+<!-- ============ SECTION 7: FINAL RECO ============ -->
+<section>
+  <h2>7. <span class="underline">Final Recommendation</span></h2>
+  <p class="h2-sub">If you do only 3 things for your pores:</p>
+
+  <div class="recipe-grid">
+    <div class="recipe-card" style="border-color:var(--green)">
+      <div class="meta" style="color:var(--green)">PRIORITY 1</div>
+      <h3>☀️ Sunscreen Daily</h3>
+      <p style="font-size:14px">This is the single most effective thing to prevent pores from getting larger. Sun = collagen loss = saggy pores. A ₹200 sunscreen from any medical store is enough.</p>
+    </div>
+    <div class="recipe-card" style="border-color:var(--blue)">
+      <div class="meta" style="color:var(--blue)">PRIORITY 2</div>
+      <h3>🍵 Green Tea Mist Daily</h3>
+      <p style="font-size:14px">Reduces oil production at the source. Less oil = stretched pores get a chance to "reset." Make fresh every 2 days. Costs ~₹2 per batch.</p>
+    </div>
+    <div class="recipe-card" style="border-color:var(--gold)">
+      <div class="meta" style="color:var(--gold)">PRIORITY 3</div>
+      <h3>🧴 Multani Mitti Weekly</h3>
+      <p style="font-size:14px">Draws out oil from deep inside pores. Keeps them clean and less visible. Don't overdo (max 2x/week) or skin dries out and produces MORE oil.</p>
+    </div>
+    <div class="recipe-card" style="border-color:var(--orange)">
+      <div class="meta" style="color:var(--orange)">BONUS</div>
+      <h3>🧊 Cold Water Rinse</h3>
+      <p style="font-size:14px">After washing, splash cold water 5-6 times. Temporary tightening for 30-60 min. Good before going out or before a video call where you want to look fresh.</p>
+    </div>
+  </div>
+
+  <!-- SUMMARY TABLE -->
+  <div class="card" style="margin-top:20px">
+    <div class="card-label">Quick Reference — Which Mist For Which Goal</div>
+    <table>
+      <thead><tr><th>Goal</th><th>Use</th><th>How Often</th></tr></thead>
+      <tbody>
+        <tr><td>Daily cooling + hydration</td><td>Rose Water Mist</td><td>Morning + midday</td></tr>
+        <tr><td>Less acne + oil control</td><td>Green Tea Mist</td><td>Morning (primary)</td></tr>
+        <tr><td>Temporary glow for events</td><td>Rice Water Mist (fresh only)</td><td>Once a week max</td></tr>
+        <tr><td>Pore minimization</td><td>Green Tea + Sunscreen + Multani mitti</td><td>Daily + weekly mask</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="text-align:center;margin-top:32px;padding:24px;border-top:2px solid var(--rule)">
+    <p style="font-family:var(--serif);font-size:18px;color:var(--ink-dim);font-style:italic">
+      "Consistency > intensity. Do the simple things every day rather than complicated things once."
+    </p>
+    <p style="font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-top:8px">
+      Face Care Guide · Kadapa · May 2026
+    </p>
+  </div>
+</section>
+</main>
+
+<!-- ============ DARK TOGGLE ============ -->
+<button id="darkToggle" title="Toggle dark/light">🌓</button>
+
+<script>
+// Dark mode toggle
+document.getElementById('darkToggle').addEventListener('click', function(){
+  var d=document.documentElement;
+  if(d.getAttribute('data-theme')==='dark'){
+    d.removeAttribute('data-theme');
+  } else {
+    d.setAttribute('data-theme','dark');
+  }
+});
+
+// Recipe tabs
+document.querySelectorAll('#recipeTabs .tab').forEach(function(t){
+  t.addEventListener('click', function(){
+    document.querySelectorAll('#recipeTabs .tab').forEach(function(x){x.classList.remove('active');});
+    t.classList.add('active');
+    var target = t.dataset.tab;
+    document.querySelectorAll('#recipeTabs ~ .tab-content').forEach(function(p){p.classList.remove('active');});
+    document.getElementById(target).classList.add('active');
+  });
+});
+
+// Scroll-triggered section entrance
+var observer = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting) e.target.classList.add('in');
+  });
+}, {threshold: 0.08});
+document.querySelectorAll('section').forEach(function(el){observer.observe(el);});
+</script>
+</body>
+</html>
