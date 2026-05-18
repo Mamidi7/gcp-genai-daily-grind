@@ -42,7 +42,8 @@ def info():
         "app": "Flask on Cloud Run",
         "port": os.getenv("PORT", "8080"),
         "hostname": socket.gethostname(),
-        "python_version": os.sys.version
+        "python_version": os.sys.version,
+        "message": "I love you Threeja, lovee of my life ❤️"
     })
 
 
