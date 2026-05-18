@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MX Master 3S — Left Click Fix Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #F3EEE4;
+    color: #2D2D2D;
+    line-height: 1.6;
+    padding: 0;
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+
+  .card {
+    background: #FFFEF9;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    padding: 28px 24px;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1A1A1A;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    color: #6B6B6B;
+    font-size: 14px;
+    font-weight: 400;
+    margin-bottom: 24px;
+  }
+
+  .symptom-box {
+    background: #FFF3E8;
+    border-left: 4px solid #E87D2F;
+    border-radius: 0 12px 12px 0;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+
+  .symptom-box p {
+    font-size: 14px;
+    color: #5A3E1F;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-top: 8px;
+    margin-bottom: 16px;
+    color: #1A1A1A;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #1A1A1A;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .fix-card {
+    background: #FFFEF9;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    padding: 24px;
+    margin-bottom: 16px;
+    border: 1px solid #EDE9E0;
+  }
+
+  .fix-card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #1A1A1A;
+  }
+
+  .fix-card .diff {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+
+  .diff-easy { background: #E3F5E8; color: #1A6D3C; }
+  .diff-medium { background: #FFF3E0; color: #B76E00; }
+  .diff-hard { background: #FFE8E8; color: #B33A3A; }
+
+  .fix-card ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .fix-card ul li {
+    font-size: 14px;
+    padding: 4px 0;
+    padding-left: 20px;
+    position: relative;
+  }
+
+  .fix-card ul li::before {
+    content: '>';
+    position: absolute;
+    left: 0;
+    color: #999;
+    font-weight: 600;
+  }
+
+  .warn-box {
+    background: #FFF0F0;
+    border-left: 4px solid #D32F2F;
+    border-radius: 0 12px 12px 0;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+
+  .warn-box p {
+    font-size: 14px;
+    color: #7A2020;
+  }
+
+  .info-box {
+    background: #E8F0FE;
+    border-left: 4px solid #1A73E8;
+    border-radius: 0 12px 12px 0;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+
+  .info-box p {
+    font-size: 14px;
+    color: #1A3A6B;
+  }
+
+  .yt-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #F8F6F0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    color: #2D2D2D;
+    transition: background 0.15s;
+    border: 1px solid #EDE9E0;
+  }
+
+  .yt-link:hover {
+    background: #EFEBE2;
+  }
+
+  .yt-link .play-icon {
+    width: 40px;
+    height: 40px;
+    background: #FF0000;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+    color: white;
+  }
+
+  .yt-link .yt-info {
+    flex: 1;
+  }
+
+  .yt-link .yt-info .yt-title {
+    font-size: 14px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .yt-link .yt-info .yt-author {
+    font-size: 12px;
+    color: #888;
+  }
+
+  .part-label {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 20px;
+    background: #EDE9E0;
+    color: #5A5A5A;
+    margin: 4px 4px 0 0;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid #EDE9E0;
+    margin: 20px 0;
+  }
+
+  .tagline {
+    text-align: center;
+    font-size: 13px;
+    color: #999;
+    margin-top: 32px;
+  }
+
+  .steps-list {
+    counter-reset: step;
+    list-style: none;
+    padding: 0;
+  }
+
+  .steps-list li {
+    counter-increment: step;
+    padding: 6px 0 6px 36px;
+    position: relative;
+    font-size: 14px;
+  }
+
+  .steps-list li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #EDE9E0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #5A5A5A;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="card" style="text-align:center; padding-bottom: 16px;">
+    <h1>MX Master 3S</h1>
+    <p style="font-size:20px; font-weight:600; color:#444; margin-bottom:4px;">Left Click Fix Guide</p>
+    <p class="subtitle">Reddit + community-tested fixes. Start from top, go down.</p>
+  </div>
+
+  <div class="symptom-box">
+    <p><strong>Symptom:</strong> Left click doesn't register — need to press hard or multiple times. Right click works fine. Drag operations break mid-way.</p>
+  </div>
+
+  <!-- WD40 WARNING -->
+  <div class="warn-box">
+    <p><strong>DO NOT use WD-40 or any spray lubricant.</strong> The MX Master 3S uses an <strong>optical switch</strong> (light beam, not mechanical). WD-40 leaves a residue that blocks the light sensor and attracts more dust. Use only <strong>compressed air</strong> (dry) or <strong>91%+ isopropyl alcohol</strong> (evaporates clean).</p>
+  </div>
+
+  <h2>Fixes (Least to Most Involved)</h2>
+
+  <!-- FIX 1 -->
+  <div class="fix-card">
+    <h3>Fix 1: Compressed Air Blast</h3>
+    <span class="diff diff-easy">Easy — 5 min</span>
+    <ul>
+      <li>Get canned compressed air (any electronics shop, ~Rs 200)</li>
+      <li>Angle nozzle into the slim gap between left button and mouse body</li>
+      <li>Blow from multiple angles — front, side, top gap</li>
+      <li>Click the button 20-30 times after blowing</li>
+      <li>Also try: lift the left button pad slightly (plastic has flex) and blow underneath</li>
+    </ul>
+    <div class="info-box" style="margin: 12px 0 0;">
+      <p><strong>Why this works:</strong> MX Master 3S uses an <strong>optical switch</strong> — a plastic plunger blocks/unblocks a light beam. A speck of dust in the path = missed clicks. Air dislodges it.</p>
+    </div>
+  </div>
+
+  <!-- FIX 2 -->
+  <div class="fix-card">
+    <h3>Fix 2: Isopropyl Alcohol + Pin Clean</h3>
+    <span class="diff diff-easy">Easy — 10 min</span>
+    <ul>
+      <li>Lift the left button pad slightly — you'll see a plastic protrusion with a circle tip</li>
+      <li>Dip a pin in 91%+ isopropyl alcohol</li>
+      <li>Gently poke into the gap where that plastic plunger goes down</li>
+      <li>Follow with compressed air blast</li>
+      <li>Let dry 5 minutes before use</li>
+    </ul>
+  </div>
+
+  <!-- FIX 3 -->
+  <div class="fix-card">
+    <h3>Fix 3: Reseat Ribbon Cable (Open Mouse)</h3>
+    <span class="diff diff-medium">Medium — 30 min</span>
+    <p style="font-size:14px; color:#666; margin-bottom:10px;">Needs: T5 Torx, PH00 Phillips, thin plastic pry tool</p>
+    <ul>
+      <li>Remove the two black strips under the mouse (glide pads)</li>
+      <li>Unscrew all screws underneath</li>
+      <li>Separate top and bottom shell carefully</li>
+      <li>Find the ribbon cable connecting left-click PCB to main board</li>
+      <li>Disconnect it gently, clean contacts with alcohol, reconnect firmly</li>
+      <li>Also check: the thin black wire should NOT be pinched between shell halves</li>
+      <li>Reassemble and test</li>
+    </ul>
+    <div class="info-box" style="margin: 12px 0 0;">
+      <p><strong>Note:</strong> Many Reddit users report the ribbon cable gets slightly loose over time. Reseating it alone fixes the issue permanently for some.</p>
+    </div>
+  </div>
+
+  <!-- FIX 4 -->
+  <div class="fix-card">
+    <h3>Fix 4: Reflow Solder Joints</h3>
+    <span class="diff diff-hard">Hard — needs soldering iron</span>
+    <ul>
+      <li>Open mouse (same as Fix 3)</li>
+      <li>Locate the left click switch PCB (small separate board)</li>
+      <li>Apply flux to existing solder joints</li>
+      <li>Heat each joint with soldering iron until solder reflows (2-3 sec each)</li>
+      <li>Let cool, reassemble</li>
+    </ul>
+  </div>
+
+  <!-- FIX 5 -->
+  <div class="fix-card">
+    <h3>Fix 5: Replace the Switch</h3>
+    <span class="diff diff-hard">Hard — needs desoldering</span>
+    <p style="font-size:14px; color:#666; margin-bottom:10px;">Permanent fix. The switch is a known weak point.</p>
+    <ul>
+      <li>Desolder old switch from the PCB</li>
+      <li>Solder new switch — choose one:</li>
+    </ul>
+    <div style="margin-top:8px;">
+      <span class="part-label">EVQ-P0E07K — Clicky feel</span>
+      <span class="part-label">EVQ-P0D07K — Quiet like original</span>
+      <span class="part-label">~Rs 50 each on Mouser/DigiKey</span>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2>Video Guides</h2>
+
+  <a class="yt-link" href="https://youtu.be/GfmRiTi_G2Q" target="_blank">
+    <div class="play-icon">&#9654;</div>
+    <div class="yt-info">
+      <span class="yt-title">How To Fix MX Master 3S Left Click Not Working Properly</span>
+      <span class="yt-author">Tech Stratology</span>
+    </div>
+  </a>
+
+  <a class="yt-link" href="https://youtu.be/WjyDUg0LUXM" target="_blank">
+    <div class="play-icon">&#9654;</div>
+    <div class="yt-info">
+      <span class="yt-title">How To Fix MX Master 3S Left Click Not Registering</span>
+      <span class="yt-author">Tech Stratology</span>
+    </div>
+  </a>
+
+  <a class="yt-link" href="https://youtu.be/wIRpVQ_BtXo" target="_blank">
+    <div class="play-icon">&#9654;</div>
+    <div class="yt-info">
+      <span class="yt-title">How to Repair Logitech MX Master 3S Click Issues</span>
+      <span class="yt-author">UFIXTEK</span>
+    </div>
+  </a>
+
+  <a class="yt-link" href="https://youtu.be/yTrwT5ddfcM" target="_blank">
+    <div class="play-icon">&#9654;</div>
+    <div class="yt-info">
+      <span class="yt-title">MX Master 3S — Click Button Replacement + Tape Fix Method</span>
+      <span class="yt-author">Brian Fischer</span>
+    </div>
+  </a>
+
+  <a class="yt-link" href="https://youtu.be/sKLJVdPp7Tw" target="_blank">
+    <div class="play-icon">&#9654;</div>
+    <div class="yt-info">
+      <span class="yt-title">Logitech MX Master 3s Left Button Malfunction Fix</span>
+      <span class="yt-author">TechFix404</span>
+    </div>
+  </a>
+
+  <hr>
+
+  <h2>Quick Reference</h2>
+
+  <div class="card" style="padding: 20px;">
+    <ul class="steps-list">
+      <li>Compressed air — try first, 70% success rate</li>
+      <li>Alcohol + pin clean — if air fails</li>
+      <li>Reseat ribbon cable — medium effort, high success</li>
+      <li>Reflow solder — if you have a soldering iron</li>
+      <li>Replace switch — permanent fix, ~Rs 50 part</li>
+    </ul>
+  </div>
+
+  <div class="tagline">
+    Source: Reddit r/logitech, Logitech Community, iFixit, individual blogs<br>
+    Compiled for Krishna by Subba Rao
+  </div>
+
+</div>
+</body>
+</html>
