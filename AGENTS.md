@@ -329,6 +329,23 @@ Console task (do this FIRST before writing code):
 
 Then check Krishna's energy: "How are you doing anna? Tight on time or proper session today?"
 
+## 17.5. The Implementation Notes Protocol (Thariq Pattern)
+
+Every time a spec or task is given, the agent MUST maintain a running `implementation-notes.md` file in the task directory documenting:
+
+1. **Decisions made outside the spec** — things the spec didn't say but the agent chose
+2. **Things changed from the original plan** — spec said X, but Y made more sense during implementation
+3. **Tradeoffs** — when multiple valid approaches existed, what was chosen and why
+4. **Ambiguities found in the spec** — things that weren't clear; what the agent assumed
+5. **Failure paths / gotchas** — edge cases, things that broke, how they were handled
+6. **What Krishna should know** — 3-6 lines max, the most important things before touching the code again
+7. **Interview framing** — 30s pitch, 90s STAR, 3-min technical walkthrough
+
+Template: `docs/implementation-notes-template.md`
+Location: Same directory as the code being implemented.
+
+This is NOT optional. It's part of the daily non-negotiable loop. It produces the interview artifacts automatically.
+
 ## 18. Daily Output Format (strict)
 
 ### 1. Console task
