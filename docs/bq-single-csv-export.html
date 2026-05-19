@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BQ Large Export to Single CSV — Complete Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f3eee4;  --paper-2: #ebe4d4;
+  --ink: #1a1612;     --ink-2: #3d3528;
+  --ink-dim: #6b5d49; --ink-faint: #a89a83;
+  --rule: #c8b99e;
+  --accent: #c0392b;  --accent2: #a93226;
+  --green: #2d7d46;   --blue: #2b6cb0;
+  --gold: #b8860b;    --purple: #7b4d8c;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+[data-theme="dark"] {
+  --paper: #1b1917;  --paper-2: #242220;
+  --ink: #f0ece9;    --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430;
+  --accent: #e8704a;  --accent2: #d95a3a;
+  --green: #5bbd6b;   --blue: #5b8fbd;
+  --gold: #d4a84b;    --purple: #b47bc4;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  background-image:
+    radial-gradient(circle at 25% 15%, rgba(200,180,140,.15) 0%, transparent 40%),
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(200,180,140,.12) 27px, rgba(200,180,140,.12) 28px);
+  line-height: 1.7;
+  min-height: 100vh;
+}
+main { max-width: 980px; margin: 0 auto; padding: 56px 28px 100px; }
+
+/* Page Entrance */
+@keyframes pageIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes stampIn { from { opacity: 0; transform: rotate(-12deg) scale(1.6); } to { opacity: .85; transform: rotate(3deg) scale(1); } }
+@keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 var(--green); } 70% { box-shadow: 0 0 0 8px rgba(45,125,70,0); } 100% { box-shadow: 0 0 0 0 rgba(45,125,70,0); } }
+section { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
+section.in { opacity: 1; transform: translateY(0); }
+
+/* Dark Toggle */
+#darkToggle {
+  position: fixed; top: 16px; right: 16px; z-index: 100;
+  background: var(--paper-2); border: 1px solid var(--ink);
+  padding: 8px 14px; font-size: 18px; cursor: pointer;
+  transition: all .2s; font-family: var(--mono);
+}
+#darkToggle:hover { transform: scale(1.05); }
+
+/* Hero */
+.page-header { margin-bottom: 36px; }
+.eyebrow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+.pill { background: var(--paper-2); border: 1px solid var(--ink); padding: 3px 10px; font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; }
+h1 { font-family: var(--serif); font-size: 44px; font-weight: 400; line-height: 1.1; margin-bottom: 4px; }
+h1 .italic { font-style: italic; color: var(--accent); }
+.subtitle { font-family: var(--serif); font-style: italic; color: var(--ink-dim); font-size: 17px; margin-bottom: 18px; }
+.cd-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+.cd-card { background: var(--paper-2); border: 1px solid var(--ink); padding: 10px 16px; display: flex; align-items: center; gap: 8px; box-shadow: 2px 2px 0 var(--ink); }
+.cd-card .num { font-family: var(--mono); font-size: 16px; font-weight: 600; }
+.cd-card .lbl { font-size: 11px; color: var(--ink-dim); }
+
+/* Section Headers */
+h2 { font-family: var(--serif); font-size: 32px; font-weight: 400; line-height: 1.15; margin-top: 44px; margin-bottom: 6px; }
+h2 .underline { text-decoration: underline; text-decoration-style: wavy; text-decoration-color: var(--accent); text-underline-offset: 4px; }
+h2 + .h2-sub { font-family: var(--serif); font-style: italic; color: var(--ink-dim); font-size: 16px; margin-bottom: 22px; }
+h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; margin-top: 28px; margin-bottom: 8px; }
+h4 { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .15em; color: var(--ink-dim); margin-top: 18px; margin-bottom: 6px; }
+
+/* Card */
+.card { background: var(--paper-2); border: 1px solid var(--ink); padding: 18px 22px; box-shadow: 3px 3px 0 var(--ink); transition: all .3s; margin-bottom: 14px; }
+.card:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+.card-label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .2em; color: var(--accent); margin-bottom: 6px; }
+.card.green { border-color: var(--green); }
+.card.blue { border-color: var(--blue); }
+.card.gold { border-color: var(--gold); }
+
+/* Telugu Card */
+.tel-card { background: var(--paper-2); border: 1px solid var(--ink); padding: 20px 24px; box-shadow: 3px 3px 0 var(--ink); margin-bottom: 18px; }
+.tel-card .label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .2em; color: var(--accent); margin-bottom: 10px; }
+.tel-card p { margin-bottom: 8px; font-size: 14px; line-height: 1.7; }
+.tel-card p:last-child { margin-bottom: 0; }
+.tel-card strong { color: var(--ink-2); }
+.tel-flow { margin-top: 12px; padding: 10px 14px; background: var(--paper); border: 1px solid var(--rule); font-family: var(--mono); font-size: 12px; text-align: center; }
+
+/* Key Grid */
+.key-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.key-item { background: var(--paper-2); border: 1px solid var(--ink); padding: 14px; box-shadow: 2px 2px 0 var(--ink); }
+.key-item .kt { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .15em; color: var(--ink-dim); margin-bottom: 4px; }
+.key-item .kv { font-size: 14px; font-weight: 500; }
+
+/* Code */
+.code-block { background: #1a1612; color: #e8d9c0; font-family: var(--mono); font-size: 13px; padding: 18px 22px; overflow-x: auto; line-height: 1.6; margin: 10px 0; white-space: pre; tab-size: 2; }
+.code-block .kw { color: #f0c674; }
+.code-block .fn { color: #81a2be; }
+.code-block .str { color: #b5bd68; }
+.code-block .cm { color: #6b5d49; font-style: italic; }
+.code-block .hl { color: #cc6666; }
+.code-block .num { color: #de935f; }
+.code-block .op { color: #8abeb7; }
+.code-wrap { position: relative; margin: 8px 0; }
+.code-wrap .code-block { margin: 0; }
+.copy-ghost {
+  position: absolute; top: 6px; right: 6px;
+  background: transparent; border: none;
+  color: #a89a83; cursor: pointer; font-size: 15px;
+  line-height: 1; padding: 2px 5px; z-index: 2;
+  opacity: 0.5; transition: opacity .2s, color .2s;
+}
+.copy-ghost:hover { opacity: 1; color: #e8d9c0; }
+.code-annotation { background: var(--paper-2); border: 1px solid var(--rule); padding: 12px 16px; margin: 4px 0 14px; font-size: 12px; color: var(--ink-dim); border-left: 3px solid var(--accent); }
+
+/* Table */
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }
+thead th { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; background: var(--paper-2); padding: 10px 10px; border: 1px solid var(--rule); text-align: left; }
+tbody td { padding: 8px 10px; border: 1px solid var(--rule); vertical-align: top; }
+tbody tr:hover { background: rgba(200,180,140,.1); }
+
+/* SVG pipeline */
+.svg-wrap { margin: 16px 0; text-align: center; }
+.svg-wrap svg { max-width: 100%; height: auto; }
+.svg-caption { font-family: var(--serif); font-style: italic; font-size: 12px; color: var(--ink-dim); margin-top: 4px; }
+
+/* Step List */
+.step-list { counter-reset: step; margin: 16px 0; list-style: none; }
+.step-item { counter-increment: step; padding: 12px 14px 12px 50px; position: relative; border-left: 2px solid var(--rule); margin-bottom: 8px; }
+.step-item:last-child { border-left-color: var(--accent); }
+.step-item::before { content: counter(step); position: absolute; left: -12px; top: 12px; width: 24px; height: 24px; background: var(--accent); color: var(--paper); font-family: var(--mono); font-size: 11px; display: flex; align-items: center; justify-content: center; }
+.step-item .title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.step-item .desc { font-size: 13px; color: var(--ink-dim); line-height: 1.5; }
+
+/* Comparison Table */
+.compare-table-wrap { overflow-x: auto; margin: 16px 0; }
+
+/* Pros/Cons */
+.pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+.pros-cons .pro { padding: 8px 12px; border-left: 3px solid var(--green); font-size: 12px; }
+.pros-cons .con { padding: 8px 12px; border-left: 3px solid var(--accent); font-size: 12px; }
+
+/* Highlight */
+.highlight-box { background: #f0e0cc; padding: 14px 18px; border-left: 3px solid var(--accent); margin: 16px 0; font-size: 14px; }
+[data-theme="dark"] .highlight-box { background: #3d3530; }
+.highlight-box .label { font-family: var(--mono); font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+
+/* Pipeline flow */
+.pipeline-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; padding: 20px 0; }
+.pipe-node { background: var(--paper-2); border: 1px solid var(--ink); padding: 10px 18px; font-family: var(--mono); font-size: 12px; box-shadow: 2px 2px 0 var(--ink); text-align: center; min-width: 70px; }
+.pipe-node.accent { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.pipe-node.green { background: var(--green); color: var(--paper); border-color: var(--green); }
+.pipe-node.blue { background: var(--blue); color: var(--paper); border-color: var(--blue); }
+.pipe-node.gold { background: var(--gold); color: var(--paper); border-color: var(--gold); }
+.pipe-arrow { font-family: var(--mono); font-size: 18px; color: var(--ink-dim); }
+
+/* Strategy Card */
+.strategy-card { background: var(--paper-2); border: 1px solid var(--ink); padding: 20px; margin-bottom: 16px; box-shadow: 3px 3px 0 var(--ink); }
+.strategy-card .snum { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; color: var(--accent); margin-bottom: 4px; }
+.strategy-card .stitle { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+.strategy-card .sdesc { font-size: 13px; color: var(--ink-2); line-height: 1.6; margin-bottom: 12px; }
+.strategy-card .smeta { display: flex; gap: 10px; flex-wrap: wrap; }
+.strategy-tag { display: inline-block; padding: 2px 8px; font-size: 9px; text-transform: uppercase; border: 1px solid var(--ink); font-family: var(--mono); }
+.strategy-tag.green { border-color: var(--green); color: var(--green); }
+.strategy-tag.gold { border-color: var(--gold); color: var(--gold); }
+.strategy-tag.blue { border-color: var(--blue); color: var(--blue); }
+.strategy-tag.accent { border-color: var(--accent); color: var(--accent); }
+
+/* Quiz Cards */
+@keyframes slideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+.q-card { animation: slideIn .35s ease-out forwards; opacity: 0; margin-bottom: 14px; border: 1px solid var(--ink); background: var(--paper-2); box-shadow: 2px 2px 0 var(--ink); }
+.q-card:nth-child(1) { animation-delay: 0s; }
+.q-card:nth-child(2) { animation-delay: .04s; }
+.q-card:nth-child(3) { animation-delay: .08s; }
+.q-card:nth-child(4) { animation-delay: .12s; }
+.q-header { display: flex; gap: 8px; align-items: center; padding: 12px 16px 4px; }
+.q-num { font-family: var(--mono); font-size: 10px; color: var(--ink-dim); }
+.cat-badge { font-family: var(--mono); font-size: 8px; padding: 2px 8px; border: 1px solid var(--rule); text-transform: uppercase; }
+.cat-bigquery { border-color: var(--blue); color: var(--blue); }
+.q-text { padding: 4px 16px 10px; font-size: 14px; font-weight: 500; }
+.opts-grid { padding: 0 16px 10px; }
+.opt-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; cursor: pointer; border: 1px solid transparent; transition: all .2s; }
+.opt-row:hover { background: var(--paper); border-color: var(--rule); transform: translateX(3px); }
+.opt-row:active { transform: scale(.98); }
+.opt-row.correct { animation: pulseGlow .6s ease; }
+.opt-row.wrong { animation: shake .4s ease; }
+.opt-letter { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 9px; flex-shrink: 0; background: var(--paper); }
+.opt-row input[type="radio"]:checked + .opt-letter { border-color: var(--blue); background: var(--blue); color: var(--paper); }
+.opt-row.correct .opt-letter { background: var(--green); color: var(--paper); border-color: var(--green); }
+.opt-row.correct .opt-text { color: var(--green); font-weight: 500; }
+.opt-row.wrong .opt-letter { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.opt-row.wrong .opt-text { color: var(--accent); }
+.opt-row.disabled { pointer-events: none; opacity: .7; }
+.q-footer { padding: 8px 16px 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.result { font-size: 12px; }
+.score-bar { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; padding: 14px 18px; background: var(--paper-2); border: 1px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+.score-stat { font-family: var(--mono); font-size: 10px; color: var(--ink-dim); }
+.score-stat strong { color: var(--ink); font-size: 13px; }
+.progress-bar-wrap { height: 18px; background: var(--paper); border: 1px solid var(--ink); flex: 1; min-width: 100px; }
+.progress-bar-fill { height: 100%; background: var(--green); transition: width .3s; }
+.btn { padding: 6px 14px; font-family: var(--mono); font-size: 10px; border: 1px solid var(--ink); background: var(--paper-2); cursor: pointer; transition: all .2s; text-transform: uppercase; }
+.btn:hover { transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--ink); }
+.btn-sm { padding: 4px 10px; font-size: 9px; }
+.btn-ghost { background: transparent; border-color: var(--rule); }
+.filter-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-row select { background: var(--paper-2); border: 1px solid var(--ink); padding: 6px 10px; font-family: var(--mono); font-size: 10px; color: var(--ink); cursor: pointer; }
+
+/* Print */
+@media print {
+  body { background: white; color: black; }
+  .code-block { background: #f5f5f5; color: #333; }
+  section { page-break-inside: avoid; }
+  body { font-size: 14pt; line-height: 1.8; }
+  #darkToggle { display: none; }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  main { padding: 36px 16px 80px; }
+  h1 { font-size: 32px; }
+  h2 { font-size: 26px; }
+  .pros-cons { grid-template-columns: 1fr; }
+  .strategy-card { padding: 14px; }
+}
+</style>
+</head>
+<body>
+
+<button id="darkToggle" title="Toggle theme">&#x263E;</button>
+
+<main>
+
+<!-- ===== HERO ===== -->
+<header class="page-header">
+  <div class="eyebrow"><span class="pill">BigQuery Export</span><span class="pill">Python Client</span><span class="pill">Partitioned Tables</span></div>
+  <h1>Export Large <span class="italic">Partitioned Tables</span> to Single CSV</h1>
+  <p class="subtitle">Why your exports take &gt;1hr, why disconnects break them, and 4 proven fixes</p>
+  <div class="cd-grid">
+    <div class="cd-card"><div class="num">&#x26A0;&#xFE0F;</div><div class="lbl">Single CSV Limit: 1GB</div></div>
+    <div class="cd-card"><div class="num">&#x23F3;</div><div class="lbl">&gt;1hr = Timeout Risk</div></div>
+    <div class="cd-card"><div class="num">4</div><div class="lbl">Solutions</div></div>
+    <div class="cd-card"><div class="num">&#x2705;</div><div class="lbl">Wildcard is #1 Fix</div></div>
+  </div>
+</header>
+
+<!-- ===== TELUGU ANALOGY ===== -->
+<section>
+<div class="tel-card">
+  <div class="label">Telugu lo — Entire Export Pipeline</div>
+  <p><strong>BigQuery = Oka pedda godown (warehouse) la untadi.</strong> Nuvvu rojuki 10,000 orders data store chestunnav. Each day's data oka separate shelf lo (partition).</p>
+  <p><strong>Single CSV export = Godown mothanni okka file lo copy cheyadam la.</strong> 100 shelves nundi data teesukoni, okka notebook lo rasi, personal assistant tho pampi.</p>
+  <p><strong>Adi enduku slow? </strong> BQ distributed system — 1000s of machines split the work. But single CSV format ante, anni machines stop ayyi, queue lo nilchuni, one-by-one okka file ki rayali. <strong>Distributed system ni single-thread cheyyadam la.</strong></p>
+  <p><strong>Disconnect = Personal assistant phone pedithe, notebook lost.</strong> Job cancel avutundi, mottam start nundi cheyali.</p>
+  <p><strong>Wildcard export = Prati shelf ki oka file.</strong> 100 shelves = 100 files, same time lo. Godown motham 10x faster ga ready.</p>
+  <div class="tel-flow"><strong>Original Flow:</strong> Nuvvu &#x2192; Python Client &#x2192; BQ Extract Job &#x2192; (single CSV) &#x2192; GCS Bucket &#x2192; 1 hr wait ... disconnect!</div>
+  <div class="tel-flow" style="margin-top:6px;"><strong>Fixed Flow:</strong> Nuvvu &#x2192; Python Client &#x2192; BQ Extract Job &#x2192; (wildcard *.csv) &#x2192; GCS Bucket &#x2192; gsutil compose &#x2192; Single CSV &#x2705;</div>
+</div>
+</section>
+
+<!-- ===== PROBLEM ANALYSIS ===== -->
+<section>
+<h2>The <span class="underline">Problem</span></h2>
+<div class="h2-sub">Why your export takes &gt;1 hour and disconnects kill it</div>
+
+<div class="key-grid">
+  <div class="key-item"><div class="kt">Root Cause 1</div><div class="kv">Single CSV limit: 1GB compressed / ~10-15GB uncompressed</div></div>
+  <div class="key-item"><div class="kt">Root Cause 2</div><div class="kv">Distributed system &#x2192; single file bottleneck — all workers queue up</div></div>
+  <div class="key-item"><div class="kt">Root Cause 3</div><div class="kv">Python client polls job.status() — disconnect = no polling = job.result() raises</div></div>
+  <div class="key-item"><div class="kt">Root Cause 4</div><div class="kv">Partitioned tables — each partition is separate storage, export scans ALL</div></div>
+</div>
+
+<div class="highlight-box">
+  <div class="label">BigQuery Export Limitation</div>
+  BQ exports to a single CSV file are <strong>limited to 1GB</strong> (compressed). Beyond that, the job silently fails or runs indefinitely. The distributed system was designed for parallel output — forcing single-file output is like asking 100 chefs to cook into one bowl.
+</div>
+
+<div class="card blue">
+  <div class="card-label">The Disconnect Problem</div>
+  <p>When your workstation disconnects midway through <code>job.result()</code>:</p>
+  <ul style="margin-top:8px;padding-left:20px;">
+    <li>The Python client was polling BQ every few seconds for job status</li>
+    <li>Disconnect = socket closes = TCP connection to BQ API drops</li>
+    <li><code>job.result()</code> throws <code>ConnectionError</code> or <code>TimeoutError</code></li>
+    <li>The export job on BQ <strong>continues running</strong> (server-side), but your client lost track</li>
+    <li>You don't know if it finished, failed, or is still running</li>
+  </ul>
+</div>
+</section>
+
+<!-- ===== SVG PIPELINE ===== -->
+<section>
+<h2>Export <span class="underline">Flow</span></h2>
+<div class="h2-sub">How the data moves through the system</div>
+
+<div class="svg-wrap">
+<svg viewBox="0 0 760 230">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="var(--ink-dim)"/>
+    </marker>
+    <marker id="arrAccent" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="var(--accent)"/>
+    </marker>
+  </defs>
+
+  <!-- Top row: BQ partitioned table -->
+  <text x="380" y="24" text-anchor="middle" font-family="var(--serif)" font-size="16" fill="var(--ink)">BQ Partitioned Table Export Flow</text>
+
+  <!-- BQ Table block -->
+  <rect x="20" y="45" width="140" height="44" rx="6" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="1.5"/>
+  <text x="90" y="62" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--ink-2)" font-weight="600">BigQuery</text>
+  <text x="90" y="78" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-dim)">Partitioned Table</text>
+
+  <!-- Partitions indicator -->
+  <rect x="20" y="94" width="140" height="44" rx="4" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="90" y="112" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-dim)">Partition 1</text>
+  <text x="90" y="124" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-dim)">Partition 2 ... N</text>
+
+  <!-- WRONG path: Single CSV -->
+  <line x1="160" y1="67" x2="230" y2="67" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrAccent)"/>
+  <rect x="230" y="50" width="140" height="34" rx="6" fill="var(--paper-2)" stroke="var(--accent)" stroke-width="2"/>
+  <text x="300" y="62" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--accent)">&#x274C; Single CSV</text>
+  <text x="300" y="76" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="var(--ink-faint)">1GB limit / queue</text>
+
+  <line x1="370" y1="67" x2="430" y2="67" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arr)"/>
+  <rect x="430" y="50" width="140" height="34" rx="6" fill="var(--paper-2)" stroke="var(--accent2)" stroke-width="1.5"/>
+  <text x="500" y="64" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-dim)">Client polls</text>
+  <text x="500" y="78" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="var(--ink-faint)">disconnect &#x2192; fail</text>
+
+  <line x1="570" y1="67" x2="630" y2="67" stroke="var(--accent2)" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arr)"/>
+  <rect x="630" y="50" width="110" height="34" rx="6" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="1"/>
+  <text x="685" y="64" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-dim)">&#x23F3; GCS</text>
+  <text x="685" y="78" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="var(--ink-faint)">output.csv</text>
+
+  <!-- CORRECT path: Wildcard -->
+  <line x1="90" y1="160" x2="90" y2="190" stroke="var(--green)" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="190" y="175" width="120" height="36" rx="6" fill="var(--paper-2)" stroke="var(--green)" stroke-width="1.5"/>
+  <text x="250" y="187" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--green)">&#x2705; Wildcard CSV</text>
+  <text x="250" y="202" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="var(--ink-faint)">output-*.csv</text>
+
+  <line x1="310" y1="193" x2="400" y2="193" stroke="var(--green)" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arr)"/>
+  <rect x="400" y="175" width="120" height="36" rx="6" fill="var(--paper-2)" stroke="var(--green)" stroke-width="1.5"/>
+  <text x="460" y="187" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--green)">gcloud / gsutil</text>
+  <text x="460" y="202" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="var(--ink-faint)">compose merge</text>
+
+  <line x1="520" y1="193" x2="600" y2="193" stroke="var(--green)" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arr)"/>
+  <rect x="600" y="175" width="120" height="36" rx="6" fill="var(--green)" stroke="var(--green)" stroke-width="1.5"/>
+  <text x="660" y="189" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--paper)" font-weight="600">Single CSV</text>
+  <text x="660" y="204" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="var(--paper)" opacity=".8">&#x2705; Done</text>
+
+  <text x="20" y="185" font-family="var(--mono)" font-size="9" fill="var(--green)">&#x2193; Correct path (parallel)</text>
+</svg>
+<div class="svg-caption">Figure: Single CSV (top, red) vs Wildcard + compose (bottom, green). Parallel wins.</div>
+</div>
+</section>
+
+<!-- ===== SOLUTION COMPARISON ===== -->
+<section>
+<h2>Four <span class="underline">Solutions</span></h2>
+<div class="h2-sub">Ranked by practicality for your use-case</div>
+
+<div class="compare-table-wrap">
+<table>
+  <thead><tr><th>#</th><th>Approach</th><th>Best For</th><th>Single CSV?</th><th>Speed vs Single</th><th>Disconnect Safe?</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><strong>Wildcard Export + gsutil compose</strong></td><td>Everything</td><td>&#x2705; (via compose)</td><td>5-20x faster</td><td>&#x2705;</td></tr>
+    <tr><td>2</td><td><strong>EXPORT DATA statement</strong></td><td>SQL lovers, partition filter</td><td>&#x2705; (via compose)</td><td>5-20x faster</td><td>&#x2705;</td></tr>
+    <tr><td>3</td><td><strong>Resumable job polling</strong></td><td>No GCS access, direct download</td><td>&#x2705;</td><td>Same (1x)</td><td>&#x26A0;&#xFE0F; Partial</td></tr>
+    <tr><td>4</td><td><strong>Partition-by-partition export</strong></td><td>Very large tables, resume point</td><td>&#x2705; (concat manually)</td><td>2-3x faster</td><td>&#x2705; Checkpoint</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<!-- ===== SOLUTION 1: Wildcard ===== -->
+<section>
+<div class="strategy-card">
+  <div class="snum">SOLUTION 1 &#x2022; RECOMMENDED</div>
+  <div class="stitle">&#x1F3AF; Wildcard Export + gsutil compose</div>
+  <div class="sdesc">The single most impactful change. Instead of exporting to one file, tell BQ to write multiple files using a wildcard pattern. BQ splits the data across parallel workers, each writing its own 1GB chunk. Then merge them locally or in GCS.</div>
+  <div class="smeta">
+    <span class="strategy-tag green">&#x2705; 5-20x speedup</span>
+    <span class="strategy-tag green">&#x2705; No timeout</span>
+    <span class="strategy-tag gold">&#x26A0;&#xFE0F; Need compose step</span>
+    <span class="strategy-tag green">&#x2705; Disconnect safe</span>
+  </div>
+
+  <h4>Python Code</h4>
+  <div class="code-wrap">
+  <button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button>
+  <div class="code-block"><span class="cm"># === STEP 1: Export with wildcard ===</span>
+<span class="kw">from</span> google.cloud <span class="kw">import</span> bigquery
+
+client = bigquery.Client()
+
+table_ref = <span class="str">"my-project.my_dataset.my_table"</span>
+
+<span class="cm"># KEY CHANGE: Use wildcard in the filename</span>
+<span class="cm"># BQ auto-splits into ~1GB files: output-000000000000.csv, etc.</span>
+destination = <span class="str">"gs://my-bucket/exports/output-*.csv"</span>
+
+extract_job = client.extract_table(
+    table_ref,
+    destination,
+    job_config=bigquery.ExtractJobConfig(
+        destination_format=bigquery.DestinationFormat.CSV,
+        print_header=<span class="kw">True</span>
+    )
+)
+extract_job.result()  <span class="cm"># Returns in minutes, not hours!</span>
+<span class="kw">print</span>(<span class="str">f"Exported {extract_job.output_rows} rows"</span>)</div></div>
+
+  <div class="code-annotation">BQ splits the data across distributed workers — each worker writes its own chunk. A 50GB table generates ~10-15 files, each complete with headers.</div>
+
+  <h4>Step 2: Merge with gsutil compose (if you NEED one file)</h4>
+  <div class="code-wrap">
+  <button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button>
+  <div class="code-block"><span class="cm"># List the generated files</span>
+gsutil ls gs://my-bucket/exports/output-*.csv
+
+<span class="cm"># Create a manifest file and compose</span>
+<span class="cm"># Note: gsutil compose max 32 components at a time</span>
+gsutil compose \
+  gs://my-bucket/exports/output-000000000000.csv \
+  gs://my-bucket/exports/output-000000000001.csv \
+  ...
+  gs://my-bucket/exports/output-merged.csv
+
+<span class="cm"># Or use a script to auto-generate the command</span>
+<span class="kw">python3</span> -c <span class="str">"""
+import subprocess
+files = subprocess.check_output(
+    ['gsutil','ls','gs://my-bucket/exports/output-*.csv']
+).decode().strip().split('\n')
+parts = ' '.join(files)
+subprocess.run(f'gsutil compose {parts} gs://my-bucket/exports/merged.csv', shell=True)
+print('Composed successfully')
+"""</span></div></div>
+
+  <div class="highlight-box">
+    <div class="label">Pitfall: gsutil compose has a 32-component limit</div>
+    If you have &gt;32 files, compose in batches: merge 32 at a time into intermediate files, then merge those intermediates. Or download locally and use <code>cat</code> (Unix) to concatenate CSV files (skip headers on all but first).
+  </div>
+</div>
+</section>
+
+<!-- ===== SOLUTION 2: EXPORT DATA ===== -->
+<section>
+<div class="strategy-card">
+  <div class="snum">SOLUTION 2</div>
+  <div class="stitle">&#x1F4CB; EXPORT DATA Statement (SQL-based)</div>
+  <div class="sdesc">If you prefer writing SQL over Python API calls, use the <code>EXPORT DATA</code> DDL statement. This runs server-side and handles partitioning elegantly with a <code>WHERE _PARTITIONTIME</code> filter.</div>
+  <div class="smeta">
+    <span class="strategy-tag green">&#x2705; Self-contained SQL</span>
+    <span class="strategy-tag green">&#x2705; Partition filter built-in</span>
+    <span class="strategy-tag gold">&#x26A0;&#xFE0F; Requires wildcard URI</span>
+    <span class="strategy-tag green">&#x2705; Disconnect safe</span>
+  </div>
+
+  <h4>Basic Export (Full Table)</h4>
+  <div class="code-wrap">
+  <button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button>
+  <div class="code-block"><span class="cm">-- Export entire table to wildcard CSV files</span>
+<span class="kw">EXPORT DATA</span> <span class="kw">OPTIONS</span> (
+  uri         = <span class="str">'gs://my-bucket/exports/data-*.csv'</span>,
+  format      = <span class="str">'CSV'</span>,
+  overwrite   = <span class="kw">TRUE</span>,
+  header      = <span class="kw">TRUE</span>
+) <span class="kw">AS</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="fn">`my-project.my_dataset.my_table`</span>;</div></div>
+
+  <h4>Partition-Specific Export (One Day)</h4>
+  <div class="code-wrap">
+  <button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button>
+  <div class="code-block"><span class="cm">-- Export only one day's partition</span>
+<span class="kw">EXPORT DATA</span> <span class="kw">OPTIONS</span> (
+  uri         = <span class="str">'gs://my-bucket/exports/20240115-*.csv'</span>,
+  format      = <span class="str">'CSV'</span>,
+  overwrite   = <span class="kw">TRUE</span>,
+  header      = <span class="kw">TRUE</span>
+) <span class="kw">AS</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="fn">`my-project.my_dataset.my_table`</span>
+<span class="kw">WHERE</span> _PARTITIONTIME = <span class="fn">TIMESTAMP</span>(<span class="str">"2024-01-15"</span>);</div></div>
+
+  <div class="code-annotation">The <code>EXPORT DATA</code> statement runs entirely server-side. Your client can disconnect — the job continues on BQ. To check status, query <code>INFORMATION_SCHEMA.JOBS_BY_USER</code> later.</div>
+</div>
+</section>
+
+<!-- ===== SOLUTION 3: Resumable ===== -->
+<section>
+<div class="strategy-card">
+  <div class="snum">SOLUTION 3</div>
+  <div class="stitle">&#x1F504; Resumable Client — Save Job ID, Resume Anywhere</div>
+  <div class="sdesc">If you truly need a direct download (no GCS intermediate) or can't use compose, make your export resilient to disconnection. The trick: assign your own job ID, save it, and rebuild the client from another machine.</div>
+  <div class="smeta">
+    <span class="strategy-tag gold">&#x26A0;&#xFE0F; No speedup</span>
+    <span class="strategy-tag green">&#x2705; Survives disconnect</span>
+    <span class="strategy-tag gold">&#x26A0;&#xFE0F; Single CSV limit still applies</span>
+  </div>
+
+  <h4>Export with Custom Job ID</h4>
+  <div class="code-wrap">
+  <button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button>
+  <div class="code-block"><span class="kw">from</span> google.cloud <span class="kw">import</span> bigquery
+<span class="kw">import</span> json
+
+client = bigquery.Client()
+table_ref = <span class="str">"my-project.my_dataset.my_table"</span>
+destination = <span class="str">"gs://my-bucket/exports/output.csv"</span>
+
+<span class="cm"># Assign a custom job ID so we can reference it later</span>
+job_id = <span class="str">"export_20240115_v1"</span>
+job_config = bigquery.ExtractJobConfig()
+job = client.extract_table(
+    table_ref,
+    destination,
+    job_id=job_id,
+    job_config=job_config
+)
+
+<span class="cm"># Save job info BEFORE waiting</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"bq_export_checkpoint.json"</span>, <span class="str">"w"</span>) <span class="kw">as</span> f:
+    json.dump({<span class="str">"project"</span>: client.project,
+               <span class="str">"job_id"</span>: job_id,
+               <span class="str">"location"</span>: <span class="str">"US"</span>}, f)
+
+<span class="cm"># Try to wait — if disconnect happens, run resume script</span>
+<span class="kw">try</span>:
+    job.result(timeout=600)  <span class="cm"># 10 min timeout</span>
+    <span class="kw">print</span>(<span class="str">"Export completed"</span>)
+<span class="kw">except</span> Exception <span class="kw">as</span> e:
+    <span class="kw">print</span>(<span class="str">f"Connection lost: {e}"</span>)
+    <span class="kw">print</span>(<span class="str">"Run resume script on another machine"</span>)</div></div>
+
+  <h4>Resume Script (Run from another machine)</h4>
+  <div class="code-wrap">
+  <button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button>
+  <div class="code-block"><span class="cm"># resume_export.py — Run on cloud shell or another VM</span>
+<span class="kw">import</span> json
+<span class="kw">from</span> google.cloud <span class="kw">import</span> bigquery
+
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"bq_export_checkpoint.json"</span>) <span class="kw">as</span> f:
+    checkpoint = json.load(f)
+
+client = bigquery.Client(project=checkpoint[<span class="str">"project"</span>])
+
+<span class="cm"># Fetch the existing job by ID</span>
+job = client.get_job(
+    job_id=checkpoint[<span class="str">"job_id"</span>],
+    location=checkpoint[<span class="str">"location"</span>]
+)
+
+<span class="kw">if</span> job.state == <span class="str">"DONE"</span>:
+    <span class="kw">print</span>(<span class="str">"Job already finished!"</span>)
+    <span class="kw">print</span>(<span class="str">f"Destination: {job.destination_uris}"</span>)
+<span class="kw">elif</span> job.state == <span class="str">"RUNNING"</span>:
+    <span class="kw">print</span>(<span class="str">"Job still running, waiting..."</span>)
+    job.result()  <span class="cm"># Resume polling</span>
+    <span class="kw">print</span>(<span class="str">"Done!"</span>)
+<span class="kw">else</span>:
+    <span class="kw">print</span>(<span class="str">f"Job state: {job.state}"</span>)</div></div>
+
+  <div class="highlight-box">
+    <div class="label">Key Insight: BQ Jobs have a 7-day lifetime</div>
+    Even if your client disconnects, the BQ job continues running server-side for up to 7 days (or until completion). You can always retrieve it with <code>client.get_job(job_id)</code> from any machine with valid credentials.
+  </div>
+</div>
+</section>
+
+<!-- ===== SOLUTION 4: Partition Iteration ===== -->
+<section>
+<div class="strategy-card">
+  <div class="snum">SOLUTION 4</div>
+  <div class="stitle">&#x1F4C5; Partition-by-Partition Export</div>
+  <div class="sdesc">For partitioned tables (your use case), export one partition at a time. Each partition is small enough to finish in minutes. If one fails, you only redo that day. Concatenate all files at the end.</div>
+  <div class="smeta">
+    <span class="strategy-tag green">&#x2705; Built-in checkpoint</span>
+    <span class="strategy-tag green">&#x2705; Very fast per partition</span>
+    <span class="strategy-tag gold">&#x26A0;&#xFE0F; Many files to merge</span>
+    <span class="strategy-tag green">&#x2705; Disconnect = resume from last partition</span>
+  </div>
+
+  <h4>Python Code</h4>
+  <div class="code-wrap">
+  <button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button>
+  <div class="code-block"><span class="kw">from</span> google.cloud <span class="kw">import</span> bigquery
+<span class="kw">from</span> datetime <span class="kw">import</span> date, timedelta
+<span class="kw">import</span> json, os
+
+client = bigquery.Client()
+project = <span class="str">"my-project"</span>
+dataset = <span class="str">"my_dataset"</span>
+table = <span class="str">"my_table"</span>
+
+<span class="cm"># Assume today's date as reference</span>
+start_date = date(<span class="num">2024</span>, <span class="num">1</span>, <span class="num">1</span>)
+end_date = date(<span class="num">2024</span>, <span class="num">1</span>, <span class="num">31</span>)
+checkpoint_file = <span class="str">"export_checkpoint.json"</span>
+
+<span class="cm"># Load checkpoint to resume from last failure</span>
+completed = set()
+<span class="kw">if</span> os.path.exists(checkpoint_file):
+    <span class="kw">with</span> <span class="fn">open</span>(checkpoint_file) <span class="kw">as</span> f:
+        completed = set(json.load(f).get(<span class="str">"completed"</span>, []))
+
+current = start_date
+<span class="kw">while</span> current &lt;= end_date:
+    day_str = current.strftime(<span class="str">"%Y%m%d"</span>)
+    <span class="kw">if</span> day_str <span class="kw">in</span> completed:
+        current += timedelta(days=<span class="num">1</span>)
+        <span class="kw">continue</span>
+
+    <span class="cm"># Export one partition: table_name$YYYYMMDD</span>
+    table_ref = <span class="str">f"{project}.{dataset}.{table}${day_str}"</span>
+    dest = <span class="str">f"gs://my-bucket/exports/{day_str}.csv"</span>
+
+    <span class="kw">print</span>(<span class="str">f"Exporting {day_str}..."</span>)
+    job = client.extract_table(table_ref, dest)
+    job.result()  <span class="cm"># Each partition is fast — 2-5 min</span>
+    <span class="kw">print</span>(<span class="str">f"  Done: {job.output_rows} rows"</span>)
+
+    <span class="cm"># Save checkpoint after each partition</span>
+    completed.add(day_str)
+    <span class="kw">with</span> <span class="fn">open</span>(checkpoint_file, <span class="str">"w"</span>) <span class="kw">as</span> f:
+        json.dump({<span class="str">"completed"</span>: <span class="fn">sorted</span>(completed)}, f)
+
+    current += timedelta(days=<span class="num">1</span>)
+
+<span class="kw">print</span>(<span class="str">"All partitions exported!"</span>)</div></div>
+
+  <div class="code-annotation">Each partition is a separate small job. If disconnect happens at partition 15/31, run again and it starts from partition 16. The checkpoint file tracks progress.</div>
+</div>
+</section>
+
+<!-- ===== COMPARISON TABLE ===== -->
+<section>
+<h2>Which <span class="underline">One to Pick</span>?</h2>
+<div class="h2-sub">Decision tree for your exact situation</div>
+
+<div class="compare-table-wrap">
+<table>
+  <thead><tr><th>Your Scenario</th><th>Best Solution</th><th>Why</th></tr></thead>
+  <tbody>
+    <tr><td>Table &lt; 10GB, one-time export</td><td><strong>Solution 1: Wildcard</strong></td><td>Minutes, not hours. Compose at the end.</td></tr>
+    <tr><td>Table &gt; 100GB, recurring exports</td><td><strong>Solution 1 + gsutil compose</strong></td><td>Automate with a script. Never worry about timeouts.</td></tr>
+    <tr><td>Need exactly one CSV file, no compose</td><td><strong>Solution 3: Resumable</strong></td><td>May still hit 1GB limit. Use for small tables.</td></tr>
+    <tr><td>Exporting month of partitions, each day small</td><td><strong>Solution 4: Partition iteration</strong></td><td>Checkpoint built-in, resume from any day.</td></tr>
+    <tr><td>Want pure SQL, no Python at all</td><td><strong>Solution 2: EXPORT DATA</strong></td><td>Run from BigQuery console or bq CLI.</td></tr>
+    <tr><td>Workstation frequently disconnects</td><td><strong>Solution 1 + Solution 3 combined</strong></td><td>Wildcard for speed + saved job_id for resume.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<!-- ===== COMMON MISTAKES ===== -->
+<section>
+<h2>Common <span class="underline">Mistakes</span></h2>
+<div class="h2-sub">What I've seen fail, and how to fix</div>
+
+<div class="compare-table-wrap">
+<table>
+  <thead><tr><th>#</th><th>Symptom</th><th>Root Cause</th><th>Fix</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Job runs for hours, never finishes</td><td>Single CSV export on large table exceeds 1GB limit</td><td>Use wildcard URI: <code>gs://bucket/data-*.csv</code></td></tr>
+    <tr><td>2</td><td>Client crashes after 30 min, no data</td><td>No checkpoint, no saved job ID, no resume</td><td>Save job_id to file before <code>job.result()</code></td></tr>
+    <tr><td>3</td><td>"Shard configuration is invalid" error</td><td>Single CSV for table &gt;1GB, BQ refuses</td><td>Use wildcard or set <code>destination_format</code> to AVRO</td></tr>
+    <tr><td>4</td><td>Export finishes but file is empty</td><td>Wrong table reference or partition decorator</td><td>Verify with <code>SELECT COUNT(*) FROM table$20240115</code></td></tr>
+    <tr><td>5</td><td>gsutil compose says "too many components"</td><td>&gt;32 wildcard files from large export</td><td>Compose in batches of 32, then compose results</td></tr>
+    <tr><td>6</td><td>Exported CSV has duplicate headers</td><td>Header=true on each wildcard file, cat without skip</td><td>Use <code>gsutil compose</code> (handles headers) or <code>tail -n+2</code></td></tr>
+    <tr><td>7</td><td>Export is slow even with wildcard</td><td>Table is clustered but export doesn't use clustering</td><td>Add <code>WHERE</code> filter to reduce scan, or export partition-level</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<!-- ===== INTERVIEW PREP ===== -->
+<section>
+<h2>Interview <span class="underline">Prep</span></h2>
+<div class="h2-sub">Three levels — pick your audience</div>
+
+<div class="card">
+  <div class="card-label">30-Second Answer</div>
+  <p>"I optimized BigQuery exports by replacing single-CSV destinations with wildcard patterns. For a partitioned table that previously took 1+ hours and failed on disconnect, the wildcard approach reduced export time to under 5 minutes by letting BQ write in parallel. For the single-CSV requirement, I post-processed with <code>gsutil compose</code> to merge the parts."</p>
+</div>
+
+<div class="card green">
+  <div class="card-label">90-Second STAR Answer</div>
+  <p><strong>Situation:</strong> Needed to export 50GB of partitioned daily data from BigQuery to a single CSV for a downstream ETL system. Partitions ranged across 90 days.</p>
+  <p><strong>Task:</strong> The Python API export was taking &gt;1 hour, and workstation disconnects killed the job midway, requiring a full restart.</p>
+  <p><strong>Action:</strong> Changed the export destination from <code>output.csv</code> to <code>output-*.csv</code>, letting BQ split the work across its distributed workers. Added a second step using <code>gsutil compose</code> to merge the parts. Also saved the job ID to a checkpoint file so if the client disconnected, we could resume polling from Cloud Shell.</p>
+  <p><strong>Result:</strong> Export time dropped from 75 minutes to 6 minutes. Zero failed exports since the change. The compose step added only 30 seconds.</p>
+</div>
+
+<div class="card blue">
+  <div class="card-label">3-Minute Technical Walkthrough</div>
+  <p><strong>Architecture:</strong> BigQuery's export API has an important design constraint — single CSV destinations can receive at most 1GB of compressed data because the export must route through a single writer node. For distributed systems, this creates a bottleneck where all workers serialize their output to one stream.</p>
+  <p><strong>Parallel approach:</strong> By using a wildcard URI (e.g. <code>gs://bucket/data-*.csv</code>), each BQ worker writes its own shard in parallel. BQ automatically determines the number of shards based on data size. This reduced our 50GB export from 75 min to 6 min.</p>
+  <p><strong>Merging shards:</strong> <code>gsutil compose</code> concatenates GCS objects without downloading. But there's a 32-component limit — for larger exports, I built a recursive compose script that merges in batches of 32, then merges the intermediates.</p>
+  <p><strong>Resilience layer:</strong> The custom job ID pattern lets us detach the client from the job. Even if the laptop goes to sleep, the BQ job keeps running. A Cloud Shell script can pick it up with <code>client.get_job()</code>. The job state persists for 7 days.</p>
+  <p><strong>Partition strategy:</strong> For the daily partitioned case specifically, iterating partition-by-partition adds built-in checkpointing — each day is a separate job, so a failure on day 20 only restarts from day 20, not day 1.</p>
+</div>
+</section>
+
+<!-- ===== QUIZ ===== -->
+<section>
+<h2>Mastery <span class="underline">Quiz</span></h2>
+<div class="h2-sub">Test your understanding before the interview</div>
+
+<div class="score-bar">
+  <span class="score-stat">Score: <strong id="scoreCorrect">0</strong>/<strong id="scoreTotal">0</strong></span>
+  <span class="score-stat">Accuracy: <strong id="scorePct">0%</strong></span>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="scoreBar" style="width:0%">
+      <span class="progress-bar-text" id="scoreBarText" style="font-size:9px;padding-left:4px;color:var(--paper);">0%</span>
+    </div>
+  </div>
+  <button class="btn btn-sm btn-ghost" onclick="resetQuiz()">Reset</button>
+</div>
+
+<div class="filter-row">
+  <select id="quizCatFilter" onchange="filterQuiz()">
+    <option value="">All Categories</option>
+    <option value="BigQuery">BigQuery</option>
+    <option value="Python">Python</option>
+    <option value="GCP">GCP</option>
+  </select>
+  <select id="quizStatusFilter" onchange="filterQuiz()">
+    <option value="">All Questions</option>
+    <option value="unanswered">Unanswered</option>
+    <option value="correct">Correct</option>
+    <option value="wrong">Wrong</option>
+  </select>
+</div>
+
+<div id="quizContainer"></div>
+</section>
+
+<!-- ===== SIGN OFF ===== -->
+<section>
+<div class="card" style="border:2px solid var(--accent);background:var(--paper);">
+  <div class="card-label">Subba Rao Anna — Final Word</div>
+  <p><strong>TL;DR:</strong> Single CSV export from BQ is slow because you're forcing a distributed system to act single-threaded.</p>
+  <p style="margin-top:8px;"><strong>The fix is simple:</strong><br>
+  &#x1F449; Use <code>output-*.csv</code> instead of <code>output.csv</code> (wildcard pattern)<br>
+  &#x1F449; Export drops from hours to minutes<br>
+  &#x1F449; Merge with <code>gsutil compose</code> if you absolutely need one file<br>
+  &#x1F449; Save job ID for resume capability</p>
+  <p style="margin-top:8px;">Baagundi babu! Tomorrow — <strong>how to optimize BQ query costs with clustering &amp; partitioning</strong> ki ready ga undo!</p>
+  <p style="font-family:var(--mono);font-size:10px;color:var(--ink-dim);margin-top:10px;">BigQuery Export Guide &#x2022; 4 Solutions &#x2022; 7 Common Mistakes &#x2022; Interview Ready</p>
+</div>
+</section>
+
+</main>
+
+<script>
+// === Dark Toggle ===
+document.getElementById('darkToggle').addEventListener('click', function(){
+  var d = document.documentElement;
+  if (d.getAttribute('data-theme') === 'dark') { d.removeAttribute('data-theme'); }
+  else { d.setAttribute('data-theme', 'dark'); }
+});
+
+// === Section Scroll Animation ===
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) e.target.classList.add('in');
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('section').forEach(function(el) { observer.observe(el); });
+
+// === Copy Code ===
+function copyCode(btn) {
+  var wrap = btn.parentElement;
+  var code = wrap.querySelector('.code-block');
+  var text = code.textContent || code.innerText;
+  navigator.clipboard.writeText(text).catch(function(){});
+  btn.textContent = '\u2705';
+  setTimeout(function(){ btn.textContent = '\uD83D\uDCCB'; }, 1500);
+}
+
+// === Quiz ===
+var LETTERS = ['A','B','C','D'];
+var QUIZ = [
+  { q: 'What is the maximum compressed file size for a single CSV export from BigQuery?',
+    o: ['100 MB', '500 MB', '1 GB', '10 GB'], c: 2, cat: 'BigQuery' },
+  { q: 'What character should you use in the destination URI to enable parallel export?',
+    o: ['? (question mark)', '* (wildcard)', '# (hash)', '@ (at sign)'], c: 1, cat: 'BigQuery' },
+  { q: 'What is the gsutil compose command\'s file limit per invocation?',
+    o: ['16 components', '32 components', '64 components', 'No limit'], c: 1, cat: 'GCP' },
+  { q: 'What happens to a BQ export job when your Python client disconnects mid-way?',
+    o: ['The job is cancelled immediately', 'The job continues running server-side', 'The job pauses until reconnection', 'The job deletes the partial output'], c: 1, cat: 'BigQuery' },
+  { q: 'How many days does a BigQuery job\'s metadata persist after completion?',
+    o: ['1 day', '7 days', '30 days', '90 days'], c: 1, cat: 'BigQuery' },
+  { q: 'Which WHERE clause field do you use to filter a partitioned table export to a specific day?',
+    o: ['_PARTITIONTIME', '_PARTITION_DATE', 'DATE(column)', 'PARTITION_BY'], c: 0, cat: 'BigQuery' },
+  { q: 'What Python exception does client.extract_table().result() raise on disconnect?',
+    o: ['ValueError', 'ConnectionError or TimeoutError', 'JobFailureException', 'BrokenPipeError'], c: 1, cat: 'Python' },
+];
+
+var answers = {};
+var scoreData = loadScoreData();
+var L = LETTERS;
+
+function loadScoreData() {
+  try { var raw = localStorage.getItem('bq_export_stats'); if (raw) return JSON.parse(raw); } catch(e) {}
+  return { total: 0, correct: 0, currentStreak: 0, bestStreak: 0 };
+}
+
+function saveScoreData() {
+  try { localStorage.setItem('bq_export_stats', JSON.stringify(scoreData)); } catch(e) {}
+}
+
+function selectOption(idx, oi) {
+  if (answers[idx] !== undefined) return;
+  answers[idx] = oi;
+  localStorage.setItem('bq_export_answers', JSON.stringify(answers));
+  var q = QUIZ[idx];
+  var isCorrect = (oi === q.c);
+  scoreData.total = (scoreData.total || 0) + 1;
+  if (isCorrect) {
+    scoreData.correct = (scoreData.correct || 0) + 1;
+    scoreData.currentStreak = (scoreData.currentStreak || 0) + 1;
+    if (scoreData.currentStreak > (scoreData.bestStreak || 0))
+      scoreData.bestStreak = scoreData.currentStreak;
+  } else {
+    scoreData.currentStreak = 0;
+  }
+  saveScoreData();
+  renderQuiz();
+}
+
+function clearAnswer(idx) {
+  delete answers[idx];
+  localStorage.setItem('bq_export_answers', JSON.stringify(answers));
+  renderQuiz();
+}
+
+function filterQuiz() {
+  renderQuiz();
+}
+
+function renderQuiz() {
+  var container = document.getElementById('quizContainer');
+  var catFilter = document.getElementById('quizCatFilter').value;
+  var statusFilter = document.getElementById('quizStatusFilter').value;
+
+  var filtered = [];
+  QUIZ.forEach(function(q, i) {
+    if (catFilter && q.cat !== catFilter) return;
+    if (statusFilter === 'unanswered' && answers[i] !== undefined) return;
+    if (statusFilter === 'correct' && (answers[i] === undefined || answers[i] !== q.c)) return;
+    if (statusFilter === 'wrong' && (answers[i] === undefined || answers[i] === q.c)) return;
+    filtered.push(i);
+  });
+
+  var html = '';
+  filtered.forEach(function(idx) {
+    var q = QUIZ[idx];
+    var ans = answers[idx];
+    var hasAns = ans !== undefined;
+    html += '<div class="q-card">';
+    html += '<div class="q-header"><span class="q-num">Q' + (idx+1) + '</span><span class="cat-badge cat-bigquery">' + q.cat + '</span></div>';
+    html += '<div class="q-text">' + q.q + '</div>';
+    html += '<div class="opts-grid">';
+    q.o.forEach(function(opt, oi) {
+      var cls = 'opt-row';
+      if (hasAns) cls += ' disabled';
+      if (hasAns && oi === q.c) cls += ' correct';
+      if (hasAns && oi === ans && oi !== q.c) cls += ' wrong';
+      var checked = (ans === oi) ? 'checked' : '';
+      html += '<div class="' + cls + '" onclick="selectOption(' + idx + ',' + oi + ')">';
+      html += '<input type="radio" name="q_' + idx + '" value="' + oi + '" ' + checked + '>';
+      html += '<span class="opt-letter">' + L[oi] + '</span>';
+      html += '<span class="opt-text">' + opt + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '<div class="q-footer">';
+    if (hasAns) {
+      var correct = (ans === q.c);
+      html += '<span class="result">' + (correct ? '&#x2705; Correct' : '&#x274C; Wrong — Answer: ' + L[q.c]) + '</span>';
+      html += '<button class="btn btn-sm btn-ghost" onclick="clearAnswer(' + idx + ')">Retry</button>';
+    }
+    html += '<span style="font-size:10px;color:var(--ink-faint);flex:1;text-align:right;">' + q.cat + '</span>';
+    html += '</div></div>';
+  });
+
+  if (filtered.length === 0) {
+    html = '<div class="card"><p style="text-align:center;color:var(--ink-dim);">No questions match your filters.</p></div>';
+  }
+
+  container.innerHTML = html;
+
+  // Update score bar
+  var total = Object.keys(answers).length;
+  var correctCount = 0;
+  for (var k in answers) {
+    if (answers[k] === QUIZ[k].c) correctCount++;
+  }
+  var pct = total > 0 ? Math.round(correctCount/total*100) : 0;
+  document.getElementById('scoreCorrect').textContent = correctCount;
+  document.getElementById('scoreTotal').textContent = total;
+  document.getElementById('scorePct').textContent = pct + '%';
+  document.getElementById('scoreBar').style.width = pct + '%';
+  document.getElementById('scoreBarText').textContent = pct + '%';
+}
+
+function resetQuiz() {
+  answers = {};
+  localStorage.removeItem('bq_export_answers');
+  scoreData = { total: 0, correct: 0, currentStreak: 0, bestStreak: 0 };
+  saveScoreData();
+  renderQuiz();
+}
+
+// Load saved answers
+(function() {
+  try { var saved = localStorage.getItem('bq_export_answers'); if (saved) answers = JSON.parse(saved); } catch(e) {}
+  renderQuiz();
+})();
+</script>
+
+</body>
+</html>

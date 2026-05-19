@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Telegram Quiz — Krishna Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#17212b;--surface:#242f3d;--bubble-in:#1d2d3e;--bubble-out:#2b5278;--accent:#5eaeff;--text:#fff;--text2:#8a9bb0;--text3:#5a6d80;--green:#4caf93;--red:#e57373;--gold:#ffd54f;--border:rgba(255,255,255,.05);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px;position:relative;overflow-x:hidden;}
+
+/* Confetti canvas */
+#confettiCanvas{position:fixed;inset:0;pointer-events:none;z-index:9999;}
+
+/* Floating reaction */
+.reaction{position:fixed;font-size:30px;pointer-events:none;z-index:9998;animation:floatUp 1.2s ease forwards;}
+@keyframes floatUp{0%{transform:translateY(0) scale(0);opacity:1;}50%{transform:translateY(-70px) scale(1.2);opacity:1;}100%{transform:translateY(-140px) scale(.8);opacity:0;}}
+
+/* ── COMPACT QUIZ ── */
+.tg-wrap{width:100%;max-width:340px;border-radius:10px;overflow:hidden;background:var(--surface);box-shadow:0 2px 20px rgba(0,0,0,.4);}
+
+/* Bot bar */
+.tg-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);}
+.tg-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#4c8fb5,#2d6a9f);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.tg-bar-info{flex:1;line-height:1.2;}
+.tg-bar-name{font-size:12px;font-weight:600;}
+.tg-bar-status{font-size:9px;color:var(--text2);}
+.tg-bar .dot{width:6px;height:6px;border-radius:50%;background:#5cba47;display:inline-block;margin-right:3px;}
+
+/* Score bar */
+.tg-sbar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:var(--bg);border-bottom:1px solid var(--border);}
+.tg-s pills{display:flex;gap:6px;}
+.tg-spill{display:flex;align-items:center;gap:3px;padding:3px 8px;border-radius:100px;font-size:10px;font-weight:600;}
+.tg-spill.q{background:rgba(94,174,255,.15);color:var(--accent);}
+.tg-spill.c{background:rgba(76,175,147,.15);color:var(--green);}
+.tg-spill.w{background:rgba(229,115,115,.15);color:var(--red);}
+.tg-sprog{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2);}
+.tg-strack{width:60px;height:3px;background:var(--surface);border-radius:2px;overflow:hidden;}
+.tg-sfill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease;}
+
+/* Messages */
+.tg-msgs{padding:8px 10px 2px;display:flex;flex-direction:column;gap:4px;max-height:320px;overflow-y:auto;background:var(--bg);}
+.tg-msgs::-webkit-scrollbar{width:3px;}
+.tg-msgs::-webkit-scrollbar-thumb{background:var(--surface);border-radius:2px;}
+
+.tb{max-width:88%;padding:7px 10px;font-size:12.5px;line-height:1.45;animation:msgIn .25s ease-out forwards;opacity:0;border-radius:12px;}
+.tb.bot{align-self:flex-start;background:var(--bubble-in);border-radius:12px 12px 12px 0;}
+.tb.user{align-self:flex-end;background:var(--bubble-out);border-radius:12px 12px 0 12px;}
+.tb .time{font-size:9px;color:var(--text3);margin-top:3px;text-align:right;}
+.tb.user .time{color:rgba(255,255,255,.4);}
+.tb code{background:rgba(0,0,0,.3);padding:1px 4px;border-radius:3px;font-size:11px;}
+
+/* Typing */
+.typing{display:flex;align-items:center;gap:6px;margin-bottom:4px;opacity:0;transition:opacity .3s;}
+.typing.show{opacity:1;}
+.typing .tind{padding:8px 12px;background:var(--bubble-in);border-radius:12px 12px 12px 0;display:flex;gap:3px;}
+.typing .dot{width:5px;height:5px;border-radius:50%;background:var(--text3);animation:tyDot 1.2s ease-in-out infinite;}
+.typing .dot:nth-child(2){animation-delay:.2s;}
+.typing .dot:nth-child(3){animation-delay:.4s;}
+@keyframes tyDot{0%,80%,100%{transform:scale(.8);opacity:.4;}40%{transform:scale(1.1);opacity:1;}}
+
+/* Quiz card */
+.qcard{background:var(--bubble-in);border-radius:12px 12px 12px 0;overflow:hidden;max-width:300px;box-shadow:0 2px 12px rgba(0,0,0,.2);animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both;}
+.qcard-top{padding:10px 12px 6px;display:flex;align-items:flex-start;gap:8px;}
+.qcard-icon{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#5eaeff,#2d6a9f);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.qcard-meta{flex:1;}
+.qcard-channel{font-size:12px;font-weight:600;color:var(--accent);}
+.qcard-topic{font-size:10px;color:var(--text2);margin-top:1px;}
+.qcard-q{padding:4px 12px 10px;font-size:13px;font-weight:600;line-height:1.5;}
+.qcard-opts{display:flex;flex-direction:column;gap:0;}
+.qcard-opt{padding:8px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:background .12s;border-top:1px solid rgba(255,255,255,.04);position:relative;overflow:hidden;user-select:none;}
+.qcard-opt:hover{background:rgba(255,255,255,.04);}
+.qcard-opt:active{background:rgba(255,255,255,.08);}
+.qcard-opt.voted{pointer-events:none;cursor:default;}
+.qcard-opt .circle{width:18px;height:18px;border-radius:50%;border:2px solid var(--text3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s;font-size:10px;font-weight:700;}
+.qcard-opt .text{font-size:12px;flex:1;line-height:1.4;z-index:1;}
+.qcard-opt .pct{font-size:11px;font-weight:600;color:var(--text2);min-width:28px;text-align:right;z-index:1;opacity:0;transition:opacity .3s;}
+.qcard-opt.voted .pct{opacity:1;}
+.qcard-opt .vbar{position:absolute;left:0;top:0;bottom:0;width:0;transition:width .6s cubic-bezier(.16,1,.3,1);}
+.qcard-opt.correct .vbar{background:rgba(76,175,147,.2);}
+.qcard-opt.wrong .vbar{background:rgba(229,115,115,.15);}
+.qcard-opt.reveal .vbar{background:rgba(76,175,147,.15);}
+.qcard-opt.correct .circle{border-color:var(--green);background:var(--green);color:#fff;}
+.qcard-opt.wrong .circle{border-color:var(--red);background:var(--red);color:#fff;}
+.qcard-opt.reveal .circle{border-color:var(--green);background:transparent;color:var(--green);}
+.qcard-opt .check{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:12px;opacity:0;transition:opacity .15s;}
+.qcard-foot{padding:6px 12px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.04);}
+.qcard-votes{font-size:11px;color:var(--text2);}
+.qcard-badge{font-size:10px;color:var(--text3);padding:2px 8px;border-radius:100px;background:rgba(255,255,255,.06);}
+
+/* Explanation */
+.expl{padding:8px 0 2px;animation:expIn .3s ease-out forwards;opacity:0;}
+.expl .box{padding:8px 10px;border-radius:10px;font-size:11.5px;line-height:1.5;background:rgba(76,175,147,.08);border:1px solid rgba(76,175,147,.2);display:flex;gap:7px;align-items:flex-start;}
+.expl .box i{flex-shrink:0;margin-top:2px;}
+.expl .head{font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;}
+
+/* Result card */
+.res{background:var(--surface);border-radius:12px;padding:20px 16px;text-align:center;animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both;max-width:300px;}
+.res-emoji{font-size:40px;margin-bottom:8px;}
+.res-title{font-size:17px;font-weight:700;margin-bottom:4px;}
+.res-grade{display:inline-block;padding:4px 16px;border-radius:100px;font-size:12px;font-weight:700;letter-spacing:.05em;margin-bottom:10px;}
+.res-score{font-size:34px;font-weight:700;margin:8px 0;}
+.res-bars{display:flex;flex-direction:column;gap:8px;margin:12px 0;}
+.res-bar-row{display:flex;align-items:center;gap:8px;font-size:11px;}
+.res-bar-row .label{min-width:50px;text-align:right;font-weight:500;}
+.res-bar-row .track{flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.res-bar-row .fill{height:100%;border-radius:3px;transition:width 1s cubic-bezier(.16,1,.3,1);}
+.res-bar-row .val{min-width:20px;font-weight:600;}
+.res-msg{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:14px;}
+.res-btn{padding:10px 24px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;}
+.res-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(94,174,255,.3);}
+
+/* Next button */
+.tg-next-wrap{padding:6px 10px 8px;background:var(--bg);}
+.tg-next{width:100%;padding:10px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;display:none;align-items:center;justify-content:center;gap:6px;transition:all .15s;box-shadow:0 4px 16px rgba(94,174,255,.2);}
+.tg-next:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(94,174,255,.3);}
+.tg-next.show{display:flex;}
+
+@keyframes msgIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@keyframes popIn{0%{transform:scale(.85);opacity:0;}60%{transform:scale(1.04);}100%{transform:scale(1);opacity:1;}}
+@keyframes expIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+
+<canvas id="confettiCanvas"></canvas>
+
+<div class="tg-wrap" id="tgApp">
+  <div class="tg-bar">
+    <div class="tg-av">K</div>
+    <div class="tg-bar-info">
+      <div class="tg-bar-name">Krishna Prep Bot</div>
+      <div class="tg-bar-status"><span class="dot"></span>online · GCP Quiz</div>
+    </div>
+  </div>
+
+  <div class="tg-sbar">
+    <div style="display:flex;gap:6px;">
+      <span class="tg-spill q">📋 <span id="qNum">0</span>/10</span>
+      <span class="tg-spill c">✓ <span id="cNum">0</span></span>
+      <span class="tg-spill w">✗ <span id="wNum">0</span></span>
+    </div>
+    <div class="tg-sprog">
+      <div class="tg-strack"><div class="tg-sfill" id="sFill" style="width:0%"></div></div>
+      <span id="sPct">0%</span>
+    </div>
+  </div>
+
+  <div class="tg-msgs" id="tgMsgs"></div>
+  <div class="tg-next-wrap"><button class="tg-next" id="tgNext">Next →</button></div>
+</div>
+
+<script>
+var QUIZ = [
+  {q: 'A2A (Agent-to-Agent) Protocol primary purpose enti?', opts: ['OAuth2 authentication', 'Agents discover, call, collaborate with other agents', 'Model outputs compress cheyadam', 'Agent costs monitor cheyadam'], ans: 1, topic: 'ADK + A2A',
+   exp: 'A2A Protocol lets agents expose a capability card (name, skills, endpoint) so other agents can discover and delegate tasks. Like microservices but for AI agents — foundation of multi-agent orchestration in ADK.'},
+  {q: 'BigQuery Vector Search kosam Google recommend chese embedding model edi?', opts: ['text-embedding-gecko-001', 'text-bison@002', 'text-embedding-004', 'embedding-001 (PaLM2)'], ans: 2, topic: 'BigQuery Vector Search',
+   exp: 'text-embedding-004 is the latest — 768-dimensional dense embeddings with improved multilingual quality. Natively supported in BigQuery ML via GENERATE_EMBEDDING().'},
+  {q: 'Vertex AI RAG Engine lo document chunks store, retrieve chese component edi?', opts: ['Model Registry', 'Reasoning Engine', 'Corpus (Vector Store)', 'Pipeline Store'], ans: 2, topic: 'RAG Engine',
+   exp: 'A Corpus in RAG Engine is a managed vector store holding chunked documents with embeddings. Query time lo RAG Engine query ni embed chesi ANN search chestundi corpus lo.'},
+  {q: 'Gemini API lo "Grounding with Google Search" em chestundi?', opts: ['GPU acceleration enable', 'Outputs ni predefined templates ki restrict', 'Real-time web results connect chesi hallucination reduce', 'Model temperature 0 ki lock'], ans: 2, topic: 'Grounding',
+   exp: 'Grounding attaches real-time Google Search results as context to Gemini generation — like giving the model a live knowledge update. Critical for time-sensitive queries and factual accuracy.'},
+  {q: 'LangGraph advantage enti simple LangChain chain meeda?', opts: ['Faster inference', 'Built-in PDF parsing', 'Stateful, cyclical workflows with conditional branching via graph', 'Lower token cost'], ans: 2, topic: 'LangGraph',
+   exp: 'LangGraph models AI workflow as a directed graph with state. Nodes = processing steps, edges = transitions — and they can loop! Enables agentic patterns like reflection, retry-on-fail, multi-agent coordination.'},
+  {q: 'Cloud Run lo cold start latency prevent chese feature edi?', opts: ['CPU boost', 'Minimum instances', 'Startup CPU boost', 'Concurrency multiplier'], ans: 1, topic: 'Cloud Run',
+   exp: 'Setting --min-instances=1 keeps at least one container warm. Combined with startup CPU boost you get near-zero cold start P99. Critical for Gemini-backed APIs.'},
+  {q: 'Constitutional AI self-critique fine-tuning lo enduku use chestaru?', opts: ['Safety filters pass ayyetattu data generate', 'Model scores its own responses against principles, then revises', 'Automatic model deployment gating', 'LoRA adapters compress'], ans: 1, topic: 'Constitutional AI',
+   exp: 'Constitutional AI has the model score its response against principles (Helpful? Honest? Harmless?), then revise if it fails. Scalable alignment without human labelers for every example.'},
+  {q: 'Vertex AI SFT lo training dataset ki required format enti?', opts: ['Parquet with schema validation', 'CSV with input/output columns', 'JSONL with input_text and output_text fields', 'TFRecord format'], ans: 2, topic: 'Vertex AI SFT',
+   exp: 'Vertex AI SFT expects a JSONL file in GCS with each line: {"input_text": "...", "output_text": "..."}. input_text includes system message + user turn for instruction tuning.'},
+  {q: 'Vertex AI Memory Bank enduku use chestaru?', opts: ['Cheaper storage', 'Persistent user-level episodic memory that updates across sessions', 'Faster embedding generation', 'Image support'], ans: 1, topic: 'Memory Bank',
+   exp: 'Memory Bank maintains per-user memory store. Agent reads at session start, writes at session end — so it remembers past interactions. Standard RAG only retrieves from static corpus.'},
+  {q: 'Banking ETL → LLM pipeline lo Gemini enrichment mundu landing zone edi best?', opts: ['Cloud Spanner', 'Cloud Memorystore', 'BigQuery', 'Cloud Filestore'], ans: 2, topic: 'ETL → LLM',
+   exp: 'BigQuery is ideal staging ground — ETL writes cleaned data there, then BigQuery ML calls GENERATE_TEXT() with Gemini to enrich (categorize, flag anomalies, generate summaries) all within SQL. No data movement.'}
+];
+
+var cur = 0, correct = 0, wrong = 0, answered = false, nextBtn = document.getElementById('tgNext');
+var canvas = document.getElementById('confettiCanvas'), ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+window.addEventListener('resize', function(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
+var particles = [], confettiRunning = false;
+
+function launchConfetti(count){
+  var cols = ['#5eaeff','#4caf93','#ffd54f','#e57373','#a78bfa','#fb7185','#34d399'];
+  for(var i=0;i<count;i++){
+    particles.push({
+      x: Math.random()*canvas.width, y: -10,
+      w: Math.random()*8+4, h: Math.random()*4+2,
+      color: cols[Math.floor(Math.random()*cols.length)],
+      vx: (Math.random()-0.5)*4, vy: Math.random()*3+2,
+      rot: Math.random()*360, rotV: (Math.random()-0.5)*8, life: 1
+    });
+  }
+  if(!confettiRunning) animConfetti();
+}
+function animConfetti(){
+  confettiRunning = true;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles = particles.filter(function(p){return p.life>0;});
+  particles.forEach(function(p){
+    p.x+=p.vx; p.y+=p.vy; p.rot+=p.rotV; p.vy+=0.08; p.life-=0.008;
+    ctx.save();
+    ctx.translate(p.x,p.y);
+    ctx.rotate(p.rot*Math.PI/180);
+    ctx.globalAlpha = Math.max(0,p.life);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    ctx.restore();
+  });
+  if(particles.length>0) requestAnimationFrame(animConfetti);
+  else confettiRunning = false;
+}
+
+function showReaction(emoji, delay){
+  setTimeout(function(){
+    var el = document.createElement('div');
+    el.className = 'reaction';
+    el.textContent = emoji;
+    el.style.left = (Math.random()*40+30)+'vw';
+    el.style.bottom = '100px';
+    document.body.appendChild(el);
+    setTimeout(function(){el.remove();},1300);
+  },delay);
+}
+
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+
+function ts(){var d=new Date();return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);}
+
+function updateScore(){
+  document.getElementById('qNum').textContent = cur;
+  document.getElementById('cNum').textContent = correct;
+  document.getElementById('wNum').textContent = wrong;
+  var pct = Math.round(cur/QUIZ.length*100);
+  document.getElementById('sFill').style.width = pct+'%';
+  document.getElementById('sPct').textContent = pct+'%';
+}
+
+function addMsg(html,delay){
+  return new Promise(function(r){
+    setTimeout(function(){
+      var div = document.createElement('div');
+      div.innerHTML = html;
+      document.getElementById('tgMsgs').appendChild(div.firstElementChild);
+      document.getElementById('tgMsgs').scrollTop = document.getElementById('tgMsgs').scrollHeight;
+      r();
+    },delay);
+  });
+}
+
+function showTyping(){
+  var el = document.createElement('div');
+  el.className = 'typing';
+  el.id = 'typing';
+  el.innerHTML = '<div class="tind"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  document.getElementById('tgMsgs').appendChild(el);
+  setTimeout(function(){el.classList.add('show');},30);
+  document.getElementById('tgMsgs').scrollTop = document.getElementById('tgMsgs').scrollHeight;
+  return el;
+}
+function hideTyping(el){
+  el.classList.remove('show');
+  setTimeout(function(){el.remove();},300);
+}
+
+function buildQuizCard(idx){
+  var q = QUIZ[idx];
+  var opts = q.opts.map(function(o,i){
+    return '<div class="qcard-opt" id="opt-'+idx+'-'+i+'" onclick="pick('+idx+','+i+')">'+
+      '<div class="vbar" id="bar-'+idx+'-'+i+'"></div>'+
+      '<div class="circle" id="cir-'+idx+'-'+i+'">'+String.fromCharCode(65+i)+'</div>'+
+      '<div class="text">'+o+'</div>'+
+      '<div class="pct" id="pct-'+idx+'-'+i+'"></div></div>';
+  }).join('');
+  return '<div class="tb bot"><div class="qcard" id="qcard-'+idx+'">'+
+    '<div class="qcard-top"><div class="qcard-icon">📚</div><div class="qcard-meta"><div class="qcard-channel">Krishna Prep Bot</div><div class="qcard-topic">'+q.topic+' · Q'+(idx+1)+'/'+QUIZ.length+'</div></div></div>'+
+    '<div class="qcard-q">'+q.q+'</div><div class="qcard-opts">'+opts+'</div>'+
+    '<div class="qcard-foot"><span class="qcard-votes" id="votes-'+idx+'">👥 0 voted</span><span class="qcard-badge">Quiz</span></div></div></div>';
+}
+
+async function pick(idx,selected){
+  if(answered) return;
+  answered = true;
+  var q = QUIZ[idx];
+  var isCorrect = selected === q.ans;
+
+  // Fake vote distribution
+  var total = Math.floor(Math.random()*60)+30;
+  var remaining = 100;
+  var pcts = q.opts.map(function(_,i){
+    if(i===q.ans) return null;
+    var p = Math.floor(Math.random()*15)+5;
+    remaining -= p;
+    return p;
+  });
+  pcts[q.ans] = Math.max(remaining,40);
+  var sum = pcts.reduce(function(a,b){return a+b;},0);
+  var norm = pcts.map(function(p){return Math.round(p/sum*100);});
+
+  // Animate bars
+  q.opts.forEach(function(_,i){
+    var el = document.getElementById('opt-'+idx+'-'+i);
+    var bar = document.getElementById('bar-'+idx+'-'+i);
+    var pct = document.getElementById('pct-'+idx+'-'+i);
+    var cir = document.getElementById('cir-'+idx+'-'+i);
+    el.classList.add('voted');
+    setTimeout(function(){
+      bar.style.width = norm[i]+'%';
+      pct.textContent = norm[i]+'%';
+      if(i===q.ans && i!==selected) el.classList.add('reveal');
+      if(i===q.ans) cir.textContent = '✓';
+      if(i===selected && isCorrect) el.classList.add('correct');
+      if(i===selected && !isCorrect){ el.classList.add('wrong'); cir.textContent = '✗'; }
+    },i*70);
+  });
+
+  setTimeout(function(){
+    document.getElementById('votes-'+idx).textContent = '👥 '+total+' voted';
+  },400);
+
+  // Score & celebrations
+  if(isCorrect){
+    correct++;
+    showReaction('🎉',0);
+    showReaction('✨',150);
+    launchConfetti(40);
+    var m = document.getElementById('tgMsgs');
+    var u = document.createElement('div');
+    u.className = 'tb user';
+    u.innerHTML = '✅ Correct!<div class="time">'+ts()+'</div>';
+    m.appendChild(u);
+    m.scrollTop = m.scrollHeight;
+  } else {
+    wrong++;
+    showReaction('🤔',0);
+    var m = document.getElementById('tgMsgs');
+    var u = document.createElement('div');
+    u.className = 'tb user';
+    u.innerHTML = '❌ Missed: '+q.opts[q.ans]+'<div class="time">'+ts()+'</div>';
+    m.appendChild(u);
+    m.scrollTop = m.scrollHeight;
+  }
+  cur++;
+  updateScore();
+
+  // Typing + explanation
+  var typ = showTyping();
+  await sleep(700);
+  hideTyping(typ);
+  await sleep(200);
+
+  var expRow = document.createElement('div');
+  expRow.className = 'expl';
+  expRow.innerHTML = '<div class="box"><div><div class="head">💡 '+q.topic+'</div><div>'+q.exp+'</div></div></div>';
+  document.getElementById('tgMsgs').appendChild(expRow);
+  document.getElementById('tgMsgs').scrollTop = document.getElementById('tgMsgs').scrollHeight;
+
+  await sleep(300);
+  if(cur >= QUIZ.length){
+    nextBtn.textContent = '🏆 See Results';
+    nextBtn.onclick = showResults;
+  } else {
+    nextBtn.textContent = 'Next →';
+    nextBtn.onclick = nextQ;
+  }
+  nextBtn.classList.add('show');
+}
+
+async function nextQ(){
+  nextBtn.classList.remove('show');
+  answered = false;
+  var typ = showTyping();
+  await sleep(500);
+  hideTyping(typ);
+  await sleep(200);
+  var div = document.createElement('div');
+  div.innerHTML = buildQuizCard(cur);
+  document.getElementById('tgMsgs').appendChild(div.firstElementChild);
+  document.getElementById('tgMsgs').scrollTop = document.getElementById('tgMsgs').scrollHeight;
+}
+
+async function showResults(){
+  nextBtn.classList.remove('show');
+  var pct = Math.round(correct/QUIZ.length*100);
+  var grade, gradeColor, emoji, msg;
+  if(pct>=90){grade='S RANK';gradeColor='#ffd54f';emoji='🏆';msg='Exceptional! You\'re crushing it anna! 🔥';}
+  else if(pct>=70){grade='A RANK';gradeColor='#4caf93';emoji='🎯';msg='Strong! A few more rounds and you\'ll hit 100%. Keep going!';}
+  else if(pct>=50){grade='B RANK';gradeColor='#5eaeff';emoji='📈';msg='Good foundation. Focus on the missed topics and re-drill.';}
+  else{grade='C RANK';gradeColor='#e57373';emoji='💪';msg='Tough round — review the explanations and come back stronger!';}
+
+  if(pct>=50) launchConfetti(80);
+  if(pct>=50){showReaction('🎉',100);showReaction('🎊',300);showReaction('🎆',500);showReaction('✨',700);}
+
+  await sleep(300);
+
+  var div = document.createElement('div');
+  div.innerHTML = '<div class="res"><div class="res-emoji">'+emoji+'</div><div class="res-title">Quiz Complete!</div>'+
+    '<div class="res-grade" style="background:'+gradeColor+'20;color:'+gradeColor+';border:1px solid '+gradeColor+'40">'+grade+'</div>'+
+    '<div class="res-score" style="color:'+gradeColor+'">'+pct+'%</div>'+
+    '<div class="res-bars"><div class="res-bar-row"><span class="label" style="color:#4caf93">Correct</span><div class="track"><div class="fill" style="background:#4caf93;width:0" data-w="'+(correct*25)+'%"></div></div><span class="val" style="color:#4caf93">'+correct+'</span></div>'+
+    '<div class="res-bar-row"><span class="label" style="color:#e57373">Wrong</span><div class="track"><div class="fill" style="background:#e57373;width:0" data-w="'+(wrong*25)+'%"></div></div><span class="val" style="color:#e57373">'+wrong+'</span></div></div>'+
+    '<div class="res-msg">'+msg+'</div><button class="res-btn" onclick="resetQuiz()">🔄 Retry Quiz</button></div>';
+  document.getElementById('tgMsgs').appendChild(div.firstElementChild);
+  document.getElementById('tgMsgs').scrollTop = document.getElementById('tgMsgs').scrollHeight;
+
+  setTimeout(function(){
+    document.querySelectorAll('[data-w]').forEach(function(el){el.style.width=el.dataset.w;});
+  },400);
+}
+
+function resetQuiz(){
+  cur=0;correct=0;wrong=0;answered=false;
+  document.getElementById('tgMsgs').innerHTML = '';
+  nextBtn.classList.remove('show');
+  nextBtn.textContent = 'Next →';
+  nextBtn.onclick = nextQ;
+  updateScore();
+  startQuiz();
+}
+
+async function startQuiz(){
+  await sleep(300);
+  var div = document.createElement('div');
+  div.innerHTML = buildQuizCard(0);
+  document.getElementById('tgMsgs').appendChild(div.firstElementChild);
+  document.getElementById('tgMsgs').scrollTop = document.getElementById('tgMsgs').scrollHeight;
+}
+
+startQuiz();
+</script>
+</body>
+</html>

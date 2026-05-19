@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flask → Cloud Run — Concept Diagrams</title>
+<style>
+:root {
+  --bg: #f8f7f4;
+  --canvas: #ffffff;
+  --text: #1a1a1a;
+  --text-dim: #666;
+  --border: #d4d2cc;
+  --c-purple-50: #EEEDFE; --c-purple-600: #534AB7; --c-purple-800: #3C3489;
+  --c-teal-50: #E1F5EE; --c-teal-600: #0F6E56; --c-teal-800: #085041;
+  --c-coral-50: #FAECE7; --c-coral-600: #993C1D; --c-coral-800: #712B13;
+  --c-gray-50: #F1EFE8; --c-gray-600: #5F5E5A; --c-gray-800: #444441;
+  --c-blue-50: #E6F1FB; --c-blue-600: #185FA5; --c-blue-800: #0C447C;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #171717; --canvas: #1f1f1f; --text: #e8e4df; --text-dim: #999; --border: #333;
+  }
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);padding:32px;font-size:15px;line-height:1.6;}
+.container{max-width:780px;margin:0 auto;}
+.canvas{background:var(--canvas);border:1px solid var(--border);padding:32px;}
+.header{border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:24px;}
+.header h1{font-size:24px;font-weight:600;margin-bottom:4px;}
+.header .sub{font-size:13px;color:var(--text-dim);}
+.section{margin-bottom:28px;}
+.section h2{font-size:16px;font-weight:600;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+
+svg{display:block;width:100%;height:auto;margin:12px 0;}
+.node rect{fill:var(--c-gray-50);stroke:var(--c-gray-600);stroke-width:0.5;rx:8;}
+.node text{font-size:14px;font-weight:500;fill:var(--text);}
+.node .ts{font-size:12px;font-weight:400;fill:var(--text-dim);}
+
+.c-purple rect{fill:var(--c-purple-50);stroke:var(--c-purple-600);}
+.c-purple text{fill:var(--c-purple-800);}
+.c-teal rect{fill:var(--c-teal-50);stroke:var(--c-teal-600);}
+.c-teal text{fill:var(--c-teal-800);}
+.c-coral rect{fill:var(--c-coral-50);stroke:var(--c-coral-600);}
+.c-coral text{fill:var(--c-coral-800);}
+.c-blue rect{fill:var(--c-blue-50);stroke:var(--c-blue-600);}
+.c-blue text{fill:var(--c-blue-800);}
+
+.arr{stroke:var(--text-dim);stroke-width:1;fill:none;marker-end:url(#arrow);}
+
+.mistake-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.mistake-item{border:1px solid var(--border);padding:10px 12px;font-size:13px;line-height:1.5;}
+.mistake-item .sym{color:#c0392b;font-weight:500;}
+.mistake-item .fix{font-family:ui-monospace,monospace;font-size:11px;color:var(--text-dim);margin-top:4px;}
+
+.code-box{background:var(--bg);border:1px solid var(--border);padding:12px 14px;font-family:ui-monospace,monospace;font-size:12px;line-height:1.6;margin:8px 0;overflow-x:auto;}
+.code-box .cm{color:var(--text-dim);}
+.code-box .hl{color:#c0392b;}
+
+footer{margin-top:24px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;color:var(--text-dim);display:flex;justify-content:space-between;}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="canvas">
+
+<div class="header">
+  <h1>Flask → Cloud Run</h1>
+  <div class="sub">Request path: browser to app, layer by layer</div>
+</div>
+
+<section class="section">
+  <h2>Architecture flow</h2>
+
+  <svg viewBox="0 0 680 240" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+
+    <g class="node c-purple">
+      <rect x="40" y="20" width="130" height="44" rx="8" stroke-width="0.5"/>
+      <text x="105" y="46" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500">Browser</text>
+    </g>
+    <line x1="170" y1="42" x2="220" y2="42" class="arr"/>
+    <g class="node c-teal">
+      <rect x="220" y="20" width="130" height="44" rx="8" stroke-width="0.5"/>
+      <text x="285" y="46" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500">Cloud Run</text>
+    </g>
+    <line x1="350" y1="42" x2="400" y2="42" class="arr"/>
+    <g class="node c-blue">
+      <rect x="400" y="20" width="130" height="44" rx="8" stroke-width="0.5"/>
+      <text x="465" y="46" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500">Gunicorn</text>
+    </g>
+    <line x1="530" y1="42" x2="580" y2="42" class="arr"/>
+    <g class="node c-coral">
+      <rect x="580" y="20" width="100" height="44" rx="8" stroke-width="0.5"/>
+      <text x="630" y="46" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500">Flask</text>
+    </g>
+
+    <text x="105" y="90" text-anchor="middle" font-size="12" fill="var(--text-dim)">HTTP request</text>
+    <text x="285" y="90" text-anchor="middle" font-size="12" fill="var(--text-dim)">port 8080</text>
+    <text x="465" y="90" text-anchor="middle" font-size="12" fill="var(--text-dim)">WSGI workers</text>
+    <text x="630" y="90" text-anchor="middle" font-size="12" fill="var(--text-dim)">response</text>
+
+    <line x1="630" y1="64" x2="630" y2="130" stroke="var(--text-dim)" stroke-width="1" stroke-dasharray="3 3"/>
+    <line x1="630" y1="130" x2="105" y2="130" stroke="var(--text-dim)" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#arrow)"/>
+    <text x="380" y="140" text-anchor="middle" font-size="11" fill="var(--text-dim)">response returns same path</text>
+  </svg>
+</section>
+
+<section class="section">
+  <h2>Key files</h2>
+
+  <div class="code-box">
+<span class="cm"># main.py — Flask app with health endpoint</span>
+<span class="hl">from</span> flask <span class="hl">import</span> Flask
+app = Flask(__name__)
+
+@app.route(<span class="cm">"/"</span>)
+<span class="hl">def</span> hello():
+    return {<span class="cm">"message"</span>: <span class="cm">"Hello from Cloud Run!"</span>}
+
+@app.route(<span class="cm">"/health"</span>)
+<span class="hl">def</span> health():
+    return {<span class="cm">"status"</span>: <span class="cm">"healthy"</span>}
+
+if __name__ == <span class="cm">"__main__"</span>:
+    app.run(host=<span class="cm">"0.0.0.0"</span>, port=8080)
+  </div>
+
+  <div class="code-box" style="margin-top:8px;">
+<span class="cm"># requirements.txt — only two dependencies</span>
+flask==3.1.0
+gunicorn==23.0.0
+  </div>
+</section>
+
+<section class="section">
+  <h2>Common mistakes</h2>
+
+  <div class="mistake-grid">
+    <div class="mistake-item"><span class="sym">Container crashes</span><br/>No gunicorn<br/><span class="fix">CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]</span></div>
+    <div class="mistake-item"><span class="sym">Slow deploys</span><br/>Wrong COPY order<br/><span class="fix">COPY req.txt → pip install → COPY .</span></div>
+    <div class="mistake-item"><span class="sym">Health check fails</span><br/>No /health or wrong port<br/><span class="fix">Bind 0.0.0.0:8080</span></div>
+    <div class="mistake-item"><span class="sym">Image 800MB+</span><br/>python:latest<br/><span class="fix">FROM python:3.11-slim</span></div>
+    <div class="mistake-item"><span class="sym">Build bloated</span><br/>No .dockerignore<br/><span class="fix">Add venv, .git, __pycache__</span></div>
+    <div class="mistake-item"><span class="sym">Cold start slow</span><br/>No min-instances<br/><span class="fix">gcloud run deploy --min-instances=1</span></div>
+  </div>
+</section>
+
+<footer>
+  <span>Flask → Cloud Run · Concept Diagrams Style</span>
+  <span>Flat educational SVG diagrams</span>
+</footer>
+
+</div>
+</div>
+</body>
+</html>

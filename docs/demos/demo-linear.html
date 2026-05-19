@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flask → Cloud Run — Linear Style</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #08090a;
+  --bg-panel: #0f1011;
+  --bg-surface: #191a1b;
+  --bg-hover: #28282c;
+  --text-primary: #f7f8f8;
+  --text-secondary: #d0d6e0;
+  --text-tertiary: #8a8f98;
+  --text-quaternary: #62666d;
+  --brand: #5e6ad2;
+  --accent: #7170ff;
+  --accent-hover: #828fff;
+  --border: rgba(255,255,255,0.08);
+  --border-subtle: rgba(255,255,255,0.05);
+  --green: #10b981;
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:var(--bg-deep);color:var(--text-primary);
+  font-family:var(--font);font-size:16px;line-height:1.5;
+  font-feature-settings:'cv01','ss03';
+  -webkit-font-smoothing:antialiased;
+}
+nav{
+  position:sticky;top:0;z-index:50;
+  background:var(--bg-deep);border-bottom:1px solid var(--border-subtle);
+  padding:14px 0;
+}
+.nav-inner{max-width:1100px;margin:0 auto;padding:0 32px;display:flex;justify-content:space-between;align-items:center;}
+.nav-brand{font-size:14px;font-weight:510;color:var(--text-secondary);letter-spacing:-0.01em;}
+.nav-brand span{color:var(--accent);}
+.nav-links{display:flex;gap:24px;align-items:center;}
+.nav-links a{font-size:13px;font-weight:510;color:var(--text-tertiary);text-decoration:none;transition:color .2s;}
+.nav-links a:hover{color:var(--text-primary);}
+.nav-cta{
+  background:var(--brand);color:#fff;border:none;padding:8px 16px;border-radius:6px;
+  font-family:var(--font);font-size:13px;font-weight:510;cursor:pointer;letter-spacing:-0.01em;
+  transition:background .2s;
+}
+.nav-cta:hover{background:var(--accent-hover);}
+
+main{max-width:1100px;margin:0 auto;padding:80px 32px 120px;}
+.hero{margin-bottom:80px;}
+.hero-tag{font-size:12px;font-weight:510;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;}
+.hero h1{font-size:64px;font-weight:510;line-height:1.00;letter-spacing:-1.408px;margin-bottom:16px;color:var(--text-primary);}
+.hero h1 em{font-style:normal;color:var(--accent);}
+.hero p{font-size:18px;font-weight:400;line-height:1.60;color:var(--text-tertiary);max-width:600px;letter-spacing:-0.165px;}
+.hero-actions{display:flex;gap:12px;margin-top:24px;}
+.btn-primary{
+  background:var(--brand);color:#fff;border:none;padding:8px 20px;border-radius:6px;
+  font-family:var(--font);font-size:15px;font-weight:510;cursor:pointer;letter-spacing:-0.01em;
+}
+.btn-primary:hover{background:var(--accent-hover);}
+.btn-ghost{
+  background:rgba(255,255,255,0.02);color:var(--text-secondary);border:1px solid var(--border);
+  padding:8px 20px;border-radius:6px;font-family:var(--font);font-size:15px;font-weight:400;cursor:pointer;
+}
+.btn-ghost:hover{background:rgba(255,255,255,0.05);}
+
+.section{margin-bottom:80px;}
+.section-tag{font-size:12px;font-weight:510;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;}
+.section h2{font-size:32px;font-weight:400;line-height:1.13;letter-spacing:-0.704px;margin-bottom:8px;}
+.section .sub{font-size:15px;color:var(--text-tertiary);letter-spacing:-0.165px;margin-bottom:24px;}
+
+.card{
+  background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;
+  padding:20px 24px;margin-bottom:12px;
+}
+.card-tag{font-size:11px;font-weight:510;color:var(--text-quaternary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;}
+.card h3{font-size:20px;font-weight:590;letter-spacing:-0.24px;margin-bottom:6px;}
+.card p{font-size:15px;color:var(--text-tertiary);letter-spacing:-0.165px;line-height:1.60;}
+.card code{font-family:var(--mono);font-size:13px;background:rgba(255,255,255,0.04);padding:2px 6px;border-radius:4px;color:var(--text-secondary);}
+
+.code-block{
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;
+  padding:16px 20px;font-family:var(--mono);font-size:13px;line-height:1.5;
+  color:var(--text-secondary);overflow-x:auto;margin:12px 0;
+}
+.code-block .hl{color:var(--accent);}
+.code-block .cm{color:var(--text-quaternary);}
+.code-block .str{color:var(--green);}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.stat-card{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:16px 20px;text-align:center;}
+.stat-num{font-size:32px;font-weight:510;color:var(--accent);letter-spacing:-0.704px;}
+.stat-lbl{font-size:12px;color:var(--text-quaternary);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;}
+
+.mistakes-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px;}
+.mistakes-table th{text-align:left;padding:10px 12px;font-size:11px;font-weight:510;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);}
+.mistakes-table td{padding:10px 12px;border-bottom:1px solid var(--border-subtle);color:var(--text-secondary);font-size:14px;}
+.mistakes-table .symptom{color:var(--accent);}
+.mistakes-table .fix{font-family:var(--mono);font-size:12px;color:var(--text-tertiary);}
+
+.pill{display:inline-block;padding:2px 10px;border-radius:9999px;border:1px solid var(--border);font-size:12px;font-weight:510;color:var(--text-secondary);}
+
+footer{margin-top:80px;padding-top:24px;border-top:1px solid var(--border-subtle);display:flex;justify-content:space-between;font-size:12px;color:var(--text-quaternary);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-brand">gcp-prep <span>/</span> flask-cloud-run</div>
+    <div class="nav-links">
+      <a href="#">Architecture</a>
+      <a href="#">Code</a>
+      <a href="#">Deploy</a>
+      <a href="#">Mistakes</a>
+      <a href="#">Quiz</a>
+      <button class="nav-cta">Open in Cloud Run</button>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+<section class="hero">
+  <div class="hero-tag">GCP / Flask / Docker / Cloud Run</div>
+  <h1>Flask → <em>Cloud Run</em></h1>
+  <p>From a Python Flask app to a production container running on Cloud Run. No Kubernetes, no complex infra.</p>
+  <div class="hero-actions">
+    <button class="btn-primary">View Architecture</button>
+    <button class="btn-ghost">Read Guide</button>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-tag">Architecture</div>
+  <h2>How It All Fits Together</h2>
+  <p class="sub">Browser → Cloud Run → Gunicorn → Flask — four layers, one request path.</p>
+
+  <div class="grid-3">
+    <div class="card"><div class="card-tag">Layer 1</div><h3>Browser / Client</h3><p>Sends HTTP request. Could be curl, web app, mobile client, or another service.</p></div>
+    <div class="card"><div class="card-tag">Layer 2</div><h3>Cloud Run</h3><p>Managed compute. Receives request, starts container if cold, routes to Gunicorn on port 8080.</p></div>
+    <div class="card"><div class="card-tag">Layer 3</div><h3>Gunicorn WSGI</h3><p>Production WSGI server. Manages worker processes, handles concurrent requests, forwards to Flask.</p></div>
+  </div>
+  <div class="grid-3" style="margin-top:0;">
+    <div></div>
+    <div class="card"><div class="card-tag">Layer 4</div><h3>Flask App</h3><p>Your Python application. Route handlers, business logic, response generation.</p></div>
+    <div></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-tag">Code</div>
+  <h2>Key Components</h2>
+  <p class="sub">The four files that make it work.</p>
+
+  <div class="code-block">
+<span class="cm"># main.py — Flask app with health endpoint</span>
+<span class="hl">from</span> flask <span class="hl">import</span> Flask, jsonify
+app = Flask(__name__)
+
+<span class="hl">@app</span>.route(<span class="str">"/"</span>)
+<span class="hl">def</span> <span class="fn">hello</span>():
+    <span class="hl">return</span> {<span class="str">"message"</span>: <span class="str">"Hello from Flask on Cloud Run!"</span>}
+
+<span class="hl">@app</span>.route(<span class="str">"/health"</span>)
+<span class="hl">def</span> <span class="fn">health</span>():
+    <span class="hl">return</span> {<span class="str">"status"</span>: <span class="str">"healthy"</span>}
+
+<span class="hl">if</span> __name__ == <span class="str">"__main__"</span>:
+    app.run(host=<span class="str">"0.0.0.0"</span>, port=<span class="str">8080</span>)
+  </div>
+
+  <div class="code-block">
+<span class="cm"># requirements.txt</span>
+flask==3.1.0
+gunicorn==23.0.0
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-tag">Key Detail</div>
+      <h3>Why Gunicorn?</h3>
+      <p>Flask's dev server is single-threaded. Under concurrent load on Cloud Run, it crashes. Gunicorn manages worker processes and handles concurrent requests properly.</p>
+    </div>
+    <div class="card">
+      <div class="card-tag">Key Detail</div>
+      <h3>CMD Format</h3>
+      <p>Use <code>CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]</code> in Dockerfile — exec form, not shell form. Shell form (<code>CMD gunicorn ...</code>) doesn't handle SIGTERM cleanly.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-tag">Common Mistakes</div>
+  <h2>What Goes Wrong</h2>
+  <p class="sub">Six things that WILL break in production. Fix them before deploy.</p>
+
+  <table class="mistakes-table">
+    <thead><tr><th>#</th><th>Symptom</th><th>Root Cause</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="symptom">Container crashes under load</td><td>No gunicorn — Flask dev server can't handle concurrent requests</td><td class="fix">CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]</td></tr>
+      <tr><td>2</td><td class="symptom">Slow deployments</td><td>requirements.txt copied after app code — no layer caching</td><td class="fix">COPY requirements.txt . → RUN pip install → COPY . .</td></tr>
+      <tr><td>3</td><td class="symptom">Health check fails</td><td>No /health endpoint or wrong port binding</td><td class="fix">Bind to 0.0.0.0:8080, add health route</td></tr>
+      <tr><td>4</td><td class="symptom">Image too large</td><td>Using python:latest instead of slim</td><td class="fix">FROM python:3.11-slim</td></tr>
+      <tr><td>5</td><td class="symptom">Build includes venv + .git</td><td>No .dockerignore</td><td class="fix">Add venv, .git, __pycache__, .env to .dockerignore</td></tr>
+      <tr><td>6</td><td class="symptom">Cold start latency</td><td>No min-instances configured</td><td class="fix">gcloud run deploy --min-instances=1</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="section">
+  <div class="section-tag">Quiz</div>
+  <h2>Test Your Knowledge</h2>
+  <p class="sub">10 questions on Flask, Docker, Cloud Run.</p>
+  <div class="card">
+    <p style="margin-bottom:12px;"><span class="pill">Quiz</span> <span style="color:var(--text-tertiary);margin-left:8px;">1 / 10</span></p>
+    <p style="font-size:16px;font-weight:510;margin-bottom:12px;">Why use gunicorn instead of Flask's dev server on Cloud Run?</p>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <div style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;cursor:pointer;">A: Gunicorn is faster</div>
+      <div style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;cursor:pointer;border-color:var(--accent);">B: Flask can't handle concurrent requests</div>
+      <div style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;cursor:pointer;">C: Gunicorn supports Python 3.13</div>
+      <div style="padding:8px 12px;border:1px solid var(--border);border-radius:6px;cursor:pointer;">D: Flask needs gunicorn</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>Flask → Cloud Run · Linear Style Demo</span>
+  <span>Skill: popular-web-designs (Linear template)</span>
+</footer>
+
+</main>
+</body>
+</html>

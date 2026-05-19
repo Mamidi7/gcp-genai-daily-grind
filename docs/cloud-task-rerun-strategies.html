@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cloud Task Rerun Strategies — Explained</title>
+<style>
+/* ===== SELF-CONTAINED STYLES ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: #f5f2ed;
+  color: #1a1612;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  min-height: 100vh;
+}
+
+/* --- Top Bar --- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #f5f2ed;
+  border-bottom: 1px solid #d4c8b4;
+  padding: 12px 0;
+}
+.topbar-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.brand {
+  font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #3d3528;
+}
+.brand span { color: #c0392b; }
+#darkToggle {
+  background: none;
+  border: 1px solid #d4c8b4;
+  cursor: pointer;
+  color: #6b5d49;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  border-radius: 3px;
+  transition: all .25s;
+}
+#darkToggle:hover { color: #1a1612; border-color: #1a1612; }
+#darkToggle svg { width: 16px; height: 16px; display: block; }
+
+/* --- Main Content --- */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 30px 20px 80px;
+}
+
+/* --- Sections --- */
+.section { margin-bottom: 40px; }
+
+h1 {
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 700;
+  line-height: 1.05;
+  margin-bottom: 4px;
+  letter-spacing: -.02em;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 32px 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+h2 .hash {
+  font-family: 'SF Mono', 'Consolas', monospace;
+  font-size: 13px;
+  color: #a89a83;
+}
+
+h3 {
+  font-family: 'SF Mono', 'Consolas', monospace;
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #6b5d49;
+  margin: 20px 0 10px;
+}
+
+p { margin-bottom: 12px; }
+
+.sub {
+  font-size: 17px;
+  font-style: italic;
+  color: #6b5d49;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #d4c8b4;
+  padding-bottom: 16px;
+}
+
+.eyebrow {
+  font-family: 'SF Mono', 'Consolas', monospace;
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #6b5d49;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.eyebrow .pill {
+  background: #1a1612;
+  color: #f5f2ed;
+  padding: 2px 8px;
+}
+
+.text-dim { color: #6b5d49; }
+.mb-3 { margin-bottom: 16px; }
+.mt-2 { margin-top: 12px; }
+.mb-2 { margin-bottom: 10px; }
+
+/* --- Card --- */
+.card {
+  background: #efe8dc;
+  border: 1px solid #1a1612;
+  padding: 18px 20px;
+  box-shadow: 3px 3px 0 #1a1612;
+}
+
+/* --- Task Flow --- */
+.task-flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; padding: 20px 0; }
+.task-node { background: #f5f2ed; border: 1px solid #1a1612; padding: 8px 12px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px; box-shadow: 2px 2px 0 #1a1612; text-align: center; min-width: 44px; }
+.task-node.done { background: #2d7d46; color: #fff; border-color: #2d7d46; box-shadow: 2px 2px 0 #1a1612; }
+.task-node.fail { background: #c0392b; color: #fff; border-color: #c0392b; animation: pulse 2s ease infinite; box-shadow: 2px 2px 0 #1a1612; }
+.task-node.pending { opacity: 0.45; }
+.task-arrow { font-family: 'SF Mono', 'Consolas', monospace; font-size: 16px; color: #a89a83; }
+
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+
+/* --- Strategy Card --- */
+.strategy-card { background: #efe8dc; border: 1px solid #1a1612; padding: 20px; margin-bottom: 16px; box-shadow: 3px 3px 0 #1a1612; }
+.strategy-card .snum { font-family: 'SF Mono', 'Consolas', monospace; font-size: 10px; letter-spacing: .2em; color: #c0392b; margin-bottom: 4px; }
+.strategy-card .stitle { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+.strategy-card .sdesc { font-size: 13px; color: #3d3528; line-height: 1.6; margin-bottom: 12px; }
+.strategy-card .smeta { display: flex; gap: 10px; flex-wrap: wrap; }
+.strategy-card .smeta span { background: #f5f2ed; padding: 3px 10px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 10px; border: 1px solid #d4c8b4; }
+
+/* --- Compact Flow --- */
+.compact-flow { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center; padding: 8px 0; font-size: 11px; }
+.compact-flow .cnode { padding: 4px 10px; border: 1px solid #d4c8b4; font-family: 'SF Mono', 'Consolas', monospace; }
+.compact-flow .cnode.g { background: #e8f5e9; border-color: #2d7d46; }
+.compact-flow .cnode.r { background: #fde8e8; border-color: #c0392b; }
+.compact-flow .carrow { color: #a89a83; }
+
+/* --- Pros/Cons --- */
+.pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+@media (max-width:600px){ .pros-cons { grid-template-columns: 1fr; } }
+.pros-cons .pro { padding: 8px 12px; border-left: 3px solid #2d7d46; font-size: 12px; color: #3d3528; }
+.pros-cons .con { padding: 8px 12px; border-left: 3px solid #c0392b; font-size: 12px; color: #3d3528; }
+
+/* --- Code Blocks --- */
+.code-block {
+  background: #1a1612;
+  color: #e8d9c0;
+  font-family: 'SF Mono', 'Consolas', 'Menlo', monospace;
+  font-size: 13px;
+  padding: 16px 18px;
+  margin: 10px 0;
+  overflow-x: auto;
+  line-height: 1.6;
+  border-radius: 0;
+}
+.code-block .comment { color: #8a7a66; }
+.code-block .keyword { color: #e8704a; }
+.code-block .string { color: #5bbd6b; }
+.code-block .built_in { color: #5b8fbd; }
+
+.code-wrap { position: relative; margin: 8px 0; }
+.code-wrap .code-block { margin: 0; }
+.copy-ghost { position: absolute; top: 6px; right: 6px; background: transparent; border: none; color: #8a7a66; cursor: pointer; font-size: 15px; line-height: 1; padding: 2px 5px; z-index: 2; opacity: 0.5; transition: opacity .2s, color .2s; }
+.copy-ghost:hover { opacity: 1; color: #e8d9c0; }
+
+/* --- Highlight Box --- */
+.highlight-box { background: #f0e0cc; padding: 14px 18px; border-left: 3px solid #c0392b; margin: 16px 0; font-size: 14px; }
+.highlight-box .label { font-family: 'SF Mono', 'Consolas', monospace; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: #c0392b; margin-bottom: 4px; }
+
+/* --- Step List --- */
+.step-list { margin: 8px 0; }
+.step-item { padding: 8px 0 8px 44px; position: relative; border-bottom: 1px solid #d4c8b4; font-size: 13px; color: #3d3528; line-height: 1.5; }
+.step-item::before { content: counter(step-counter); counter-increment: step-counter; position: absolute; left: 8px; top: 8px; font-family: 'SF Mono', 'Consolas', monospace; font-size: 11px; color: #c0392b; font-weight: 600; }
+.step-list { counter-reset: step-counter; }
+.step-item .desc { color: #3d3528; }
+.step-item code { font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px; background: #efe8dc; padding: 1px 4px; border: 1px solid #d4c8b4; }
+
+/* --- Comparison Table --- */
+.compare-table-wrap { overflow-x: auto; margin: 16px 0; }
+.compare-table-wrap table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.compare-table-wrap th, .compare-table-wrap td { padding: 10px 12px; border: 1px solid #d4c8b4; text-align: left; vertical-align: top; }
+.compare-table-wrap th { background: #efe8dc; font-family: 'SF Mono', 'Consolas', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.compare-table-wrap td { color: #3d3528; line-height: 1.5; }
+.compare-table-wrap .best { background: #e8f5e9; }
+
+/* --- GCP Service Box --- */
+.gcp-service-box { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border: 1px solid #d4c8b4; margin-bottom: 8px; }
+.gcp-service-box .icon { font-size: 22px; min-width: 30px; }
+.gcp-service-box .info { flex: 1; }
+.gcp-service-box .info .name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+.gcp-service-box .info .desc { font-size: 12px; color: #6b5d49; line-height: 1.5; }
+
+/* --- Interview Tab --- */
+.interview-tab { padding: 14px; border: 1px solid #d4c8b4; margin-bottom: 8px; }
+.interview-tab .q { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.interview-tab .a { font-size: 13px; color: #3d3528; line-height: 1.6; }
+
+/* --- Accordion --- */
+.accordion { margin: 12px 0; }
+.accordion-item { border: 1px solid #d4c8b4; margin-bottom: 6px; }
+.accordion-header { width: 100%; text-align: left; padding: 12px 16px; background: #efe8dc; border: none; cursor: pointer; font-family: 'SF Mono', 'Consolas', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #1a1612; display: flex; justify-content: space-between; align-items: center; }
+.accordion-header:hover { background: #e4d9c8; }
+.accordion-icon { font-size: 16px; font-weight: 700; transition: transform .2s; }
+.accordion-item.open .accordion-icon { transform: rotate(45deg); }
+.accordion-body { display: none; padding: 14px 16px; font-size: 13px; color: #3d3528; line-height: 1.6; background: #f5f2ed; }
+.accordion-item.open .accordion-body { display: block; }
+.accordion-body p { margin-bottom: 8px; }
+.accordion-body code { font-family: 'SF Mono', 'Consolas', monospace; font-size: 12px; background: #efe8dc; padding: 1px 4px; border: 1px solid #d4c8b4; }
+
+/* --- Table (cheatsheet) --- */
+.table-container { overflow-x: auto; margin: 12px 0; }
+.ds-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ds-table th, .ds-table td { padding: 10px 12px; border: 1px solid #d4c8b4; text-align: left; vertical-align: top; }
+.ds-table th { background: #efe8dc; font-family: 'SF Mono', 'Consolas', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.ds-table td { color: #3d3528; }
+.ds-table.striped tbody tr:nth-child(even) { background: #efe8dc; }
+
+/* --- Footer --- */
+footer { margin-top: 60px; padding-top: 20px; border-top: 2px solid #d4c8b4; font-family: 'SF Mono', 'Consolas', monospace; font-size: 10px; color: #a89a83; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+
+/* --- Section Divider --- */
+.section-divider { height: 1px; background: #d4c8b4; margin: 36px 0; border: none; }
+
+/* --- Utility --- */
+.d-flex { display: flex; }
+.align-center { align-items: center; }
+.gap-md { gap: 12px; }
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 640px) {
+  main { padding: 20px 14px 60px; }
+  h1 { font-size: 28px; }
+  h2 { font-size: 20px; flex-wrap: wrap; }
+  .card { padding: 14px; }
+  .strategy-card { padding: 14px; }
+  .task-node { padding: 6px 10px; font-size: 11px; min-width: 36px; }
+  .gcp-service-box { flex-direction: column; }
+  .code-block { font-size: 12px; padding: 12px; }
+}
+
+/* ===== DARK MODE ===== */
+[data-theme="dark"] body {
+  background: #1b1917;
+  color: #f0ece9;
+}
+[data-theme="dark"] .topbar { background: #1b1917; border-color: #3a3430; }
+[data-theme="dark"] .brand { color: #c5bbb2; }
+[data-theme="dark"] #darkToggle { border-color: #3a3430; color: #9a9088; }
+[data-theme="dark"] #darkToggle:hover { color: #f0ece9; border-color: #f0ece9; }
+[data-theme="dark"] .card { background: #242220; border-color: #f0ece9; box-shadow: 3px 3px 0 #f0ece9; }
+[data-theme="dark"] .strategy-card { background: #242220; border-color: #f0ece9; box-shadow: 3px 3px 0 #f0ece9; }
+[data-theme="dark"] .strategy-card .sdesc { color: #c5bbb2; }
+[data-theme="dark"] .strategy-card .smeta span { background: #1b1917; border-color: #3a3430; }
+[data-theme="dark"] .task-node { background: #1b1917; border-color: #f0ece9; box-shadow: 2px 2px 0 #f0ece9; }
+[data-theme="dark"] .task-node.pending { opacity: 0.35; }
+[data-theme="dark"] .sub { color: #9a9088; border-color: #3a3430; }
+[data-theme="dark"] h2 .hash { color: #6b625c; }
+[data-theme="dark"] .eyebrow { color: #9a9088; }
+[data-theme="dark"] .eyebrow .pill { background: #f0ece9; color: #1b1917; }
+[data-theme="dark"] .text-dim { color: #9a9088; }
+[data-theme="dark"] .highlight-box { background: #3d3530; }
+[data-theme="dark"] .compare-table-wrap th { background: #242220; }
+[data-theme="dark"] .compare-table-wrap td { color: #c5bbb2; }
+[data-theme="dark"] .compare-table-wrap th, .compare-table-wrap td { border-color: #3a3430; }
+[data-theme="dark"] .compare-table-wrap .best { background: rgba(91,189,107,0.12); }
+[data-theme="dark"] .gcp-service-box { border-color: #3a3430; }
+[data-theme="dark"] .gcp-service-box .info .desc { color: #9a9088; }
+[data-theme="dark"] .interview-tab { border-color: #3a3430; }
+[data-theme="dark"] .interview-tab .a { color: #c5bbb2; }
+[data-theme="dark"] .accordion-item { border-color: #3a3430; }
+[data-theme="dark"] .accordion-header { background: #242220; color: #f0ece9; }
+[data-theme="dark"] .accordion-header:hover { background: #2d2a28; }
+[data-theme="dark"] .accordion-body { background: #1b1917; color: #c5bbb2; }
+[data-theme="dark"] .accordion-body code { background: #242220; border-color: #3a3430; }
+[data-theme="dark"] .pros-cons .pro { border-color: #5bbd6b; color: #c5bbb2; }
+[data-theme="dark"] .pros-cons .con { border-color: #e8704a; color: #c5bbb2; }
+[data-theme="dark"] .compact-flow .cnode { border-color: #3a3430; }
+[data-theme="dark"] .compact-flow .cnode.g { background: rgba(91,189,107,0.15); border-color: #5bbd6b; }
+[data-theme="dark"] .compact-flow .cnode.r { background: rgba(232,112,74,0.15); border-color: #e8704a; }
+[data-theme="dark"] .step-item { border-color: #3a3430; color: #c5bbb2; }
+[data-theme="dark"] .step-item .desc { color: #c5bbb2; }
+[data-theme="dark"] .step-item code { background: #242220; border-color: #3a3430; }
+[data-theme="dark"] .ds-table th { background: #242220; }
+[data-theme="dark"] .ds-table td { color: #c5bbb2; }
+[data-theme="dark"] .ds-table th, .ds-table td { border-color: #3a3430; }
+[data-theme="dark"] .ds-table.striped tbody tr:nth-child(even) { background: #242220; }
+[data-theme="dark"] .section-divider { background: #3a3430; }
+[data-theme="dark"] footer { border-color: #3a3430; color: #6b625c; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Cloud Computing <span>Deep Dive</span></div>
+    <div class="d-flex align-center gap-md">
+      <button id="darkToggle" onclick="var d=document.documentElement;if(d.getAttribute('data-theme')==='dark'){d.removeAttribute('data-theme')}else{d.setAttribute('data-theme','dark')}" aria-label="Toggle dark mode">
+        <svg viewBox="0 0 16 16" fill="none"> <circle cx="8" cy="8" r="3.5" stroke="currentColor" stroke-width="1.3"/> <line x1="8" y1="1" x2="8" y2="3" stroke="currentColor" stroke-width="1.3"/> <line x1="8" y1="13" x2="8" y2="15" stroke="currentColor" stroke-width="1.3"/> <line x1="1" y1="8" x2="3" y2="8" stroke="currentColor" stroke-width="1.3"/> <line x1="13" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/> <line x1="3.05" y1="3.05" x2="4.46" y2="4.46" stroke="currentColor" stroke-width="1.3"/> <line x1="11.54" y1="11.54" x2="12.95" y2="12.95" stroke="currentColor" stroke-width="1.3"/> <line x1="3.05" y1="12.95" x2="4.46" y2="11.54" stroke="currentColor" stroke-width="1.3"/> <line x1="11.54" y1="4.46" x2="12.95" y2="3.05" stroke="currentColor" stroke-width="1.3"/> </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ===== HERO ===== -->
+<section class="section">
+  <div class="eyebrow"><span class="pill">Cloud Pipelines</span> May 2026</div>
+  <h1>Task Rerun<br>Strategies</h1>
+  <p class="sub">10 tasks · 5th failed · Rerun without redoing upstream · 4 proven strategies</p>
+</section>
+
+<!-- ===== THE PROBLEM ===== -->
+<section class="section">
+  <h2><span class="hash">01</span> The Problem Visualized</h2>
+  <p class="text-dim mb-3">10 sequential tasks. Task 5 failed mid-pipeline. You fixed the bug. Now what?</p>
+
+  <div class="card" style="padding: 20px;">
+    <div class="task-flow">
+      <div class="task-node done">T1</div><div class="task-arrow">&#8594;</div>
+      <div class="task-node done">T2</div><div class="task-arrow">&#8594;</div>
+      <div class="task-node done">T3</div><div class="task-arrow">&#8594;</div>
+      <div class="task-node done">T4</div><div class="task-arrow">&#8594;</div>
+      <div class="task-node fail">T5</div><div class="task-arrow">&#8594;</div>
+      <div class="task-node pending">T6</div><div class="task-arrow">&#8594;</div>
+      <div class="task-node pending">T7</div><div class="task-arrow">&#8594;</div>
+      <div class="task-node pending">T8</div><div class="task-arrow">&#8594;</div>
+      <div class="task-node pending">T9</div><div class="task-arrow">&#8594;</div>
+      <div class="task-node pending">T10</div>
+    </div>
+
+    <div class="highlight-box" style="margin-top: 12px;">
+      <div class="label">The Question</div>
+      How to re-run <strong>only</strong> Task 5 (and its downstreams) without re-executing T1-T4 which already succeeded?
+    </div>
+
+    <p class="mt-2" style="font-size: 13px; color: #6b5d49;">
+      <strong>Naive approach:</strong> Restart the entire pipeline. T1-T4 run again — waste of time, compute, and money.
+      <strong>Smart approach:</strong> Use one of the 4 strategies below to resume from the failure point.
+    </p>
+  </div>
+</section>
+
+<!-- ===== STRATEGY A: DAG PIPELINE RERUN ===== -->
+<section class="section">
+  <h2><span class="hash">02</span> Strategy A — DAG-Based Pipeline Rerun</h2>
+
+  <div class="strategy-card">
+    <div class="snum">Strategy A</div>
+    <div class="stitle">Cache + Selective Re-execution</div>
+    <div class="sdesc">
+      The pipeline tracks every task's output as an artifact. When a task fails, you fix the issue and <strong>re-run only the failed task + downstream tasks</strong>.
+      Tasks that already succeeded (T1-T4) reuse cached results. This is how <strong>Vertex AI Pipelines</strong> works.
+    </div>
+
+    <div class="compact-flow">
+      <span class="cnode g">T1</span><span class="carrow">&#8594;</span>
+      <span class="cnode g">T2</span><span class="carrow">&#8594;</span>
+      <span class="cnode g">T3</span><span class="carrow">&#8594;</span>
+      <span class="cnode g">T4</span><span class="carrow">&#8594;</span>
+      <span class="cnode r">T5 (rerun)</span><span class="carrow">&#8594;</span>
+      <span class="cnode" style="border-color:#b8860b;">T6 (rerun)</span><span class="carrow">&#8594;</span>
+      <span class="cnode" style="border-color:#b8860b;">T7 (rerun)</span><span class="carrow">&#8594;</span>
+      <span class="cnode" style="border-color:#b8860b;">T8 (rerun)</span><span class="carrow">&#8594;</span>
+      <span class="cnode" style="border-color:#b8860b;">T9 (rerun)</span><span class="carrow">&#8594;</span>
+      <span class="cnode" style="border-color:#b8860b;">T10 (rerun)</span>
+    </div>
+
+    <p style="font-size: 12px; color: #6b5d49; margin: 8px 0;">
+      Green = cached (input unchanged) &middot; Red = failed, now fixed &middot; Gold = downstream, needs fresh run
+    </p>
+
+    <div class="pros-cons">
+      <div class="pro">&#x2714; Minimally invasive — only re-runs what's needed</div>
+      <div class="pro">&#x2714; Vertex AI Pipelines has built-in "rerun task" feature (preview)</div>
+      <div class="pro">&#x2714; Maintains original run reference for traceability</div>
+      <div class="con">&#x2716; Requires pipeline framework (Kubeflow, Vertex Pipelines)</div>
+      <div class="con">&#x2716; Caching logic can get complex with non-deterministic steps</div>
+      <div class="con">&#x2716; Still in preview on Vertex AI</div>
+    </div>
+
+    <div class="code-wrap"><button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button><div class="code-block mt-2" style="font-size: 12px; padding: 12px 14px;">
+<span class="comment"># Vertex AI Pipelines — rerun a specific task</span>
+<span class="keyword">from</span> google.cloud <span class="keyword">import</span> aiplatform
+
+<span class="comment"># Get the failed pipeline run</span>
+pipeline_job = aiplatform.PipelineJob.get(resource_name=<span class="string">"projects/.../pipelineJobs/..."</span>)
+
+<span class="comment"># Rerun from task 5 — Vertex reuses cache for T1-T4</span>
+<span class="comment"># Only T5 (failed) + downstream tasks re-execute</span>
+pipeline_job.rerun(task_name=<span class="string">"task-5"</span>)  <span class="comment"># Modifies config, re-runs downstream</span></div></div>
+  </div>
+</section>
+
+<!-- ===== STRATEGY B: CHECKPOINT + RESUME ===== -->
+<section class="section">
+  <h2><span class="hash">03</span> Strategy B — Checkpoint &amp; Resume</h2>
+
+  <div class="strategy-card">
+    <div class="snum">Strategy B</div>
+    <div class="stitle">Periodic State Persistence</div>
+    <div class="sdesc">
+      Each task writes <strong>partial progress</strong> to persistent storage (GCS, BigQuery, Cloud SQL). When a task fails,
+      on restart it checks for existing checkpoint data and resumes from where it left off instead of starting from scratch.
+      This is the <strong>recommended pattern for Cloud Run Jobs</strong>.
+    </div>
+
+    <p style="font-size: 13px; color: #3d3528; margin-bottom: 8px;">
+      <strong>How it works:</strong>
+    </p>
+    <div class="step-list" style="margin-top: 0;">
+      <div class="step-item" style="padding-left: 44px; padding-top: 8px; padding-bottom: 8px;">
+        <div class="desc">Task starts, checks GCS for a checkpoint file: <code>gs://my-bucket/pipeline/task5-checkpoint.json</code></div>
+      </div>
+      <div class="step-item" style="padding-left: 44px; padding-top: 8px; padding-bottom: 8px;">
+        <div class="desc">If checkpoint exists, restore state and continue from last committed offset</div>
+      </div>
+      <div class="step-item" style="padding-left: 44px; padding-top: 8px; padding-bottom: 8px;">
+        <div class="desc">Every N records / N seconds, update the checkpoint with current progress</div>
+      </div>
+      <div class="step-item" style="padding-left: 44px; padding-top: 8px; padding-bottom: 8px;">
+        <div class="desc">On successful completion, delete checkpoint or write a "done" marker</div>
+      </div>
+    </div>
+
+    <div class="pros-cons">
+      <div class="pro">&#x2714; Works with any task runner — Cloud Run Jobs, Batch, Compute Engine</div>
+      <div class="pro">&#x2714; No special pipeline framework needed</div>
+      <div class="pro">&#x2714; Fault-tolerant by design — even VM restart doesn't lose progress</div>
+      <div class="con">&#x2716; Requires application-level checkpointing logic</div>
+      <div class="con">&#x2716; Extra complexity in writing and reading checkpoint state</div>
+      <div class="con">&#x2716; Not suitable for non-idempotent or stateful operations</div>
+    </div>
+
+    <div class="code-wrap"><button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button><div class="code-block mt-2" style="font-size: 12px; padding: 12px 14px;">
+<span class="keyword">import</span> json
+<span class="keyword">from</span> google.cloud <span class="keyword">import</span> storage
+
+client = storage.Client()
+bucket = client.bucket(<span class="string">"my-pipeline-checkpoints"</span>)
+checkpoint = bucket.blob(<span class="string">"pipeline/task5-checkpoint.json"</span>)
+
+<span class="comment"># On start — try to load checkpoint</span>
+last_offset = 0
+<span class="keyword">if</span> checkpoint.exists():
+    state = json.loads(checkpoint.download_as_text())
+    last_offset = state[<span class="string">"offset"</span>]
+    <span class="built_in">print</span>(<span class="string">f"Resuming from offset {last_offset}"</span>)
+
+<span class="comment"># Process records from last_offset onwards</span>
+<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(last_offset, total_records):
+    process_record(records[i])
+    <span class="comment"># Every 100 records, save checkpoint</span>
+    <span class="keyword">if</span> i % 100 == 0:
+        checkpoint.upload_from_string(
+            json.dumps({<span class="string">"offset"</span>: i, <span class="string">"status"</span>: <span class="string">"in_progress"</span>})
+        )
+
+<span class="comment"># On success, mark complete</span>
+checkpoint.upload_from_string(json.dumps({<span class="string">"status"</span>: <span class="string">"completed"</span>}))</div></div>
+  </div>
+</section>
+
+<!-- ===== STRATEGY C: IDEMPOTENT RETRY ===== -->
+<section class="section">
+  <h2><span class="hash">04</span> Strategy C — Idempotent Task Retry</h2>
+
+  <div class="strategy-card">
+    <div class="snum">Strategy C</div>
+    <div class="stitle">Safe Re-execution via Idempotency</div>
+    <div class="sdesc">
+      Design every task so that <strong>running it multiple times produces the same result</strong>.
+      When T5 fails, just retry it (manually or via lifecycle policy). Since each task is idempotent,
+      T1-T4 are untouched — re-running them would produce the same output anyway, so you skip them
+      and re-run only T5. This is the <strong>recommended approach for Google Cloud Batch</strong>.
+    </div>
+
+    <p style="font-size: 13px; color: #3d3528; margin-bottom: 8px;">
+      <strong>Lifecycle Policies (Batch):</strong>
+    </p>
+    <div class="code-wrap"><button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button><div class="code-block" style="font-size: 12px; padding: 12px 14px;">
+<span class="comment"># Batch job with lifecycle policy — auto-retry task on failure</span>
+{
+  <span class="string">"taskGroups"</span>: [{
+    <span class="string">"taskSpec"</span>: {
+      <span class="string">"runnables"</span>: [{<span class="string">"script"</span>: {<span class="string">"text"</span>: <span class="string">"python task5.py"</span>}}],
+      <span class="string">"maxRetryCount"</span>: 3,
+      <span class="string">"lifecyclePolicies"</span>: [{
+        <span class="string">"action"</span>: <span class="string">"RETRY_TASK"</span>,
+        <span class="string">"actionCondition"</span>: {
+          <span class="string">"exitCodes"</span>: [50001, 50002]  <span class="comment"># Spot VM preemption, network errors</span>
+        }
+      }]
+    }
+  }]
+}</div></div>
+
+    <p style="font-size: 13px; color: #3d3528; margin: 10px 0 6px;">
+      <strong>Idempotency patterns:</strong>
+    </p>
+    <div class="smeta" style="margin-bottom: 8px;">
+      <span>Use unique keys (dedup by ID)</span>
+      <span>Write output to new location, not in-place</span>
+      <span>Check IF NOT EXISTS before creating</span>
+      <span>Use INSERT ON CONFLICT / MERGE in SQL</span>
+    </div>
+
+    <div class="pros-cons">
+      <div class="pro">&#x2714; Simplest to implement — just retry the failed task</div>
+      <div class="pro">&#x2714; Batch lifecycle policies do this automatically</div>
+      <div class="pro">&#x2714; Works for transient failures (network, preemption, quota)</div>
+      <div class="con">&#x2716; Only for transient failures, not logic bugs</div>
+      <div class="con">&#x2716; Requires all tasks to be truly idempotent</div>
+      <div class="con">&#x2716; Doesn't help if T5's output is needed by downstream but T5 is broken</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STRATEGY D: SAGA PATTERN ===== -->
+<section class="section">
+  <h2><span class="hash">05</span> Strategy D — Saga Pattern</h2>
+
+  <div class="strategy-card">
+    <div class="snum">Strategy D</div>
+    <div class="stitle">Compensating Transactions + Retry</div>
+    <div class="sdesc">
+      For distributed transactions spanning multiple services (e.g., payment + inventory + shipping),
+      the <strong>Saga pattern</strong> pairs each task with a <em>compensating action</em> that undoes it.
+      When T5 fails, the saga executes compensating actions for T5's side effects (rollback),
+      then retries T5 with corrected input. <strong>GCP Workflows supports this natively</strong>.
+    </div>
+
+    <div class="compact-flow">
+      <span class="cnode g">T1</span><span class="carrow">&#8594;</span>
+      <span class="cnode g">T2</span><span class="carrow">&#8594;</span>
+      <span class="cnode g">T3</span><span class="carrow">&#8594;</span>
+      <span class="cnode g">T4</span><span class="carrow">&#8594;</span>
+      <span class="cnode r">T5 (fail)</span>
+    </div>
+    <div class="compact-flow" style="padding: 4px 0;">
+      <span style="font-size: 11px; color: #c0392b;">&#x21B4; Execute compensating action for T5 (undo partial work)</span>
+    </div>
+    <div class="compact-flow">
+      <span class="cnode r">T5 (retry)</span><span class="carrow">&#8594;</span>
+      <span class="cnode" style="border-color:#b8860b;">T6</span><span class="carrow">&#8594;</span>
+      <span class="cnode" style="border-color:#b8860b;">T10</span>
+    </div>
+
+    <p style="font-size: 13px; color: #3d3528; margin: 10px 0;">
+      <strong>GCP Workflows — try/retry block:</strong>
+    </p>
+    <div class="code-wrap"><button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button><div class="code-block" style="font-size: 12px; padding: 12px 14px;">
+<span class="comment"># Workflows YAML — retry with exponential backoff</span>
+main:
+  steps:
+    - task5:
+        try:
+          call: http.post
+          args:
+            url: https://my-service/task5
+            body: {data: <span class="string">"${input}"</span>}
+          result: task5_result
+        retry:
+          predicate: ${custom_retry}
+          max_retries: 3
+          backoff_duration: 5s
+          backoff_factor: 2.0
+        except:
+          as: e
+          steps:
+            - compensate_task5:
+                call: http.post
+                args:
+                  url: https://my-service/task5/compensate
+            - raise: ${e}</div></div>
+
+    <div class="pros-cons">
+      <div class="pro">&#x2714; Handles distributed transactions with side effects</div>
+      <div class="pro">&#x2714; Workflows supports native retry + saga pattern</div>
+      <div class="pro">&#x2714; Compensating actions ensure data consistency</div>
+      <div class="con">&#x2716; Most complex to implement — need compensating logic for every step</div>
+      <div class="con">&#x2716; Compensating actions may also fail (requires idempotent compensation)</div>
+      <div class="con">&#x2716; Overkill for simple sequential batch processing</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== COMPARISON TABLE ===== -->
+<section class="section">
+  <h2><span class="hash">06</span> When to Use Which — Comparison</h2>
+
+  <div class="compare-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Strategy</th>
+          <th>Best For</th>
+          <th>GCP Service</th>
+          <th>Complexity</th>
+          <th>Recovery Scope</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>A: DAG Rerun</strong></td>
+          <td>ML pipelines, data pipelines with clear DAG structure</td>
+          <td>Vertex AI Pipelines</td>
+          <td>Medium</td>
+          <td>Task 5 + downstream</td>
+        </tr>
+        <tr class="best">
+          <td><strong>B: Checkpoint + Resume</strong></td>
+          <td>Long-running batch jobs, data processing with large volumes</td>
+          <td>Cloud Run Jobs, Batch</td>
+          <td>Medium-High</td>
+          <td>Within Task 5 (offset-level)</td>
+        </tr>
+        <tr>
+          <td><strong>C: Idempotent Retry</strong></td>
+          <td>Transient failures (network, VM preemption, quota)</td>
+          <td>Batch lifecycle policies</td>
+          <td>Low</td>
+          <td>Task 5 only (full retry)</td>
+        </tr>
+        <tr>
+          <td><strong>D: Saga Pattern</strong></td>
+          <td>Distributed transactions, multi-service orchestration</td>
+          <td>Workflows</td>
+          <td>High</td>
+          <td>Task 5 + compensate + retry</td>
+        </tr>
+        <tr>
+          <td><strong>E: Airflow Clear</strong></td>
+          <td>DAG-based pipelines, multi-cloud orchestration, cloud resource provisioning</td>
+          <td>Cloud Composer / Managed Airflow</td>
+          <td>Low-Medium</td>
+          <td>Task 5 + downstream (Clear with Downstream) or Task 5 only (Clear Current)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="highlight-box">
+    <div class="label">Recommendation</div>
+    <strong>Start with Strategy C</strong> (idempotent retry) for transient failures. <strong>Add Strategy B</strong> (checkpointing) when tasks process large datasets.
+    For complex ML pipelines, use <strong>Strategy A</strong> (Vertex AI Pipelines rerun).
+    For multi-service transactions, use <strong>Strategy D</strong> (Workflows saga).
+  </div>
+</section>
+
+<!-- ===== GCP SERVICES ===== -->
+<section class="section">
+  <h2><span class="hash">07</span> GCP Services That Support Task Rerun</h2>
+
+  <div class="gcp-service-box">
+    <div class="icon">&#x1F3C3;</div>
+    <div class="info">
+      <div class="name">Vertex AI Pipelines</div>
+      <div class="desc">Preview feature: rerun specific tasks from failed/completed pipeline runs. Maintains reference to original run. Succeeded tasks use cached outcomes; failed tasks re-execute. Supports modifying task-level config before rerun.</div>
+    </div>
+  </div>
+  <div class="gcp-service-box">
+    <div class="icon">&#x2615;</div>
+    <div class="info">
+      <div class="name">Cloud Run Jobs</div>
+      <div class="desc">Automatic task retries (default 3). Recommended pattern: checkpoint partial progress to Cloud Storage. Use BATCH_TASK_RETRY_ATTEMPT env var to customize behavior per retry attempt. Idempotency is critical.</div>
+    </div>
+  </div>
+  <div class="gcp-service-box">
+    <div class="icon">&#x2699;&#xFE0F;</div>
+    <div class="info">
+      <div class="name">Google Cloud Batch</div>
+      <div class="desc">Lifecycle policies: RETRY_TASK for specific exit codes (50000-59999 reserved). maxRetryCount up to 10. Spot VM preemption handling via exit code 50001. Use BATCH_TASK_RETRY_ATTEMPT variable.</div>
+    </div>
+  </div>
+  <div class="gcp-service-box">
+    <div class="icon">&#x1F4CB;</div>
+    <div class="info">
+      <div class="name">Workflows</div>
+      <div class="desc">Native try/retry blocks with exponential backoff. Saga pattern support via compensating transactions. Cloud Tasks integration for queued retries. Callbacks for human-in-the-loop approval before retry.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== AIRFLOW RERUN ===== -->
+<section class="section">
+  <h2><span class="hash">08</span> Bonus: Airflow Task Rerun — Clear = Rerun</h2>
+  <p class="text-dim mb-3">Apache Airflow's approach to the exact same problem — multi-cloud, open source, and its "Clear" mechanism.</p>
+
+  <div class="strategy-card">
+    <div class="snum">Airflow is Multi-Cloud</div>
+    <div class="stitle">Not Just for Data Pipelines</div>
+    <div class="sdesc">
+      Apache Airflow is <strong>open source</strong> and provides <strong>operators for every major cloud</strong> —
+      GCP (Google Cloud operators), AWS (S3, ECS, Lambda), Azure (Blob, Functions), and more.
+      It's not limited to orchestrating data pipelines — you can use it to <strong>build and manage cloud resources</strong>:
+      spin up VMs, provision Kubernetes clusters, deploy Cloud Run services, manage IAM policies, and trigger Terraform runs.
+      Each cloud also offers a <strong>managed Airflow service</strong>: GCP = Cloud Composer, AWS = MWAA, Azure = Managed Airflow.
+    </div>
+    <div class="smeta">
+      <span>Multi-cloud by design</span>
+      <span>300+ operators</span>
+      <span>Not just data pipelines</span>
+      <span>Managed services on all clouds</span>
+    </div>
+  </div>
+
+  <div class="strategy-card">
+    <div class="snum">The "Clear" Mechanism</div>
+    <div class="stitle">How Airflow Handles Failed Task Reruns</div>
+    <div class="sdesc">
+      In Airflow, when a task fails in a DAG, you don't "rerun" it — you <strong>Clear</strong> it.
+      Clearing a task instance resets its state to "None", which tells the scheduler to re-execute it on the next DAG run.
+      Airflow gives you <strong>two options</strong> when clearing:
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;">
+      <div style="background:#f5f2ed;border:1px solid #1a1612;padding:16px;box-shadow:2px 2px 0 #1a1612;">
+        <div style="font-family:'SF Mono','Consolas',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#c0392b;margin-bottom:4px;">Option 1</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px;">Clear with Downstream</div>
+        <div style="font-size:13px;color:#3d3528;line-height:1.6;">
+          Clears the failed task <strong>plus all tasks downstream</strong> of it.
+          Upstream tasks (already succeeded) are <em>not</em> cleared — their outputs are preserved.
+          <br><br>
+          <strong>Best for:</strong> When the failure may affect downstream logic, or when downstream tasks also need fresh data from the corrected task.
+        </div>
+      </div>
+      <div style="background:#f5f2ed;border:1px solid #1a1612;padding:16px;box-shadow:2px 2px 0 #1a1612;">
+        <div style="font-family:'SF Mono','Consolas',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#2d7d46;margin-bottom:4px;">Option 2</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px;">Clear Current Task Only</div>
+        <div style="font-size:13px;color:#3d3528;line-height:1.6;">
+          Clears <strong>only the failed task</strong>. Upstream and downstream tasks are untouched.
+          If downstream tasks already succeeded with stale data, they stay as-is.
+          <br><br>
+          <strong>Best for:</strong> Transient failures where only the failed task needs retrying. Faster recovery since downstream doesn't re-run.
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;padding:14px;background:#f0e0cc;border-left:3px solid #c0392b;font-size:13px;color:#3d3528;line-height:1.6;">
+      <strong>Key insight:</strong> In Airflow, "Clear" = Rerun. The word "rerun" doesn't exist in the Airflow UI —
+      you <em>clear</em> the task instance's state, and the scheduler picks it up naturally. This is identical to the
+      question "how to rerun task 5 without affecting upstream tasks" — <strong>Clear with Downstream</strong>
+      is exactly the answer: it preserves T1-T4 (upstream), re-executes T5 (failed), and re-executes T6-T10 (downstream).
+    </div>
+
+    <div style="margin-top:14px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:6px;color:#3d3528;">Visual: Clear with Downstream on a 10-task DAG</div>
+      <div class="compact-flow">
+        <span class="cnode g">T1</span><span class="carrow">&#8594;</span>
+        <span class="cnode g">T2</span><span class="carrow">&#8594;</span>
+        <span class="cnode g">T3</span><span class="carrow">&#8594;</span>
+        <span class="cnode g">T4</span><span class="carrow">&#8594;</span>
+        <span class="cnode r">T5 (cleared)</span><span class="carrow">&#8594;</span>
+        <span class="cnode" style="border-color:#b8860b;padding:4px 10px;border:1px solid #b8860b;font-family:'SF Mono','Consolas',monospace;">T6 (cleared)</span><span class="carrow">&#8594;</span>
+        <span class="cnode" style="border-color:#b8860b;padding:4px 10px;border:1px solid #b8860b;font-family:'SF Mono','Consolas',monospace;">T7 (cleared)</span><span class="carrow">&#8594;</span>
+        <span class="cnode" style="border-color:#b8860b;padding:4px 10px;border:1px solid #b8860b;font-family:'SF Mono','Consolas',monospace;">T10 (cleared)</span>
+      </div>
+      <p style="font-size:11px;color:#6b5d49;margin-top:2px;">Green = untouched (upstream) &middot; Red = cleared (failed) &middot; Gold = cleared (downstream)</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== INTERVIEW PREP ===== -->
+<section class="section">
+  <h2><span class="hash">09</span> Interview Prep</h2>
+
+  <div class="accordion">
+    <div class="accordion-item open">
+      <button class="accordion-header" onclick="toggleAccordion(this)">
+        <span>30-second answer</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <p>"To rerun only the 5th task without affecting upstream tasks, use a <strong>DAG-based pipeline system with output caching</strong> (like Vertex AI Pipelines) where tasks 1-4 reuse cached outputs, and only task 5 + downstream re-execute. Alternatively, design tasks to be <strong>idempotent</strong> so you can safely retry task 5 alone. For long-running tasks, use <strong>checkpointing</strong> where partial progress is saved to persistent storage so the task resumes from its last committed offset rather than from scratch."</p>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <button class="accordion-header" onclick="toggleAccordion(this)">
+        <span>90-second STAR answer</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <p><strong>Situation:</strong> Production data pipeline with 10 sequential tasks processing customer transactions. Task 5 (data enrichment) failed at 2 AM due to a dependency timeout.</p>
+        <p><strong>Task:</strong> Resume the pipeline from task 5 without re-processing tasks 1-4 (which took 3 hours).</p>
+        <p><strong>Action:</strong> Used Vertex AI Pipelines rerun — T1-T4 outputs were cached. Fixed the timeout issue in task 5's config (increased timeout from 30s to 120s). Triggered rerun from task 5. Pipeline skipped T1-T4 (cache hit) and re-ran T5 through T10.</p>
+        <p><strong>Result:</strong> Pipeline completed in 45 minutes instead of 4 hours. Recovery required zero data reprocessing. Added lifecycle policies for automatic retry on timeout errors for future runs.</p>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <button class="accordion-header" onclick="toggleAccordion(this)">
+        <span>3-minute technical walkthrough</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <p><strong>Depth 1 — Problem analysis:</strong> The 10 tasks form a sequential DAG. Task 5 failed. Tasks 1-4 produced deterministic outputs (idempotent + no side effects). The naive restart wastes 3 hours of compute. The solution must: (a) preserve T1-T4 results, (b) re-run T5 with fixes, (c) re-run T6-T10 with T5's fresh output.</p>
+        <p><strong>Depth 2 — Strategy comparison:</strong> Strategy C (idempotent retry) works if the failure is transient — just retry T5. Strategy B (checkpointing) works if T5 processes data in batches — resume from last checkpoint. Strategy A (DAG rerun) works when the pipeline framework supports caching — reuse upstream artifacts. Strategy D (saga) is for distributed transactions with side effects.</p>
+        <p><strong>Depth 3 — GCP implementation details:</strong> Vertex AI Pipelines rerun (preview) — call <code>pipeline_job.rerun(task_name="task-5")</code>. Cloud Run Jobs — use checkpointing to GCS with <code>BATCH_TASK_RETRY_ATTEMPT</code> env var. Batch — lifecycle policies with <code>maxRetryCount: 3</code> and exit code filters. Workflows — <code>try/retry</code> with <code>backoff_duration</code> and compensating steps.</p>
+        <p><strong>Depth 4 — Failure modes:</strong> Non-deterministic tasks break caching (always use fixed seeds). Checkpoint writes may fail (write to multiple locations). Compensating actions may also fail (use idempotent compensation with retries). Cache invalidation is tricky (version input schemas).</p>
+        <p><strong>Depth 5 — Design principles:</strong> Always design pipelines with <strong>idempotency</strong> as a first-class concern. <strong>Output immutability</strong> (write-once) makes caching natural. <strong>Deterministic tasks</strong> enable safe retries. <strong>Explicit failure modes</strong> (via exit codes) allow lifecycle policies to handle different failures differently.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <h3>Possible Interview Questions</h3>
+  <div class="interview-tab">
+    <div class="q">Q: Your pipeline task failed after 2 hours of processing. How do you recover?</div>
+    <div class="a">A: First, assess if the failure is transient (network, preemption) or permanent (code bug, data issue). For transient, use lifecycle policies with automatic retry (Batch) or checkpointing (Cloud Run Jobs). For permanent, use DAG rerun (Vertex AI Pipelines) with output caching to avoid redoing upstream work. Always design for idempotency so retries are safe.</div>
+  </div>
+  <div class="interview-tab">
+    <div class="q">Q: What's the difference between retry and rerun?</div>
+    <div class="a">A: <strong>Retry</strong> re-executes the same task with the same inputs, expecting transient issues to resolve. <strong>Rerun</strong> implies you may modify config or fix bugs before re-executing. Retry is automatic (lifecycle policies), rerun is typically manual or triggered after a code/config change.</div>
+  </div>
+  <div class="interview-tab">
+    <div class="q">Q: How do you handle side effects in retryable tasks?</div>
+    <div class="a">A: Use the <strong>Saga pattern</strong> — each task has a compensating action. If T5 sends an email and then fails, the compensation undoes the email (or marks it as rolled back). Pair this with idempotency keys so retries don't send duplicate emails. GCP Workflows has native support for this pattern.</div>
+  </div>
+  <div class="interview-tab">
+    <div class="q">Q: In Airflow, how do you rerun a failed task without affecting upstream tasks?</div>
+    <div class="a">A: Use <strong>Clear with Downstream</strong>. In Airflow, "Clear" resets a task instance's state to None, so the scheduler re-executes it. Clear with Downstream resets the failed task AND all downstream tasks — upstream tasks stay untouched. This is exactly like our 10-task scenario: T1-T4 are preserved, T5 re-runs, and T6-T10 also re-run with T5's fresh output. To rerun only T5 alone, use <strong>Clear Current Task Only</strong>.</div>
+  </div>
+  <div class="interview-tab">
+    <div class="q">Q: Is Airflow only for data pipelines? Can you use it for multi-cloud resource provisioning?</div>
+    <div class="a">A: No, Airflow is not limited to data pipelines. It's a general-purpose workflow orchestrator with 300+ operators for GCP, AWS, Azure, and others. You can use it to provision VMs, deploy Kubernetes clusters, manage IAM, run Terraform, trigger Cloud Run deployments — anything that has an API. Each cloud also has a managed Airflow service: Cloud Composer (GCP), MWAA (AWS), and Managed Airflow (Azure).</div>
+  </div>
+</section>
+
+<!-- ===== CHEATSHEET ===== -->
+<section class="section">
+  <h2><span class="hash">10</span> Quick Reference Cheatsheet</h2>
+
+  <div class="table-container">
+    <table class="ds-table striped">
+      <thead>
+        <tr><th>Concept</th><th>What It Means</th><th>GCP Equivalent</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>DAG Cache</strong></td><td>Store task outputs for reuse on rerun</td><td>Vertex AI Pipelines artifact caching</td></tr>
+        <tr><td><strong>Checkpointing</strong></td><td>Persist partial progress to resume mid-task</td><td>Cloud Storage checkpoint blobs</td></tr>
+        <tr><td><strong>Idempotency</strong></td><td>Running N times = same result as 1 time</td><td>Unique keys, IF NOT EXISTS, MERGE</td></tr>
+        <tr><td><strong>Lifecycle Policy</strong></td><td>Auto-actions based on exit codes</td><td>Batch lifecyclePolicies[]</td></tr>
+        <tr><td><strong>Compensation</strong></td><td>Undo a completed step in a saga</td><td>Workflows except block</td></tr>
+        <tr><td><strong>Backoff</strong></td><td>Increasing delay between retries</td><td>Workflows backoff_duration * factor</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <span>Cloud Task Rerun Strategies — Explained</span>
+  <span>Self-contained version &middot; Works offline</span>
+</footer>
+
+</main>
+
+<script>
+/* Accordion toggle */
+function toggleAccordion(header){
+  var item = header.parentElement;
+  item.classList.toggle('open');
+}
+
+/* Copy code — ghost emoji style */
+function copyCode(btn){
+  var wrap = btn.parentElement;
+  var code = wrap.querySelector('.code-block');
+  var text = code.textContent || code.innerText;
+  navigator.clipboard.writeText(text).catch(function(){});
+  btn.textContent = '\u2705';
+  setTimeout(function(){ btn.textContent = '\uD83D\uDCCB'; }, 1500);
+}
+</script>
+
+</body>
+</html>

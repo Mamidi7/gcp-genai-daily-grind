@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>shadcn/ui — Design System Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+/* ===== SHADCN-ADAPTED DESIGN SYSTEM ===== */
+
+/* Base tokens */
+:root {
+  --background: #ffffff;
+  --foreground: #09090b;
+  --card: #ffffff;
+  --card-foreground: #09090b;
+  --popover: #ffffff;
+  --popover-foreground: #09090b;
+  --primary: #18181b;
+  --primary-foreground: #fafafa;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+  --success: #16a34a;
+  --success-foreground: #fafafa;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #18181b;
+  --radius: 0.5rem;
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-lg: calc(var(--radius) + 2px);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #09090b;
+    --foreground: #fafafa;
+    --card: #09090b;
+    --card-foreground: #fafafa;
+    --popover: #09090b;
+    --popover-foreground: #fafafa;
+    --primary: #fafafa;
+    --primary-foreground: #18181b;
+    --secondary: #27272a;
+    --secondary-foreground: #fafafa;
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+    --accent: #27272a;
+    --accent-foreground: #fafafa;
+    --destructive: #7f1d1d;
+    --destructive-foreground: #fafafa;
+    --success: #166534;
+    --success-foreground: #fafafa;
+    --border: #27272a;
+    --input: #27272a;
+    --ring: #d4d4d8;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  }
+}
+
+/* Toggle for manual dark mode override */
+[data-theme="dark"] {
+  --background: #09090b;
+  --foreground: #fafafa;
+  --card: #09090b;
+  --card-foreground: #fafafa;
+  --popover: #09090b;
+  --popover-foreground: #fafafa;
+  --primary: #fafafa;
+  --primary-foreground: #18181b;
+  --secondary: #27272a;
+  --secondary-foreground: #fafafa;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --accent: #27272a;
+  --accent-foreground: #fafafa;
+  --destructive: #7f1d1d;
+  --destructive-foreground: #fafafa;
+  --success: #166534;
+  --success-foreground: #fafafa;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #d4d4d8;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--font-sans);
+  background:var(--background);
+  color:var(--foreground);
+  font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ===== GLOBAL UTILITY ===== */
+.container{max-width:1000px;margin:0 auto;padding:0 24px;}
+
+/* ===== TOPBAR ===== */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:var(--background);border-bottom:1px solid var(--border);
+  height:56px;display:flex;align-items:center;
+}
+.topbar-inner{max-width:1000px;margin:0 auto;width:100%;padding:0 24px;display:flex;justify-content:space-between;align-items:center;}
+.brand{font-size:15px;font-weight:600;letter-spacing:-0.02em;display:flex;align-items:center;gap:8px;}
+.brand .sh-logo{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--primary);color:var(--primary-foreground);border-radius:calc(var(--radius) - 4px);font-size:11px;font-weight:700;}
+.brand span{color:var(--muted-foreground);font-weight:400;}
+.top-actions{display:flex;gap:8px;align-items:center;}
+
+/* ===== SHADCN BUTTON ===== */
+.sh-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;
+  border-radius:var(--radius-sm);font-size:0.875rem;font-weight:500;line-height:1;
+  white-space:nowrap;transition:all 0.15s ease;cursor:pointer;
+  outline:none;border:1px solid transparent;padding:0.5rem 1rem;height:2.25rem;
+  text-decoration:none;font-family:var(--font-sans);
+}
+.sh-btn:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ring);}
+.sh-btn:disabled{opacity:0.5;pointer-events:none;}
+.sh-btn:active{transform:translateY(1px);}
+
+.sh-btn-primary{background:var(--primary);color:var(--primary-foreground);}
+.sh-btn-primary:hover{opacity:0.9;}
+.sh-btn-secondary{background:var(--secondary);color:var(--secondary-foreground);}
+.sh-btn-secondary:hover{background:var(--accent);}
+.sh-btn-destructive{background:var(--destructive);color:var(--destructive-foreground);}
+.sh-btn-destructive:hover{opacity:0.9;}
+.sh-btn-outline{border-color:var(--input);background:transparent;color:var(--foreground);}
+.sh-btn-outline:hover{background:var(--accent);}
+.sh-btn-ghost{background:transparent;color:var(--foreground);}
+.sh-btn-ghost:hover{background:var(--accent);}
+.sh-btn-success{background:var(--success);color:var(--success-foreground);}
+.sh-btn-success:hover{opacity:0.9;}
+
+.sh-btn-sm{padding:0.25rem 0.75rem;height:2rem;font-size:0.8125rem;}
+.sh-btn-lg{padding:0.75rem 1.5rem;height:2.75rem;font-size:1rem;}
+.sh-btn-icon{padding:0;width:2.25rem;justify-content:center;}
+.sh-btn-icon.sh-btn-sm{width:2rem;}
+.sh-btn-icon svg{width:16px;height:16px;}
+
+/* ===== SHADCN CARD ===== */
+.sh-card{
+  border-radius:var(--radius);border:1px solid var(--border);
+  background:var(--card);color:var(--card-foreground);
+  box-shadow:var(--shadow-sm);transition:box-shadow 0.2s,transform 0.2s;
+}
+.sh-card-hover:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.sh-card-header{padding:1.5rem 1.5rem 0;display:flex;flex-direction:column;gap:0.25rem;}
+.sh-card-header h3{font-size:1.125rem;font-weight:600;margin:0;line-height:1.4;}
+.sh-card-header p{font-size:0.875rem;color:var(--muted-foreground);margin:0;}
+.sh-card-content{padding:1.5rem;font-size:0.875rem;line-height:1.6;}
+.sh-card-footer{padding:0 1.5rem 1.5rem;display:flex;align-items:center;gap:0.5rem;}
+
+/* ===== SHADCN BADGE ===== */
+.sh-badge{
+  display:inline-flex;align-items:center;
+  border-radius:calc(var(--radius) - 2px);border:1px solid transparent;
+  padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;line-height:1.25;white-space:nowrap;
+  transition:all .15s;cursor:default;
+}
+.sh-badge-default{background:var(--primary);color:var(--primary-foreground);}
+.sh-badge-secondary{background:var(--secondary);color:var(--secondary-foreground);}
+.sh-badge-destructive{background:var(--destructive);color:var(--destructive-foreground);}
+.sh-badge-outline{border-color:var(--border);color:var(--foreground);}
+.sh-badge-success{background:var(--success);color:var(--success-foreground);}
+
+/* ===== SHADCN INPUT ===== */
+.sh-input{
+  display:flex;height:2.25rem;width:100%;
+  border-radius:var(--radius-sm);border:1px solid var(--input);
+  background:transparent;padding:0.5rem 0.75rem;
+  font-size:0.875rem;font-family:var(--font-sans);color:var(--foreground);
+  transition:box-shadow 0.15s,border-color 0.15s;
+}
+.sh-input:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ring);border-color:var(--ring);}
+.sh-input::placeholder{color:var(--muted-foreground);}
+
+/* ===== SHADCN SEPARATOR ===== */
+.sh-separator{border:none;height:1px;background:var(--border);margin:1rem 0;}
+
+/* ===== SHADCN TABLE ===== */
+.sh-table{width:100%;border-collapse:collapse;}
+.sh-table th{
+  text-align:left;padding:0.75rem 1rem;
+  font-size:0.75rem;font-weight:600;text-transform:uppercase;
+  letter-spacing:0.05em;color:var(--muted-foreground);
+  border-bottom:1px solid var(--border);
+}
+.sh-table td{padding:0.75rem 1rem;border-bottom:1px solid var(--border);font-size:0.875rem;}
+.sh-table tbody tr:hover{background:var(--muted);}
+.sh-table tr:last-child td{border-bottom:none;}
+
+/* ===== SHADCN CODE ===== */
+.sh-code{
+  border-radius:var(--radius);background:var(--muted);
+  padding:1rem 1.25rem;font-family:var(--font-mono);
+  font-size:0.8125rem;line-height:1.6;overflow-x:auto;
+  margin:0.75rem 0;position:relative;
+}
+.sh-code .hl{color:#dc2626;font-weight:500;}
+.sh-code .cm{color:var(--muted-foreground);}
+.sh-code .str{color:#16a34a;}
+.sh-code .fn{color:#2563eb;}
+.sh-code .kw{color:#9333ea;}
+.sh-code .num{color:#d97706;}
+
+/* ===== SHADCN TABS ===== */
+.sh-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1rem;}
+.sh-tab{
+  padding:0.5rem 1rem;font-size:0.875rem;font-weight:500;
+  color:var(--muted-foreground);cursor:pointer;border:none;background:transparent;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:all .15s;font-family:var(--font-sans);
+}
+.sh-tab:hover{color:var(--foreground);}
+.sh-tab.active{color:var(--foreground);border-bottom-color:var(--foreground);}
+.sh-tab-panel{display:none;}
+.sh-tab-panel.active{display:block;}
+
+/* ===== SHADCN ALERT ===== */
+.sh-alert{
+  border-radius:var(--radius);border:1px solid var(--border);
+  padding:1rem 1.25rem;display:flex;gap:0.75rem;align-items:flex-start;
+}
+.sh-alert-destructive{border-color:var(--destructive);background:rgba(239,68,68,0.03);}
+.sh-alert-destructive .alert-title{color:var(--destructive);font-weight:600;}
+.sh-alert-success{border-color:var(--success);background:rgba(22,163,74,0.03);}
+.sh-alert-success .alert-title{color:var(--success);font-weight:600;}
+.sh-alert .alert-title{font-size:0.875rem;margin-bottom:2px;}
+.sh-alert .alert-desc{font-size:0.8125rem;color:var(--muted-foreground);}
+
+/* ===== SHADCN DIALOG/MODAL ===== */
+.sh-dialog-overlay{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;
+  animation:sh-fade-in 0.15s ease-out;
+}
+.sh-dialog-overlay.open{display:flex;}
+.sh-dialog{
+  background:var(--popover);color:var(--popover-foreground);
+  border-radius:var(--radius-lg);border:1px solid var(--border);
+  box-shadow:var(--shadow-lg);max-width:450px;width:90%;
+  max-height:85vh;overflow-y:auto;animation:sh-scale-in 0.15s ease-out;
+}
+.sh-dialog-header{padding:1.5rem 1.5rem 0;}
+.sh-dialog-header h2{font-size:1.125rem;font-weight:600;}
+.sh-dialog-header p{font-size:0.875rem;color:var(--muted-foreground);margin-top:4px;}
+.sh-dialog-content{padding:1.5rem;}
+.sh-dialog-footer{padding:0 1.5rem 1.5rem;display:flex;justify-content:flex-end;gap:0.5rem;}
+
+/* ===== TOGGLE SWITCH ===== */
+.sh-switch{
+  display:inline-flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.875rem;
+}
+.sh-switch input{display:none;}
+.sh-switch .track{
+  width:40px;height:22px;border-radius:9999px;background:var(--input);
+  transition:background .2s;position:relative;flex-shrink:0;
+}
+.sh-switch .track::after{
+  content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;
+  border-radius:50%;background:white;transition:transform .2s;
+}
+.sh-switch input:checked+.track{background:var(--primary);}
+.sh-switch input:checked+.track::after{transform:translateX(18px);}
+
+/* ===== SLIDER ===== */
+.sh-slider{
+  -webkit-appearance:none;appearance:none;width:100%;height:6px;
+  border-radius:9999px;background:var(--input);outline:none;
+}
+.sh-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:18px;height:18px;
+  border-radius:50%;background:var(--primary);cursor:pointer;
+  border:2px solid var(--background);box-shadow:var(--shadow-sm);
+}
+
+/* ===== PROGRESS ===== */
+.sh-progress{height:8px;border-radius:9999px;background:var(--secondary);overflow:hidden;}
+.sh-progress .bar{height:100%;border-radius:9999px;background:var(--primary);transition:width .5s ease;}
+
+/* ===== ANIMATIONS ===== */
+@keyframes sh-fade-in{
+  from{opacity:0;transform:translateY(4px);}
+  to{opacity:1;transform:translateY(0);}
+}
+@keyframes sh-scale-in{
+  from{opacity:0;transform:scale(0.95);}
+  to{opacity:1;transform:scale(1);}
+}
+@keyframes sh-slide-up{
+  from{opacity:0;transform:translateY(12px);}
+  to{opacity:1;transform:translateY(0);}
+}
+@keyframes sh-pulse{
+  0%,100%{opacity:1;}
+  50%{opacity:0.5;}
+}
+.sh-fade-in{animation:sh-fade-in 0.25s ease-out forwards;}
+.sh-slide-up{animation:sh-slide-up 0.3s ease-out forwards;}
+.sh-pulse{animation:sh-pulse 2s ease-in-out infinite;}
+
+/* ===== TOAST (for demo feedback) ===== */
+.sh-toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--primary);color:var(--primary-foreground);
+  padding:0.75rem 1.25rem;border-radius:var(--radius);
+  font-size:0.875rem;font-weight:500;z-index:200;
+  box-shadow:var(--shadow-lg);opacity:0;transition:opacity .3s;
+  pointer-events:none;
+}
+.sh-toast.show{opacity:1;}
+
+/* ===== FLOWCHART COMPONENT ===== */
+.flow-grid{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;}
+.flow-node{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:14px 18px;border:1px solid var(--border);border-radius:var(--radius);
+  background:var(--card);min-width:90px;text-align:center;
+  transition:all .2s;cursor:default;
+}
+.flow-node:hover{box-shadow:var(--shadow-md);border-color:var(--ring);transform:translateY(-1px);}
+.flow-node .label{font-size:0.75rem;font-weight:600;color:var(--foreground);}
+.flow-node .sub{font-size:0.65rem;color:var(--muted-foreground);margin-top:2px;}
+.flow-arrow{font-size:18px;color:var(--muted-foreground);flex-shrink:0;}
+
+/* ===== COPY BUTTON ===== */
+.copy-btn{
+  position:absolute;top:8px;right:8px;
+  padding:4px 8px;font-size:11px;border-radius:var(--radius-sm);
+  background:var(--secondary);color:var(--secondary-foreground);
+  border:1px solid var(--border);cursor:pointer;font-family:var(--font-sans);
+  opacity:0;transition:opacity .2s;
+}
+.sh-code:hover .copy-btn{opacity:1;}
+
+/* ===== PAGE LAYOUT ===== */
+.page-header{padding:2.5rem 0 1.5rem;}
+.page-header h1{font-size:2rem;font-weight:700;letter-spacing:-0.025em;line-height:1.15;margin-bottom:0.5rem;}
+.page-header .desc{font-size:1rem;color:var(--muted-foreground);max-width:600px;}
+.page-header .badge-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:0.75rem;}
+
+.section-card{margin-bottom:1.5rem;}
+.section-card .sh-card-header h2{font-size:1.25rem;font-weight:600;}
+.section-card .sh-card-header p{font-size:0.85rem;}
+
+/* grid helpers */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;}
+@media(max-width:768px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+
+/* component showcase */
+.showcase-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 0;}
+.showcase-label{font-size:0.75rem;font-weight:500;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:0.05em;width:100%;margin-bottom:2px;}
+
+.token-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin:8px 0;}
+.token-item{
+  padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);
+  cursor:pointer;transition:all .15s;font-size:0.8rem;
+}
+.token-item:hover{border-color:var(--ring);box-shadow:var(--shadow-sm);}
+.token-item .name{font-family:var(--font-mono);font-size:0.7rem;color:var(--muted-foreground);}
+.token-item .val{font-family:var(--font-mono);font-size:0.75rem;color:var(--foreground);font-weight:500;margin-top:2px;}
+.token-item .swatch{width:100%;height:16px;border-radius:2px;border:1px solid var(--border);margin-bottom:4px;}
+
+footer{margin-top:3rem;padding:1.5rem 0;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:0.8rem;color:var(--muted-foreground);}
+
+/* component demo area */
+.demo-area{padding:20px;border:2px dashed var(--border);border-radius:var(--radius);margin:12px 0;text-align:center;}
+.demo-area p{font-size:0.85rem;color:var(--muted-foreground);}
+
+/* ===== SVG PIPELINE ANIMATIONS ===== */
+@keyframes pipe-flow{to{stroke-dashoffset:-24;}}
+@keyframes packet-move{
+  0%{left:0%;opacity:0;}
+  5%{opacity:1;}
+  85%{opacity:1;}
+  100%{left:calc(100% - 14px);opacity:0;}
+}
+@keyframes pulse-glow{0%,100%{opacity:1;}50%{opacity:0.5;}}
+@keyframes fade-in-up{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@keyframes dash{to{stroke-dashoffset:-20;}}
+
+.svgi-arrow{stroke:var(--muted-foreground);stroke-width:1.5;stroke-dasharray:6 4;fill:none;animation:pipe-flow 1s linear infinite;}
+.svgi-box{cursor:pointer;transition:all .2s;}
+.svgi-box rect{fill:var(--card);stroke:var(--border);stroke-width:1;rx:8;transition:all .2s;}
+.svgi-box:hover rect{stroke:var(--ring);stroke-width:1.5;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.08));}
+.svgi-box text{fill:var(--foreground);font-family:var(--font-sans);font-size:13px;font-weight:500;text-anchor:middle;dominant-baseline:central;}
+.svgi-box .ts{fill:var(--muted-foreground);font-size:10px;font-weight:400;}
+.svgi-box.active rect{stroke:var(--ring);stroke-width:1.5;}
+
+.svgi-label{fill:var(--muted-foreground);font-family:var(--font-mono);font-size:9px;text-anchor:middle;}
+
+.pipeline-timeline{display:flex;justify-content:space-between;margin-top:8px;font-size:0.7rem;font-family:var(--font-mono);color:var(--muted-foreground);padding:0 10px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="sh-logo">S</span> shadcn/ui <span>· design system</span></div>
+    <div class="top-actions">
+      <button class="sh-btn sh-btn-sm sh-btn-outline" onclick="document.getElementById('dialogOverlay').classList.add('open')">Preview Dialog</button>
+      <button class="sh-btn sh-btn-sm sh-btn-ghost" onclick="toggleTheme()"><i data-lucide="moon" style="width:16px;height:16px;"></i></button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="badge-row">
+    <span class="sh-badge sh-badge-default">v1.0</span>
+    <span class="sh-badge sh-badge-secondary">vanilla HTML</span>
+    <span class="sh-badge sh-badge-secondary">no React</span>
+    <span class="sh-badge sh-badge-outline">clickable demos</span>
+  </div>
+  <h1>shadcn/ui Components</h1>
+  <div class="desc">Live, clickable reference for all shadcn components adapted to vanilla HTML/CSS. Click, toggle, slide, and interact — then copy the code.</div>
+</div>
+
+<hr class="sh-separator" />
+
+<!-- SECTION 1: FLOWCHART -->
+<section class="section-card">
+  <div class="sh-card">
+    <div class="sh-card-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div><h2>Architecture Flow</h2><p>Click any node to see details. shadcn-style interactive flowchart.</p></div>
+        <span class="sh-badge sh-badge-secondary">interactive</span>
+      </div>
+    </div>
+    <div class="sh-card-content">
+      <div class="flow-grid" id="flowGrid">
+        <div class="flow-node" onclick="showFlowInfo('Browser','Sends HTTP request. Could be curl, web app, mobile client, or another service.')">
+          <i data-lucide="globe" style="width:22px;height:22px;margin-bottom:4px;color:var(--foreground);"></i>
+          <div class="label">Browser</div>
+          <div class="sub">HTTP request</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node" onclick="showFlowInfo('Cloud Run','Managed compute. Receives request on port 8080. Auto-scales containers.')">
+          <i data-lucide="cloud" style="width:22px;height:22px;margin-bottom:4px;color:var(--foreground);"></i>
+          <div class="label">Cloud Run</div>
+          <div class="sub">port 8080</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node" onclick="showFlowInfo('Gunicorn','WSGI HTTP server. Manages worker processes. Handles concurrent requests.')">
+          <i data-lucide="settings" style="width:22px;height:22px;margin-bottom:4px;color:var(--foreground);"></i>
+          <div class="label">Gunicorn</div>
+          <div class="sub">WSGI workers</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node" onclick="showFlowInfo('Flask','Your Python app. Route handlers, business logic, response generation.')">
+          <i data-lucide="file-code" style="width:22px;height:22px;margin-bottom:4px;color:var(--foreground);"></i>
+          <div class="label">Flask</div>
+          <div class="sub">app routes</div>
+        </div>
+      </div>
+      <div id="flowInfo" class="sh-alert sh-alert-success" style="margin-top:12px;display:none;">
+        <div><div class="alert-title" id="flowTitle">Node</div><div class="alert-desc" id="flowDesc">Click a node above.</div></div>
+      </div>
+      <div class="sh-code" style="margin-top:12px;font-size:0.75rem;">
+<span class="cm">&lt;!-- Flowchart HTML pattern — copy this structure --&gt;</span>
+&lt;div class="<span class="hl">flow-grid</span>"&gt;
+  &lt;div class="<span class="hl">flow-node</span>" onclick="showFlowInfo('Name','Desc')"&gt;
+    &lt;div class="icon"&gt;🌐&lt;/div&gt;
+    &lt;div class="label"&gt;Service&lt;/div&gt;
+    &lt;div class="sub"&gt;detail&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="flow-arrow"&gt;→&lt;/div&gt;
+&lt;/div&gt;
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SVG ANIMATED PIPELINE -->
+<section class="section-card">
+  <div class="sh-card">
+    <div class="sh-card-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div><h2>Animated SVG Pipeline</h2><p>Properly aligned SVG flow. Click any stage to see details. Data packets use SVG-native animations.</p></div>
+        <span class="sh-badge sh-badge-default">svg-animated</span>
+      </div>
+    </div>
+    <div class="sh-card-content">
+      <div style="text-align:center;">
+        <svg class="svgi-flow" viewBox="0 0 720 160" style="max-width:700px;margin:0 auto;">
+          <defs>
+            <marker id="arr" markerWidth="8" markerHeight="6" refX="9" refY="3" orient="auto">
+              <path d="M0,0 L8,3 L0,6" fill="var(--muted-foreground)"/>
+            </marker>
+          </defs>
+
+          <!-- Box 1: Browser — x=35, w=110, right=145 -->
+          <g class="svgi-box" onclick="showPipeInfo('Browser','HTTP request originates here. Could be curl, mobile app, or another service.','Step 1: Client sends request')">
+            <rect x="35" y="55" width="110" height="44" rx="6"/>
+            <text x="90" y="72" style="font-size:13px;">Browser</text>
+            <text x="90" y="88" style="font-size:9px;fill:var(--muted-foreground);">HTTP client</text>
+          </g>
+
+          <!-- Arrow 1: 145→215 -->
+          <line x1="145" y1="77" x2="215" y2="77" class="svgi-arrow" marker-end="url(#arr)"/>
+
+          <!-- Box 2: Cloud Run — x=215, w=110, right=325 -->
+          <g class="svgi-box" onclick="showPipeInfo('Cloud Run','Managed compute platform. Routes requests to Gunicorn on port 8080. Auto-scales.','Step 2: Cloud Run receives request')">
+            <rect x="215" y="55" width="110" height="44" rx="6"/>
+            <text x="270" y="72" style="font-size:13px;">Cloud Run</text>
+            <text x="270" y="88" style="font-size:9px;fill:var(--muted-foreground);">port 8080</text>
+          </g>
+
+          <!-- Arrow 2: 325→395 -->
+          <line x1="325" y1="77" x2="395" y2="77" class="svgi-arrow" marker-end="url(#arr)"/>
+
+          <!-- Box 3: Gunicorn — x=395, w=110, right=505 -->
+          <g class="svgi-box" onclick="showPipeInfo('Gunicorn','WSGI HTTP server. Manages worker processes for concurrent requests.','Step 3: Gunicorn processes request')">
+            <rect x="395" y="55" width="110" height="44" rx="6"/>
+            <text x="450" y="72" style="font-size:13px;">Gunicorn</text>
+            <text x="450" y="88" style="font-size:9px;fill:var(--muted-foreground);">WSGI workers</text>
+          </g>
+
+          <!-- Arrow 3: 505→575 -->
+          <line x1="505" y1="77" x2="575" y2="77" class="svgi-arrow" marker-end="url(#arr)"/>
+
+          <!-- Box 4: Flask — x=575, w=110, right=685 -->
+          <g class="svgi-box" onclick="showPipeInfo('Flask','Python web framework. Route handlers parse request and generate response.','Step 4: Flask generates response')">
+            <rect x="575" y="55" width="110" height="44" rx="6"/>
+            <text x="630" y="72" style="font-size:13px;">Flask</text>
+            <text x="630" y="88" style="font-size:9px;fill:var(--muted-foreground);">app routes</text>
+          </g>
+
+          <!-- Return path (below boxes) -->
+          <path d="M630,99 L630,118 L90,118 L90,99" fill="none" stroke="var(--muted-foreground)" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arr)"/>
+          <text x="360" y="132" style="font-size:9px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">Response returns same path</text>
+
+          <!-- Step labels -->
+          <text x="90" y="150" style="font-size:8px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">Step 1: Request</text>
+          <text x="270" y="150" style="font-size:8px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">Step 2: Route</text>
+          <text x="450" y="150" style="font-size:8px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">Step 3: Process</text>
+          <text x="630" y="150" style="font-size:8px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">Step 4: Respond</text>
+
+          <!-- DATA PACKETS — one per arrow, travels only on dash line -->
+          <!-- Packet 1: Arrow 1 (Browser → Cloud Run, 145→215) -->
+          <circle r="5" fill="var(--primary)" opacity="0">
+            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.85;1" dur="1.5s" repeatCount="indefinite"/>
+            <animate attributeName="cx" values="145;180;215" dur="1.5s" repeatCount="indefinite"/>
+            <animate attributeName="cy" values="77;77;77" dur="1.5s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Packet 2: Arrow 2 (Cloud Run → Gunicorn, 325→395) -->
+          <circle r="5" fill="var(--primary)" opacity="0">
+            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.85;1" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+            <animate attributeName="cx" values="325;360;395" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+            <animate attributeName="cy" values="77;77;77" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Packet 3: Arrow 3 (Gunicorn → Flask, 505→575) -->
+          <circle r="5" fill="var(--primary)" opacity="0">
+            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.85;1" dur="1.5s" begin="1s" repeatCount="indefinite"/>
+            <animate attributeName="cx" values="505;540;575" dur="1.5s" begin="1s" repeatCount="indefinite"/>
+            <animate attributeName="cy" values="77;77;77" dur="1.5s" begin="1s" repeatCount="indefinite"/>
+          </circle>
+
+          <!-- Return packet: follows return path: right → down → across → up → left edge -->
+          <circle r="4" fill="var(--muted-foreground)" opacity="0">
+            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.85;1" dur="2.5s" begin="1.2s" repeatCount="indefinite"/>
+            <animate attributeName="cx" values="630;630;90;90" dur="2.5s" begin="1.2s" repeatCount="indefinite"/>
+            <animate attributeName="cy" values="99;118;118;99" dur="2.5s" begin="1.2s" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+      </div>
+
+      <div id="pipeInfo" class="sh-alert" style="margin-top:12px;display:none;animation:sh-fade-in 0.2s ease-out;">
+        <i data-lucide="info" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;color:var(--muted-foreground);"></i>
+        <div>
+          <div class="alert-title" id="pipeTitle" style="font-weight:600;font-size:0.9rem;">Stage</div>
+          <div class="alert-desc" id="pipeDesc">Click a pipeline stage above.</div>
+          <div id="pipeMeta" style="font-size:0.75rem;color:var(--muted-foreground);margin-top:4px;font-family:var(--font-mono);"></div>
+        </div>
+      </div>
+
+      <div class="sh-code" style="margin-top:12px;font-size:0.7rem;line-height:1.5;">
+<span class="cm">&lt;!-- Copy this SVG pipeline pattern --&gt;</span>
+&lt;svg viewBox="0 0 720 160"&gt;
+  &lt;defs&gt;
+    &lt;marker id="arr" markerWidth="8" markerHeight="6"
+      refX="9" refY="3" orient="auto"&gt;
+      &lt;path d="M0,0 L8,3 L0,6" fill="var(--muted-foreground)"/&gt;
+    &lt;/marker&gt;
+  &lt;/defs&gt;
+
+  &lt;!-- Box: x=35, width=110, gap=70 --&gt;
+  &lt;g class="<span class="hl">svgi-box</span>" onclick="showPipeInfo('Title','Desc','Meta')"&gt;
+    &lt;rect x="35" y="55" width="110" height="44" rx="6"/&gt;
+    &lt;text x="90" y="72" style="font-size:13px;"&gt;Service&lt;/text&gt;
+    &lt;text x="90" y="88" style="font-size:9px;fill:var(--muted-foreground);"&gt;detail&lt;/text&gt;
+  &lt;/g&gt;
+
+  &lt;!-- Animated arrow: right edge → next left edge --&gt;
+  &lt;line x1="145" y1="77" x2="215" y2="77"
+    class="<span class="hl">svgi-arrow</span>" marker-end="url(#arr)"/&gt;
+
+  &lt;!-- Data packet (SVG-native animation) --&gt;
+  &lt;circle r="5" fill="var(--primary)" opacity="0"&gt;
+    &lt;animate attributeName="opacity" values="0;1;1;0"
+      keyTimes="0;0.03;0.9;1" dur="2.5s" repeatCount="indefinite"/&gt;
+    &lt;animate attributeName="cx" values="145;215;325;395;505;575"
+      dur="2.5s" repeatCount="indefinite"/&gt;
+    &lt;animate attributeName="cy" values="77;77;77;77;77;77"
+      dur="2.5s" repeatCount="indefinite"/&gt;
+  &lt;/circle&gt;
+&lt;/svg&gt;
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 2: BUTTONS -->
+<section class="section-card">
+  <div class="sh-card">
+    <div class="sh-card-header">
+      <div><h2>Button Variants</h2><p>6 variants × 3 sizes. Click to see feedback.</p></div>
+    </div>
+    <div class="sh-card-content">
+      <div class="showcase-label">Default size</div>
+      <div class="showcase-row">
+        <button class="sh-btn sh-btn-primary" onclick="toast('Primary clicked')">Primary</button>
+        <button class="sh-btn sh-btn-secondary" onclick="toast('Secondary clicked')">Secondary</button>
+        <button class="sh-btn sh-btn-outline" onclick="toast('Outline clicked')">Outline</button>
+        <button class="sh-btn sh-btn-ghost" onclick="toast('Ghost clicked')">Ghost</button>
+        <button class="sh-btn sh-btn-destructive" onclick="toast('Destructive clicked')">Destructive</button>
+        <button class="sh-btn sh-btn-success" onclick="toast('Success clicked')">Success</button>
+        <button class="sh-btn sh-btn-primary" disabled>Disabled</button>
+      </div>
+
+      <div class="showcase-label" style="margin-top:12px;">Small (sm)</div>
+      <div class="showcase-row">
+        <button class="sh-btn sh-btn-sm sh-btn-primary" onclick="toast('Small primary')">Primary</button>
+        <button class="sh-btn sh-btn-sm sh-btn-secondary" onclick="toast('Small secondary')">Secondary</button>
+        <button class="sh-btn sh-btn-sm sh-btn-outline" onclick="toast('Small outline')">Outline</button>
+        <button class="sh-btn sh-btn-sm sh-btn-ghost" onclick="toast('Small ghost')">Ghost</button>
+      </div>
+
+      <div class="showcase-label" style="margin-top:12px;">Large (lg)</div>
+      <div class="showcase-row">
+        <button class="sh-btn sh-btn-lg sh-btn-primary" onclick="toast('Large primary')">Primary</button>
+        <button class="sh-btn sh-btn-lg sh-btn-outline" onclick="toast('Large outline')">Outline</button>
+      </div>
+
+      <div class="showcase-label" style="margin-top:12px;">Icon buttons</div>
+      <div class="showcase-row">
+        <button class="sh-btn sh-btn-icon sh-btn-primary" onclick="toast('Search icon')"><i data-lucide="search" style="width:16px;height:16px;"></i></button>
+        <button class="sh-btn sh-btn-icon sh-btn-outline" onclick="toast('Settings icon')"><i data-lucide="settings" style="width:16px;height:16px;"></i></button>
+        <button class="sh-btn sh-btn-icon sh-btn-ghost" onclick="toast('Menu icon')"><i data-lucide="menu" style="width:16px;height:16px;"></i></button>
+      </div>
+
+      <div class="sh-code" style="margin-top:8px;font-size:0.75rem;">
+<span class="cm">&lt;!-- Button classes --&gt;</span>
+&lt;button class="<span class="hl">sh-btn sh-btn-primary</span>"&gt;Primary&lt;/button&gt;
+&lt;button class="<span class="hl">sh-btn sh-btn-sm sh-btn-outline</span>"&gt;Small Outline&lt;/button&gt;
+&lt;button class="<span class="hl">sh-btn sh-btn-lg sh-btn-success</span>"&gt;Large Success&lt;/button&gt;
+&lt;button class="<span class="hl">sh-btn sh-btn-icon sh-btn-ghost</span>"&gt;...&lt;/button&gt;
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3: CARDS -->
+<section class="section-card">
+  <div class="sh-card">
+    <div class="sh-card-header">
+      <div><h2>Cards</h2><p>Four cards in a grid. Hover for lift effect. Click to trigger action.</p></div>
+    </div>
+    <div class="sh-card-content">
+      <div class="grid-3">
+        <div class="sh-card sh-card-hover" onclick="toast('Standard card clicked')" style="cursor:pointer;">
+          <div class="sh-card-header">
+            <span class="sh-badge sh-badge-secondary">Standard</span>
+            <h3>Gunicorn</h3>
+            <p>Production WSGI server for Flask</p>
+          </div>
+          <div class="sh-card-content">
+            Manages worker processes, handles concurrent requests. Use exec-form CMD in Dockerfile.
+          </div>
+        </div>
+        <div class="sh-card sh-card-hover" onclick="toast('Code card clicked')" style="cursor:pointer;">
+          <div class="sh-card-header">
+            <span class="sh-badge sh-badge-default">Docker</span>
+            <h3>Layer Caching</h3>
+            <p>COPY order matters</p>
+          </div>
+          <div class="sh-card-content">
+            Copy requirements.txt first, run pip install, then copy app code. Avoids reinstalling deps on every build.
+          </div>
+        </div>
+        <div class="sh-card sh-card-hover" onclick="toast('Destructive card clicked')" style="cursor:pointer;">
+          <div class="sh-card-header">
+            <span class="sh-badge sh-badge-destructive">Gotcha</span>
+            <h3>Port Binding</h3>
+            <p>0.0.0.0 not 127.0.0.1</p>
+          </div>
+          <div class="sh-card-content">
+            Inside a container, 127.0.0.1 binds to container localhost only. Cloud Run's health check won't reach it. Always use 0.0.0.0.
+          </div>
+        </div>
+      </div>
+      <div class="sh-code" style="margin-top:12px;font-size:0.75rem;">
+<span class="cm">&lt;!-- Card with hover lift --&gt;</span>
+&lt;div class="<span class="hl">sh-card sh-card-hover</span>"&gt;
+  &lt;div class="<span class="hl">sh-card-header</span>"&gt;
+    &lt;span class="<span class="hl">sh-badge sh-badge-secondary</span>"&gt;Label&lt;/span&gt;
+    &lt;h3&gt;Title&lt;/h3&gt;
+    &lt;p&gt;Description&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="<span class="hl">sh-card-content</span>"&gt;
+    Content here
+  &lt;/div&gt;
+&lt;/div&gt;
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4: BADGES + INPUTS -->
+<section class="section-card">
+  <div class="sh-card">
+    <div class="sh-card-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div><h2>Badges & Form Elements</h2><p>Click badges. Type in inputs. Toggle switches. Slide sliders.</p></div>
+        <span class="sh-badge sh-badge-outline">interactive</span>
+      </div>
+    </div>
+    <div class="sh-card-content">
+      <div class="grid-2">
+        <div>
+          <div class="showcase-label">Badge variants (clickable)</div>
+          <div class="showcase-row">
+            <span class="sh-badge sh-badge-default" onclick="toast('Default badge')" style="cursor:pointer;">default</span>
+            <span class="sh-badge sh-badge-secondary" onclick="toast('Secondary badge')" style="cursor:pointer;">secondary</span>
+            <span class="sh-badge sh-badge-destructive" onclick="toast('Destructive badge')" style="cursor:pointer;">destructive</span>
+            <span class="sh-badge sh-badge-outline" onclick="toast('Outline badge')" style="cursor:pointer;">outline</span>
+            <span class="sh-badge sh-badge-success" onclick="toast('Success badge')" style="cursor:pointer;">success</span>
+          </div>
+
+          <div class="showcase-label" style="margin-top:16px;">Input (type and see)</div>
+          <input class="sh-input" placeholder="Type something..." oninput="document.getElementById('inputMirror').textContent=this.value||'waiting...'" />
+          <p style="font-size:0.75rem;color:var(--muted-foreground);margin-top:4px;">You typed: <span id="inputMirror" style="font-family:var(--font-mono);">waiting...</span></p>
+        </div>
+
+        <div>
+          <div class="showcase-label" style="margin-top:0;">Toggle switch (click me)</div>
+          <div class="showcase-row">
+            <label class="sh-switch">
+              <input type="checkbox" onchange="toast(this.checked?'ON':'OFF')" />
+              <span class="track"></span>
+              Notifications
+            </label>
+          </div>
+          <div class="showcase-row">
+            <label class="sh-switch">
+              <input type="checkbox" />
+              <span class="track"></span>
+              Dark mode (auto)
+            </label>
+          </div>
+
+          <div class="showcase-label" style="margin-top:16px;">Slider (drag me)</div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <input type="range" min="0" max="100" value="65" class="sh-slider" oninput="document.getElementById('sliderVal').textContent=this.value+'%'" />
+            <span id="sliderVal" style="font-family:var(--font-mono);font-size:0.85rem;min-width:40px;">65%</span>
+          </div>
+
+          <div class="showcase-label" style="margin-top:16px;">Progress bar (animated)</div>
+          <div class="sh-progress" style="width:100%;">
+            <div class="bar" style="width:65%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 5: ALERTS + TABLE -->
+<section class="section-card">
+  <div class="sh-card">
+    <div class="sh-card-header">
+      <div><h2>Alerts & Tables</h2><p>Click alert cards. Table rows highlight on hover.</p></div>
+    </div>
+    <div class="sh-card-content">
+      <div class="grid-2" style="margin-bottom:1rem;">
+        <div class="sh-alert sh-alert-destructive" onclick="toast('Destructive alert')" style="cursor:pointer;">
+          <i data-lucide="alert-circle" style="width:18px;height:18px;flex-shrink:0;margin-top:2px;color:var(--destructive);"></i>
+          <div><div class="alert-title">Missing Gunicorn</div><div class="alert-desc">Flask dev server crashes under concurrent load on Cloud Run. Use gunicorn with workers.</div></div>
+        </div>
+        <div class="sh-alert sh-alert-success" onclick="toast('Success alert')" style="cursor:pointer;">
+          <i data-lucide="check-circle" style="width:18px;height:18px;flex-shrink:0;margin-top:2px;color:var(--success);"></i>
+          <div><div class="alert-title">Layer Caching Active</div><div class="alert-desc">requirements.txt copied before app code. Docker caches pip install layer across builds.</div></div>
+        </div>
+      </div>
+
+      <table class="sh-table">
+        <thead><tr><th>#</th><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Container crash under load</td><td>No gunicorn</td><td style="font-family:var(--font-mono);font-size:0.75rem;">CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]</td></tr>
+          <tr><td>2</td><td>Slow builds</td><td>Wrong COPY order</td><td style="font-family:var(--font-mono);font-size:0.75rem;">COPY req.txt → RUN pip install → COPY .</td></tr>
+          <tr><td>3</td><td>Health check 503</td><td>No /health endpoint</td><td style="font-family:var(--font-mono);font-size:0.75rem;">Bind 0.0.0.0:8080 + add health route</td></tr>
+          <tr><td>4</td><td>Image 800MB+</td><td>python:latest</td><td style="font-family:var(--font-mono);font-size:0.75rem;">FROM python:3.11-slim</td></tr>
+        </tbody>
+      </table>
+
+      <div class="sh-code" style="margin-top:8px;font-size:0.75rem;">
+<span class="cm">&lt;!-- Alert pattern --&gt;</span>
+&lt;div class="<span class="hl">sh-alert sh-alert-destructive</span>"&gt;
+  &lt;div class="<span class="hl">alert-title</span>"&gt;Title&lt;/div&gt;
+  &lt;div class="<span class="hl">alert-desc</span>"&gt;Description&lt;/div&gt;
+&lt;/div&gt;
+
+<span class="cm">&lt;!-- Table pattern --&gt;</span>
+&lt;table class="<span class="hl">sh-table</span>"&gt;
+  &lt;thead&gt;&lt;tr&gt;&lt;th&gt;Header&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+  &lt;tbody&gt;&lt;tr&gt;&lt;td&gt;Data&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;
+&lt;/table&gt;
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 6: CSS TOKENS -->
+<section class="section-card">
+  <div class="sh-card">
+    <div class="sh-card-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div><h2>CSS Variables — Copy to Clipboard</h2><p>Click any token to copy it. These are the shadcn base tokens.</p></div>
+        <span class="sh-badge sh-badge-default">tokens</span>
+      </div>
+    </div>
+    <div class="sh-card-content">
+      <div class="token-grid" id="tokenGrid"></div>
+      <div class="sh-code" style="margin-top:8px;font-size:0.75rem;">
+<span class="cm">/* Paste this in any HTML to get shadcn theming */</span>
+<span class="hl">:root {</span>
+  --background: #ffffff;   --foreground: #09090b;
+  --card: #ffffff;          --card-foreground: #09090b;
+  --primary: #18181b;       --primary-foreground: #fafafa;
+  --secondary: #f4f4f5;     --secondary-foreground: #18181b;
+  --muted: #f4f4f5;         --muted-foreground: #71717a;
+  --border: #e4e4e7;        --input: #e4e4e7;
+  --ring: #18181b;          --radius: 0.5rem;
+<span class="hl">}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 7: CODE BLOCKS -->
+<section class="section-card">
+  <div class="sh-card">
+    <div class="sh-card-header">
+      <div><h2>Code Blocks</h2><p>Hover to reveal the copy button. Syntax-highlighted.</p></div>
+    </div>
+    <div class="sh-card-content">
+      <div class="sh-code">
+<span class="cm"># main.py — shadcn-style code block</span>
+<span class="kw">from</span> flask <span class="kw">import</span> Flask
+
+app = Flask(__name__)
+
+<span class="hl">@app</span>.route(<span class="str">"/"</span>)
+<span class="kw">def</span> <span class="fn">hello</span>():
+    <span class="kw">return</span> {<span class="str">"message"</span>: <span class="str">"Hello from Cloud Run!"</span>}
+
+<span class="hl">@app</span>.route(<span class="str">"/health"</span>)
+<span class="kw">def</span> <span class="fn">health</span>():
+    <span class="kw">return</span> {<span class="str">"status"</span>: <span class="str">"healthy"</span>}
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    app.run(host=<span class="str">"0.0.0.0"</span>, port=<span class="num">8080</span>)
+      </div>
+
+      <div class="sh-code">
+<span class="cm"># Dockerfile</span>
+<span class="kw">FROM</span> python:<span class="num">3.11</span>-slim
+WORKDIR /app
+<span class="kw">COPY</span> requirements.txt .
+<span class="kw">RUN</span> pip install -r requirements.txt
+<span class="kw">COPY</span> . .
+<span class="kw">CMD</span> [<span class="str">"gunicorn"</span>, <span class="str">"--bind"</span>, <span class="str">"0.0.0.0:8080"</span>, <span class="str">"main:app"</span>]
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 8: TABS -->
+<section class="section-card">
+  <div class="sh-card">
+    <div class="sh-card-header">
+      <div><h2>Tabs System</h2><p>Click tabs to switch content. shadcn-style tab bar.</p></div>
+    </div>
+    <div class="sh-card-content">
+      <div class="sh-tabs">
+        <button class="sh-tab active" data-tab="tab1" onclick="switchTab(this,'tab1')">Flask</button>
+        <button class="sh-tab" data-tab="tab2" onclick="switchTab(this,'tab2')">Gunicorn</button>
+        <button class="sh-tab" data-tab="tab3" onclick="switchTab(this,'tab3')">Cloud Run</button>
+      </div>
+      <div class="sh-tab-panel active" id="tab1">
+        <div class="sh-card" style="border-color:var(--border);box-shadow:none;">
+          <div class="sh-card-content">
+            <span class="sh-badge sh-badge-secondary" style="margin-bottom:8px;">Flask</span>
+            <p style="font-size:0.95rem;">Flask is a lightweight WSGI web application framework. It's designed to make getting started quick and easy, with the ability to scale up to complex applications. On Cloud Run, Flask handles route dispatching, request parsing, and response generation.</p>
+          </div>
+        </div>
+      </div>
+      <div class="sh-tab-panel" id="tab2">
+        <div class="sh-card" style="border-color:var(--border);box-shadow:none;">
+          <div class="sh-card-content">
+            <span class="sh-badge sh-badge-default" style="margin-bottom:8px;">Gunicorn</span>
+            <p style="font-size:0.95rem;">Gunicorn 'Green Unicorn' is a Python WSGI HTTP Server for UNIX. It's the production-grade server that sits between Cloud Run and Flask. Manages worker processes, handles concurrent connections, and forwards requests to Flask via the WSGI protocol.</p>
+          </div>
+        </div>
+      </div>
+      <div class="sh-tab-panel" id="tab3">
+        <div class="sh-card" style="border-color:var(--border);box-shadow:none;">
+          <div class="sh-card-content">
+            <span class="sh-badge sh-badge-destructive" style="margin-bottom:8px;">Cloud Run</span>
+            <p style="font-size:0.95rem;">Cloud Run is a managed compute platform that lets you run containers directly on Google's infrastructure. It auto-scales from 0 to N instances, charges per request, and handles HTTPS, auth, and monitoring out of the box. No Kubernetes knowledge needed.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- DIALOG/MODAL -->
+<div class="sh-dialog-overlay" id="dialogOverlay" onclick="if(event.target===this)closeDialog()">
+  <div class="sh-dialog">
+    <div class="sh-dialog-header">
+      <h2>shadcn-style Dialog</h2>
+      <p>This is a modal dialog built with pure HTML/CSS/JS. Click outside to close or use the button below.</p>
+    </div>
+    <div class="sh-dialog-content">
+      <p style="font-size:0.875rem;line-height:1.6;">This demonstrates the dialog/modal component pattern. In your prep HTMLs, use this for quiz results, confirmation dialogs, or detail views.</p>
+      <div class="sh-code" style="margin-top:12px;font-size:0.7rem;">
+<span class="cm">&lt;!-- Dialog pattern --&gt;</span>
+&lt;div class="<span class="hl">sh-dialog-overlay</span>" id="myDialog"&gt;
+  &lt;div class="<span class="hl">sh-dialog</span>"&gt;
+    &lt;div class="<span class="hl">sh-dialog-header</span>"&gt;
+      &lt;h2&gt;Title&lt;/h2&gt;
+      &lt;p&gt;Description&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="<span class="hl">sh-dialog-content</span>"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+      </div>
+    </div>
+    <div class="sh-dialog-footer">
+      <button class="sh-btn sh-btn-outline" onclick="closeDialog()">Cancel</button>
+      <button class="sh-btn sh-btn-primary" onclick="closeDialog();toast('Confirmed!')">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="sh-toast" id="shToast"></div>
+
+<footer>
+  <div class="container" style="display:flex;justify-content:space-between;width:100%;">
+    <span>shadcn/ui Design System · Vanilla HTML Adaptation</span>
+    <span>Use: load skill → copy components → paste in prep HTMLs</span>
+  </div>
+</footer>
+
+<script>
+// ===== TOAST =====
+function toast(msg){
+  var t=document.getElementById('shToast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},1500);
+}
+
+// ===== THEME TOGGLE =====
+function toggleTheme(){
+  var d=document.documentElement;
+  if(d.getAttribute('data-theme')==='dark'){
+    d.removeAttribute('data-theme');
+  } else {
+    d.setAttribute('data-theme','dark');
+  }
+}
+
+// ===== FLOW INFO =====
+function showFlowInfo(title, desc){
+  var info=document.getElementById('flowInfo');
+  info.style.display='flex';
+  document.getElementById('flowTitle').textContent=title;
+  document.getElementById('flowDesc').textContent=desc;
+  // Highlight clicked node
+  document.querySelectorAll('.flow-node').forEach(function(n){n.style.borderColor='';});
+  event.currentTarget.style.borderColor='var(--ring)';
+  event.currentTarget.style.borderWidth='2px';
+}
+
+// ===== SVG PIPELINE INFO =====
+function showPipeInfo(title, desc, meta){
+  var info=document.getElementById('pipeInfo');
+  info.style.display='flex';
+  document.getElementById('pipeTitle').textContent=title;
+  document.getElementById('pipeDesc').textContent=desc;
+  document.getElementById('pipeMeta').textContent=meta || '';
+  // Highlight clicked box
+  document.querySelectorAll('.svgi-box').forEach(function(g){g.classList.remove('active');});
+  event.currentTarget.classList.add('active');
+}
+
+// ===== TABS =====
+function switchTab(btn, id){
+  var parent=btn.parentElement;
+  parent.querySelectorAll('.sh-tab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  var panels=parent.parentElement.querySelectorAll('.sh-tab-panel');
+  panels.forEach(function(p){p.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+
+// ===== DIALOG =====
+function closeDialog(){
+  document.getElementById('dialogOverlay').classList.remove('open');
+}
+
+// ===== CSS TOKENS =====
+var tokens = [
+  {name:'--background', val:'#ffffff', dark:'#09090b'},
+  {name:'--foreground', val:'#09090b', dark:'#fafafa'},
+  {name:'--primary', val:'#18181b', dark:'#fafafa'},
+  {name:'--primary-foreground', val:'#fafafa', dark:'#18181b'},
+  {name:'--secondary', val:'#f4f4f5', dark:'#27272a'},
+  {name:'--secondary-foreground', val:'#18181b', dark:'#fafafa'},
+  {name:'--muted', val:'#f4f4f5', dark:'#27272a'},
+  {name:'--muted-foreground', val:'#71717a', dark:'#a1a1aa'},
+  {name:'--accent', val:'#f4f4f5', dark:'#27272a'},
+  {name:'--accent-foreground', val:'#18181b', dark:'#fafafa'},
+  {name:'--destructive', val:'#ef4444', dark:'#7f1d1d'},
+  {name:'--success', val:'#16a34a', dark:'#166534'},
+  {name:'--border', val:'#e4e4e7', dark:'#27272a'},
+  {name:'--input', val:'#e4e4e7', dark:'#27272a'},
+  {name:'--ring', val:'#18181b', dark:'#d4d4d8'},
+  {name:'--radius', val:'0.5rem', dark:'0.5rem'},
+];
+
+function renderTokens(){
+  var grid=document.getElementById('tokenGrid');
+  var isDark=document.documentElement.getAttribute('data-theme')==='dark' ||
+             (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.getAttribute('data-theme'));
+  grid.innerHTML = tokens.map(function(t){
+    var color = t.name==='--radius' ? '' : (isDark ? t.dark : t.val);
+    var swatch = t.name.startsWith('--') && !t.name.includes('radius') && !t.name.includes('ring') && !t.name.includes('primary-foreground') && !t.name.includes('secondary-foreground') && !t.name.includes('accent-foreground') && !t.name.includes('muted-foreground') && !t.name.includes('destructive-foreground') && !t.name.includes('success-foreground') && !t.name.includes('foreground') && !t.name.includes('background') ? '<div class="swatch" style="background:'+color+'"></div>' : '';
+    return '<div class="token-item" onclick="copyToken(\''+t.name+'\',\''+(isDark?t.dark:t.val)+'\')" title="Click to copy">'+
+      swatch+
+      '<div class="name">'+t.name+'</div>'+
+      '<div class="val">'+(isDark?t.dark:t.val)+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+renderTokens();
+
+document.getElementById('darkToggle')&&document.getElementById('darkToggle').addEventListener('click',renderTokens);
+
+function copyToken(name, val){
+  var text=name+': '+val+';';
+  navigator.clipboard.writeText(text);
+  toast('Copied: '+text);
+}
+
+// ===== ANIMATIONS ON SCROLL =====
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting){
+      e.target.style.animation='sh-slide-up 0.3s ease-out forwards';
+    }
+  });
+},{threshold:0.1});
+document.querySelectorAll('.section-card').forEach(function(el,i){
+  el.style.opacity='0';
+  el.style.animation='none';
+  obs.observe(el);
+});
+
+// ===== INIT LUCIDE =====
+document.addEventListener('DOMContentLoaded', function(){
+  if(typeof lucide !== 'undefined') lucide.createIcons();
+});
+
+// Re-create icons after theme toggle
+var origToggle = toggleTheme;
+toggleTheme = function(){
+  origToggle();
+  setTimeout(function(){
+    if(typeof lucide !== 'undefined') lucide.createIcons();
+  }, 50);
+};
+</script>
+</body>
+</html>

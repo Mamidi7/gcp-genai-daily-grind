@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>47-Day Sprint Plan — GCP AI/ML Interview Prep</title>
+<link rel="stylesheet" href="design-system.css">
+<style>
+  /* ===== Plan-specific overrides ===== */
+  .accordion-body.day-grid-body {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .accordion-item.open .accordion-body.day-grid-body {
+    max-height: none !important;
+    padding: 12px 16px 20px;
+  }
+
+  /* Day grid (cards in responsive columns) */
+  .day-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+
+  /* List view override */
+  .day-grid.list-view {
+    grid-template-columns: 1fr;
+  }
+
+  /* Day card — extends .card */
+  .day-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    cursor: default;
+  }
+  .day-card.current-day {
+    border-color: var(--accent);
+    box-shadow: 3px 3px 0 var(--accent), inset 0 0 0 1px rgba(192,57,43,0.08);
+    background: var(--paper);
+  }
+  .day-card.current-day:hover {
+    box-shadow: 5px 5px 0 var(--accent);
+  }
+  .day-card .day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+  }
+  .day-card .day-num {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .day-card .day-topic {
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .day-card .day-desc {
+    font-size: 13px;
+    color: var(--ink-2);
+    margin-bottom: 8px;
+    line-height: 1.45;
+    flex: 1;
+  }
+  .day-card .day-signal {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: 1px 6px;
+    margin-top: auto;
+  }
+  .day-card .day-check {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+
+  /* Stats cards row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+    margin: 16px 0;
+  }
+
+  /* Quick nav tabs — stick below topbar */
+  #quickNav {
+    position: sticky;
+    top: 56px;
+    z-index: 30;
+    margin: 16px 0;
+    border: 1px solid var(--ink);
+    background: var(--paper-2);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+  #quickNav .tab-item {
+    flex: 1;
+    text-align: center;
+  }
+
+  /* Phase header in accordion */
+  .phase-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .phase-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .phase-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-dim);
+  }
+
+  /* Dependency chains */
+  .dep-section {
+    margin: 16px 0;
+  }
+  .dep-chain {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+    font-size: 12px;
+  }
+  .dep-node {
+    background: var(--paper-2);
+    border: 1px solid var(--ink);
+    padding: 6px 10px;
+    text-align: center;
+    box-shadow: 2px 2px 0 var(--ink);
+    font-family: var(--mono);
+    font-size: 10px;
+    line-height: 1.3;
+    min-width: 80px;
+  }
+  .dep-node small {
+    font-size: 8px;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    display: block;
+  }
+  .dep-node.highlight {
+    border-color: var(--accent);
+    background: var(--paper);
+    box-shadow: 2px 2px 0 var(--accent);
+  }
+  .dep-arrow {
+    color: var(--ink-faint);
+    font-size: 14px;
+    font-family: var(--mono);
+  }
+
+  /* Phase progress bar with overlap fix */
+  .phase-progress {
+    margin: 8px 0 14px;
+  }
+
+  /* Pitch card */
+  .pitch-card {
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    padding: 22px 26px;
+    box-shadow: 4px 4px 0 var(--ink);
+    margin: 12px 0;
+    position: relative;
+  }
+  .pitch-card::before {
+    content: '\201C';
+    position: absolute;
+    top: -8px;
+    left: 10px;
+    font-family: var(--serif);
+    font-size: 64px;
+    color: var(--accent);
+    opacity: .3;
+    line-height: 1;
+  }
+  .pitch-text {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-style: italic;
+    line-height: 1.65;
+    color: var(--ink);
+  }
+  .pitch-text strong {
+    color: var(--accent);
+    font-style: normal;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .05em;
+  }
+
+  /* Target roles in grid */
+  .roles-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Filter select inline style (compact) */
+  .filter-select {
+    width: auto;
+    font-size: 10px;
+    padding: 4px 24px 4px 8px;
+    min-width: 0;
+    background-position: right 6px center;
+    background-size: 10px;
+  }
+
+  /* Highlighted stat */
+  .stat-em {
+    color: var(--accent);
+  }
+  .stat-done {
+    color: var(--green);
+  }
+
+  /* Hidden utility */
+  .hidden {
+    display: none !important;
+  }
+
+  @media (max-width: 768px) {
+    .day-grid {
+      grid-template-columns: 1fr;
+    }
+    .stats-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .phase-header-left {
+      flex-wrap: wrap;
+    }
+    #quickNav .tab-item {
+      font-size: 8px;
+      padding: 6px 8px;
+    }
+    .pitch-text {
+      font-size: 15px;
+    }
+  }
+  @media (max-width: 480px) {
+    .stats-row {
+      grid-template-columns: 1fr 1fr;
+    }
+    .phase-header-right {
+      font-size: 8px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== TOP BAR ===== -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">GCP Prep <span>Sprint Plan</span></div>
+    <div class="d-flex align-center gap-md">
+      <div class="d-flex align-center gap-sm">
+        <button class="btn btn-sm" id="viewToggle" onclick="toggleView()" title="Toggle grid/list view">
+          <span id="viewIcon">[#]</span>
+        </button>
+        <select class="form-select filter-select" id="filterSelect" onchange="filterDays()" aria-label="Filter days">
+          <option value="all">All</option>
+          <option value="done">Done</option>
+          <option value="current">Current</option>
+          <option value="upcoming">Upcoming</option>
+        </select>
+      </div>
+      <button id="darkToggle" onclick="toggleDark()" aria-label="Toggle dark mode">
+        <svg viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="3.5" stroke="currentColor" stroke-width="1.3"/>
+          <line x1="8" y1="1" x2="8" y2="3" stroke="currentColor" stroke-width="1.3"/>
+          <line x1="8" y1="13" x2="8" y2="15" stroke="currentColor" stroke-width="1.3"/>
+          <line x1="1" y1="8" x2="3" y2="8" stroke="currentColor" stroke-width="1.3"/>
+          <line x1="13" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/>
+          <line x1="3.05" y1="3.05" x2="4.46" y2="4.46" stroke="currentColor" stroke-width="1.3"/>
+          <line x1="11.54" y1="11.54" x2="12.95" y2="12.95" stroke="currentColor" stroke-width="1.3"/>
+          <line x1="3.05" y1="12.95" x2="4.46" y2="11.54" stroke="currentColor" stroke-width="1.3"/>
+          <line x1="11.54" y1="4.46" x2="12.95" y2="3.05" stroke="currentColor" stroke-width="1.3"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ===== HERO ===== -->
+<section class="section">
+  <div class="eyebrow"><span class="pill">SPRINT PLAN</span> May 19, 2026</div>
+  <h1>47-Day Sprint Plan</h1>
+  <p class="sub">GCP AI/ML Interview Prep &mdash; Krishna Vardhan Mamidi</p>
+
+  <!-- Stats summary -->
+  <div class="stats-row" id="statsRow">
+    <div class="cd-card">
+      <div class="num">47</div>
+      <div class="label">Total Days</div>
+    </div>
+    <div class="cd-card">
+      <div class="num" style="color:var(--green);">12</div>
+      <div class="label">Done</div>
+    </div>
+    <div class="cd-card">
+      <div class="num stat-em">1</div>
+      <div class="label">Current</div>
+    </div>
+    <div class="cd-card">
+      <div class="num" style="color:var(--ink-dim);">34</div>
+      <div class="label">Remaining</div>
+    </div>
+    <div class="cd-card">
+      <div class="num" style="color:var(--blue);">26%</div>
+      <div class="label">Complete</div>
+    </div>
+  </div>
+
+  <!-- Status alert -->
+  <div class="alert alert-info">
+    <span class="alert-icon">&#x2139;</span>
+    <div class="alert-content">
+      <div class="alert-title">Day 12 / 47 Complete</div>
+      <div class="alert-message">
+        <strong>Currently in Phase 1: Foundation</strong> &middot;
+        Last: FastAPI Basics <span class="badge badge-green badge-sm" style="vertical-align:middle;">Done</span> &nbsp;
+        Next: Day 14 &mdash; BigQuery Mental Model
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== QUICK NAV ===== -->
+<div class="tab-bar" id="quickNav">
+  <button class="tab-item active" data-target="phase1" onclick="scrollToSection('phase1')">Phase 1: Foundation</button>
+  <button class="tab-item" data-target="phase2" onclick="scrollToSection('phase2')">Phase 2: RAG</button>
+  <button class="tab-item" data-target="phase3" onclick="scrollToSection('phase3')">Phase 3: Agents</button>
+  <button class="tab-item" data-target="phase4" onclick="scrollToSection('phase4')">Phase 4: ETL</button>
+  <button class="tab-item" data-target="deps" onclick="scrollToSection('deps')">Dependencies</button>
+  <button class="tab-item" data-target="pitch" onclick="scrollToSection('pitch')">Pitch</button>
+</div>
+
+<!-- ===== TARGET ROLES ===== -->
+<section class="section" id="target-roles">
+  <div class="eyebrow"><span class="pill">ROLES</span> Interview Targets</div>
+  <h2><span class="hash">00</span> Target Roles</h2>
+  <div class="comp-box">
+    <div class="roles-grid">
+      <span class="badge badge-accent badge-lg">Applied AI Engineer</span>
+      <span class="badge badge-blue badge-lg">Forward Deployed Engineer</span>
+      <span class="badge badge-green badge-lg">AI Solutions Engineer</span>
+      <span class="badge badge-gold badge-lg">Applied Safety Research Engineer</span>
+      <span class="badge badge-accent badge-lg">ML Systems Engineer</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PHASE 1: Foundation ===== -->
+<section class="section" id="phase1">
+  <div class="eyebrow"><span class="pill">PHASE 1</span> Days 1-20</div>
+
+  <div class="accordion">
+    <div class="accordion-item open" id="phase1Accordion">
+      <button class="accordion-header" onclick="togglePhase('phase1Accordion')">
+        <div class="phase-header-inner">
+          <div class="phase-header-left">
+            <span class="badge badge-blue">Phase 1</span>
+            <span class="type-h3" style="margin:0;">Foundation</span>
+            <span class="text-dim" style="font-family:var(--serif);font-style:italic;font-size:14px;">Backend + Evals Basics</span>
+          </div>
+          <div class="phase-header-right">
+            <span><span class="stat-done">3 done</span></span>
+            <span>&middot;</span>
+            <span><span class="stat-em">1 current</span></span>
+            <span>&middot;</span>
+            <span>16 left</span>
+            <span class="accordion-icon" style="margin-left:4px;">+</span>
+          </div>
+        </div>
+      </button>
+      <div class="accordion-body day-grid-body">
+        <!-- Phase progress bar -->
+        <div class="phase-progress">
+          <div class="progress-label">
+            <span>Progress</span>
+            <span>12 / 20 days <span class="text-dim">(60%)</span></span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill green" style="width:60%"></div>
+          </div>
+        </div>
+
+        <!-- Day cards -->
+        <div class="day-grid" data-phase="phase1">
+          <!-- Days 1-9 Done -->
+          <div class="card day-card" data-status="done" data-day-id="d1-9">
+            <div class="day-header">
+              <span class="day-num">Days 1-9</span>
+              <span class="badge badge-green badge-sm">Done</span>
+            </div>
+            <div class="day-topic">Python + SQL Foundation</div>
+            <div class="day-desc">Python basics, SQL queries, GCP fundamentals</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal">Foundation</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" checked onchange="saveCheck(this,'d1-9')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Day 10 Done -->
+          <div class="card day-card" data-status="done" data-day-id="d10">
+            <div class="day-header">
+              <span class="day-num">Day 10</span>
+              <span class="badge badge-green badge-sm">Done</span>
+            </div>
+            <div class="day-topic">FastAPI + Gemini + Cloud Run</div>
+            <div class="day-desc">Deployed FastAPI app with Gemini integration on Cloud Run</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Python # Backend</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" checked onchange="saveCheck(this,'d10')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Days 11-12 Done -->
+          <div class="card day-card" data-status="done" data-day-id="d11-12">
+            <div class="day-header">
+              <span class="day-num">Days 11-12</span>
+              <span class="badge badge-green badge-sm">Done</span>
+            </div>
+            <div class="day-topic">FastAPI Basics (Flask Port)</div>
+            <div class="day-desc">4 endpoints, auto-docs, Pydantic validation, 7 tests passing</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Backend # API</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" checked onchange="saveCheck(this,'d11-12')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Day 13 Current -->
+          <div class="card day-card current-day" data-status="current" data-day-id="d13">
+            <div class="day-header">
+              <span class="day-num">Day 13</span>
+              <span class="badge badge-accent badge-sm">Current</span>
+            </div>
+            <div class="day-topic">FastAPI Errors + Validation</div>
+            <div class="day-desc">Add A2A agent.json to Day 10 app. Custom error handlers, input validation depth.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Production # A2A</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d13')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Day 14 Upcoming -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d14">
+            <div class="day-header">
+              <span class="day-num">Day 14</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">BigQuery Mental Model</div>
+            <div class="day-desc">5 SQL queries on public data. Window functions, CTEs, query planning.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Data Pipelines</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d14')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Day 15 Upcoming -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d15">
+            <div class="day-header">
+              <span class="day-num">Day 15</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">LLM Wrapper Design</div>
+            <div class="day-desc">Unified Gemini client module &mdash; retries, error classes, structured config.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># LLM # Design</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d15')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Day 16 Upcoming -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d16">
+            <div class="day-header">
+              <span class="day-num">Day 16</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Structured Output</div>
+            <div class="day-desc">JSON mode + Pydantic parsing. Schema enforcement, response models.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Tool Use</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d16')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Day 17 Upcoming -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d17">
+            <div class="day-header">
+              <span class="day-num">Day 17</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Embeddings Intro</div>
+            <div class="day-desc">text-embedding-004 batch call. Similarity search basics.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># RAG Foundation</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d17')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Day 18 Upcoming -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d18">
+            <div class="day-header">
+              <span class="day-num">Day 18</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Chunking Strategies</div>
+            <div class="day-desc">3 chunking approaches + recall comparison. Interview differentiator.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># RAG # Differentiator</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d18')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Day 19 Upcoming -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d19">
+            <div class="day-header">
+              <span class="day-num">Day 19</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Eval Intro</div>
+            <div class="day-desc">Create 10 test Q&amp;A pairs with rubrics. Foundation for eval harness.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># #1 Hiring Signal</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d19')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Day 20 Upcoming -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d20">
+            <div class="day-header">
+              <span class="day-num">Day 20</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Eval Harness v1</div>
+            <div class="day-desc">Run 10 cases, log pass/fail to BQ. Production eval pipeline.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># #1 Hiring Signal</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d20')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PHASE 2: RAG + Retrieval ===== -->
+<section class="section" id="phase2">
+  <div class="eyebrow"><span class="pill">PHASE 2</span> Days 21-30</div>
+
+  <div class="accordion">
+    <div class="accordion-item" id="phase2Accordion">
+      <button class="accordion-header" onclick="togglePhase('phase2Accordion')">
+        <div class="phase-header-inner">
+          <div class="phase-header-left">
+            <span class="badge badge-green">Phase 2</span>
+            <span class="type-h3" style="margin:0;">RAG + Retrieval</span>
+            <span class="text-dim" style="font-family:var(--serif);font-style:italic;font-size:14px;">The Core Differentiator</span>
+          </div>
+          <div class="phase-header-right">
+            <span class="text-dim">0 done</span>
+            <span>&middot;</span>
+            <span>10 days</span>
+            <span class="accordion-icon" style="margin-left:4px;">+</span>
+          </div>
+        </div>
+      </button>
+      <div class="accordion-body day-grid-body">
+        <div class="phase-progress">
+          <div class="progress-label">
+            <span>Progress</span>
+            <span>0 / 10 days</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill blue" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="day-grid" data-phase="phase2">
+          <!-- Day 21 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d21">
+            <div class="day-header">
+              <span class="day-num">Day 21</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">BigQuery Vector Search RAG</div>
+            <div class="day-desc">Full RAG pipeline with BQ VECTOR_SEARCH(). Your ETL moat. <strong style="color:var(--gold);">SHOCK TOPIC</strong></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Your ETL Moat</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d21')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 22 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d22">
+            <div class="day-header">
+              <span class="day-num">Day 22</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Vertex AI RAG Engine</div>
+            <div class="day-desc">Managed RAG vs custom comparison. Tradeoff answer for interviews.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Tradeoff # Interview</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d22')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 23 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d23">
+            <div class="day-header">
+              <span class="day-num">Day 23</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Hybrid Search</div>
+            <div class="day-desc">BM25 + vector combined scores. Advanced RAG differentiator.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Advanced RAG</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d23')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 24 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d24">
+            <div class="day-header">
+              <span class="day-num">Day 24</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Citations + No-Answer Mode</div>
+            <div class="day-desc">Return &ldquo;I don&rsquo;t know&rdquo; when weak. Safety mindset.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Safety # Anthropic</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d24')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 25 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d25">
+            <div class="day-header">
+              <span class="day-num">Day 25</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Preference Eval System</div>
+            <div class="day-desc">BigQuery preference_pairs table. Applied RLHF. <strong style="color:var(--gold);">SHOCK TOPIC</strong></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Applied RLHF</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d25')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 26 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d26">
+            <div class="day-header">
+              <span class="day-num">Day 26</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Adversarial Testing</div>
+            <div class="day-desc">10 failure cases logged. Red teaming practice.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Red Teaming</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d26')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 27 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d27">
+            <div class="day-header">
+              <span class="day-num">Day 27</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Guardrails Layer</div>
+            <div class="day-desc">Input classifier + output validator. Safety first.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Safety</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d27')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 28 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d28">
+            <div class="day-header">
+              <span class="day-num">Day 28</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Error Taxonomy</div>
+            <div class="day-desc">5 error classes + retry strategy. Production thinking.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Production</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d28')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 29 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d29">
+            <div class="day-header">
+              <span class="day-num">Day 29</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Structured Logging</div>
+            <div class="day-desc">JSON Cloud Logging, trace IDs. Debugging story.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Observability</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d29')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 30 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d30">
+            <div class="day-header">
+              <span class="day-num">Day 30</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Grounding</div>
+            <div class="day-desc">Google Search grounding on Vertex AI. <strong style="color:var(--gold);">SHOCK TOPIC</strong></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Grounding</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d30')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PHASE 3: Agents ===== -->
+<section class="section" id="phase3">
+  <div class="eyebrow"><span class="pill">PHASE 3</span> Days 31-40</div>
+
+  <div class="accordion">
+    <div class="accordion-item" id="phase3Accordion">
+      <button class="accordion-header" onclick="togglePhase('phase3Accordion')">
+        <div class="phase-header-inner">
+          <div class="phase-header-left">
+            <span class="badge badge-gold">Phase 3</span>
+            <span class="type-h3" style="margin:0;">Agents</span>
+            <span class="text-dim" style="font-family:var(--serif);font-style:italic;font-size:14px;">The Production Proof</span>
+          </div>
+          <div class="phase-header-right">
+            <span class="text-dim">0 done</span>
+            <span>&middot;</span>
+            <span>10 days</span>
+            <span class="accordion-icon" style="margin-left:4px;">+</span>
+          </div>
+        </div>
+      </button>
+      <div class="accordion-body day-grid-body">
+        <div class="phase-progress">
+          <div class="progress-label">
+            <span>Progress</span>
+            <span>0 / 10 days</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill gold" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="day-grid" data-phase="phase3">
+          <!-- Day 31 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d31">
+            <div class="day-header">
+              <span class="day-num">Day 31</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">ReAct Agent from Scratch</div>
+            <div class="day-desc">Reason+act loop, 3 tools, no framework. &ldquo;Build without framework&rdquo; interview Q.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Agents # Interview</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d31')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 32 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d32">
+            <div class="day-header">
+              <span class="day-num">Day 32</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Tool Routing</div>
+            <div class="day-desc">Gemini classifies intent &rarr; routes. Agent reliability.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Reliability</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d32')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 33 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d33">
+            <div class="day-header">
+              <span class="day-num">Day 33</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">ADK v1</div>
+            <div class="day-desc">50-line agent deployed to Agent Engine. <strong style="color:var(--gold);">SHOCK TOPIC</strong></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># GCP-Native</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d33')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 34 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d34">
+            <div class="day-header">
+              <span class="day-num">Day 34</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">ADK Multi-Agent</div>
+            <div class="day-desc">Orchestrator + specialist via A2A. Full agent system.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Multi-Agent</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d34')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 35 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d35">
+            <div class="day-header">
+              <span class="day-num">Day 35</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Memory Bank</div>
+            <div class="day-desc">Agent Engine + Memory Bank sessions. <strong style="color:var(--gold);">SHOCK TOPIC</strong></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Memory # State</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d35')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 36 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d36">
+            <div class="day-header">
+              <span class="day-num">Day 36</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Agent Constraints</div>
+            <div class="day-desc">Max cost, banned combos, confirmation. Enterprise deployment.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Enterprise</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d36')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 37 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d37">
+            <div class="day-header">
+              <span class="day-num">Day 37</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">MCP Server</div>
+            <div class="day-desc">BigQuery tool registered in API Registry. <strong style="color:var(--gold);">SHOCK TOPIC</strong></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># MCP # Tool</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d37')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 38 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d38">
+            <div class="day-header">
+              <span class="day-num">Day 38</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">MCP + ADK Connection</div>
+            <div class="day-desc">Full pipeline: MCP &rarr; ADK &rarr; Cloud Run. Complete architecture.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Architecture</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d38')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 39 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d39">
+            <div class="day-header">
+              <span class="day-num">Day 39</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Preference &rarr; SFT Prep</div>
+            <div class="day-desc">JSONL export from BQ for tuning. <strong style="color:var(--gold);">SHOCK TOPIC</strong></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Tuning</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d39')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 40 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d40">
+            <div class="day-header">
+              <span class="day-num">Day 40</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Vertex AI SFT</div>
+            <div class="day-desc">Trigger tuning job, deploy custom model. Real fine-tuning story.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Fine-Tuning</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d40')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PHASE 4: ETL + Pipeline ===== -->
+<section class="section" id="phase4">
+  <div class="eyebrow"><span class="pill">PHASE 4</span> Days 41-47</div>
+
+  <div class="accordion">
+    <div class="accordion-item" id="phase4Accordion">
+      <button class="accordion-header" onclick="togglePhase('phase4Accordion')">
+        <div class="phase-header-inner">
+          <div class="phase-header-left">
+            <span class="badge badge-accent">Phase 4</span>
+            <span class="type-h3" style="margin:0;">ETL + Pipeline</span>
+            <span class="text-dim" style="font-family:var(--serif);font-style:italic;font-size:14px;">Your Unique Moat</span>
+          </div>
+          <div class="phase-header-right">
+            <span class="text-dim">0 done</span>
+            <span>&middot;</span>
+            <span>7 days</span>
+            <span class="accordion-icon" style="margin-left:4px;">+</span>
+          </div>
+        </div>
+      </button>
+      <div class="accordion-body day-grid-body">
+        <div class="phase-progress">
+          <div class="progress-label">
+            <span>Progress</span>
+            <span>0 / 7 days</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="day-grid" data-phase="phase4">
+          <!-- Day 41 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d41">
+            <div class="day-header">
+              <span class="day-num">Day 41</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Constitutional AI</div>
+            <div class="day-desc">Critique + revise loop on outputs. <strong style="color:var(--gold);">SHOCK TOPIC</strong></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Anthropic Signal</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d41')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 42 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d42">
+            <div class="day-header">
+              <span class="day-num">Day 42</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">ETL-to-LLM Pipeline</div>
+            <div class="day-desc">Watermark-based incremental load. <strong style="color:var(--gold);">SHOCK TOPIC</strong></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Your ETL Moat</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d42')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 43 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d43">
+            <div class="day-header">
+              <span class="day-num">Day 43</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Data Quality + PIP Safety</div>
+            <div class="day-desc">No future leakage checks. ETL engineering depth.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Data Quality</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d43')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 44 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d44">
+            <div class="day-header">
+              <span class="day-num">Day 44</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Embedding Drift Monitor</div>
+            <div class="day-desc">Cosine sim trend &rarr; alert. MLOps angle.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># MLOps</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d44')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 45 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d45">
+            <div class="day-header">
+              <span class="day-num">Day 45</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Full Stack Integration</div>
+            <div class="day-desc">Day 10 + Day 21 + Day 33 + Day 37. Portfolio centerpiece.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Portfolio</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d45')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 46 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d46">
+            <div class="day-header">
+              <span class="day-num">Day 46</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Architecture Diagram + README</div>
+            <div class="day-desc">Full system diagram + live demo URL. GitHub at top of resume.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Polish</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d46')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+          <!-- Day 47 -->
+          <div class="card day-card" data-status="upcoming" data-day-id="d47">
+            <div class="day-header">
+              <span class="day-num">Day 47</span>
+              <span class="badge badge-sm">Next</span>
+            </div>
+            <div class="day-topic">Apply + Cold Outreach</div>
+            <div class="day-desc">5 roles + 2 engineer reachouts. Ship it or it doesn&rsquo;t count.</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+              <span class="day-signal"># Apply</span>
+              <label class="form-check day-check" style="margin:0;padding:0;" onclick="event.stopPropagation()">
+                <input type="checkbox" onchange="saveCheck(this,'d47')">
+                <span class="check-box" style="width:14px;height:14px;font-size:10px;"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ===== CRITICAL PATH DEPENDENCIES ===== -->
+<section class="section" id="deps">
+  <div class="eyebrow"><span class="pill">DEPENDENCIES</span> Critical Path</div>
+  <h2><span class="hash">XX</span> Critical Path Dependencies</h2>
+
+  <div class="alert alert-warning">
+    <span class="alert-icon">&#x26A0;</span>
+    <div class="alert-content">
+      <div class="alert-title">Caution</div>
+      <div class="alert-message">If any critical path item slips, the portfolio centerpiece is weaker. Protect these days.</div>
+    </div>
+  </div>
+
+  <div class="dep-section">
+    <div class="dep-chain">
+      <span class="dep-node">Day 20 <small>Eval Harness</small></span>
+      <span class="dep-arrow">&rarr;</span>
+      <span class="dep-node">Day 25 <small>Preference Eval</small></span>
+      <span class="dep-arrow">&rarr;</span>
+      <span class="dep-node">Day 39 <small>SFT Prep</small></span>
+      <span class="dep-arrow">&rarr;</span>
+      <span class="dep-node highlight">Day 40 <small>SFT Job</small></span>
+    </div>
+    <div class="dep-chain">
+      <span class="dep-node">Day 21 <small>BQ Vector Search</small></span>
+      <span class="dep-arrow">&rarr;</span>
+      <span class="dep-node">Day 22 <small>Vertex RAG</small></span>
+      <span class="dep-arrow">&rarr;</span>
+      <span class="dep-node">Day 23 <small>Hybrid</small></span>
+      <span class="dep-arrow">&rarr;</span>
+      <span class="dep-node highlight">Day 45 <small>Full Stack</small></span>
+    </div>
+    <div class="dep-chain">
+      <span class="dep-node">Day 33 <small>ADK v1</small></span>
+      <span class="dep-arrow">&rarr;</span>
+      <span class="dep-node">Day 34 <small>Multi-Agent</small></span>
+      <span class="dep-arrow">&rarr;</span>
+      <span class="dep-node highlight">Day 35 <small>Memory Bank</small></span>
+      <span class="dep-arrow">&rarr;</span>
+      <span class="dep-node highlight">Day 38 <small>MCP + ADK</small></span>
+    </div>
+    <div class="dep-chain">
+      <span class="dep-node">Day 42 <small>ETL Pipeline</small></span>
+      <span class="dep-arrow">&rarr;</span>
+      <span class="dep-node">Day 43 <small>Data Quality</small></span>
+      <span class="dep-arrow">&rarr;</span>
+      <span class="dep-node highlight">Day 44 <small>Drift Monitor</small></span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 60-SECOND PITCH ===== -->
+<section class="section" id="pitch">
+  <div class="eyebrow"><span class="pill">PITCH</span> 60 Seconds</div>
+  <h2><span class="hash">XX</span> The 60-Second Interview Pitch</h2>
+
+  <div class="pitch-card">
+    <div class="pitch-text">
+      &ldquo;I&rsquo;m a banking ETL engineer building production-grade AI infrastructure on GCP.<br>
+      I have a deployed <strong>FastAPI + Gemini</strong> service on Cloud Run,<br>
+      a <strong>BigQuery Vector Search RAG</strong> pipeline using SQL for retrieval,<br>
+      an <strong>ADK multi-agent system</strong> with Memory Bank,<br>
+      and a <strong>preference evaluation system</strong> collecting RLHF-style training signal.<br>
+      I used that preference data to run <strong>supervised fine-tuning on Vertex AI</strong>.<br>
+      My ETL background means my pipelines have watermarks, data quality checks,<br>
+      and audit trails &mdash; things most AI engineers skip.<br>
+      Everything is public on GitHub with a live demo.&rdquo;
+    </div>
+    <div style="margin-top:16px;font-family:var(--mono);font-size:10px;color:var(--ink-faint);text-align:right;">
+      &mdash; Krishna Vardhan Mamidi
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer style="max-width:1100px;margin:0 auto;padding:30px 28px 40px;border-top:2px solid var(--rule);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+  <div style="font-family:var(--mono);font-size:10px;color:var(--ink-faint);">
+    47-Day Sprint Plan &middot; GCP AI/ML Interview Prep
+  </div>
+  <div style="font-family:var(--mono);font-size:10px;color:var(--ink-faint);">
+    Built with the Thariq Shihipar pattern &mdash; HTML instead of Markdown for better planning
+    <br>
+    Last updated: 2026-05-19 &middot; Day 12/47 &middot; <a href="#" onclick="resetChecks();return false;" style="color:var(--ink-faint);">Reset checkboxes</a>
+  </div>
+</footer>
+
+<script>
+/* ===== DARK MODE TOGGLE ===== */
+function toggleDark() {
+  var d = document.documentElement;
+  if (d.getAttribute('data-theme') === 'dark') {
+    d.removeAttribute('data-theme');
+  } else {
+    d.setAttribute('data-theme', 'dark');
+  }
+  localStorage.setItem('plan_theme', d.getAttribute('data-theme') || 'light');
+}
+
+/* Restore dark mode */
+(function() {
+  var saved = localStorage.getItem('plan_theme');
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+})();
+
+/* ===== INTERSECTION OBSERVER (entrance animation) ===== */
+var obs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) e.target.classList.add('in');
+  });
+}, {threshold: 0.1});
+document.querySelectorAll('.section').forEach(function(el) { obs.observe(el); });
+
+/* ===== SCROLL SPY ===== */
+(function() {
+  var navItems = document.querySelectorAll('#quickNav .tab-item');
+  var sections = [];
+  navItems.forEach(function(item) {
+    var target = document.getElementById(item.getAttribute('data-target'));
+    if (target) sections.push({el: target, btn: item});
+  });
+
+  var spyObs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) {
+        navItems.forEach(function(b) { b.classList.remove('active'); });
+        sections.forEach(function(s) {
+          if (s.el === e.target) s.btn.classList.add('active');
+        });
+      }
+    });
+  }, {threshold: 0.2, rootMargin: '-60px 0px 0px 0px'});
+
+  sections.forEach(function(s) { spyObs.observe(s.el); });
+})();
+
+/* ===== SCROLL TO SECTION (for tab clicks) ===== */
+function scrollToSection(id) {
+  var el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({behavior: 'smooth', block: 'start'});
+    /* Update active tab */
+    document.querySelectorAll('#quickNav .tab-item').forEach(function(b) { b.classList.remove('active'); });
+    var btn = document.querySelector('#quickNav .tab-item[data-target="' + id + '"]');
+    if (btn) btn.classList.add('active');
+  }
+}
+
+/* ===== PHASE COLLAPSE (accordion toggle) ===== */
+function togglePhase(id) {
+  var item = document.getElementById(id);
+  if (item) item.classList.toggle('open');
+}
+
+/* ===== VIEW TOGGLE (grid / list) ===== */
+var isListView = false;
+function toggleView() {
+  isListView = !isListView;
+  var grids = document.querySelectorAll('.day-grid');
+  grids.forEach(function(g) {
+    g.classList.toggle('list-view', isListView);
+  });
+  document.getElementById('viewIcon').textContent = isListView ? '[=]' : '[#]';
+  localStorage.setItem('plan_view', isListView ? 'list' : 'grid');
+}
+
+/* Restore view */
+(function() {
+  var saved = localStorage.getItem('plan_view');
+  if (saved === 'list') toggleView();
+})();
+
+/* ===== FILTER DAYS ===== */
+function filterDays() {
+  var val = document.getElementById('filterSelect').value;
+  var allCards = document.querySelectorAll('.day-card');
+  allCards.forEach(function(card) {
+    var status = card.getAttribute('data-status');
+    if (val === 'all') {
+      card.style.display = '';
+    } else if (val === status) {
+      card.style.display = '';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+/* ===== CHECKBOX + LOCALSTORAGE ===== */
+function saveCheck(cb, id) {
+  var key = 'plan_check_' + id;
+  if (cb.checked) {
+    localStorage.setItem(key, 'done');
+  } else {
+    localStorage.removeItem(key);
+  }
+  /* Update the card status visually */
+  var card = cb.closest('.day-card');
+  if (card) {
+    var badge = card.querySelector('.badge');
+    if (cb.checked && badge) {
+      badge.className = 'badge badge-green badge-sm';
+      badge.textContent = 'Done';
+      card.setAttribute('data-status', 'done');
+    } else if (!cb.checked && badge) {
+      var isCurrent = card.classList.contains('current-day');
+      if (isCurrent) {
+        badge.className = 'badge badge-accent badge-sm';
+        badge.textContent = 'Current';
+        card.setAttribute('data-status', 'current');
+      } else {
+        badge.className = 'badge badge-sm';
+        badge.textContent = 'Next';
+        card.setAttribute('data-status', 'upcoming');
+      }
+    }
+  }
+}
+
+/* Restore checkboxes from localStorage */
+(function() {
+  document.querySelectorAll('.day-card input[type="checkbox"]').forEach(function(cb) {
+    var id = cb.closest('.day-card').getAttribute('data-day-id');
+    if (id && localStorage.getItem('plan_check_' + id)) {
+      cb.checked = true;
+      /* Update badge */
+      var card = cb.closest('.day-card');
+      if (card) {
+        var badge = card.querySelector('.badge');
+        if (badge) {
+          badge.className = 'badge badge-green badge-sm';
+          badge.textContent = 'Done';
+          card.setAttribute('data-status', 'done');
+        }
+      }
+    }
+  });
+})();
+
+/* ===== RESET ALL CHECKBOXES ===== */
+function resetChecks() {
+  if (!confirm('Reset all checkboxes? This will clear all progress tracking.')) return;
+  document.querySelectorAll('.day-card input[type="checkbox"]').forEach(function(cb) {
+    cb.checked = false;
+    var card = cb.closest('.day-card');
+    if (card) {
+      var id = card.getAttribute('data-day-id');
+      if (id) localStorage.removeItem('plan_check_' + id);
+      var badge = card.querySelector('.badge');
+      if (badge) {
+        var isCurrent = card.classList.contains('current-day');
+        if (isCurrent) {
+          badge.className = 'badge badge-accent badge-sm';
+          badge.textContent = 'Current';
+          card.setAttribute('data-status', 'current');
+        } else {
+          badge.className = 'badge badge-sm';
+          badge.textContent = 'Next';
+          card.setAttribute('data-status', 'upcoming');
+        }
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>

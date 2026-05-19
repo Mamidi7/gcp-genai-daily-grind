@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BigQuery Vector Search — Implementation Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f3eee4;  --paper-2: #ebe4d4;
+  --ink: #1a1612;     --ink-2: #3d3528;
+  --ink-dim: #6b5d49; --ink-faint: #a89a83;
+  --rule: #c8b99e;
+  --accent: #c0392b;  --accent2: #a93226;
+  --green: #2d7d46;   --blue: #2b6cb0;
+  --gold: #b8860b;
+  --highlight: #fff59d;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --n1: #c0392b; --n2: #2b6cb0; --n3: #2d7d46; --n4: #b8860b;
+}
+[data-theme="dark"] {
+  --paper: #1b1917;  --paper-2: #242220;
+  --ink: #f0ece9;    --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430;
+  --accent: #e8704a;  --accent2: #d95a3a;
+  --green: #5bbd6b;   --blue: #5b8fbd;
+  --gold: #d4a84b;
+  --highlight: #7a5a3a;
+  --n1: #e8704a; --n2: #5b8fbd; --n3: #5bbd6b; --n4: #d4a84b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:15px;line-height:1.65;
+  background-image:radial-gradient(circle at 25% 15%,rgba(200,180,140,.15) 0%,transparent 40%),radial-gradient(circle at 75% 85%,rgba(200,180,140,.12) 0%,transparent 40%),repeating-linear-gradient(0deg,transparent 0,transparent 28px,rgba(120,100,70,.04) 28px,rgba(120,100,70,.04) 29px);
+  min-height:100vh;
+}
+.topbar{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule);padding:14px 0;backdrop-filter:blur(8px);}
+.topbar-inner{max-width:980px;margin:0 auto;padding:0 28px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;}
+.brand{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);}
+.brand span{color:var(--accent);}
+#darkToggle{background:none;border:1px solid var(--rule);cursor:pointer;color:var(--ink-dim);padding:5px;display:flex;align-items:center;line-height:1;flex-shrink:0;border-radius:0;transition:all .25s;}
+#darkToggle:hover{color:var(--ink);border-color:var(--ink);}
+#darkToggle svg{width:16px;height:16px;display:block;}
+main{max-width:980px;margin:0 auto;padding:56px 28px 100px;}
+section{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease;margin-bottom:48px;}
+section.in{opacity:1;transform:translateY(0);}
+
+/* --- Section Navigation --- */
+.section-nav-wrap{position:sticky;top:51px;z-index:40;margin-bottom:40px;}
+.section-nav{background:var(--paper-2);border-bottom:1px solid var(--rule);border-top:1px solid var(--rule);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.section-nav::-webkit-scrollbar{display:none;}
+.section-nav-inner{display:flex;gap:0;white-space:nowrap;}
+.section-nav a{display:block;padding:10px 14px;font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;color:var(--ink-dim);border-bottom:2px solid transparent;transition:all .2s;flex-shrink:0;}
+.section-nav a:hover{color:var(--ink);background:var(--paper);}
+.section-nav a.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--paper);}
+@media(max-width:600px){.section-nav a{padding:10px 10px;font-size:8px;letter-spacing:.04em;}}
+
+.page-header{border-bottom:2px solid var(--ink);padding-bottom:24px;margin-bottom:40px;position:relative;}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);display:flex;align-items:center;gap:8px;}
+.eyebrow .pill{background:var(--ink);color:var(--paper);padding:2px 8px;}
+h1{font-family:var(--serif);font-size:clamp(42px,6vw,68px);font-weight:400;line-height:.92;letter-spacing:-.02em;margin-top:6px;}
+h1 .italic{font-style:italic;color:var(--accent);}
+.subtitle{margin-top:14px;font-family:var(--serif);font-size:18px;font-style:italic;color:var(--ink-2);max-width:600px;}
+.stamp{position:absolute;top:0;right:0;font-family:var(--mono);font-size:9px;color:var(--accent);border:2px solid var(--accent);padding:6px 10px;transform:rotate(3deg);letter-spacing:.12em;text-transform:uppercase;line-height:1.3;text-align:center;opacity:0;animation:stampIn .4s .6s cubic-bezier(.2,.8,.3,1.4) forwards;}
+@keyframes stampIn{from{opacity:0;transform:rotate(-12deg) scale(1.6);}to{opacity:.85;transform:rotate(3deg) scale(1)}}
+.cd-grid{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.cd-card{background:var(--paper-2);border:1px solid var(--ink);padding:8px 16px;min-width:90px;box-shadow:3px 3px 0 var(--ink);text-align:center;}
+.cd-card .num{font-family:var(--serif);font-size:26px;font-style:italic;color:var(--accent);line-height:1;}
+.cd-card .lbl{font-family:var(--mono);font-size:9px;color:var(--ink-dim);letter-spacing:.08em;text-transform:uppercase;}
+
+/* --- Section Header --- */
+.section-header{position:relative;cursor:pointer;padding-right:40px;user-select:none;}
+.section-header:hover .collapse-indicator{opacity:1;}
+.section-header:focus-visible{outline:2px solid var(--accent);outline-offset:4px;}
+.collapse-indicator{position:absolute;top:6px;right:8px;font-size:13px;color:var(--ink-faint);transition:transform .3s ease;opacity:.5;line-height:1;pointer-events:none;font-family:var(--mono);}
+
+/* --- Section Body (Collapsible) --- */
+.section-body{max-height:5000px;overflow:hidden;transition:max-height .45s ease,opacity .35s ease,padding .35s ease;opacity:1;padding-top:1px;padding-bottom:1px;}
+.section-body.collapsed{max-height:0;opacity:0;padding-top:0;padding-bottom:0;}
+
+h2{font-family:var(--serif);font-size:34px;font-weight:400;line-height:1.1;margin-bottom:8px;}
+h2 .underline{text-decoration:underline;text-decoration-style:wavy;text-decoration-color:var(--accent);}
+.h2-sub{font-family:var(--serif);font-style:italic;color:var(--ink-dim);font-size:17px;margin-bottom:20px;}
+h3{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);margin:24px 0 10px;}
+
+.card{background:var(--paper-2);border:1px solid var(--ink);padding:18px 22px;margin:12px 0;box-shadow:3px 3px 0 var(--ink);transition:all .3s;}
+.card:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--ink);}
+.card-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px;}
+
+/* --- Code Blocks --- */
+.code-block{background:var(--ink);color:#e8d9c0;font-family:var(--mono);font-size:13px;padding:18px 22px;margin:12px 0;overflow-x:auto;position:relative;}
+.code-block .hl{color:#e8704a;}
+.code-block .cm{color:#8a7a66;}
+.code-block .str{color:#5bbd6b;}
+.code-block .fn{color:#5b8fbd;}
+.copy-btn{position:absolute;top:6px;right:6px;opacity:0;transition:opacity .2s;background:var(--ink-2);color:#e8d9c0;border:1px solid rgba(255,255,255,.2);cursor:pointer;padding:4px 10px;font-family:var(--mono);font-size:9px;line-height:1;border-radius:0;text-transform:uppercase;letter-spacing:.06em;}
+.code-block:hover .copy-btn{opacity:1;}
+.copy-btn:hover{background:#3d3528;}
+
+.key-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:16px 0;}
+.key-item{background:var(--paper-2);border:1px solid var(--ink);padding:14px 14px 14px 40px;position:relative;cursor:pointer;transition:all .25s;}
+.key-item:hover{border-color:var(--ink-2);transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--ink);}
+.key-item .key-num{font-family:var(--mono);font-size:24px;color:var(--ink-faint);line-height:1;margin-bottom:4px;}
+.key-item .key-title{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:6px;}
+.key-item p{font-size:13px;color:var(--ink-dim);line-height:1.5;}
+.key-item p code{font-family:var(--mono);font-size:11px;background:var(--paper);padding:1px 4px;border:1px solid var(--rule);}
+
+/* Checkbox pseudo-element */
+.key-item .ck-box{position:absolute;left:12px;top:14px;width:18px;height:18px;border:2px solid var(--ink);background:var(--paper);display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;color:transparent;transition:all .2s;flex-shrink:0;}
+.key-item.checked .ck-box{background:var(--green);border-color:var(--green);color:#fff;}
+.key-item.checked .key-title,.key-item.checked p{text-decoration:line-through;opacity:.55;}
+
+/* Checklist progress */
+.checklist-progress{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.checklist-progress-bar{flex:1;height:8px;background:var(--rule);border:1px solid var(--ink);overflow:hidden;}
+.checklist-progress-fill{height:100%;background:var(--green);transition:width .35s ease;width:0%;}
+.checklist-progress-text{font-family:var(--mono);font-size:11px;color:var(--ink-dim);white-space:nowrap;}
+.checklist-reset{background:none;border:1px solid var(--rule);font-family:var(--mono);font-size:9px;padding:4px 10px;cursor:pointer;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.08em;transition:all .2s;border-radius:0;flex-shrink:0;}
+.checklist-reset:hover{border-color:var(--accent);color:var(--accent);}
+
+.mistakes-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+.mistakes-table thead{border-bottom:2px solid var(--ink);}
+.mistakes-table th{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-dim);padding:10px 8px;text-align:left;}
+.mistakes-table td{padding:10px 8px;border-bottom:1px solid var(--rule);color:var(--ink-2);}
+.mistakes-table .num-cell{font-family:var(--mono);color:var(--ink-faint);width:30px;}
+.mistakes-table .symptom{color:var(--accent);}
+.mistakes-table .fix{font-family:var(--mono);font-size:12px;}
+
+.def-block{padding:12px 16px;border-left:3px solid var(--accent);margin:12px 0;}
+.def-block .term{font-family:var(--mono);font-size:9px;text-transform:uppercase;color:var(--accent);}
+.def-block .desc{color:var(--ink-2);font-size:14px;}
+
+/* --- SVG Diagram --- */
+.svg-wrap{background:var(--paper-2);border:1px solid var(--ink);padding:20px;margin:16px 0;box-shadow:3px 3px 0 var(--ink);position:relative;}
+.svg-caption{font-family:var(--mono);font-size:9px;color:var(--ink-faint);text-align:center;margin-top:6px;}
+
+@keyframes pipeFlow{to{stroke-dashoffset:-18;}}
+.sarrow{stroke:var(--ink);stroke-width:2;stroke-dasharray:6 3;fill:none;animation:pipeFlow .8s linear infinite;}
+.sarrow-head{fill:var(--ink);}
+
+.svg-node{cursor:pointer;}
+.svg-node rect{transition:stroke-width .15s,filter .15s;}
+.svg-node:hover rect{stroke-width:3;filter:brightness(1.05);}
+.svg-node:focus-visible rect{stroke-width:3;stroke-dasharray:4 2;}
+
+/* SVG tooltip */
+.svg-tooltip{position:fixed;z-index:200;background:var(--paper);border:2px solid var(--ink);padding:14px;box-shadow:6px 6px 0 var(--ink);max-width:280px;display:none;font-size:13px;line-height:1.5;}
+.svg-tooltip.show{display:block;}
+.svg-tooltip .tt-name{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+.svg-tooltip .tt-desc{color:var(--ink-2);margin-bottom:8px;font-size:13px;}
+.svg-tooltip .tt-ref{font-size:11px;color:var(--ink-faint);font-style:italic;border-top:1px solid var(--rule);padding-top:6px;}
+.svg-tooltip .tt-close{position:absolute;top:4px;right:6px;background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:14px;line-height:1;padding:2px;}
+
+/* --- Comparison Grid --- */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+.compare-card{padding:16px;border:1px solid var(--rule);background:var(--paper);}
+.compare-card h4{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;}
+.compare-card.bad{border-color:var(--accent);}
+.compare-card.bad h4{color:var(--accent);}
+.compare-card.good{border-color:var(--green);}
+.compare-card.good h4{color:var(--green);}
+.compare-card ul{list-style:none;padding:0;}
+.compare-card li{padding:4px 0;font-size:13px;color:var(--ink-2);border-bottom:1px solid var(--rule);}
+.compare-card li:last-child{border-bottom:none;}
+@media(max-width:600px){.compare-grid{grid-template-columns:1fr;}}
+
+/* --- SQL Sandbox --- */
+.sandbox{background:var(--paper-2);border:2px solid var(--ink);padding:20px;margin:16px 0;box-shadow:3px 3px 0 var(--ink);}
+.sandbox-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:12px;}
+.sandbox-controls{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end;}
+.sandbox-field{display:flex;flex-direction:column;gap:4px;}
+.sandbox-field label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-dim);}
+.sandbox-field select,.sandbox-field input[type="text"]{background:var(--paper);border:1px solid var(--ink);padding:6px 10px;font-family:var(--mono);font-size:13px;color:var(--ink);border-radius:0;}
+.sandbox-field select:focus,.sandbox-field input[type="text"]:focus{outline:none;border-color:var(--accent);}
+.sandbox-hint{font-size:11px;color:var(--ink-faint);font-style:italic;margin-bottom:12px;padding:8px;background:var(--paper);border-left:3px solid var(--gold);}
+.sandbox-table-wrap{overflow-x:auto;}
+.sandbox-table{width:100%;border-collapse:collapse;font-size:13px;}
+.sandbox-table th{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-dim);padding:8px 10px;text-align:left;border-bottom:2px solid var(--ink);}
+.sandbox-table td{padding:8px 10px;border-bottom:1px solid var(--rule);color:var(--ink-2);}
+.sandbox-table .dist-col{font-family:var(--mono);color:var(--ink-faint);text-align:right;white-space:nowrap;}
+.sandbox-table .rank-col{font-family:var(--mono);color:var(--ink-faint);width:40px;text-align:center;}
+.sandbox-empty{text-align:center;padding:20px;color:var(--ink-faint);font-family:var(--serif);font-style:italic;}
+.sandbox-sql-display{background:var(--ink);color:#e8d9c0;font-family:var(--mono);font-size:12px;padding:14px 18px;margin-top:14px;overflow-x:auto;}
+
+/* --- Toast --- */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--paper);padding:8px 20px;font-family:var(--mono);font-size:12px;opacity:0;transition:all .3s ease;z-index:999;pointer-events:none;border:1px solid rgba(255,255,255,.15);}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+footer{margin-top:60px;padding-top:20px;border-top:2px solid var(--ink);font-family:var(--mono);font-size:10px;color:var(--ink-faint);display:flex;justify-content:space-between;}
+
+/* --- Print Styles --- */
+@media print{
+body{background:#fff!important;color:#000!important;background-image:none!important;}
+.topbar,.section-nav-wrap,#darkToggle,.copy-btn,.svg-tooltip,#toast,.collapse-indicator,.checklist-progress,.checklist-reset,.stamp,.cd-grid,.sandbox-hint{display:none!important;}
+.section-body{max-height:none!important;opacity:1!important;overflow:visible!important;padding-top:0!important;padding-bottom:0!important;}
+section{opacity:1!important;transform:none!important;page-break-inside:avoid;page-break-before:always;}
+section:first-of-type{page-break-before:avoid;}
+.code-block{background:#f5f5f5!important;color:#333!important;border:1px solid #ccc!important;page-break-inside:avoid;}
+.code-block .hl{color:#c0392b!important;}
+.code-block .cm{color:#999!important;}
+.code-block .str{color:#2d7d46!important;}
+.code-block .fn{color:#2b6cb0!important;}
+.card,.key-item,.compare-card,.def-block,.svg-wrap,.sandbox{box-shadow:none!important;border:1px solid #ccc!important;page-break-inside:avoid;}
+.svg-wrap{background:#fff!important;}
+.sandbox{background:#f9f9f9!important;}
+.sandbox-table td,.sandbox-table th{border-color:#ccc!important;}
+a{color:#000!important;text-decoration:underline!important;}
+h2{page-break-after:avoid;}
+.key-item.checked .key-title,.key-item.checked p{opacity:.5!important;}
+.key-item .ck-box{border-color:#999!important;}
+.key-item.checked .ck-box{background:#999!important;border-color:#999!important;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span>⚡</span> Brainstorm — Implementation Plan</div>
+    <button id="darkToggle" aria-label="Toggle dark mode">
+      <svg viewBox="0 0 16 16" fill="none"> <circle cx="8" cy="8" r="3.5" stroke="currentColor" stroke-width="1.3"/> <line x1="8" y1="1" x2="8" y2="3" stroke="currentColor" stroke-width="1.3"/> <line x1="8" y1="13" x2="8" y2="15" stroke="currentColor" stroke-width="1.3"/> <line x1="1" y1="8" x2="3" y2="8" stroke="currentColor" stroke-width="1.3"/> <line x1="13" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/> <line x1="3.05" y1="3.05" x2="4.46" y2="4.46" stroke="currentColor" stroke-width="1.3"/> <line x1="11.54" y1="11.54" x2="12.95" y2="12.95" stroke="currentColor" stroke-width="1.3"/> <line x1="3.05" y1="12.95" x2="4.46" y2="11.54" stroke="currentColor" stroke-width="1.3"/> <line x1="11.54" y1="4.46" x2="12.95" y2="3.05" stroke="currentColor" stroke-width="1.3"/> </svg>
+    </button>
+  </div>
+</div>
+
+<main>
+
+<header class="page-header">
+  <div class="eyebrow"><span class="pill">Brainstorm</span> GCP · BigQuery · Semantic Search</div>
+  <h1>BigQuery <span class="italic">Vector Search</span></h1>
+  <p class="subtitle">In-database semantic search — find text by meaning, not by keywords. No separate vector DB needed.</p>
+  <div class="stamp">BQ VECTOR<br>SEARCH</div>
+  <div class="cd-grid">
+    <div class="cd-card"><div class="num">1</div><div class="lbl">Service</div></div>
+    <div class="cd-card"><div class="num">🐘</div><div class="lbl">BigQuery</div></div>
+    <div class="cd-card"><div class="num">🔍</div><div class="lbl">Semantic</div></div>
+    <div class="cd-card"><div class="num">🎯</div><div class="lbl">Prep Phase</div></div>
+  </div>
+</header>
+
+<!-- Quick Navigation -->
+<div class="section-nav-wrap">
+<nav class="section-nav" aria-label="Section navigation">
+  <div class="section-nav-inner">
+    <a href="#telugu-analogy">Analogy</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#sql-deep-dive">SQL</a>
+    <a href="#compare">Compare</a>
+    <a href="#mistakes">Mistakes</a>
+    <a href="#interview-prep">Interview</a>
+    <a href="#checklist">Checklist</a>
+  </div>
+</nav>
+</div>
+
+<!-- ===== SECTION: Telugu Analogy ===== -->
+<section id="telugu-analogy">
+  <div class="section-header" role="button" tabindex="0" aria-expanded="true">
+    <h2><span class="underline">Telugu</span> Analogy</h2>
+    <div class="h2-sub">Vector Search = Friend Circle lo "dorkari vyakti" search cheyyadam</div>
+    <span class="collapse-indicator">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="card">
+      <div class="card-label">Telugu lo — Vector Search ante enti?</div>
+      <p><strong>Traditional Search = Dictionary la word vetakadam la untadi.</strong> Nuvvu "pomegranate" ani search chesthe, exactly aa word unna rows ne return chestundi. "Pomegranate" ki badulu "anar" ani search chesthe em raadu — exact match kavali.</p>
+      <p style="margin-top:12px;"><strong>Vector Search = Friend circle lo okadini describe chesi vetakadam la untadi.</strong> "One guy, around 5'10", wears glasses, always talks about cricket, loves biryani" ani describe chesthe — vaadu evado neeku telusu. Aa description ki set ayye vyakti evaru ani brain automatic ga chestundi. Name exact ga teliyakapoina, meaning-based search chestunnav.</p>
+      <p style="margin-top:12px;"><strong>BigQuery Vector Search = Same table lo, same SQL lo.</strong> Nuvvu BigQuery table lo data undi. Dantone embeddings column vesi, <code>VECTOR_SEARCH()</code> SQL function call chesthe — separate vector DB (Pinecone, Weaviate, Chroma) avasaram ledu. Everything stays in BigQuery.</p>
+      <div style="margin-top:12px;padding:10px;background:var(--paper);border:1px solid var(--rule);font-family:var(--mono);font-size:12px;">
+        <strong>Flow:</strong> Text data → embeddings (text-embedding-004) → store in BQ column → VECTOR_SEARCH() query → ranked results
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: Architecture Flow ===== -->
+<section id="architecture">
+  <div class="section-header" role="button" tabindex="0" aria-expanded="true">
+    <h2><span class="underline">Architecture</span> Flow</h2>
+    <div class="h2-sub">Data flows from raw text to semantic search — all inside BigQuery.</div>
+    <span class="collapse-indicator">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="svg-wrap">
+      <svg viewBox="0 0 740 280" style="width:100%;height:auto;">
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="var(--ink)"/>
+          </marker>
+        </defs>
+
+        <!-- Node 1: Raw Text -->
+        <g class="svg-node" data-node="raw-text" tabindex="0" role="button" aria-label="Raw Text node">
+          <rect x="20" y="100" width="120" height="60" rx="6" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/>
+          <text x="80" y="128" text-anchor="middle" fill="var(--ink)" font-size="13" font-family="var(--sans)">Raw Text</text>
+          <text x="80" y="145" text-anchor="middle" fill="var(--ink-dim)" font-size="10" font-family="var(--mono)">CSV / Logs / JSON</text>
+        </g>
+
+        <!-- Arrow 1 -->
+        <line x1="140" y1="130" x2="210" y2="130" class="sarrow" marker-end="url(#arrow)"/>
+
+        <!-- Node 2: Embedding -->
+        <g class="svg-node" data-node="embedding" tabindex="0" role="button" aria-label="Embedding node">
+          <rect x="210" y="85" width="130" height="90" rx="6" fill="var(--paper-2)" stroke="var(--n2)" stroke-width="2"/>
+          <text x="275" y="115" text-anchor="middle" fill="var(--ink)" font-size="13" font-family="var(--sans)">text-embedding-004</text>
+          <text x="275" y="135" text-anchor="middle" fill="var(--ink-dim)" font-size="10" font-family="var(--mono)">Vertex AI call</text>
+          <text x="275" y="155" text-anchor="middle" fill="var(--ink-dim)" font-size="9" font-family="var(--mono)">768-dim vector</text>
+        </g>
+
+        <!-- Arrow 2 -->
+        <line x1="340" y1="130" x2="410" y2="130" class="sarrow" marker-end="url(#arrow)"/>
+
+        <!-- Node 3: BQ Table -->
+        <g class="svg-node" data-node="bq-table" tabindex="0" role="button" aria-label="BigQuery Table node">
+          <rect x="410" y="85" width="140" height="90" rx="6" fill="var(--paper-2)" stroke="var(--green)" stroke-width="2"/>
+          <text x="480" y="115" text-anchor="middle" fill="var(--ink)" font-size="13" font-family="var(--sans)">BigQuery Table</text>
+          <text x="480" y="135" text-anchor="middle" fill="var(--ink-dim)" font-size="10" font-family="var(--mono)">id, text, content</text>
+          <text x="480" y="155" text-anchor="middle" fill="var(--ink-dim)" font-size="10" font-family="var(--mono)">embedding (FLOAT64[])</text>
+        </g>
+
+        <!-- Arrow 3 -->
+        <line x1="550" y1="130" x2="620" y2="130" class="sarrow" marker-end="url(#arrow)"/>
+
+        <!-- Node 4: Vector Search -->
+        <g class="svg-node" data-node="vector-search" tabindex="0" role="button" aria-label="Vector Search node">
+          <rect x="620" y="85" width="110" height="90" rx="6" fill="var(--paper-2)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="675" y="115" text-anchor="middle" fill="var(--ink)" font-size="13" font-family="var(--sans)">VECTOR_SEARCH</text>
+          <text x="675" y="135" text-anchor="middle" fill="var(--ink-dim)" font-size="10" font-family="var(--mono)">()</text>
+          <text x="675" y="155" text-anchor="middle" fill="var(--ink-dim)" font-size="10" font-family="var(--mono)">cosine sim</text>
+        </g>
+
+        <!-- Labels below -->
+        <text x="80" y="210" text-anchor="middle" fill="var(--ink-faint)" font-size="9" font-family="var(--mono)">Your data</text>
+        <text x="275" y="210" text-anchor="middle" fill="var(--ink-faint)" font-size="9" font-family="var(--mono)">Embedding</text>
+        <text x="480" y="210" text-anchor="middle" fill="var(--ink-faint)" font-size="9" font-family="var(--mono)">Storage + Index</text>
+        <text x="675" y="210" text-anchor="middle" fill="var(--ink-faint)" font-size="9" font-family="var(--mono)">Query</text>
+
+        <!-- Side note about query -->
+        <rect x="20" y="230" width="200" height="36" rx="4" fill="rgba(43,108,176,.08)" stroke="var(--blue)" stroke-width="1" stroke-dasharray="4 2"/>
+        <text x="120" y="252" text-anchor="middle" fill="var(--blue)" font-size="10" font-family="var(--mono)">Query: embed query → VECTOR_SEARCH</text>
+      </svg>
+      <div class="svg-caption">Figure: BigQuery Vector Search pipeline — data → embeddings → indexed table → semantic query</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: SQL Deep Dive ===== -->
+<section id="sql-deep-dive">
+  <div class="section-header" role="button" tabindex="0" aria-expanded="true">
+    <h2><span class="underline">SQL</span> Deep Dive</h2>
+    <div class="h2-sub">Two steps: create the index, then search by meaning.</div>
+    <span class="collapse-indicator">▼</span>
+  </div>
+  <div class="section-body">
+    <h3>Step 1: Create Vector Index</h3>
+    <div class="code-block">
+<span class="cm">-- Create a vector index on the embedding column</span>
+<span class="hl">CREATE VECTOR INDEX</span> my_index
+<span class="hl">ON</span> my_dataset.my_table(embedding)
+<span class="hl">OPTIONS</span>(distance_type=<span class="str">'COSINE'</span>, index_type=<span class="str">'IVF'</span>, ivf_options=<span class="str">'{"num_lists":100}'</span>);
+    </div>
+
+    <div class="def-block">
+      <div class="term">What this does</div>
+      <div class="desc">Creates an approximate nearest neighbor (ANN) index on the embedding column. Without this, VECTOR_SEARCH does a brute-force scan — fine for small tables, slow for millions of rows. IVF = Inverted File Index, divides vectors into 100 clusters for faster search.</div>
+    </div>
+
+    <h3>Step 2: Search with VECTOR_SEARCH()</h3>
+    <div class="code-block">
+<span class="hl">SELECT</span> base.text, base.category, query.query_text, distance
+<span class="hl">FROM VECTOR_SEARCH</span>(
+  <span class="hl">TABLE</span> my_dataset.my_table, <span class="str">'embedding'</span>,
+  <span class="hl">(</span>
+    <span class="hl">SELECT</span> embedding <span class="hl">AS</span> query_embedding, <span class="str">'fraud detection policy'</span> <span class="hl">AS</span> query_text
+    <span class="hl">FROM</span> <span class="hl">ML.GENERATE_EMBEDDING</span>(
+      <span class="hl">MODEL</span> my_dataset.embedding_model,
+      <span class="hl">(SELECT</span> <span class="str">'fraud detection policy'</span> <span class="hl">AS</span> content<span class="hl">)</span>
+    )
+  <span class="hl">)</span>,
+  top_k => <span class="n2">5</span>
+);
+    </div>
+
+    <div class="def-block">
+      <div class="term">Key parameters</div>
+      <div class="desc"><strong>TABLE</strong> = the table with your embeddings. <strong>Second arg</strong> = column name as string. <strong>Subquery</strong> = generates the query embedding. <strong>top_k</strong> = how many results to return. <strong>distance_type</strong> must match the index (COSINE in this case).</div>
+    </div>
+
+    <h3>More Efficient: Pre-Embed the Query</h3>
+    <div class="code-block">
+<span class="cm">-- For production: embed query separately, pass directly</span>
+<span class="hl">SELECT</span> base.text, base.category, distance
+<span class="hl">FROM VECTOR_SEARCH</span>(
+  <span class="hl">TABLE</span> my_dataset.my_table, <span class="str">'embedding'</span>,
+  <span class="hl">(SELECT</span> [0.012, -0.045, 0.078, <span class="cm">/* ... 768 floats ... */</span>] <span class="hl">AS</span> query_embedding<span class="hl">)</span>,
+  top_k => <span class="n2">5</span>,
+  distance_type => <span class="str">'COSINE'</span>
+);
+    </div>
+
+    <div class="card" style="border-color:var(--accent);">
+      <div class="card-label">⚠️ Gotcha — Query Embedding</div>
+      <p>If you use <code>ML.GENERATE_EMBEDDING</code> inside the VECTOR_SEARCH call, it re-embeds the query for every row scan. Better to pre-embed the query in your app code and pass the vector directly. This also lets you reuse cached embeddings.</p>
+    </div>
+
+    <!-- Interactive SQL Sandbox -->
+    <h3>SQL Playground <span style="color:var(--ink-faint);font-size:9px;">(Simulation)</span></h3>
+    <div class="sandbox">
+      <div class="sandbox-label">🔬 Interactive SQL Sandbox — see how VECTOR_SEARCH works</div>
+      <div class="sandbox-controls">
+        <div class="sandbox-field">
+          <label for="sandbox-topk">top_k (results to return)</label>
+          <select id="sandbox-topk">
+            <option value="3">3</option>
+            <option value="5" selected>5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+          </select>
+        </div>
+        <div class="sandbox-field" style="flex:1;min-width:200px;">
+          <label for="sandbox-query">Search query</label>
+          <input type="text" id="sandbox-query" value="fraud detection policy" placeholder="e.g. fraud detection policy" />
+        </div>
+      </div>
+      <div class="sandbox-hint">This is a SIMULATION — no actual BigQuery calls are made. Results demonstrate how semantic search returns meaning-based matches even when keywords differ.</div>
+
+      <div class="sandbox-table-wrap">
+        <table class="sandbox-table" id="sandbox-results">
+          <thead><tr><th>#</th><th>Text</th><th>Category</th><th>Distance</th></tr></thead>
+          <tbody id="sandbox-tbody">
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sandbox-sql-display" id="sandbox-sql">
+        <span class="cm">-- Generated SQL will appear here</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: Traditional vs Vector Search ===== -->
+<section id="compare">
+  <div class="section-header" role="button" tabindex="0" aria-expanded="true">
+    <h2><span class="underline">Traditional</span> vs Vector Search</h2>
+    <div class="h2-sub">Same query, different approaches — see the gap.</div>
+    <span class="collapse-indicator">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="compare-grid">
+      <div class="compare-card bad">
+        <h4>❌ LIKE / Text Search</h4>
+        <ul>
+          <li><code>WHERE text LIKE '%fraud%'</code></li>
+          <li>Misses "scam", "unauthorized transaction"</li>
+          <li>Case-sensitive (unless LOWER)</li>
+          <li>No ranking by relevance</li>
+          <li>Can't handle typos: "fraaud" → no match</li>
+          <li>Exact word match only</li>
+        </ul>
+      </div>
+      <div class="compare-card good">
+        <h4>✅ VECTOR_SEARCH</h4>
+        <ul>
+          <li><code>VECTOR_SEARCH(TABLE t, ...)</code></li>
+          <li>Finds "scam", "fraud", "unauthorized tx"</li>
+          <li>Semantic understanding</li>
+          <li>Returns ranked by distance (relevance)</li>
+          <li>Handles typos — meaning is preserved</li>
+          <li>Language agnostic (telugu query kuda work chestundi)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: Common Mistakes ===== -->
+<section id="mistakes">
+  <div class="section-header" role="button" tabindex="0" aria-expanded="true">
+    <h2><span class="underline">Common</span> Mistakes</h2>
+    <div class="h2-sub">Things WILL go wrong. Here's how to fix them.</div>
+    <span class="collapse-indicator">▼</span>
+  </div>
+  <div class="section-body">
+    <table class="mistakes-table">
+      <thead><tr><th>#</th><th>Symptom</th><th>Root Cause</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td class="num-cell">1</td><td class="symptom">"Index not found" error</td><td>Index still building (takes minutes for large tables)</td><td>Query <code>INFORMATION_SCHEMA.VECTOR_INDEXES</code> to check status</td></tr>
+        <tr><td class="num-cell">2</td><td class="symptom">Bad relevance — top results don't match</td><td>Embedding model mismatch (query embedder ≠ table embedder)</td><td>Use same text-embedding-004 model for both</td></tr>
+        <tr><td class="num-cell">3</td><td class="symptom">Slow queries on large tables</td><td>No index, doing brute-force scan</td><td>Create IVf index with appropriate num_lists</td></tr>
+        <tr><td class="num-cell">4</td><td class="symptom">"Column embedding is not a valid vector"</td><td>Embedding stored as STRING instead of FLOAT64[]</td><td>Store as ARRAY&lt;FLOAT64&gt; or use the correct type</td></tr>
+        <tr><td class="num-cell">5</td><td class="symptom">top_k returns fewer results than requested</td><td>Not enough rows with distance within threshold</td><td>Check data volume or reduce distance threshold</td></tr>
+        <tr><td class="num-cell">6</td><td class="symptom">distance_type mismatch</td><td>Index created with COSINE, query uses EUCLIDEAN</td><td>Match distance_type in query to index creation</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== SECTION: Interview Prep ===== -->
+<section id="interview-prep">
+  <div class="section-header" role="button" tabindex="0" aria-expanded="true">
+    <h2><span class="underline">Interview</span> Prep</h2>
+    <div class="h2-sub">Three levels of answers — pick your depth.</div>
+    <span class="collapse-indicator">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="card">
+      <div class="card-label">🎯 30-Second Answer</div>
+      <p>"BigQuery Vector Search lets you find text by meaning, not keywords. You store embeddings (from text-embedding-004) as a column in BigQuery, create a vector index, and use the VECTOR_SEARCH() SQL function. No separate vector database needed — everything stays in BigQuery."</p>
+    </div>
+
+    <div class="card">
+      <div class="card-label">🎯 90-Second STAR Answer</div>
+      <p><strong>Problem:</strong> We needed semantic search on a corpus of 500K banking transaction descriptions. Traditional LIKE queries missed synonyms and typos — "fraud" wouldn't match "unauthorized tx."</p>
+      <p><strong>Action:</strong> I implemented BigQuery Vector Search. I embedded all descriptions using text-embedding-004 (768-dim vectors), stored them as FLOAT64[] in a new column, created a COSINE IVF index, and wrote VECTOR_SEARCH() queries with top_k=10. The embedding happens in a weekly batch job via a Cloud Function.</p>
+      <p><strong>Result:</strong> 40% improvement in relevant result recall. Zero additional infrastructure — no Pinecone, no Chroma. Query latency under 2 seconds for 500K rows. Production ready with zero ops overhead.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-label">🎯 3-Minute Technical Walkthrough</div>
+      <p><strong>Architecture:</strong> BigQuery table with columns (id, text, category, embedding FLOAT64[]). Embedding generated via Vertex AI text-embedding-004, stored as repeated float array. Vector index created with IVF (Inverted File Index) using cosine distance. Query-time: embed user query → VECTOR_SEARCH() → ranked results.</p>
+      <p><strong>Key decisions:</strong> (1) IVF not Brute Force — IVF is approximate but 10x faster for large data. (2) COSINE not EUCLIDEAN — cosine works better for text embeddings. (3) Pre-embedding — embed queries in app code, not inline in SQL.</p>
+      <p><strong>Tradeoffs:</strong> BigQuery Vector Search is slower than dedicated vector DBs (Pinecone) for real-time use cases. But for batch/analytical workloads where data already lives in BQ, it eliminates ETL overhead. Best for: RAG on historical data, document search, classification. Not for: real-time recommendation (sub-100ms needed).</p>
+      <p><strong>What can fail:</strong> Index not yet built, embedding model mismatch, column type mismatch, distance_type mismatch. Always verify index status via INFORMATION_SCHEMA.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION: Implementation Checklist ===== -->
+<section id="checklist">
+  <div class="section-header" role="button" tabindex="0" aria-expanded="true">
+    <h2><span class="underline">Implementation</span> Checklist</h2>
+    <div class="h2-sub">Step-by-step to get this working in your GCP project.</div>
+    <span class="collapse-indicator">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="checklist-progress">
+      <div class="checklist-progress-bar"><div class="checklist-progress-fill" id="checklist-fill"></div></div>
+      <span class="checklist-progress-text" id="checklist-text">0/6</span>
+      <button class="checklist-reset" id="checklist-reset">Reset</button>
+    </div>
+
+    <div class="key-grid">
+      <div class="key-item" data-check-index="0">
+        <span class="ck-box">✓</span>
+        <div class="key-num">01</div>
+        <div class="key-title">Enable APIs</div>
+        <p>Enable BigQuery Connection API + Vertex AI API in your GCP project.</p>
+      </div>
+      <div class="key-item" data-check-index="1">
+        <span class="ck-box">✓</span>
+        <div class="key-num">02</div>
+        <div class="key-title">Create Embedding Model</div>
+        <p>Run <code>CREATE MODEL my_dataset.embedding_model REMOTE WITH CONNECTION ... OPTIONS(model_type='TEXT_EMBEDDING_004')</code></p>
+      </div>
+      <div class="key-item" data-check-index="2">
+        <span class="ck-box">✓</span>
+        <div class="key-num">03</div>
+        <div class="key-title">Generate Embeddings</div>
+        <p><code>SELECT ML.GENERATE_EMBEDDING(MODEL m, (SELECT text, content FROM source))</code> → store in table</p>
+      </div>
+      <div class="key-item" data-check-index="3">
+        <span class="ck-box">✓</span>
+        <div class="key-num">04</div>
+        <div class="key-title">Create Vector Index</div>
+        <p><code>CREATE VECTOR INDEX ... OPTIONS(distance_type='COSINE', index_type='IVF')</code> — wait for build</p>
+      </div>
+      <div class="key-item" data-check-index="4">
+        <span class="ck-box">✓</span>
+        <div class="key-num">05</div>
+        <div class="key-title">Query</div>
+        <p>Embed query → <code>SELECT FROM VECTOR_SEARCH(TABLE t, 'embedding', subquery, top_k => 5)</code></p>
+      </div>
+      <div class="key-item" data-check-index="5">
+        <span class="ck-box">✓</span>
+        <div class="key-num">06</div>
+        <div class="key-title">Monitor</div>
+        <p>Check <code>INFORMATION_SCHEMA.VECTOR_INDEXES</code> for index status. Log query latency.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>BigQuery Vector Search — Brainstorm Plan</span>
+  <span>Thariq Pattern: HTML as a plan you want to read</span>
+</footer>
+
+</main>
+
+<!-- Toast notification -->
+<div id="toast"></div>
+
+<!-- SVG Tooltip -->
+<div class="svg-tooltip" id="svg-tooltip">
+  <button class="tt-close" id="tt-close" aria-label="Close tooltip">✕</button>
+  <div class="tt-name"></div>
+  <div class="tt-desc"></div>
+  <div class="tt-ref"></div>
+</div>
+
+<script>
+(function() {
+'use strict';
+
+// ============================================================
+// 1. DARK MODE with persistence
+// ============================================================
+var darkToggle = document.getElementById('darkToggle');
+var htmlEl = document.documentElement;
+function setTheme(theme) {
+  if (theme === 'dark') {
+    htmlEl.setAttribute('data-theme', 'dark');
+  } else {
+    htmlEl.removeAttribute('data-theme');
+  }
+  try { localStorage.setItem('bq-theme', theme); } catch(e) {}
+}
+var savedTheme;
+try { savedTheme = localStorage.getItem('bq-theme'); } catch(e) {}
+if (savedTheme === 'dark') setTheme('dark');
+
+darkToggle.addEventListener('click', function() {
+  var isDark = htmlEl.getAttribute('data-theme') === 'dark';
+  setTheme(isDark ? 'light' : 'dark');
+});
+
+// ============================================================
+// 2. COPY BUTTONS on code blocks
+// ============================================================
+function showToast(msg) {
+  var toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(function() {
+    toast.classList.remove('show');
+  }, 2000);
+}
+
+document.querySelectorAll('.code-block').forEach(function(block) {
+  var btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'Copy';
+  btn.setAttribute('aria-label', 'Copy SQL to clipboard');
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    // Get text content excluding the button itself
+    var text = block.textContent.replace('Copy', '').trim();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        showToast('SQL copied to clipboard');
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      }).catch(function() {
+        fallbackCopy(text, btn);
+      });
+    } else {
+      fallbackCopy(text, btn);
+    }
+  });
+  block.appendChild(btn);
+});
+
+function fallbackCopy(text, btn) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    btn.textContent = 'Copied!';
+    showToast('SQL copied to clipboard');
+    setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+  } catch(e) {
+    showToast('Could not copy. Select the code manually.');
+  }
+  document.body.removeChild(ta);
+}
+
+// ============================================================
+// 3. COLLAPSIBLE SECTIONS
+// ============================================================
+var sectionIds = ['telugu-analogy', 'architecture', 'sql-deep-dive', 'compare', 'mistakes', 'interview-prep', 'checklist'];
+
+function initCollapsible(id) {
+  var section = document.getElementById(id);
+  if (!section) return;
+  var header = section.querySelector('.section-header');
+  var body = section.querySelector('.section-body');
+  var indicator = section.querySelector('.collapse-indicator');
+  if (!header || !body || !indicator) return;
+
+  var collapsed;
+  try { collapsed = localStorage.getItem('bq-section-' + id) === '1'; } catch(e) { collapsed = false; }
+
+  if (collapsed) {
+    body.classList.add('collapsed');
+    indicator.textContent = '▶';
+    header.setAttribute('aria-expanded', 'false');
+  }
+
+  function toggleIt() {
+    var wasCollapsed = body.classList.contains('collapsed');
+    body.classList.toggle('collapsed');
+    indicator.textContent = wasCollapsed ? '▼' : '▶';
+    header.setAttribute('aria-expanded', wasCollapsed ? 'true' : 'false');
+    try { localStorage.setItem('bq-section-' + id, wasCollapsed ? '0' : '1'); } catch(e) {}
+  }
+
+  header.addEventListener('click', function(e) {
+    if (e.target.closest('a, button, select, input, label, .copy-btn, .svg-node')) return;
+    toggleIt();
+  });
+  header.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleIt();
+    }
+  });
+}
+
+sectionIds.forEach(initCollapsible);
+
+// ============================================================
+// 4. INTERACTIVE CHECKLIST
+// ============================================================
+(function initChecklist() {
+  var items = document.querySelectorAll('.key-item[data-check-index]');
+  var fill = document.getElementById('checklist-fill');
+  var text = document.getElementById('checklist-text');
+  var resetBtn = document.getElementById('checklist-reset');
+
+  if (!items.length || !fill || !text || !resetBtn) return;
+
+  function getChecked() {
+    var result = [];
+    try { result = JSON.parse(localStorage.getItem('bq-checklist') || '[]'); } catch(e) {}
+    return result;
+  }
+
+  function saveChecked(indices) {
+    try { localStorage.setItem('bq-checklist', JSON.stringify(indices)); } catch(e) {}
+  }
+
+  function updateUI() {
+    var checked = document.querySelectorAll('.key-item.checked').length;
+    var total = items.length;
+    text.textContent = checked + '/' + total;
+    fill.style.width = (checked / total * 100) + '%';
+  }
+
+  function applySaved() {
+    var saved = getChecked();
+    items.forEach(function(item) {
+      var idx = parseInt(item.getAttribute('data-check-index'), 10);
+      if (saved.indexOf(idx) !== -1) {
+        item.classList.add('checked');
+      }
+    });
+    updateUI();
+  }
+
+  items.forEach(function(item) {
+    item.addEventListener('click', function(e) {
+      if (e.target.closest('code')) return;
+      this.classList.toggle('checked');
+      updateUI();
+      var indices = [];
+      items.forEach(function(it) {
+        if (it.classList.contains('checked')) {
+          indices.push(parseInt(it.getAttribute('data-check-index'), 10));
+        }
+      });
+      saveChecked(indices);
+    });
+  });
+
+  resetBtn.addEventListener('click', function() {
+    items.forEach(function(item) { item.classList.remove('checked'); });
+    updateUI();
+    saveChecked([]);
+  });
+
+  applySaved();
+})();
+
+// ============================================================
+// 5. INTERACTIVE SVG DIAGRAM
+// ============================================================
+(function initSvgDiagram() {
+  var groups = document.querySelectorAll('.svg-node');
+  var tooltip = document.getElementById('svg-tooltip');
+  var closeBtn = document.getElementById('tt-close');
+  if (!tooltip || !groups.length) return;
+
+  var nodeData = {
+    'raw-text': {
+      name: 'Raw Text',
+      desc: 'Your source data — CSV files, logs, or JSON documents. This is the input that gets embedded and indexed for semantic search.',
+      ref: 'BigQuery supports batch loading from GCS, streaming inserts, and external tables.'
+    },
+    'embedding': {
+      name: 'text-embedding-004',
+      desc: 'Vertex AI model that converts text into 768-dimensional embedding vectors. Each vector captures the semantic meaning of the input.',
+      ref: 'Part of Vertex AI unified embedding API. 768 dimensions balance accuracy with performance.'
+    },
+    'bq-table': {
+      name: 'BigQuery Table',
+      desc: 'Stores original text alongside its embedding vector as FLOAT64[]. A vector index enables fast approximate nearest neighbor search.',
+      ref: 'Vector index uses IVF (Inverted File Index). Available index types: IVF, IVFPQ, or brute-force.'
+    },
+    'vector-search': {
+      name: 'VECTOR_SEARCH()',
+      desc: 'SQL function that finds nearest neighbors by distance. Returns ranked results with distance scores. All inside standard BigQuery SQL.',
+      ref: 'Supports COSINE, EUCLIDEAN, and DOT_PRODUCT distance types. Must match the index distance_type.'
+    }
+  };
+
+  function hideTooltip() {
+    tooltip.classList.remove('show');
+    tooltip.dataset.node = '';
+  }
+
+  groups.forEach(function(g) {
+    g.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var id = this.getAttribute('data-node');
+      if (!id) return;
+
+      if (tooltip.classList.contains('show') && tooltip.dataset.node === id) {
+        hideTooltip();
+        return;
+      }
+
+      var data = nodeData[id];
+      if (!data) return;
+
+      var rect = this.getBoundingClientRect();
+      tooltip.querySelector('.tt-name').textContent = data.name;
+      tooltip.querySelector('.tt-desc').textContent = data.desc;
+      tooltip.querySelector('.tt-ref').textContent = 'Learn more: ' + data.ref;
+      tooltip.dataset.node = id;
+
+      // Position above the node, centered
+      var top = rect.top - 10;
+      var left = rect.left + (rect.width / 2);
+      tooltip.style.top = Math.max(8, top) + 'px';
+      tooltip.style.left = Math.max(8, left) + 'px';
+      tooltip.style.transform = 'translate(-50%, -100%)';
+      tooltip.classList.add('show');
+    });
+  });
+
+  // Close button
+  closeBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    hideTooltip();
+  });
+
+  // Click elsewhere to dismiss
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.svg-wrap') && !e.target.closest('.svg-tooltip')) {
+      hideTooltip();
+    }
+  });
+
+  // Escape key to dismiss
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') hideTooltip();
+  });
+})();
+
+// ============================================================
+// 6. SQL SANDBOX
+// ============================================================
+(function initSandbox() {
+  var topkSelect = document.getElementById('sandbox-topk');
+  var queryInput = document.getElementById('sandbox-query');
+  var tbody = document.getElementById('sandbox-tbody');
+  var sqlDisplay = document.getElementById('sandbox-sql');
+  if (!topkSelect || !queryInput || !tbody || !sqlDisplay) return;
+
+  var mockResults = {
+    'fraud': [
+      { text: 'fraud detection policy for high-value transactions', category: 'compliance', distance: 0.05 },
+      { text: 'identifying unauthorized transaction patterns', category: 'security', distance: 0.12 },
+      { text: 'anti-money laundering screening procedures', category: 'compliance', distance: 0.23 },
+      { text: 'suspicious activity reporting guidelines', category: 'compliance', distance: 0.31 },
+      { text: 'customer due diligence verification process', category: 'kyc', distance: 0.45 },
+      { text: 'credit card chargeback handling workflow', category: 'operations', distance: 0.52 },
+      { text: 'new account opening verification steps', category: 'kyc', distance: 0.68 },
+      { text: 'daily transaction limit policy updates', category: 'policy', distance: 0.72 },
+      { text: 'branch manager approval for large withdrawals', category: 'operations', distance: 0.81 },
+      { text: 'customer email notification preferences', category: 'communication', distance: 0.89 }
+    ],
+    'loan': [
+      { text: 'home loan eligibility criteria for salaried employees', category: 'lending', distance: 0.04 },
+      { text: 'personal loan interest rate calculation methodology', category: 'lending', distance: 0.11 },
+      { text: 'auto loan documentation requirements', category: 'lending', distance: 0.18 },
+      { text: 'loan against property valuation process', category: 'lending', distance: 0.26 },
+      { text: 'credit score impact on loan approval', category: 'risk', distance: 0.35 },
+      { text: 'EMI payment default handling procedure', category: 'collections', distance: 0.48 },
+      { text: 'mortgage insurance policy guidelines', category: 'insurance', distance: 0.55 },
+      { text: 'education loan moratorium period terms', category: 'lending', distance: 0.63 },
+      { text: 'business loan working capital assessment', category: 'lending', distance: 0.72 },
+      { text: 'fixed deposit interest rate comparison', category: 'savings', distance: 0.91 }
+    ],
+    'customer': [
+      { text: 'customer onboarding document verification checklist', category: 'kyc', distance: 0.03 },
+      { text: 'customer complaint escalation matrix', category: 'support', distance: 0.08 },
+      { text: 'customer account closure request process', category: 'operations', distance: 0.15 },
+      { text: 'customer data privacy and consent management', category: 'compliance', distance: 0.22 },
+      { text: 'customer satisfaction survey analysis report', category: 'analytics', distance: 0.34 },
+      { text: 'customer segmentation for targeted offers', category: 'marketing', distance: 0.42 },
+      { text: 'customer relationship management system access', category: 'it', distance: 0.56 },
+      { text: 'customer feedback collection and reporting', category: 'support', distance: 0.63 },
+      { text: 'customer retention program effectiveness metrics', category: 'marketing', distance: 0.71 },
+      { text: 'customer address change request form process', category: 'operations', distance: 0.88 }
+    ],
+    'scam': [
+      { text: 'identifying phishing email patterns in customer reports', category: 'security', distance: 0.06 },
+      { text: 'fraud detection policy for high-value transactions', category: 'compliance', distance: 0.15 },
+      { text: 'suspicious activity reporting guidelines', category: 'compliance', distance: 0.22 },
+      { text: 'social engineering attack prevention training', category: 'security', distance: 0.28 },
+      { text: 'unauthorized account access investigation protocol', category: 'security', distance: 0.37 },
+      { text: 'anti-money laundering screening procedures', category: 'compliance', distance: 0.44 },
+      { text: 'customer due diligence verification process', category: 'kyc', distance: 0.58 },
+      { text: 'credit card chargeback handling workflow', category: 'operations', distance: 0.65 },
+      { text: 'two-factor authentication setup instructions', category: 'it', distance: 0.71 },
+      { text: 'account recovery and password reset process', category: 'support', distance: 0.83 }
+    ],
+    'unauthorized': [
+      { text: 'identifying unauthorized transaction patterns', category: 'security', distance: 0.04 },
+      { text: 'fraud detection policy for high-value transactions', category: 'compliance', distance: 0.11 },
+      { text: 'unauthorized account access investigation protocol', category: 'security', distance: 0.19 },
+      { text: 'suspicious activity reporting guidelines', category: 'compliance', distance: 0.27 },
+      { text: 'anti-money laundering screening procedures', category: 'compliance', distance: 0.38 },
+      { text: 'customer due diligence verification process', category: 'kyc', distance: 0.49 },
+      { text: 'credit card chargeback handling workflow', category: 'operations', distance: 0.55 },
+      { text: 'daily transaction limit policy updates', category: 'policy', distance: 0.67 },
+      { text: 'branch manager approval for large withdrawals', category: 'operations', distance: 0.76 },
+      { text: 'customer email notification preferences', category: 'communication', distance: 0.91 }
+    ],
+    'credit': [
+      { text: 'credit score impact on loan approval decisions', category: 'risk', distance: 0.03 },
+      { text: 'credit card chargeback handling workflow', category: 'operations', distance: 0.08 },
+      { text: 'personal loan interest rate calculation methodology', category: 'lending', distance: 0.14 },
+      { text: 'home loan eligibility criteria for salaried employees', category: 'lending', distance: 0.22 },
+      { text: 'auto loan documentation requirements', category: 'lending', distance: 0.31 },
+      { text: 'fraud detection policy for high-value transactions', category: 'compliance', distance: 0.42 },
+      { text: 'EMI payment default handling procedure', category: 'collections', distance: 0.51 },
+      { text: 'customer due diligence verification process', category: 'kyc', distance: 0.63 },
+      { text: 'new account opening verification steps', category: 'kyc', distance: 0.74 },
+      { text: 'customer email notification preferences', category: 'communication', distance: 0.88 }
+    ]
+  };
+
+  function findBestKey(query) {
+    var q = query.toLowerCase();
+    var keys = Object.keys(mockResults);
+    // Check for exact word matches first
+    for (var k = 0; k < keys.length; k++) {
+      if (q.indexOf(keys[k]) !== -1) return keys[k];
+    }
+    // Check substring matches
+    for (var k = 0; k < keys.length; k++) {
+      if (keys[k].indexOf(q) !== -1 || q.indexOf(keys[k]) !== -1) return keys[k];
+    }
+    return 'fraud';
+  }
+
+  function renderSandbox() {
+    var topk = parseInt(topkSelect.value, 10);
+    var query = queryInput.value || 'fraud detection policy';
+    var bestKey = findBestKey(query);
+    var results = mockResults[bestKey] || mockResults['fraud'];
+    var sliced = results.slice(0, topk);
+
+    // Render table
+    var html = '';
+    if (sliced.length === 0) {
+      html = '<tr><td colspan="4" class="sandbox-empty">No results match your query.</td></tr>';
+    } else {
+      for (var i = 0; i < sliced.length; i++) {
+        var r = sliced[i];
+        html += '<tr>' +
+          '<td class="rank-col">' + (i + 1) + '</td>' +
+          '<td>' + escapeHtml(r.text) + '</td>' +
+          '<td>' + escapeHtml(r.category) + '</td>' +
+          '<td class="dist-col">' + r.distance.toFixed(4) + '</td>' +
+          '</tr>';
+      }
+    }
+    tbody.innerHTML = html;
+
+    // Render generated SQL
+    var escapedQuery = escapeHtml(query);
+    var sql = '<span class="cm">-- Generated SQL for: "' + escapedQuery + '"</span>\n';
+    sql += '<span class="hl">SELECT</span> base.text, base.category, distance\n';
+    sql += '<span class="hl">FROM VECTOR_SEARCH</span>(\n';
+    sql += '  <span class="hl">TABLE</span> my_dataset.my_table, <span class="str">\'embedding\'</span>,\n';
+    sql += '  (\n';
+    sql += '    <span class="hl">SELECT</span> embedding <span class="hl">AS</span> query_embedding,\n';
+    sql += '           <span class="str">\'' + escapedQuery + '\'</span> <span class="hl">AS</span> query_text\n';
+    sql += '    <span class="hl">FROM</span> <span class="hl">ML.GENERATE_EMBEDDING</span>(\n';
+    sql += '      <span class="hl">MODEL</span> my_dataset.embedding_model,\n';
+    sql += '      <span class="hl">(SELECT</span> <span class="str">\'' + escapedQuery + '\'</span> <span class="hl">AS</span> content<span class="hl">)</span>\n';
+    sql += '    )\n';
+    sql += '  ),\n';
+    sql += '  top_k => <span class="n2">' + topk + '</span>\n';
+    sql += ');';
+    sqlDisplay.innerHTML = sql;
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  topkSelect.addEventListener('change', renderSandbox);
+  queryInput.addEventListener('input', renderSandbox);
+
+  // Initial render
+  renderSandbox();
+})();
+
+// ============================================================
+// 7. NAVIGATION SCROLL SPY
+// ============================================================
+(function initNavScrollSpy() {
+  var navLinks = document.querySelectorAll('.section-nav a');
+  var sections = [];
+
+  navLinks.forEach(function(link) {
+    var href = link.getAttribute('href');
+    if (!href || href.charAt(0) !== '#') return;
+    var id = href.substring(1);
+    var el = document.getElementById(id);
+    if (el) {
+      sections.push({ id: id, el: el, link: link });
+    }
+  });
+
+  if (sections.length === 0) return;
+
+  var spyObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var id = entry.target.id;
+        navLinks.forEach(function(l) { l.classList.remove('active'); });
+        sections.forEach(function(s) {
+          if (s.id === id) s.link.classList.add('active');
+        });
+      }
+    });
+  }, { threshold: 0.3, rootMargin: '-60px 0px -30% 0px' });
+
+  sections.forEach(function(s) { spyObserver.observe(s.el); });
+
+  // Click handler for nav links (smooth scroll is handled by CSS scroll-behavior)
+  navLinks.forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      // Collapse mobile nav if needed — no-op on desktop
+    });
+  });
+})();
+
+// ============================================================
+// 8. SCROLL ANIMATIONS (existing)
+// ============================================================
+var observer = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if (e.isIntersecting) e.target.classList.add('in');
+  });
+}, {threshold: 0.1});
+document.querySelectorAll('section').forEach(function(el){observer.observe(el);});
+
+// ============================================================
+// 9. TOOLTIP REPOSITION ON SCROLL/RESIZE
+// ============================================================
+(function() {
+  var tooltip = document.getElementById('svg-tooltip');
+  var resizeTimeout;
+  function repositionTooltip() {
+    if (!tooltip.classList.contains('show')) return;
+    var nodeId = tooltip.dataset.node;
+    if (!nodeId) return;
+    var node = document.querySelector('.svg-node[data-node="' + nodeId + '"]');
+    if (!node) return;
+    var rect = node.getBoundingClientRect();
+    var top = rect.top - 10;
+    var left = rect.left + (rect.width / 2);
+    tooltip.style.top = Math.max(8, top) + 'px';
+    tooltip.style.left = Math.max(8, left) + 'px';
+    tooltip.style.transform = 'translate(-50%, -100%)';
+  }
+  window.addEventListener('scroll', repositionTooltip, {passive: true});
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(repositionTooltip, 100);
+  });
+})();
+
+})();
+</script>
+</body>
+</html>

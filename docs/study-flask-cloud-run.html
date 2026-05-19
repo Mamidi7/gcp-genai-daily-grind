@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flask → Cloud Run — Study Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+:root{--background:#ffffff;--foreground:#09090b;--card:#ffffff;--card-foreground:#09090b;--primary:#18181b;--primary-foreground:#fafafa;--secondary:#f4f4f5;--secondary-foreground:#18181b;--muted:#f4f4f5;--muted-foreground:#71717a;--accent:#f4f4f5;--accent-foreground:#18181b;--destructive:#ef4444;--success:#16a34a;--warning:#f59e0b;--border:#e4e4e7;--input:#e4e4e7;--ring:#18181b;--radius:0.5rem;--radius-sm:calc(var(--radius)-2px);--radius-lg:calc(var(--radius)+2px);--font-sans:'Inter',system-ui,-apple-system,sans-serif;--font-mono:'JetBrains Mono',ui-monospace,monospace;--shadow-sm:0 1px 2px 0 rgb(0 0 0 /0.05);--shadow:0 1px 3px 0 rgb(0 0 0 /0.1),0 1px 2px -1px rgb(0 0 0 /0.1);--shadow-md:0 4px 6px -1px rgb(0 0 0 /0.1),0 2px 4px -2px rgb(0 0 0 /0.1);--shadow-lg:0 10px 15px -3px rgb(0 0 0 /0.1),0 4px 6px -4px rgb(0 0 0 /0.1);}
+[data-theme="dark"]{--background:#09090b;--foreground:#fafafa;--card:#09090b;--card-foreground:#fafafa;--primary:#fafafa;--primary-foreground:#18181b;--secondary:#27272a;--secondary-foreground:#fafafa;--muted:#27272a;--muted-foreground:#a1a1aa;--accent:#27272a;--accent-foreground:#fafafa;--destructive:#7f1d1d;--success:#166534;--warning:#92400e;--border:#27272a;--input:#27272a;--ring:#d4d4d8;--shadow-sm:0 1px 2px 0 rgb(0 0 0 /0.3);--shadow:0 1px 3px 0 rgb(0 0 0 /0.4),0 1px 2px -1px rgb(0 0 0 /0.3);--shadow-md:0 4px 6px -1px rgb(0 0 0 /0.4),0 2px 4px -2px rgb(0 0 0 /0.3);--shadow-lg:0 10px 15px -3px rgb(0 0 0 /0.4),0 4px 6px -4px rgb(0 0 0 /0.3);}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font-sans);background:var(--background);color:var(--foreground);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+.container{max-width:960px;margin:0 auto;padding:0 20px;}
+
+/* shadcn components */
+.sh-btn{display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;border-radius:var(--radius-sm);font-size:0.875rem;font-weight:500;line-height:1;white-space:nowrap;transition:all 0.15s ease;cursor:pointer;outline:none;border:1px solid transparent;padding:0.5rem 1rem;height:2.25rem;text-decoration:none;font-family:var(--font-sans);}
+.sh-btn:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ring);}
+.sh-btn:disabled{opacity:0.5;pointer-events:none;}
+.sh-btn:active{transform:translateY(1px);}
+.sh-btn-primary{background:var(--primary);color:var(--primary-foreground);}
+.sh-btn-primary:hover{opacity:0.9;}
+.sh-btn-outline{border-color:var(--input);background:transparent;color:var(--foreground);}
+.sh-btn-outline:hover{background:var(--accent);}
+.sh-btn-ghost{background:transparent;color:var(--foreground);}
+.sh-btn-ghost:hover{background:var(--accent);}
+.sh-btn-sm{padding:0.25rem 0.75rem;height:2rem;font-size:0.8125rem;}
+
+.sh-card{border-radius:var(--radius);border:1px solid var(--border);background:var(--card);color:var(--card-foreground);box-shadow:var(--shadow-sm);transition:box-shadow 0.2s,transform 0.2s;}
+.sh-card-hover:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.sh-card-header{padding:1.25rem 1.25rem 0;display:flex;flex-direction:column;gap:0.25rem;}
+.sh-card-header h3{font-size:1.125rem;font-weight:600;margin:0;line-height:1.4;}
+.sh-card-header p{font-size:0.875rem;color:var(--muted-foreground);margin:0;}
+.sh-card-content{padding:1.25rem;font-size:0.875rem;line-height:1.6;}
+
+.sh-badge{display:inline-flex;align-items:center;border-radius:calc(var(--radius)-2px);border:1px solid transparent;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;line-height:1.25;white-space:nowrap;}
+.sh-badge-default{background:var(--primary);color:var(--primary-foreground);}
+.sh-badge-secondary{background:var(--secondary);color:var(--secondary-foreground);}
+.sh-badge-outline{border-color:var(--border);color:var(--foreground);}
+.sh-badge-success{background:var(--success);color:#fff;}
+.sh-badge-warning{background:var(--warning);color:#fff;}
+
+.sh-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1rem;}
+.sh-tab{padding:0.5rem 1rem;font-size:0.875rem;font-weight:500;color:var(--muted-foreground);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;font-family:var(--font-sans);}
+.sh-tab:hover{color:var(--foreground);}
+.sh-tab.active{color:var(--foreground);border-bottom-color:var(--foreground);}
+.sh-tab-panel{display:none;padding:0.5rem 0;}
+.sh-tab-panel.active{display:block;}
+
+.sh-table{width:100%;border-collapse:collapse;}
+.sh-table th{text-align:left;padding:0.75rem 1rem;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted-foreground);border-bottom:1px solid var(--border);}
+.sh-table td{padding:0.75rem 1rem;border-bottom:1px solid var(--border);font-size:0.875rem;}
+.sh-table tbody tr:hover{background:var(--muted);}
+
+.sh-code{border-radius:var(--radius);background:var(--muted);padding:1rem 1.25rem;font-family:var(--font-mono);font-size:0.8125rem;line-height:1.6;overflow-x:auto;margin:0.75rem 0;}
+.sh-code .hl{color:#dc2626;font-weight:500;}
+.sh-code .cm{color:var(--muted-foreground);}
+.sh-code .str{color:#16a34a;}
+.sh-code .kw{color:#9333ea;}
+
+.sh-separator{border:none;height:1px;background:var(--border);margin:1.5rem 0;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+@media(max-width:640px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+/* Layout */
+.topbar{position:sticky;top:0;z-index:50;background:var(--background);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;}
+.topbar-inner{max-width:960px;margin:0 auto;width:100%;padding:0 20px;display:flex;justify-content:space-between;align-items:center;}
+.brand{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.brand span{color:var(--muted-foreground);font-weight:400;}
+
+.page-header{padding:2rem 0 0.5rem;}
+.page-header h1{font-size:1.75rem;font-weight:700;letter-spacing:-0.025em;line-height:1.2;}
+.page-header .desc{font-size:0.95rem;color:var(--muted-foreground);margin-top:0.25rem;}
+
+.section-mb{margin-bottom:1.5rem;}
+.section-title{font-size:1rem;font-weight:600;margin-bottom:0.75rem;display:flex;align-items:center;gap:8px;}
+
+.card-row{display:flex;flex-wrap:wrap;gap:1rem;}
+
+.arch-svg{width:100%;max-width:700px;height:auto;display:block;margin:0 auto;}
+
+.demo-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.mt-1{margin-top:8px;}
+.mb-1{margin-bottom:8px;}
+
+.progress-group{margin:8px 0;}
+.progress-group .label{font-size:0.75rem;font-weight:500;color:var(--muted-foreground);margin-bottom:4px;}
+.progress-bar{height:6px;border-radius:9999px;background:var(--secondary);overflow:hidden;}
+.progress-bar .fill{height:100%;border-radius:9999px;background:var(--primary);}
+
+footer{margin-top:3rem;padding:1.5rem 0;border-top:1px solid var(--border);text-align:center;font-size:0.8rem;color:var(--muted-foreground);}
+
+@keyframes fade-up{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.fade-up{animation:fade-up 0.3s ease-out forwards;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><i data-lucide="layers" style="width:18px;height:18px;"></i>Flask → Cloud Run</div>
+    <div style="display:flex;gap:6px;">
+      <button class="sh-btn sh-btn-sm sh-btn-ghost" onclick="toggleDark()"><i data-lucide="moon" style="width:16px;height:16px;"></i></button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- HEADER -->
+<div class="page-header">
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+    <span class="sh-badge sh-badge-default">study</span>
+    <span class="sh-badge sh-badge-secondary">Flask</span>
+    <span class="sh-badge sh-badge-secondary">Gunicorn</span>
+    <span class="sh-badge sh-badge-outline">Cloud Run</span>
+    <span class="sh-badge sh-badge-outline">Docker</span>
+  </div>
+  <h1>Flask → Cloud Run Pipeline</h1>
+  <div class="desc">Deploy a Flask API to Cloud Run: local dev → Docker → Gunicorn → Cloud Run. Full architecture with code samples.</div>
+</div>
+
+<hr class="sh-separator" />
+
+<!-- 1. ARCHITECTURE -->
+<div class="section-mb">
+  <div class="section-title"><i data-lucide="git-branch" style="width:16px;height:16px;color:var(--muted-foreground);"></i> Architecture Flow</div>
+  <div class="sh-card">
+    <div class="sh-card-content" style="text-align:center;">
+      <svg viewBox="0 0 720 110" class="arch-svg">
+        <defs>
+          <marker id="sh-arrow" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--muted-foreground)"/></marker>
+          <marker id="sh-arrow-light" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--primary)"/></marker>
+        </defs>
+
+        <!-- Box 0: Local Dev -->
+        <rect x="10" y="30" width="115" height="42" rx="8" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="67" y="47" style="font-size:9px;fill:var(--foreground);text-anchor:middle;font-weight:600;font-family:var(--font-sans);">Local Dev</text>
+        <text x="67" y="60" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">flask run</text>
+
+        <!-- Box 1: Docker -->
+        <rect x="170" y="30" width="115" height="42" rx="8" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="227" y="47" style="font-size:9px;fill:var(--foreground);text-anchor:middle;font-weight:600;font-family:var(--font-sans);">Docker Build</text>
+        <text x="227" y="60" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">docker build -t app</text>
+
+        <!-- Box 2: Artifact Registry -->
+        <rect x="330" y="30" width="115" height="42" rx="8" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="387" y="47" style="font-size:9px;fill:var(--foreground);text-anchor:middle;font-weight:600;font-family:var(--font-sans);">Artifact Registry</text>
+        <text x="387" y="60" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">docker push</text>
+
+        <!-- Box 3: Cloud Run -->
+        <rect x="490" y="30" width="115" height="42" rx="8" fill="var(--card)" stroke="var(--primary)" stroke-width="1.5"/>
+        <text x="547" y="47" style="font-size:9px;fill:var(--foreground);text-anchor:middle;font-weight:600;font-family:var(--font-sans);">Cloud Run</text>
+        <text x="547" y="60" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">gcloud run deploy</text>
+
+        <!-- Box 4: Endpoint -->
+        <rect x="650" y="30" width="65" height="42" rx="8" fill="var(--card)" stroke="var(--success)" stroke-width="1.5"/>
+        <text x="682" y="47" style="font-size:9px;fill:var(--foreground);text-anchor:middle;font-weight:600;font-family:var(--font-sans);">HTTPS</text>
+        <text x="682" y="60" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">*.run.app</text>
+
+        <!-- Arrows -->
+        <line x1="125" y1="51" x2="170" y2="51" stroke="var(--muted-foreground)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#sh-arrow)"/>
+        <line x1="285" y1="51" x2="330" y2="51" stroke="var(--muted-foreground)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#sh-arrow)"/>
+        <line x1="445" y1="51" x2="490" y2="51" stroke="var(--muted-foreground)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#sh-arrow-light)"/>
+        <line x1="605" y1="51" x2="650" y2="51" stroke="var(--muted-foreground)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#sh-arrow)"/>
+
+        <!-- Packets on arrows -->
+        <circle r="4" fill="var(--primary)" opacity="0">
+          <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.8;1" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="cx" values="130;145;160" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="cy" values="51;51;51" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <circle r="4" fill="var(--primary)" opacity="0">
+          <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.8;1" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+          <animate attributeName="cx" values="290;305;320" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+          <animate attributeName="cy" values="51;51;51" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle r="4" fill="var(--primary)" opacity="0">
+          <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.8;1" dur="2s" begin="1s" repeatCount="indefinite"/>
+          <animate attributeName="cx" values="450;465;480" dur="2s" begin="1s" repeatCount="indefinite"/>
+          <animate attributeName="cy" values="51;51;51" dur="2s" begin="1s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- Step labels -->
+        <text x="67" y="85" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">Step 1: Build</text>
+        <text x="227" y="85" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">Step 2: Containerize</text>
+        <text x="387" y="85" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">Step 3: Push</text>
+        <text x="547" y="85" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">Step 4: Deploy</text>
+
+        <!-- Return arrow -->
+        <path d="M682,82 L682,98 L50,98 L50,82" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#sh-arrow)"/>
+        <text x="360" y="106" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">Response back to client</text>
+
+        <circle r="3" fill="var(--success)" opacity="0">
+          <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.85;1" dur="3s" begin="1.5s" repeatCount="indefinite"/>
+          <animate attributeName="cx" values="682;682;50;50" dur="3s" begin="1.5s" repeatCount="indefinite"/>
+          <animate attributeName="cy" values="82;98;98;82" dur="3s" begin="1.5s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- 2. CONCEPT CARDS -->
+<div class="grid-3 section-mb">
+  <div class="sh-card sh-card-hover">
+    <div class="sh-card-header"><h3><i data-lucide="flask" style="width:16px;height:16px;display:inline;vertical-align:middle;"></i> Flask</h3><p>WSGI web framework</p></div>
+    <div class="sh-card-content">
+      Lightweight Python framework for building web apps and APIs. Routes requests, parses inputs, returns responses.
+      <div class="progress-group mt-1">
+        <div class="label">interview frequency</div>
+        <div class="progress-bar"><div class="fill" style="width:85%;"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="sh-card sh-card-hover">
+    <div class="sh-card-header"><h3><i data-lucide="server" style="width:16px;height:16px;display:inline;vertical-align:middle;"></i> Gunicorn</h3><p>Production WSGI server</p></div>
+    <div class="sh-card-content">
+      Handles multiple workers, load balancing, concurrent connections. Flasks dev server is single-threaded — not for production.
+      <div class="progress-group mt-1">
+        <div class="label">interview frequency</div>
+        <div class="progress-bar"><div class="fill" style="width:70%;"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="sh-card sh-card-hover">
+    <div class="sh-card-header"><h3><i data-lucide="cloud" style="width:16px;height:16px;display:inline;vertical-align:middle;"></i> Cloud Run</h3><p>Serverless compute</p></div>
+    <div class="sh-card-content">
+      Fully managed container runtime. Scales from 0, charges per request. Handles HTTPS, auto-scaling, logging.
+      <div class="progress-group mt-1">
+        <div class="label">interview frequency</div>
+        <div class="progress-bar"><div class="fill" style="width:95%;"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. CODE SAMPLES (Tabs) -->
+<div class="section-mb">
+  <div class="section-title"><i data-lucide="code" style="width:16px;height:16px;color:var(--muted-foreground);"></i> Code Samples</div>
+  <div class="sh-card">
+    <div class="sh-card-content">
+      <div class="sh-tabs">
+        <button class="sh-tab active" onclick="switchTab(this,'c1')">app.py</button>
+        <button class="sh-tab" onclick="switchTab(this,'c2')">Dockerfile</button>
+        <button class="sh-tab" onclick="switchTab(this,'c3')">gcloud deploy</button>
+        <button class="sh-tab" onclick="switchTab(this,'c4')">requirements.txt</button>
+      </div>
+      <div class="sh-tab-panel active" id="c1">
+        <div class="sh-code">
+<span class="cm"># app.py — Flask API with health check</span>
+<span class="kw">from</span> flask <span class="kw">import</span> Flask, jsonify
+<span class="kw">import</span> os
+
+app = Flask(__name__)
+
+<span class="hl">@app</span>.route(<span class="str">"/"</span>)
+<span class="kw">def</span> hello():
+    <span class="kw">return</span> jsonify({<span class="str">"message"</span>: <span class="str">"Hello from Cloud Run!"</span>,
+                    <span class="str">"version"</span>: <span class="str">"1.0.0"</span>})
+
+<span class="hl">@app</span>.route(<span class="str">"/health"</span>)
+<span class="kw">def</span> health():
+    <span class="kw">return</span> jsonify({<span class="str">"status"</span>: <span class="str">"healthy"</span>}), <span class="hl">200</span>
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    port = int(os.getenv(<span class="str">"PORT"</span>, <span class="hl">8080</span>))
+    app.run(<span class="hl">host="0.0.0.0"</span>, port=port)</div>
+      </div>
+      <div class="sh-tab-panel" id="c2">
+        <div class="sh-code">
+<span class="cm"># Dockerfile — multi-stage for smaller image</span>
+<span class="kw">FROM</span> python:3.12-slim AS builder
+<span class="kw">COPY</span> requirements.txt .
+<span class="kw">RUN</span> pip install --user -r requirements.txt
+
+<span class="kw">FROM</span> python:3.12-slim
+<span class="kw">COPY</span> --from=builder /root/.local /root/.local
+<span class="kw">COPY</span> . /app
+<span class="kw">WORKDIR</span> /app
+<span class="kw">ENV</span> PATH=/root/.local/bin:$PATH
+<span class="kw">CMD</span> [<span class="str">"gunicorn"</span>, <span class="str">"-w"</span>, <span class="str">"4"</span>, <span class="str">"-b"</span>, <span class="str">"0.0.0.0:8080"</span>, <span class="str">"app:app"</span>]</div>
+      </div>
+      <div class="sh-tab-panel" id="c3">
+        <div class="sh-code">
+<span class="cm"># Deploy to Cloud Run</span>
+gcloud builds submit --tag gcr.io/<span class="hl">$PROJECT</span>/flask-api:v1
+gcloud run deploy flask-api \
+  --image gcr.io/<span class="hl">$PROJECT</span>/flask-api:v1 \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --memory 256Mi \
+  --cpu 1</div>
+      </div>
+      <div class="sh-tab-panel" id="c4">
+        <div class="sh-code">
+<span class="cm"># requirements.txt</span>
+flask==3.0.0
+gunicorn==22.0.0</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. COMPARISON TABLE -->
+<div class="section-mb">
+  <div class="section-title"><i data-lucide="list" style="width:16px;height:16px;color:var(--muted-foreground);"></i> Flask Dev vs Production</div>
+  <div class="sh-card">
+    <div class="sh-card-content" style="padding:0;">
+      <table class="sh-table">
+        <thead><tr><th>Aspect</th><th>Dev (flask run)</th><th>Prod (gunicorn)</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight:500;">Server</td><td>Werkzeug built-in</td><td>Gunicorn worker manager</td></tr>
+          <tr><td style="font-weight:500;">Concurrency</td><td>1 request at a time</td><td>Multi-worker (sync/async)</td></tr>
+          <tr><td style="font-weight:500;">Reload</td><td>Auto (debug mode)</td><td>--reload flag (dev only)</td></tr>
+          <tr><td style="font-weight:500;">Security</td><td>Not hardened</td><td>Production-ready</td></tr>
+          <tr><td style="font-weight:500;">Port binding</td><td>Defaults 5000</td><td>Explicit -b flag</td></tr>
+          <tr><td style="font-weight:500;">Health checks</td><td>No</td><td>Yes + readiness probe</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 5. INTERVIEW PREP -->
+<div class="section-mb">
+  <div class="section-title"><i data-lucide="message-square" style="width:16px;height:16px;color:var(--muted-foreground);"></i> Interview Questions</div>
+  <div class="grid-2">
+    <div class="sh-card">
+      <div class="sh-card-header">
+        <div style="display:flex;justify-content:space-between;"><h3>30-Second Answer</h3><span class="sh-badge sh-badge-success">quick</span></div>
+      </div>
+      <div class="sh-card-content" style="font-size:0.8rem;color:var(--muted-foreground);">
+        "Flask is a lightweight Python web framework. For production, you wrap it with Gunicorn — a multi-worker WSGI server — inside a Docker container, and deploy to Cloud Run. Cloud Run auto-scales from zero, charges per request, and handles HTTPS termination."
+      </div>
+    </div>
+    <div class="sh-card">
+      <div class="sh-card-header">
+        <div style="display:flex;justify-content:space-between;"><h3>STAR Answer</h3><span class="sh-badge sh-badge-warning">prep</span></div>
+      </div>
+      <div class="sh-card-content" style="font-size:0.8rem;color:var(--muted-foreground);">
+        "In a production project, I containerized a Flask API with Gunicorn and deployed it to Cloud Run. The health check endpoint let Cloud Run verify readiness. I used multi-stage Docker builds to keep the image under 200MB. The API handled 1000+ requests/min with zero cold-start issues after adjusting min-instances to 1."
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  <div class="container">
+    GCP Prep — shadcn Study Reference &middot; Flask → Cloud Run
+  </div>
+</footer>
+
+<div id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--primary);color:var(--primary-foreground);padding:0.6rem 1rem;border-radius:var(--radius);font-size:0.8rem;z-index:200;box-shadow:var(--shadow-lg);opacity:0;transition:opacity .3s;pointer-events:none;">Copied!</div>
+
+<script>
+function toggleDark(){
+  var d=document.documentElement;
+  if(d.getAttribute('data-theme')==='dark'){d.removeAttribute('data-theme');}
+  else{d.setAttribute('data-theme','dark');}
+  setTimeout(function(){if(typeof lucide!=='undefined')lucide.createIcons();},50);
+}
+
+function switchTab(btn,id){
+  var parent=btn.closest('.sh-card-content')||btn.parentElement;
+  parent.querySelectorAll('.sh-tab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  parent.querySelectorAll('.sh-tab-panel').forEach(function(p){p.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded',function(){if(typeof lucide!=='undefined')lucide.createIcons();});
+</script>
+</body>
+</html>

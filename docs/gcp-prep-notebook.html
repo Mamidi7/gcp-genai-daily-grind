@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GCP Prep — Study Notebook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f3eee4;  --paper-2: #ebe4d4;
+  --ink: #1a1612;     --ink-2: #3d3528;
+  --ink-dim: #6b5d49; --ink-faint: #a89a83;
+  --rule: #c8b99e;
+  --accent: #c0392b;  --accent2: #a93226;
+  --green: #2d7d46;   --blue: #2b6cb0;
+  --gold: #b8860b;    --purple: #7b4d8c; --teal: #2d7d7d;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+[data-theme="dark"] {
+  --paper: #1b1917;  --paper-2: #242220;
+  --ink: #f0ece9;    --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430;
+  --accent: #e8704a;  --accent2: #d95a3a;
+  --green: #5bbd6b;   --blue: #5b8fbd;
+  --gold: #d4a84b;    --purple: #b07ccc; --teal: #5bbdbd;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:15px;line-height:1.65;
+  background-image:
+    radial-gradient(circle at 25% 15%, rgba(200,180,140,.15) 0%, transparent 40%),
+    radial-gradient(circle at 75% 85%, rgba(200,180,140,.12) 0%, transparent 40%),
+    repeating-linear-gradient(0deg, transparent 0, transparent 28px, rgba(120,100,70,.04) 28px, rgba(120,100,70,.04) 29px);
+  min-height:100vh;
+}
+#confettiCanvas{position:fixed;inset:0;pointer-events:none;z-index:9999;}
+
+/* ===== SOLID FLOATING REACTIONS ===== */
+.reaction{position:fixed;font-size:52px;pointer-events:none;z-index:9998;font-weight:700;
+  text-shadow:0 2px 8px rgba(0,0,0,.2);animation:reactionFloat 1.1s cubic-bezier(.2,.9,.3,1) forwards;}
+@keyframes reactionFloat{
+  0%{transform:translateY(0) scale(0) rotate(-8deg);opacity:1;}
+  40%{transform:translateY(-60px) scale(1.4) rotate(4deg);opacity:1;}
+  100%{transform:translateY(-140px) scale(.9) rotate(0deg);opacity:0;}
+}
+
+.topbar{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule);padding:10px 0;backdrop-filter:blur(8px);}
+.topbar-inner{max-width:1100px;margin:0 auto;padding:0 28px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
+.brand{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);}
+.brand span{color:var(--accent);}
+#darkToggle{background:none;border:1px solid var(--rule);cursor:pointer;color:var(--ink-dim);padding:5px;display:flex;align-items:center;line-height:1;flex-shrink:0;}
+#darkToggle:hover{color:var(--ink);border-color:var(--ink);}
+#darkToggle svg{width:16px;height:16px;display:block;}
+
+main{max-width:1100px;margin:0 auto;padding:32px 28px 100px;}
+
+h1{font-family:var(--serif);font-size:clamp(36px,5vw,54px);font-weight:400;line-height:.95;letter-spacing:-.02em;margin-bottom:4px;}
+.sub{font-family:var(--serif);font-size:17px;font-style:italic;color:var(--ink-dim);margin-bottom:24px;border-bottom:2px solid var(--rule);padding-bottom:16px;}
+.text-dim{color:var(--ink-dim);}
+.mb-0{margin-bottom:0!important;}.mb-2{margin-bottom:8px!important;}.mb-3{margin-bottom:14px!important;}
+.mt-2{margin-top:8px!important;}.mt-3{margin-top:14px!important;}
+
+/* ===== BUTTONS ===== */
+.btn{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:8px 16px;border:1px solid var(--ink);background:var(--paper);cursor:pointer;color:var(--ink);transition:all .2s;display:inline-flex;align-items:center;gap:6px;text-decoration:none;line-height:1.4;}
+.btn:hover{background:var(--ink);color:var(--paper);}
+.btn-sm{padding:5px 12px;font-size:10px;}
+.btn-accent{background:var(--accent);color:var(--paper);border-color:var(--accent);}
+.btn-accent:hover{background:var(--accent2);}
+.btn-green{background:var(--green);color:var(--paper);border-color:var(--green);}
+.btn-green:hover{opacity:.85;}
+.btn-ghost{border-color:transparent;color:var(--ink-dim);}
+.btn-ghost:hover{background:var(--paper-2);color:var(--ink);border-color:var(--rule);}
+.btn:disabled{opacity:.4;cursor:default;pointer-events:none;}
+.btn-group{display:flex;gap:4px;flex-wrap:wrap;}
+
+/* ===== TAB BAR ===== */
+.tab-bar{display:flex;gap:0;border-bottom:2px solid var(--rule);margin-bottom:24px;}
+.tab-item{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:10px 18px;background:transparent;border:none;cursor:pointer;color:var(--ink-dim);position:relative;transition:color .2s;}
+.tab-item:hover{color:var(--ink);}
+.tab-item.active{color:var(--ink);font-weight:600;}
+.tab-item.active::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:2px;background:var(--accent);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;animation:panelIn .35s ease;}
+@keyframes panelIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== STUDY TOPIC CARD ===== */
+.topic-card{background:var(--paper-2);border:1px solid var(--ink);padding:18px 22px;margin-bottom:14px;box-shadow:2px 2px 0 var(--ink);transition:all .2s;}
+.topic-card:hover{box-shadow:3px 3px 0 var(--ink);transform:translate(-1px,-1px);}
+.topic-card .topic-title{font-size:17px;font-weight:500;margin-bottom:2px;}
+.topic-card .topic-meta{font-family:var(--mono);font-size:9px;color:var(--ink-faint);letter-spacing:.06em;margin-bottom:10px;}
+.topic-card .analogy{background:var(--paper);padding:10px 14px;margin:8px 0;border-left:3px solid var(--accent);font-style:italic;color:var(--ink-2);font-size:14px;}
+.topic-card .analogy strong{color:var(--accent);font-style:normal;}
+.topic-card .key-points{list-style:none;padding:0;}
+.topic-card .key-points li{padding:3px 0 3px 16px;position:relative;font-size:14px;color:var(--ink-2);}
+.topic-card .key-points li::before{content:'→';position:absolute;left:0;color:var(--ink-dim);}
+.topic-card .code-sample{background:var(--ink);color:#e8d9c0;font-family:var(--mono);font-size:12px;padding:10px 14px;margin:8px 0;overflow-x:auto;line-height:1.5;}
+
+/* ===== CARD-BASED QUIZ ===== */
+.quiz-wrap{background:var(--paper-2);border:1px solid var(--ink);box-shadow:2px 2px 0 var(--ink);overflow:hidden;}
+
+/* Score bar */
+.qscore{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--paper);border-bottom:1px solid var(--rule);gap:12px;flex-wrap:wrap;}
+.qscore-pills{display:flex;gap:8px;}
+.qscore-pill{font-family:var(--mono);font-size:11px;font-weight:600;padding:4px 12px;border:1px solid var(--rule);display:flex;align-items:center;gap:5px;}
+.qscore-pill.g{color:var(--green);border-color:var(--green);}
+.qscore-pill.r{color:var(--accent);border-color:var(--accent);}
+.qscore-pill.b{color:var(--blue);border-color:var(--blue);}
+.qscore-prog{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--ink-dim);}
+.qscore-track{width:100px;height:5px;background:var(--paper-2);border:1px solid var(--rule);overflow:hidden;}
+.qscore-fill{height:100%;background:var(--blue);transition:width .5s cubic-bezier(.22,1,.36,1);}
+
+/* Navigation row */
+.qnav{background:var(--paper-2);border-bottom:1px solid var(--rule);}
+.qnav-inner{overflow-x:auto;padding:6px 16px;-webkit-overflow-scrolling:touch;}
+.qnav-inner::-webkit-scrollbar{height:2px;}
+.qnav-inner::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px;}
+.qnav-grid{display:flex;gap:5px;min-width:fit-content;}
+.qnav-badge{display:flex;align-items:center;justify-content:center;width:30px;height:30px;
+  font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer;
+  border:1px solid var(--rule);background:var(--paper);color:var(--ink-dim);
+  transition:all .1s;flex-shrink:0;user-select:none;}
+.qnav-badge:hover{background:var(--paper-2);color:var(--ink);border-color:var(--ink);transform:translateY(-1px);}
+.qnav-badge.cr{background:var(--green);color:var(--paper);border-color:var(--green);}
+.qnav-badge.wr{background:var(--accent);color:var(--paper);border-color:var(--accent);}
+.qnav-badge.cur{color:var(--accent);border-color:var(--accent);font-weight:700;font-size:12px;
+  box-shadow:0 0 0 1px var(--accent);z-index:1;}
+.qnav-row{display:flex;align-items:center;justify-content:space-between;padding:6px 16px 8px;gap:8px;flex-wrap:wrap;}
+.qnav-btns{display:flex;gap:6px;}
+.qnav-info{font-family:var(--mono);font-size:11px;color:var(--ink-dim);}
+
+/* Main quiz card */
+.qcard{background:var(--paper);border:1px solid var(--ink);box-shadow:2px 2px 0 var(--ink);margin:0 16px;animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both;}
+.qcard-hdr{display:flex;align-items:flex-start;gap:10px;padding:14px 16px 6px;}
+.qcard-icon{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#1a4f8b);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;color:var(--paper);}
+.qcard-meta{flex:1;}
+.qcard-title{font-size:14px;font-weight:600;color:var(--ink-2);}
+.qcard-topic{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--ink-dim);margin-top:2px;}
+.qcard-q{padding:4px 16px 12px;font-size:18px;font-weight:500;line-height:1.55;color:var(--ink);}
+
+/* Options - bigger */
+.qcard-opts{display:flex;flex-direction:column;}
+.qcard-opt{padding:10px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .12s;border-top:1px solid var(--rule);position:relative;overflow:hidden;user-select:none;}
+.qcard-opt:hover{background:var(--paper-2);}
+.qcard-opt:active{background:var(--paper-2);}
+.qcard-opt.voted{pointer-events:none;}
+.qcard-opt .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--ink-faint);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s;font-family:var(--mono);font-size:10px;font-weight:700;}
+.qcard-opt .txt{font-size:16px;flex:1;line-height:1.45;z-index:1;color:var(--ink-2);}
+.qcard-opt .pct{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink-dim);min-width:32px;text-align:right;z-index:1;opacity:0;transition:opacity .3s;}
+.qcard-opt.voted .pct{opacity:1;}
+.qcard-opt .vbar{position:absolute;left:0;top:0;bottom:0;width:0;transition:width .6s cubic-bezier(.16,1,.3,1);background:rgba(43,108,176,.08);}
+.qcard-opt.cr .vbar{background:rgba(45,125,70,.12);}
+.qcard-opt.wr .vbar{background:rgba(192,57,43,.1);}
+.qcard-opt.rv .vbar{background:rgba(45,125,70,.08);}
+.qcard-opt.cr .dot{border-color:var(--green);background:var(--green);color:var(--paper);}
+.qcard-opt.wr .dot{border-color:var(--accent);background:var(--accent);color:var(--paper);}
+.qcard-opt.rv .dot{border-color:var(--green);background:transparent;color:var(--green);}
+.qcard-foot{padding:8px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--rule);}
+.qcard-votes{font-family:var(--mono);font-size:11px;color:var(--ink-dim);}
+.qcard-badge{font-family:var(--mono);font-size:9px;padding:3px 10px;border:1px solid var(--rule);color:var(--ink-dim);letter-spacing:.06em;text-transform:uppercase;}
+
+/* Explanation - bigger */
+.qexp{padding:0 16px;margin-top:8px;}
+.qexp .box{padding:12px 16px;font-size:15px;line-height:1.6;background:rgba(45,125,70,.06);border:1px solid rgba(45,125,70,.15);color:var(--ink-2);animation:expIn .3s ease-out forwards;opacity:0;}
+.qexp .hdr{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.qexp .box.wr{background:rgba(192,57,43,.06);border-color:rgba(192,57,43,.15);}
+.qexp .box.wr .hdr{color:var(--accent);}
+
+/* Nav buttons below card */
+.qbtns{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;gap:8px;}
+.qbtns .btn{min-width:80px;justify-content:center;}
+
+/* Result card */
+.res{background:var(--paper);border:1px solid var(--ink);box-shadow:2px 2px 0 var(--ink);margin:0 16px;padding:24px 20px;animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both;}
+.res-emoji{font-size:52px;margin-bottom:8px;text-align:center;}
+.res-title{font-size:22px;font-weight:600;text-align:center;margin-bottom:4px;}
+.res-grade{display:block;padding:5px 20px;text-align:center;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;margin:0 auto 12px;max-width:160px;border:1px solid;}
+.res-score{font-size:48px;font-weight:700;text-align:center;margin:8px 0;}
+.res-bars{display:flex;flex-direction:column;gap:10px;margin:16px 0 20px;}
+.res-bar-row{display:flex;align-items:center;gap:10px;font-size:14px;}
+.res-bar-row .lb{min-width:60px;text-align:right;font-weight:500;}
+.res-bar-row .tk{flex:1;height:8px;background:var(--paper-2);border:1px solid var(--rule);overflow:hidden;}
+.res-bar-row .fl{height:100%;transition:width 1s cubic-bezier(.16,1,.3,1);}
+.res-bar-row .vl{min-width:24px;font-weight:600;font-family:var(--mono);font-size:13px;}
+.res-msg{font-size:14px;color:var(--ink-dim);line-height:1.6;margin-bottom:16px;text-align:center;}
+.res-btn{display:block;margin:0 auto;padding:12px 28px;border:1px solid var(--blue);background:var(--blue);color:var(--paper);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all .15s;}
+.res-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(43,108,176,.25);}
+
+/* ===== CATEGORY BADGE ===== */
+.cat-badge{display:inline-block;font-family:var(--mono);font-size:9px;padding:2px 8px;letter-spacing:.04em;}
+.cat-gcp{background:var(--blue);color:var(--paper);}
+.cat-python{background:var(--green);color:var(--paper);}
+.cat-sql{background:var(--gold);color:var(--paper);}
+.cat-docker{background:var(--teal);color:var(--paper);}
+.cat-fastapi{background:var(--accent);color:var(--paper);}
+.cat-ml{background:var(--purple);color:var(--paper);}
+.cat-general{background:var(--ink-dim);color:var(--paper);}
+
+/* ===== STATS ===== */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:14px 0;}
+.stat-card{background:var(--paper-2);border:1px solid var(--rule);padding:12px;text-align:center;}
+.stat-card .stat-value{font-family:var(--serif);font-size:28px;color:var(--ink);}
+.stat-card .stat-label{font-family:var(--mono);font-size:9px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.08em;}
+
+/* ===== FILTER CONTROLS ===== */
+.filter-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+.filter-row select,.filter-row input{background:var(--paper);border:1px solid var(--rule);padding:5px 8px;font-family:var(--mono);font-size:10px;color:var(--ink);cursor:pointer;}
+.filter-row select:focus,.filter-row input:focus{outline:1px solid var(--ink);border-color:var(--ink);}
+
+/* ===== TOAST ===== */
+.copy-toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 20px;font-family:var(--mono);font-size:11px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;}
+.copy-toast.show{opacity:1;}
+footer{margin-top:48px;padding-top:16px;border-top:2px solid var(--rule);font-family:var(--mono);font-size:9px;color:var(--ink-faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+
+@media(max-width:640px){
+  h1{font-size:28px;}
+  .topbar-inner{padding:0 16px;}
+  main{padding:24px 16px 80px;}
+  .topic-card{padding:14px 16px;}
+  .tab-item{padding:8px 12px;font-size:9px;}
+  .qcard-q{font-size:16px;}
+  .qcard-opt .txt{font-size:14px;}
+  .qexp .box{font-size:13px;}
+}
+
+@keyframes popIn{0%{transform:scale(.85);opacity:0;}60%{transform:scale(1.04);}100%{transform:scale(1);opacity:1;}}
+@keyframes expIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+@keyframes panelIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+
+<canvas id="confettiCanvas"></canvas>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">GCP Prep <span>Notebook</span></div>
+    <div class="btn-group">
+      <button class="btn btn-sm btn-ghost" onclick="switchTab('study')" id="tabBtnStudy">Study</button>
+      <button class="btn btn-sm btn-ghost" onclick="switchTab('quiz')" id="tabBtnQuiz">Quiz</button>
+      <button class="btn btn-sm btn-ghost" onclick="switchTab('stats')" id="tabBtnStats">Progress</button>
+    </div>
+    <button id="darkToggle" onclick="toggleDark()" aria-label="Toggle dark mode">
+      <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3.5" stroke="currentColor" stroke-width="1.3"/><line x1="8" y1="1" x2="8" y2="3" stroke="currentColor" stroke-width="1.3"/><line x1="8" y1="13" x2="8" y2="15" stroke="currentColor" stroke-width="1.3"/><line x1="1" y1="8" x2="3" y2="8" stroke="currentColor" stroke-width="1.3"/><line x1="13" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/><line x1="3.05" y1="3.05" x2="4.46" y2="4.46" stroke="currentColor" stroke-width="1.3"/><line x1="11.54" y1="11.54" x2="12.95" y2="12.95" stroke="currentColor" stroke-width="1.3"/><line x1="3.05" y1="12.95" x2="4.46" y2="11.54" stroke="currentColor" stroke-width="1.3"/><line x1="11.54" y1="4.46" x2="12.95" y2="3.05" stroke="currentColor" stroke-width="1.3"/></svg>
+    </button>
+  </div>
+</div>
+
+<main>
+
+<h1>GCP Interview Prep</h1>
+<p class="sub">Notebook-style study guide + self-test quiz. Telugu analogies, code samples, and GCP console steps for every topic.</p>
+
+<div class="tab-bar" id="mainTabBar">
+  <button class="tab-item active" onclick="switchTab('study')">Study Guide</button>
+  <button class="tab-item" onclick="switchTab('quiz')">Quiz</button>
+  <button class="tab-item" onclick="switchTab('stats')">Progress</button>
+</div>
+
+<!-- ===== TAB 1: STUDY ===== -->
+<div class="tab-panel active" id="tabStudy">
+<div class="filter-row">
+  <select onchange="filterTopics(this.value)" id="topicFilter">
+    <option value="">All Topics</option>
+    <option value="cloud-run">Cloud Run</option>
+    <option value="vertex-ai">Vertex AI / Gemini</option>
+    <option value="bigquery">BigQuery</option>
+    <option value="storage">Cloud Storage</option>
+    <option value="fastapi">FastAPI + Gunicorn</option>
+    <option value="docker">Docker</option>
+    <option value="python">Python / SQL</option>
+  </select>
+</div>
+<div id="topicList"></div>
+</div>
+
+<!-- ===== TAB 2: CARD QUIZ ===== -->
+<div class="tab-panel" id="tabQuiz">
+<div class="quiz-wrap">
+  <div class="qscore">
+    <div class="qscore-pills">
+      <span class="qscore-pill b">📋 <span id="qNum">0</span>/32</span>
+      <span class="qscore-pill g">✓ <span id="cNum">0</span></span>
+      <span class="qscore-pill r">✗ <span id="wNum">0</span></span>
+    </div>
+    <div class="qscore-prog">
+      <div class="qscore-track"><div class="qscore-fill" id="sFill" style="width:0%"></div></div>
+      <span id="sPct">0%</span>
+    </div>
+  </div>
+
+  <div class="qnav">
+    <div class="qnav-inner">
+      <div class="qnav-grid" id="qJumpGrid"></div>
+    </div>
+    <div class="qnav-row">
+      <div class="qnav-btns">
+        <button class="btn btn-sm" onclick="prevQ()" id="prevBtn">← Prev</button>
+        <button class="btn btn-sm btn-accent" onclick="nextQ()" id="nextBtn" style="display:none">Next →</button>
+      </div>
+      <span class="qnav-info" id="qStatus">Q1 of 32 · Unanswered</span>
+    </div>
+  </div>
+
+  <div id="quizArea"></div>
+</div>
+</div>
+
+<!-- ===== TAB 3: PROGRESS ===== -->
+<div class="tab-panel" id="tabStats">
+<div style="margin-bottom:20px;">
+  <div class="stats-grid" id="statsGrid"></div>
+</div>
+<h3>Category Breakdown</h3>
+<div id="statsCatList" style="margin-bottom:20px;"></div>
+<h3>Streak &amp; History</h3>
+<div class="topic-card">
+  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div><div class="topic-meta">Current Streak</div><div style="font-family:var(--serif);font-size:32px;" id="statsStreak">0</div></div>
+    <div><div class="topic-meta">Best Streak</div><div style="font-family:var(--serif);font-size:32px;" id="statsBestStreak">0</div></div>
+    <div><div class="topic-meta">Total Attempts</div><div style="font-family:var(--serif);font-size:32px;" id="statsAttempts">0</div></div>
+    <div><button class="btn btn-sm btn-ghost" onclick="clearStats()" style="margin-top:10px;">Clear History</button></div>
+  </div>
+</div>
+</div>
+
+<footer>
+  <span>GCP Prep Notebook v0.3</span>
+  <span>Built on design-system v1.0 · Practice daily</span>
+</footer>
+
+</main>
+
+<div id="toast" class="copy-toast"></div>
+
+<script>
+// ================================================================
+//  DATA
+// ================================================================
+var QUIZ = [
+  {q:'Why use gunicorn instead of Flask\'s dev server on Cloud Run?',o:['Gunicorn is faster','Flask can\'t handle concurrent requests','Gunicorn supports Python 3.13','Flask needs gunicorn'],c:1,cat:'GCP',exp:'Flask\'s built-in server is single-threaded. Gunicorn spawns multiple workers to handle concurrent requests — essential for production Cloud Run.'},
+  {q:'What does /healthz do for Cloud Run?',o:['Returns user data','Liveness check — kills instance on failure','Triggers scaling','Logs request count'],c:1,cat:'GCP',exp:'Cloud Run pings /healthz periodically. If it fails, the instance is killed and restarted. Without it, a stuck instance keeps receiving traffic.'},
+  {q:'Which IP should a web app bind to inside a container?',o:['127.0.0.1','0.0.0.0','localhost','container-ip'],c:1,cat:'GCP',exp:'127.0.0.1 is loopback — only reachable inside the container. Cloud Run health checks come from outside, so you need 0.0.0.0 to bind all interfaces.'},
+  {q:'Which command deploys from source in one step?',o:['gcloud run deploy --source .','gcloud builds submit','docker run gcloud','kubectl apply'],c:0,cat:'GCP',exp:'--source . handles the full workflow: builds with Cloud Build, pushes to Artifact Registry, then deploys to Cloud Run. One command, zero manual steps.'},
+  {q:'How does Cloud Run scale to zero?',o:['By shutting down idle instances','By reducing CPU','By pausing containers','It doesn\'t'],c:0,cat:'GCP',exp:'When no requests come in for a while, Cloud Run shuts down the container instance. Next request triggers a cold start — new container spins up.'},
+  {q:'What is the difference between Cloud Run and Cloud Functions?',o:['Cloud Run uses containers, Functions uses scripts','Cloud Run is cheaper','Functions supports more languages','No difference'],c:0,cat:'GCP',exp:'Cloud Functions runs a script in a managed runtime. Cloud Run runs a full container — you control the entire environment, dependencies, and runtime.'},
+  {q:'Vertex AI endpoint — what model is allowed for us?',o:['gemini-2.0-flash-001','gemini-ultra','claude-3','gpt-4'],c:0,cat:'GCP',exp:'gemini-2.0-flash-001 is the only model we can use via our Developer API key. It\'s fast and efficient for chat/completion use cases.'},
+  {q:'What does BigQuery VECTOR_SEARCH do?',o:['Semantic search in SQL','Full-text search','Image search','Regex search'],c:0,cat:'GCP',exp:'VECTOR_SEARCH lets you find semantically similar items using embeddings, directly in SQL. No separate vector database needed — it\'s built into BigQuery.'},
+  {q:'Which GCP product is a serverless data warehouse?',o:['Cloud Storage','BigQuery','Cloud SQL','Firestore'],c:1,cat:'GCP',exp:'BigQuery is serverless — no clusters to manage, auto-scales, pay per TB scanned. Cloud Storage is object storage, Cloud SQL is managed relational DB.'},
+  {q:'What is the purpose of Artifact Registry in GCP?',o:['Store Docker images','Run containers','Monitor logs','Store secrets'],c:0,cat:'GCP',exp:'Artifact Registry is GCP\'s container image registry. Cloud Build pushes images here, Cloud Run pulls from here during deployment.'},
+  {q:'What does `if __name__ == \'__main__\'` ensure?',o:['Only runs when executed directly','Makes app faster','Prevents import errors','Enables hot reload'],c:0,cat:'Python',exp:'When a Python file is imported as a module, __name__ is the module name — so the block doesn\'t run. Only when executed directly is __name__ == \'__main__\'.'},
+  {q:'What is the correct way to define an async endpoint in FastAPI?',o:['async def get_items()','def get_items_async()','@async def get_items()','async def get_items(): return'],c:0,cat:'Python',exp:'FastAPI supports async def natively. Just prefix with async and use await for I/O calls. FastAPI handles the thread pool automatically.'},
+  {q:'What does Pydantic V2 use instead of @validator?',o:['@field_validator','@check_validator','@validate','@assert'],c:0,cat:'Python',exp:'Pydantic V2 replaced @validator with @field_validator (classmethod). Also model_dump() replaces .dict(), model_validate() replaces .parse_obj().'},
+  {q:'What is the correct way to parse a JSON request body in FastAPI?',o:['Using Pydantic BaseModel','request.json()','json.loads()','parse_json()'],c:0,cat:'Python',exp:'Define a Pydantic BaseModel class with type hints. FastAPI auto-validates and deserializes the JSON body into the model. Type safety + validation in one step.'},
+  {q:'What is a generator function in Python?',o:['A function with yield','A function with return','A class with __iter__','A list comprehension'],c:0,cat:'Python',exp:'A generator uses yield to produce values lazily — one at a time, on demand. Memory efficient for large datasets, unlike a list that stores everything.'},
+  {q:'Why copy requirements.txt before the app code in Dockerfile?',o:['Avoid syntax errors','Docker layer caching — code changes don\'t reinstall deps','Docker requires it','Reduce image size'],c:1,cat:'Docker',exp:'Docker caches layers. If requirements.txt hasn\'t changed, Docker reuses the cached pip install layer. Code changes only trigger COPY for the app layer — much faster builds.'},
+  {q:'What base image is recommended for Python apps?',o:['python:latest','python:3.11-slim','ubuntu:22.04','alpine:latest'],c:1,cat:'Docker',exp:'slim (~125MB) has just enough to run Python without compilers/docs. latest (~900MB) has unnecessary tools. Smaller image = faster cold starts on Cloud Run.'},
+  {q:'Why add .dockerignore?',o:['It\'s required','Prevents venv, .git, __pycache__ from bloating build','Improves security','Speeds runtime'],c:1,cat:'Docker',exp:'Without .dockerignore, the entire project directory (including venv/, .git/) gets sent to Docker daemon. This slows builds and can cause cache invalidation.'},
+  {q:'What does CMD ["gunicorn","--bind","0.0.0.0:8080","main:app"] do?',o:['Runs gunicorn on port 8080','Builds the app','Installs dependencies','Exposes port 8080'],c:0,cat:'Docker',exp:'EXPOSE just documents the port. CMD is what actually runs. The exec form (JSON array) avoids a shell wrapper, so signals (SIGTERM) reach gunicorn directly.'},
+  {q:'What is the purpose of a multi-stage Docker build?',o:['Reduce final image size','Speed up builds','Run multiple apps','Improve security'],c:0,cat:'Docker',exp:'First stage installs build tools + compiles. Second stage copies only the compiled artifacts. Final image is smaller — no build tools, no intermediate files.'},
+  {q:'What is the correct Dockerfile CMD for production FastAPI?',o:['CMD python main.py','CMD ["gunicorn","--bind","0.0.0.0:8080","main:app"]','CMD gunicorn --bind main:app','CMD run app'],c:1,cat:'FastAPI',exp:'Use exec form with gunicorn + uvicorn worker. python main.py uses Flask\'s dev server — single-threaded, crashes under load. Gunicorn handles concurrent requests.'},
+  {q:'What happens deploying a FastAPI app without gunicorn?',o:['Works fine','Crashes under concurrent load','Build fails','Deployment rejected'],c:1,cat:'FastAPI',exp:'FastAPI\'s dev server (uvicorn) is single-process. Under concurrent load, requests queue up and timeout. Gunicorn spawns multiple worker processes.'},
+  {q:'What does /docs endpoint do in FastAPI?',o:['Auto-generated Swagger UI','Custom documentation','API health check','Returns version info'],c:0,cat:'FastAPI',exp:'FastAPI reads your Pydantic models and route decorators to auto-generate OpenAPI specs. /docs serves an interactive Swagger UI for testing endpoints.'},
+  {q:'What is the correct way to declare path parameters in FastAPI?',o:['/items/{item_id}','/items/<item_id>','/items/:item_id','/items?item_id='],c:0,cat:'FastAPI',exp:'FastAPI uses Python\'s string interpolation syntax {param_name} in route decorators. The function parameter with the same name receives the value.'},
+  {q:'What does GROUP BY do in SQL?',o:['Groups rows with same values','Orders rows','Filters rows','Joins tables'],c:0,cat:'SQL',exp:'GROUP BY collapses rows with identical values in specified columns, letting you run aggregate functions (COUNT, SUM, AVG) on each group.'},
+  {q:'What is the difference between WHERE and HAVING?',o:['WHERE filters rows, HAVING filters groups','They are the same','HAVING is faster','WHERE applies after GROUP BY'],c:0,cat:'SQL',exp:'WHERE filters rows before grouping. HAVING filters groups after GROUP BY. You can\'t use aggregate functions in WHERE, but you can in HAVING.'},
+  {q:'What does LEFT JOIN return?',o:['All rows from left table + matches from right','Only matching rows','All rows from both tables','All rows from right table'],c:0,cat:'SQL',exp:'LEFT JOIN keeps every row from the left table. If no match exists in the right table, the right side columns are NULL. INNER JOIN only keeps matches.'},
+  {q:'What is a CTE in SQL?',o:['A temporary named result set using WITH','A type of index','A join type','A constraint'],c:0,cat:'SQL',exp:'CTE (Common Table Expression) uses WITH to create a named temporary result set. It\'s like a subquery but more readable and reusable within the same query.'},
+  {q:'What is the difference between supervised and unsupervised learning?',o:['Supervised has labels, unsupervised doesn\'t','Supervised is faster','Unsupervised needs more data','No difference'],c:0,cat:'ML',exp:'Supervised learning trains on labeled data (e.g., emails tagged spam/not-spam). Unsupervised finds patterns in unlabeled data (e.g., customer segments).'},
+  {q:'What is a confusion matrix used for?',o:['Evaluating classification models','Training models','Feature selection','Data preprocessing'],c:0,cat:'ML',exp:'Confusion matrix shows TP/FP/TN/FN counts. From it you calculate precision, recall, F1-score, and accuracy — essential for classification evaluation.'},
+  {q:'What does gradient descent do?',o:['Minimizes loss function','Maximizes accuracy','Normalizes data','Splits data'],c:0,cat:'ML',exp:'Gradient descent iteratively adjusts model parameters in the direction that reduces the loss function. The learning rate controls step size.'},
+  {q:'What is overfitting?',o:['Model performs well on training but poorly on test','Model performs well on test','Model needs more data','Model is too simple'],c:0,cat:'ML',exp:'Overfitting = model memorizes training data instead of learning general patterns. Symptoms: high train accuracy, low test accuracy. Solutions: regularization, more data, simpler model.'},
+];
+
+// ================================================================
+//  STATE
+// ================================================================
+var answers = {};  // { idx: selectedIndex }
+var qIdx = 0;
+var answered = false;
+var autoTimer = null;
+var scoreData = { total:0, correct:0, currentStreak:0, bestStreak:0 };
+var STORAGE_STATS_KEY = 'gcp_prep_stats';
+
+// ================================================================
+//  CONFETTI
+// ================================================================
+var canvas = document.getElementById('confettiCanvas'), ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+window.addEventListener('resize',function(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
+var particles = [], confettiRunning = false;
+function launchConfetti(count){
+  var cols=['#c0392b','#2b6cb0','#2d7d46','#b8860b','#7b4d8c','#2d7d7d'];
+  for(var i=0;i<count;i++) particles.push({x:Math.random()*canvas.width,y:-10,w:Math.random()*8+4,h:Math.random()*4+2,color:cols[Math.floor(Math.random()*cols.length)],vx:(Math.random()-0.5)*4,vy:Math.random()*3+2,rot:Math.random()*360,rotV:(Math.random()-0.5)*8,life:1});
+  if(!confettiRunning) animConfetti();
+}
+function animConfetti(){
+  confettiRunning=true;ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles=particles.filter(function(p){return p.life>0;});
+  particles.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.rot+=p.rotV;p.vy+=0.08;p.life-=0.008;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();});
+  if(particles.length>0) requestAnimationFrame(animConfetti); else confettiRunning=false;
+}
+
+// ===== FLOATING REACTIONS (solid) =====
+function showReaction(emoji,delay){
+  setTimeout(function(){
+    var el=document.createElement('div');el.className='reaction';el.textContent=emoji;
+    el.style.left=(Math.random()*40+30)+'vw';el.style.bottom='80px';
+    document.body.appendChild(el);
+    setTimeout(function(){el.remove();},1200);
+  },delay);
+}
+
+// ================================================================
+//  HELPERS
+// ================================================================
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+function escHtml(s){if(typeof s!=='string')return '';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+function calcVotePercents(idx,sel){
+  var q=QUIZ[idx];
+  var pcts=[];var rem=100;
+  for(var i=0;i<q.o.length;i++){
+    if(i===q.c) continue;
+    var p=Math.floor(Math.random()*15)+5;pcts[i]=p;rem-=p;
+  }
+  pcts[q.c]=Math.max(rem,40);
+  var sum=pcts.reduce(function(a,b){return a+b;},0);
+  return pcts.map(function(p){return Math.round(p/sum*100);});
+}
+
+function updateScore(){
+  document.getElementById('qNum').textContent = qIdx;
+  document.getElementById('cNum').textContent = Object.keys(answers).filter(function(i){return answers[i]===QUIZ[i].c}).length;
+  document.getElementById('wNum').textContent = Object.keys(answers).filter(function(i){return answers[i]!==QUIZ[i].c}).length;
+  var done=Object.keys(answers).length;
+  var pct=Math.round(done/QUIZ.length*100);
+  document.getElementById('sFill').style.width=pct+'%';document.getElementById('sPct').textContent=pct+'%';
+}
+
+// ===== QUESTION GRID (replaces dropdown) =====
+function renderQGrid(){
+  var grid=document.getElementById('qJumpGrid');grid.innerHTML='';
+  for(var i=0;i<QUIZ.length;i++){
+    var b=document.createElement('div');b.className='qnav-badge';
+    if(i===qIdx) b.classList.add('cur');
+    if(answers[i]!==undefined) b.classList.add(answers[i]===QUIZ[i].c?'cr':'wr');
+    b.textContent=i+1;
+    b.onclick=(function(j){return function(){jumpTo(j);};})(i);
+    grid.appendChild(b);
+  }
+  var cur=grid.querySelector('.cur');
+  if(cur) cur.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+}
+
+function updateNavInfo(){
+  var el=document.getElementById('qStatus');
+  var status='Unanswered';
+  if(answers[qIdx]!==undefined) status=answers[qIdx]===QUIZ[qIdx].c?'✓ Correct':'✗ Wrong';
+  el.textContent='Q'+(qIdx+1)+' of '+QUIZ.length+' · '+status;
+  renderQGrid();
+  updateNavBtns();
+}
+
+function updateNavBtns(){
+  document.getElementById('prevBtn').disabled=qIdx===0;
+  var nextBtn=document.getElementById('nextBtn');
+  if(answers[qIdx]!==undefined){
+    nextBtn.style.display='inline-flex';
+    nextBtn.textContent=autoTimer?'Skip →':'Next →';
+  } else {
+    nextBtn.style.display='none';
+  }
+}
+
+function nextQ(){
+  if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  if(qIdx<QUIZ.length-1){qIdx++;renderCurrentQ();}
+  else showResults();
+}
+
+function renderExplanation(idx){
+  var q=QUIZ[idx];var sel=answers[idx];var isCorrect=sel===q.c;
+  // Remove old explanation if any
+  var old=document.getElementById('qexp-'+idx);
+  if(old) old.remove();
+  var exp=document.createElement('div');exp.className='qexp';exp.id='qexp-'+idx;
+  exp.innerHTML='<div class="box'+(isCorrect?'':' wr')+'"><div class="hdr">💡 '+q.cat+'</div><div>'+q.exp+'</div></div>';
+  var card=document.getElementById('qcard-'+idx);
+  if(card) card.insertAdjacentElement('afterend',exp);
+}
+
+// ===== BUILD CARD =====
+function buildQuizCard(idx){
+  var q=QUIZ[idx];var L=['A','B','C','D','E','F'];
+  var sel=answers[idx];var isAnswered=sel!==undefined;var isCorrect=sel===q.c;
+  var optsHtml=q.o.map(function(o,i){
+    var cls='qcard-opt';var dotCls='dot';
+    if(isAnswered){
+      cls+=' voted';
+      if(i===q.c && i!==sel) cls+=' rv';
+      if(i===sel && isCorrect){cls+=' cr';dotCls+=' cr';}
+      if(i===sel && !isCorrect){cls+=' wr';dotCls+=' wr';}
+    }
+    var chk=isAnswered?(i===q.c?'✓':(i===sel?'✗':L[i])):L[i];
+    // Calculate vote distribution
+    var pcts = calcVotePercents(idx, sel);
+    var pct=isAnswered?'<span class="pct" id="pct-'+idx+'-'+i+'">'+pcts[i]+'%</span>':'';
+    var vbar='<div class="vbar" style="width:'+(isAnswered?pcts[i]:0)+'%" id="bar-'+idx+'-'+i+'"></div>';
+    return '<div class="'+cls+'" onclick="'+(isAnswered?'':'pick('+idx+','+i+')')+'" id="opt-'+idx+'-'+i+'">'+
+      vbar+'<div class="'+dotCls+'" id="cir-'+idx+'-'+i+'">'+chk+'</div>'+
+      '<div class="txt">'+escHtml(o)+'</div>'+pct+'</div>';
+  }).join('');
+  var badge=q.cat?'<span class="qcard-badge">'+q.cat+'</span>':'';
+  return '<div class="qcard" id="qcard-'+idx+'">'+
+    '<div class="qcard-hdr"><div class="qcard-icon">📚</div><div class="qcard-meta"><div class="qcard-title">GCP Prep</div><div class="qcard-topic">'+q.cat+' · Q'+(idx+1)+'/'+QUIZ.length+'</div></div></div>'+
+    '<div class="qcard-q">'+escHtml(q.q)+'</div><div class="qcard-opts">'+optsHtml+'</div>'+
+    '<div class="qcard-foot"><span class="qcard-votes" id="votes-'+idx+'">👥 Awaiting votes...</span>'+badge+'</div></div>';
+}
+
+// ===== PICK ANSWER =====
+async function pick(idx,selected){
+  if(answered) return;
+  answered=true;
+  var q=QUIZ[idx];var isCorrect=selected===q.c;
+  answers[idx]=selected;
+
+  // Vote distribution
+  var remaining=100;var pcts=q.o.map(function(_,i){
+    if(i===q.c) return null;
+    var p=Math.floor(Math.random()*15)+5;remaining-=p;return p;
+  });
+  pcts[q.c]=Math.max(remaining,40);
+  var sum=pcts.reduce(function(a,b){return a+b;},0);
+  var norm=pcts.map(function(p){return Math.round(p/sum*100);});
+
+  // Animate bars
+  q.o.forEach(function(_,i){
+    var opt=document.getElementById('opt-'+idx+'-'+i);
+    var bar=document.getElementById('bar-'+idx+'-'+i);
+    var pct=document.getElementById('pct-'+idx+'-'+i);
+    if(!opt)return;
+    setTimeout(function(){
+      if(bar) bar.style.width=norm[i]+'%';
+      if(pct) pct.textContent=norm[i]+'%';
+    },i*70);
+  });
+  setTimeout(function(){
+    var v=document.getElementById('votes-'+idx);
+    if(v) v.textContent='👥 '+(Math.floor(Math.random()*60)+30)+' voted';
+  },400);
+
+  // Reactions
+  if(isCorrect){
+    showReaction('🎉',0);showReaction('✨',150);launchConfetti(40);
+    scoreData.total=(scoreData.total||0)+1;scoreData.correct=(scoreData.correct||0)+1;
+    scoreData.currentStreak=(scoreData.currentStreak||0)+1;
+    if(scoreData.currentStreak>(scoreData.bestStreak||0)) scoreData.bestStreak=scoreData.currentStreak;
+  } else {
+    showReaction('🤔',0);
+    scoreData.total=(scoreData.total||0)+1;scoreData.currentStreak=0;
+  }
+  saveScoreData();
+  updateScore();renderQGrid();updateNavInfo();
+
+  // Show Skip button
+  updateNavBtns();
+
+  // Explanation
+  renderExplanation(idx);
+  document.getElementById('quizArea').scrollIntoView({behavior:'smooth',block:'nearest'});
+
+  // Auto-advance after 5s
+  if(autoTimer) clearTimeout(autoTimer);
+  autoTimer=setTimeout(function(){
+    autoTimer=null;
+    if(qIdx<QUIZ.length-1){qIdx++;renderCurrentQ();}
+    else showResults();
+  },5000);
+
+  // Show Skip button (autoTimer now set, so it shows "Skip →")
+  updateNavBtns();
+}
+
+// ===== RENDER CURRENT QUESTION =====
+function renderCurrentQ(){
+  answered=false;
+  if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  document.getElementById('quizArea').innerHTML='';
+  if(qIdx>=QUIZ.length){showResults();return;}
+  var div=document.createElement('div');div.innerHTML=buildQuizCard(qIdx);
+  document.getElementById('quizArea').appendChild(div.firstElementChild);
+  updateScore();renderQGrid();updateNavInfo();
+  document.getElementById('quizArea').scrollIntoView({behavior:'smooth',block:'nearest'});
+
+  // Show explanation if already answered (prev/dropdown nav)
+  if(answers[qIdx]!==undefined) renderExplanation(qIdx);
+}
+
+// ===== NAV =====
+function prevQ(){
+  if(qIdx>0){qIdx--;renderCurrentQ();}
+}
+function jumpTo(n){
+  if(!isNaN(n)&&n>=0&&n<QUIZ.length){qIdx=n;renderCurrentQ();}
+}
+
+// ===== RESULTS =====
+function showResults(){
+  var total=Object.keys(answers).length;
+  var correct=Object.keys(answers).filter(function(i){return answers[i]===QUIZ[i].c}).length;
+  var wrong=total-correct;
+  var pct=total>0?Math.round(correct/total*100):0;
+  var grade,gradeColor,emoji,msg;
+  if(pct>=90){grade='S RANK';gradeColor='#b8860b';emoji='🏆';msg='Exceptional! You\'re crushing it anna! 🔥';}
+  else if(pct>=70){grade='A RANK';gradeColor='#2d7d46';emoji='🎯';msg='Strong! A few more rounds and you\'ll hit 100%. Keep going!';}
+  else if(pct>=50){grade='B RANK';gradeColor='#2b6cb0';emoji='📈';msg='Good foundation. Focus on missed topics and re-drill.';}
+  else{grade='C RANK';gradeColor='#c0392b';emoji='💪';msg='Tough round — review explanations and come back stronger!';}
+  if(pct>=50) launchConfetti(80);
+  if(pct>=50){showReaction('🎉',100);showReaction('🎊',300);showReaction('✨',500);}
+  document.getElementById('quizArea').innerHTML=
+    '<div class="res"><div class="res-emoji">'+emoji+'</div><div class="res-title">Quiz Complete!</div>'+
+    '<div class="res-grade" style="background:'+gradeColor+'15;color:'+gradeColor+';border-color:'+gradeColor+'40">'+grade+'</div>'+
+    '<div class="res-score" style="color:'+gradeColor+'">'+pct+'%</div>'+
+    '<div class="res-bars"><div class="res-bar-row"><span class="lb" style="color:var(--green)">Correct</span><div class="tk"><div class="fl" style="background:var(--green);width:0" data-w="'+(correct*3.125)+'%"></div></div><span class="vl" style="color:var(--green)">'+correct+'</span></div>'+
+    '<div class="res-bar-row"><span class="lb" style="color:var(--accent)">Wrong</span><div class="tk"><div class="fl" style="background:var(--accent);width:0" data-w="'+(wrong*3.125)+'%"></div></div><span class="vl" style="color:var(--accent)">'+wrong+'</span></div></div>'+
+    '<div class="res-msg">'+msg+'</div><button class="res-btn" onclick="resetQ()">🔄 Retry Quiz</button></div>';
+  document.getElementById('prevBtn').disabled=true;
+  document.getElementById('nextBtn').style.display='none';
+  setTimeout(function(){document.querySelectorAll('[data-w]').forEach(function(el){el.style.width=el.dataset.w;});},400);
+}
+
+// ===== RESET =====
+function resetQ(){
+  if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  answers={};qIdx=0;answered=false;
+  document.getElementById('quizArea').innerHTML='';
+  updateScore();renderQGrid();updateNavInfo();
+  renderCurrentQ();
+}
+
+// ===== START =====
+function startQuiz(){
+  if(document.getElementById('quizArea').children.length===0) renderCurrentQ();
+}
+
+// ================================================================
+//  TAB SWITCHING
+// ================================================================
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(function(el){el.classList.remove('active');});
+  document.querySelectorAll('.tab-item').forEach(function(el){el.classList.remove('active');});
+  var m={study:0,quiz:1,stats:2};
+  document.querySelectorAll('.tab-item')[m[tab]].classList.add('active');
+  document.getElementById('tab'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');
+  if(tab==='quiz'){updateScore();renderQGrid();updateNavInfo();startQuiz();}
+  if(tab==='stats') renderStats();
+  document.getElementById('tabBtnStudy').classList.toggle('btn-accent',tab==='study');
+  document.getElementById('tabBtnQuiz').classList.toggle('btn-accent',tab==='quiz');
+  document.getElementById('tabBtnStats').classList.toggle('btn-accent',tab==='stats');
+}
+
+// ================================================================
+//  TAB 1: STUDY
+// ================================================================
+function renderTopics(f){
+  var c=document.getElementById('topicList');
+  var l=f?TOPICS.filter(function(t){return t.id===f}):TOPICS;
+  if(!l.length){c.innerHTML='<div class="empty-state" style="text-align:center;padding:40px;color:var(--ink-dim);border:2px dashed var(--rule);"><p style="font-family:var(--serif);font-size:18px;font-style:italic;">No topics match.</p></div>';return;}
+  c.innerHTML=l.map(function(t){
+    return '<div class="topic-card"><div class="topic-title">'+t.title+'</div><div class="topic-meta">'+t.meta+'</div>'+
+      '<div class="analogy">'+t.analogy+'</div><ul class="key-points">'+t.points.map(function(p){return '<li>'+p+'</li>';}).join('')+'</ul>'+
+      (t.code?'<div class="code-sample">'+t.code+'</div>':'')+'</div>';
+  }).join('');
+}
+function filterTopics(v){renderTopics(v);}
+
+// ================================================================
+//  TAB 3: STATS
+// ================================================================
+function renderStats(){
+  var t=scoreData.total||0,c=scoreData.correct||0,p=t>0?Math.round(c/t*100):0;
+  document.getElementById('statsGrid').innerHTML=
+    '<div class="stat-card"><div class="stat-value">'+t+'</div><div class="stat-label">Total Attempts</div></div>'+
+    '<div class="stat-card"><div class="stat-value">'+c+'</div><div class="stat-label">Correct</div></div>'+
+    '<div class="stat-card"><div class="stat-value">'+p+'%</div><div class="stat-label">Accuracy</div></div>'+
+    '<div class="stat-card"><div class="stat-value">'+QUIZ.length+'</div><div class="stat-label">Questions</div></div>';
+  document.getElementById('statsStreak').textContent=scoreData.currentStreak||0;
+  document.getElementById('statsBestStreak').textContent=scoreData.bestStreak||0;
+  document.getElementById('statsAttempts').textContent=t;
+  var d={};QUIZ.forEach(function(q){d[q.cat]=(d[q.cat]||0)+1;});
+  document.getElementById('statsCatList').innerHTML=Object.keys(d).sort(function(a,b){return d[b]-d[a];}).map(function(c){
+    return '<div class="topic-card" style="padding:10px 14px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;">'+
+      '<span class="cat-badge cat-'+c.toLowerCase()+'">'+c+'</span>'+
+      '<span style="font-family:var(--mono);font-size:11px;color:var(--ink-dim);">'+d[c]+' questions ('+Math.round(d[c]/QUIZ.length*100)+'%)</span></div></div>';
+  }).join('');
+}
+function clearStats(){scoreData={total:0,correct:0,currentStreak:0,bestStreak:0};saveScoreData();renderStats();toast('History cleared');}
+
+// ================================================================
+//  PERSISTENCE
+// ================================================================
+function loadScoreData(){try{var r=localStorage.getItem(STORAGE_STATS_KEY);if(r)return JSON.parse(r);}catch(e){}return{total:0,correct:0,currentStreak:0,bestStreak:0};}
+function saveScoreData(){try{localStorage.setItem(STORAGE_STATS_KEY,JSON.stringify(scoreData));}catch(e){}}
+
+// ================================================================
+//  TOAST
+// ================================================================
+var toastTimer=null;
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},2000);}
+
+// ===== DARK MODE =====
+function toggleDark(){var d=document.documentElement;if(d.getAttribute('data-theme')==='dark'){d.removeAttribute('data-theme');localStorage.setItem('gcp_prep_dark','light');}else{d.setAttribute('data-theme','dark');localStorage.setItem('gcp_prep_dark','dark');}}
+function loadDarkPref(){try{if(localStorage.getItem('gcp_prep_dark')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}}
+
+// ================================================================
+//  TOPICS DATA
+// ================================================================
+var TOPICS = [
+  {id:'cloud-run',title:'Cloud Run — Serverless Containers',meta:'GCP · Compute',
+    analogy:'Cloud Run = <strong>RTC bus</strong> that starts only when passengers are waiting at the stop. You don\'t pay for the bus when it\'s idle — it scales to zero automatically.',
+    points:['Fully managed serverless container runtime','Auto-scales from 0 to N, scales to zero when idle','Pay only for compute time used (per 100ms)','Health checks: /healthz (liveness), /readyz (readiness)','Max request timeout: 60 minutes','Concurrency: one container handles multiple requests'],
+    code:'gcloud run deploy my-service --source . --region us-central1 --allow-unauthenticated'},
+  {id:'vertex-ai',title:'Vertex AI + Gemini API',meta:'AI/ML · GCP',
+    analogy:'Vertex AI = <strong>godown</strong> where you store all your ML tools. Gemini is the <strong>smart assistant</strong> inside.',
+    points:['Vertex AI is GCP\'s unified ML platform','Org blocks Vertex AI — use Gemini Developer API key','Models: gemini-2.5-flash, gemini-2.5-pro','text-embedding-004: 768 dimensions for vector search'],
+    code:'genai.configure(api_key=os.getenv("GEMINI_API_KEY"))\nmodel = genai.GenerativeModel("gemini-2.5-flash")\nresponse = model.generate_content("Explain Cloud Run")'},
+  {id:'bigquery',title:'BigQuery — Data Warehouse + Vector Search',meta:'Data · GCP',
+    analogy:'BigQuery = <strong>supermarket warehouse</strong>. VECTOR_SEARCH lets you search by <strong>"find me something like this"</strong>.',
+    points:['Serverless petabyte-scale data warehouse','SQL-based with VECTOR_SEARCH extension','Semantic similarity search in SQL — no separate vector DB','$5/TB processed (on-demand)'],
+    code:'SELECT base.query FROM VECTOR_SEARCH(TABLE my_vectors, \'embedding\', TABLE query_vector, \'embedding\', top_k => 5);'},
+  {id:'storage',title:'Cloud Storage — Object Storage',meta:'Storage · GCP',
+    analogy:'Cloud Storage = <strong>Alphabetized godown</strong>. Buckets are shelves, objects are items. Versioning is like keeping old bills in a separate folder.',
+    points:['Object storage — store any data up to 5TB per object','Storage classes: Standard, Nearline, Coldline, Archive','Versioning prevents accidental overwrites','Signed URLs for temporary access without IAM'],
+    code:'gcloud storage cp myfile.txt gs://my-bucket/data/\ngcloud storage sign-url gs://my-bucket/data/report.pdf --duration 1h'},
+  {id:'fastapi',title:'FastAPI + Gunicorn — Production Web Serving',meta:'Backend · Python',
+    analogy:'FastAPI = <strong>bank manager</strong> handling multiple customers (async). Gunicorn = <strong>security guard</strong> managing the queue. Flask is a single-window clerk.',
+    points:['FastAPI: async Python web framework, auto-generates OpenAPI docs at /docs','Gunicorn + Uvicorn workers for production','Pydantic V2: @field_validator, model_dump(), model_validate()','Bind to 0.0.0.0 inside containers (not 127.0.0.1)'],
+    code:'CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "4", "-k", "uvicorn.workers.UvicornWorker", "main:app"]'},
+  {id:'docker',title:'Docker — Containerization for Cloud Run',meta:'DevOps',
+    analogy:'Docker = <strong>tiffin box</strong> that packs your app + all dependencies into a sealed container. Runs the same everywhere.',
+    points:['Container: packaged app + dependencies','Layer caching: deps first, code second','.dockerignore prevents sending venv/, .git/ to daemon','Multi-stage builds for smaller images','Use slim images (python:3.11-slim) over latest'],
+    code:'FROM python:3.11-slim\nCOPY requirements.txt .\nRUN pip install -r requirements.txt\nCOPY . .\nCMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]'},
+  {id:'python',title:'Python + SQL — Foundation',meta:'Core',
+    analogy:'Python = <strong>Sambar</strong> — add any vegetable (library) and it works. SQL = <strong>ledger book</strong> — rows are entries, columns are fields.',
+    points:['Async/await: non-blocking I/O without threads','Generators (yield): lazy value production','Pydantic V2: @field_validator replaces @validator','SQL CTEs (WITH clause): cleaner than nested subqueries','Window functions: ROW_NUMBER, RANK, LAG'],
+    code:'WITH ranked AS (\n  SELECT *, ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC) as rn\n  FROM employees\n)\nSELECT * FROM ranked WHERE rn <= 3;'}
+];
+
+// ================================================================
+//  INIT
+// ================================================================
+function init(){
+  loadDarkPref();scoreData=loadScoreData();renderTopics('');renderStats();switchTab('study');
+}
+init();
+</script>
+</body>
+</html>

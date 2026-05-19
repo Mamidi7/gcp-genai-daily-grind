@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>shadcn Design System — GCP Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+:root {
+  --background: #ffffff;
+  --foreground: #09090b;
+  --card: #ffffff;
+  --card-foreground: #09090b;
+  --popover: #ffffff;
+  --popover-foreground: #09090b;
+  --primary: #18181b;
+  --primary-foreground: #fafafa;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+  --success: #16a34a;
+  --success-foreground: #fafafa;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #18181b;
+  --radius: 0.5rem;
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-lg: calc(var(--radius) + 2px);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+@media (prefers-color-scheme: dark) {
+  :root{--background:#09090b;--foreground:#fafafa;--card:#09090b;--card-foreground:#fafafa;--popover:#09090b;--popover-foreground:#fafafa;--primary:#fafafa;--primary-foreground:#18181b;--secondary:#27272a;--secondary-foreground:#fafafa;--muted:#27272a;--muted-foreground:#a1a1aa;--accent:#27272a;--accent-foreground:#fafafa;--destructive:#7f1d1d;--destructive-foreground:#fafafa;--success:#166534;--success-foreground:#fafafa;--border:#27272a;--input:#27272a;--ring:#d4d4d8;--shadow-sm:0 1px 2px 0 rgb(0 0 0 / 0.3);--shadow:0 1px 3px 0 rgb(0 0 0 / 0.4),0 1px 2px -1px rgb(0 0 0 / 0.3);--shadow-md:0 4px 6px -1px rgb(0 0 0 / 0.4),0 2px 4px -2px rgb(0 0 0 / 0.3);--shadow-lg:0 10px 15px -3px rgb(0 0 0 / 0.4),0 4px 6px -4px rgb(0 0 0 / 0.3);}
+}
+[data-theme="dark"]{--background:#09090b;--foreground:#fafafa;--card:#09090b;--card-foreground:#fafafa;--popover:#09090b;--popover-foreground:#fafafa;--primary:#fafafa;--primary-foreground:#18181b;--secondary:#27272a;--secondary-foreground:#fafafa;--muted:#27272a;--muted-foreground:#a1a1aa;--accent:#27272a;--accent-foreground:#fafafa;--destructive:#7f1d1d;--destructive-foreground:#fafafa;--success:#166534;--success-foreground:#fafafa;--border:#27272a;--input:#27272a;--ring:#d4d4d8;--shadow-sm:0 1px 2px 0 rgb(0 0 0 / 0.3);--shadow:0 1px 3px 0 rgb(0 0 0 / 0.4),0 1px 2px -1px rgb(0 0 0 / 0.3);--shadow-md:0 4px 6px -1px rgb(0 0 0 / 0.4),0 2px 4px -2px rgb(0 0 0 / 0.3);--shadow-lg:0 10px 15px -3px rgb(0 0 0 / 0.4),0 4px 6px -4px rgb(0 0 0 / 0.3);}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font-sans);background:var(--background);color:var(--foreground);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+.container{max-width:1000px;margin:0 auto;padding:0 24px;}
+
+/* ===== SHADCN COMPONENTS ===== */
+.sh-btn{display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;border-radius:var(--radius-sm);font-size:0.875rem;font-weight:500;line-height:1;white-space:nowrap;transition:all 0.15s ease;cursor:pointer;outline:none;border:1px solid transparent;padding:0.5rem 1rem;height:2.25rem;text-decoration:none;font-family:var(--font-sans);}
+.sh-btn:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ring);}
+.sh-btn:disabled{opacity:0.5;pointer-events:none;}
+.sh-btn:active{transform:translateY(1px);}
+.sh-btn-primary{background:var(--primary);color:var(--primary-foreground);}
+.sh-btn-primary:hover{opacity:0.9;}
+.sh-btn-secondary{background:var(--secondary);color:var(--secondary-foreground);}
+.sh-btn-secondary:hover{background:var(--accent);}
+.sh-btn-outline{border-color:var(--input);background:transparent;color:var(--foreground);}
+.sh-btn-outline:hover{background:var(--accent);}
+.sh-btn-ghost{background:transparent;color:var(--foreground);}
+.sh-btn-ghost:hover{background:var(--accent);}
+.sh-btn-destructive{background:var(--destructive);color:var(--destructive-foreground);}
+.sh-btn-sm{padding:0.25rem 0.75rem;height:2rem;font-size:0.8125rem;}
+.sh-btn-lg{padding:0.75rem 1.5rem;height:2.75rem;font-size:1rem;}
+
+.sh-card{border-radius:var(--radius);border:1px solid var(--border);background:var(--card);color:var(--card-foreground);box-shadow:var(--shadow-sm);transition:box-shadow 0.2s,transform 0.2s;}
+.sh-card-hover:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.sh-card-header{padding:1.5rem 1.5rem 0;display:flex;flex-direction:column;gap:0.25rem;}
+.sh-card-header h3{font-size:1.125rem;font-weight:600;margin:0;line-height:1.4;}
+.sh-card-header p{font-size:0.875rem;color:var(--muted-foreground);margin:0;}
+.sh-card-content{padding:1.5rem;font-size:0.875rem;line-height:1.6;}
+.sh-card-footer{padding:0 1.5rem 1.5rem;display:flex;align-items:center;gap:0.5rem;}
+
+.sh-badge{display:inline-flex;align-items:center;border-radius:calc(var(--radius) - 2px);border:1px solid transparent;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;line-height:1.25;white-space:nowrap;}
+.sh-badge-default{background:var(--primary);color:var(--primary-foreground);}
+.sh-badge-secondary{background:var(--secondary);color:var(--secondary-foreground);}
+.sh-badge-destructive{background:var(--destructive);color:var(--destructive-foreground);}
+.sh-badge-outline{border-color:var(--border);color:var(--foreground);}
+.sh-badge-success{background:var(--success);color:var(--success-foreground);}
+
+.sh-table{width:100%;border-collapse:collapse;}
+.sh-table th{text-align:left;padding:0.75rem 1rem;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted-foreground);border-bottom:1px solid var(--border);}
+.sh-table td{padding:0.75rem 1rem;border-bottom:1px solid var(--border);font-size:0.875rem;}
+.sh-table tbody tr:hover{background:var(--muted);}
+
+.sh-code{border-radius:var(--radius);background:var(--muted);padding:1rem 1.25rem;font-family:var(--font-mono);font-size:0.8125rem;line-height:1.6;overflow-x:auto;margin:0.75rem 0;position:relative;}
+.sh-code .hl{color:#dc2626;font-weight:500;}
+.sh-code .cm{color:var(--muted-foreground);}
+.sh-code .str{color:#16a34a;}
+.sh-code .kw{color:#9333ea;}
+
+.sh-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1rem;}
+.sh-tab{padding:0.5rem 1rem;font-size:0.875rem;font-weight:500;color:var(--muted-foreground);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;font-family:var(--font-sans);}
+.sh-tab:hover{color:var(--foreground);}
+.sh-tab.active{color:var(--foreground);border-bottom-color:var(--foreground);}
+.sh-tab-panel{display:none;}
+.sh-tab-panel.active{display:block;}
+
+.sh-input{display:flex;height:2.25rem;width:100%;border-radius:var(--radius-sm);border:1px solid var(--input);background:transparent;padding:0.5rem 0.75rem;font-size:0.875rem;font-family:var(--font-sans);color:var(--foreground);transition:box-shadow 0.15s,border-color 0.15s;}
+.sh-input:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ring);border-color:var(--ring);}
+.sh-input::placeholder{color:var(--muted-foreground);}
+
+.sh-separator{border:none;height:1px;background:var(--border);margin:1.5rem 0;}
+
+/* ===== LAYOUT ===== */
+.topbar{position:sticky;top:0;z-index:50;background:var(--background);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;}
+.topbar-inner{max-width:1000px;margin:0 auto;width:100%;padding:0 24px;display:flex;justify-content:space-between;align-items:center;}
+.brand{font-size:15px;font-weight:600;letter-spacing:-0.02em;display:flex;align-items:center;gap:8px;}
+.brand span{color:var(--muted-foreground);font-weight:400;}
+.top-actions{display:flex;gap:8px;align-items:center;}
+
+.page-header{padding:2.5rem 0 1.5rem;}
+.page-header h1{font-size:2rem;font-weight:700;letter-spacing:-0.025em;line-height:1.15;margin-bottom:0.5rem;}
+.page-header .desc{font-size:1rem;color:var(--muted-foreground);max-width:600px;}
+.badge-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:0.75rem;}
+
+.section-card{margin-bottom:1.5rem;}
+.section-card .sh-card-header h2{font-size:1.25rem;font-weight:600;}
+.section-card .sh-card-header p{font-size:0.85rem;}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;}
+@media(max-width:768px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+
+.showcase-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:8px 0;}
+.showcase-label{font-size:0.75rem;font-weight:500;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:0.05em;width:100%;margin-bottom:2px;}
+
+.token-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin:8px 0;}
+.token-item{padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;}
+.token-item:hover{border-color:var(--ring);box-shadow:var(--shadow-sm);}
+.token-item .name{font-family:var(--font-mono);font-size:0.7rem;color:var(--muted-foreground);}
+.token-item .val{font-family:var(--font-mono);font-size:0.75rem;color:var(--foreground);font-weight:500;margin-top:2px;}
+.token-item .swatch{width:100%;height:16px;border-radius:2px;border:1px solid var(--border);margin-bottom:4px;}
+
+.demo-area{padding:20px;border:2px dashed var(--border);border-radius:var(--radius);margin:12px 0;min-height:60px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;}
+.progress-bar{height:8px;border-radius:9999px;background:var(--secondary);overflow:hidden;}
+.progress-bar .fill{height:100%;border-radius:9999px;background:var(--primary);transition:width .5s ease;}
+
+footer{margin-top:3rem;padding:1.5rem 0;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:0.8rem;color:var(--muted-foreground);}
+
+/* ── TELEGRAM QUIZ COMPONENT ── */
+#confettiCanvas{position:fixed;inset:0;pointer-events:none;z-index:9999;}
+.reaction{position:fixed;font-size:30px;pointer-events:none;z-index:9998;animation:floatUp 1.2s ease forwards;}
+@keyframes floatUp{0%{transform:translateY(0) scale(0);opacity:1;}50%{transform:translateY(-70px) scale(1.2);opacity:1;}100%{transform:translateY(-140px) scale(.8);opacity:0;}}
+
+.tg-wrap{width:100%;max-width:340px;border-radius:10px;overflow:hidden;background:#242f3d;box-shadow:0 2px 20px rgba(0,0,0,.4);}
+.tg-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.05);background:#242f3d;}
+.tg-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#4c8fb5,#2d6a9f);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;color:#fff;}
+.tg-bar-info{flex:1;line-height:1.2;}
+.tg-bar-name{font-size:12px;font-weight:600;color:#fff;}
+.tg-bar-status{font-size:9px;color:#8a9bb0;}
+.tg-bar .dot{width:6px;height:6px;border-radius:50%;background:#5cba47;display:inline-block;margin-right:3px;}
+
+.tg-sbar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:#17212b;border-bottom:1px solid rgba(255,255,255,.05);}
+.tg-spill{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:100px;font-size:10px;font-weight:600;}
+.tg-spill.q{background:rgba(94,174,255,.15);color:#5eaeff;}
+.tg-spill.c{background:rgba(76,175,147,.15);color:#4caf93;}
+.tg-spill.w{background:rgba(229,115,115,.15);color:#e57373;}
+.tg-sprog{display:inline-flex;align-items:center;gap:6px;font-size:10px;color:#8a9bb0;}
+.tg-strack{width:60px;height:3px;background:#242f3d;border-radius:2px;overflow:hidden;}
+.tg-sfill{height:100%;background:#5eaeff;border-radius:2px;transition:width .4s ease;}
+
+.tg-msgs{padding:8px 10px 2px;display:flex;flex-direction:column;gap:4px;max-height:320px;overflow-y:auto;background:#17212b;}
+.tg-msgs::-webkit-scrollbar{width:3px;}
+.tg-msgs::-webkit-scrollbar-thumb{background:#242f3d;border-radius:2px;}
+
+.tb{max-width:88%;padding:7px 10px;font-size:12.5px;line-height:1.45;animation:msgIn .25s ease-out forwards;opacity:0;border-radius:12px;color:#fff;}
+.tb.bot{align-self:flex-start;background:#1d2d3e;border-radius:12px 12px 12px 0;}
+.tb.user{align-self:flex-end;background:#2b5278;border-radius:12px 12px 0 12px;}
+.tb .time{font-size:9px;color:#5a6d80;margin-top:3px;text-align:right;}
+.tb.user .time{color:rgba(255,255,255,.4);}
+.tb code{background:rgba(0,0,0,.3);padding:1px 4px;border-radius:3px;font-size:11px;}
+
+.typing{display:flex;align-items:center;gap:6px;margin-bottom:4px;opacity:0;transition:opacity .3s;}
+.typing.show{opacity:1;}
+.typing .tind{padding:8px 12px;background:#1d2d3e;border-radius:12px 12px 12px 0;display:flex;gap:3px;}
+.typing .dot{width:5px;height:5px;border-radius:50%;background:#5a6d80;animation:tyDot 1.2s ease-in-out infinite;}
+.typing .dot:nth-child(2){animation-delay:.2s;}
+.typing .dot:nth-child(3){animation-delay:.4s;}
+@keyframes tyDot{0%,80%,100%{transform:scale(.8);opacity:.4;}40%{transform:scale(1.1);opacity:1;}}
+
+.qcard{background:#1d2d3e;border-radius:12px 12px 12px 0;overflow:hidden;max-width:300px;box-shadow:0 2px 12px rgba(0,0,0,.2);animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both;}
+.qcard-top{padding:10px 12px 6px;display:flex;align-items:flex-start;gap:8px;}
+.qcard-icon{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#5eaeff,#2d6a9f);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;color:#fff;}
+.qcard-meta{flex:1;}
+.qcard-channel{font-size:12px;font-weight:600;color:#5eaeff;}
+.qcard-topic{font-size:10px;color:#8a9bb0;margin-top:1px;}
+.qcard-q{padding:4px 12px 10px;font-size:13px;font-weight:600;line-height:1.5;color:#fff;}
+.qcard-opts{display:flex;flex-direction:column;gap:0;}
+.qcard-opt{padding:8px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:background .12s;border-top:1px solid rgba(255,255,255,.04);position:relative;overflow:hidden;user-select:none;color:#fff;font-size:12px;}
+.qcard-opt:hover{background:rgba(255,255,255,.04);}
+.qcard-opt:active{background:rgba(255,255,255,.08);}
+.qcard-opt.voted{pointer-events:none;cursor:default;}
+.qcard-opt .circle{width:18px;height:18px;border-radius:50%;border:2px solid #5a6d80;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .3s;font-size:10px;font-weight:700;color:#fff;}
+.qcard-opt .text{flex:1;line-height:1.4;z-index:1;}
+.qcard-opt .pct{font-size:11px;font-weight:600;color:#8a9bb0;min-width:28px;text-align:right;z-index:1;opacity:0;transition:opacity .3s;}
+.qcard-opt.voted .pct{opacity:1;}
+.qcard-opt .vbar{position:absolute;left:0;top:0;bottom:0;width:0;transition:width .6s cubic-bezier(.16,1,.3,1);}
+.qcard-opt.correct .vbar{background:rgba(76,175,147,.2);}
+.qcard-opt.wrong .vbar{background:rgba(229,115,115,.15);}
+.qcard-opt.reveal .vbar{background:rgba(76,175,147,.15);}
+.qcard-opt.correct .circle{border-color:#4caf93;background:#4caf93;}
+.qcard-opt.wrong .circle{border-color:#e57373;background:#e57373;}
+.qcard-opt.reveal .circle{border-color:#4caf93;background:transparent;color:#4caf93;}
+.qcard-foot{padding:6px 12px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.04);}
+.qcard-votes{font-size:11px;color:#8a9bb0;}
+.qcard-badge{font-size:10px;color:#5a6d80;padding:2px 8px;border-radius:100px;background:rgba(255,255,255,.06);}
+
+.expl{padding:8px 0 2px;animation:expIn .3s ease-out forwards;opacity:0;}
+.expl .box{padding:8px 10px;border-radius:10px;font-size:11.5px;line-height:1.5;background:rgba(76,175,147,.08);border:1px solid rgba(76,175,147,.2);display:flex;gap:7px;align-items:flex-start;color:#b0c8d8;}
+.expl .head{font-size:10px;font-weight:700;color:#4caf93;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;}
+
+.res{background:#242f3d;border-radius:12px;padding:20px 16px;text-align:center;animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both;max-width:300px;}
+.res-emoji{font-size:40px;margin-bottom:8px;}
+.res-title{font-size:17px;font-weight:700;color:#fff;margin-bottom:4px;}
+.res-grade{display:inline-block;padding:4px 16px;border-radius:100px;font-size:12px;font-weight:700;letter-spacing:.05em;margin-bottom:10px;}
+.res-score{font-size:34px;font-weight:700;margin:8px 0;}
+.res-bars{display:flex;flex-direction:column;gap:8px;margin:12px 0;}
+.res-bar-row{display:flex;align-items:center;gap:8px;font-size:11px;color:#fff;}
+.res-bar-row .label{min-width:50px;text-align:right;font-weight:500;}
+.res-bar-row .track{flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.res-bar-row .fill{height:100%;border-radius:3px;transition:width 1s cubic-bezier(.16,1,.3,1);}
+.res-bar-row .val{min-width:20px;font-weight:600;}
+.res-msg{font-size:12px;color:#8a9bb0;line-height:1.6;margin-bottom:14px;}
+.res-btn{padding:10px 24px;border:none;border-radius:8px;background:#5eaeff;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;}
+.res-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(94,174,255,.3);}
+
+.tg-next{padding:6px 10px 8px;background:#17212b;}
+.tg-next-inner{width:100%;padding:10px;border:none;border-radius:8px;background:#5eaeff;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;display:none;align-items:center;justify-content:center;gap:6px;transition:all .15s;box-shadow:0 4px 16px rgba(94,174,255,.2);}
+.tg-next-inner:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(94,174,255,.3);}
+.tg-next-inner.show{display:flex;}
+
+@keyframes msgIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@keyframes popIn{0%{transform:scale(.85);opacity:0;}60%{transform:scale(1.04);}100%{transform:scale(1);opacity:1;}}
+@keyframes expIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.sh-fade-in{animation:sh-fade-in 0.25s ease-out forwards;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">shadcn<span> Design System</span></div>
+    <div class="top-actions">
+      <button class="sh-btn sh-btn-sm sh-btn-outline" onclick="copyAllCSS()"><i data-lucide="clipboard-copy" style="width:14px;height:14px;"></i>Copy CSS</button>
+      <button class="sh-btn sh-btn-sm sh-btn-ghost" onclick="toggleDark()"><i data-lucide="moon" style="width:16px;height:16px;"></i></button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<div class="page-header">
+  <div class="badge-row">
+    <span class="sh-badge sh-badge-default">v1.0</span>
+    <span class="sh-badge sh-badge-secondary">shadcn/ui</span>
+    <span class="sh-badge sh-badge-outline">vanilla HTML</span>
+    <span class="sh-badge sh-badge-outline">GCP Prep</span>
+  </div>
+  <h1>Design System</h1>
+  <div class="desc">shadcn/ui components adapted for vanilla HTML. Clean, modern, responsive. Click tokens to copy.</div>
+  <div style="display:flex;gap:8px;margin-top:1rem;">
+    <button class="sh-btn sh-btn-primary" onclick="copyAllCSS()">Copy All CSS</button>
+    <button class="sh-btn sh-btn-outline" onclick="location.href='#howto'">How to Use</button>
+  </div>
+</div>
+
+<hr class="sh-separator" />
+
+<!-- 01: COLOR PALETTE -->
+<section class="section-card" id="colors">
+  <div class="sh-card">
+    <div class="sh-card-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div><h2>01. Color Palette</h2><p>Click any token to copy. Dark mode values auto-switch.</p></div>
+        <span class="sh-badge sh-badge-secondary">16 tokens</span>
+      </div>
+    </div>
+    <div class="sh-card-content">
+      <div style="position:relative;margin-bottom:12px;">
+        <input class="sh-input" id="tokenSearch" placeholder="Filter tokens by name..." oninput="filterTokens()" style="max-width:300px;">
+      </div>
+      <h3 style="font-size:0.8rem;font-weight:600;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Core Tokens</h3>
+      <div class="token-grid" id="colorTable"></div>
+      <h3 style="font-size:0.8rem;font-weight:600;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:0.05em;margin:16px 0 8px;">Semantic Colors</h3>
+      <div class="token-grid" id="semanticTable"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 02: TYPOGRAPHY -->
+<section class="section-card">
+  <div class="sh-card">
+    <div class="sh-card-header">
+      <div><h2>02. Typography</h2><p>Inter for UI, JetBrains Mono for code. Three font families cover all needs.</p></div>
+    </div>
+    <div class="sh-card-content">
+      <div class="sh-card" style="border-style:dashed;box-shadow:none;">
+        <div class="sh-card-content">
+          <div style="font-family:var(--font-sans);font-size:2.5rem;font-weight:700;letter-spacing:-0.025em;line-height:1.1;">Sans Heading</div>
+          <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--muted-foreground);margin-top:2px;">--font-sans: 'Inter', system-ui, sans-serif</div>
+          <hr class="sh-separator" />
+          <div style="font-size:1rem;line-height:1.6;">Body text in Inter at 16px with 1.6 line-height. This is the default for all cards and paragraphs. Clean, readable, professional.</div>
+          <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--muted-foreground);margin-top:2px;">--font-sans: 16px, line-height: 1.6</div>
+          <hr class="sh-separator" />
+          <div style="font-family:var(--font-mono);font-size:0.8125rem;color:var(--muted-foreground);">Code blocks in JetBrains Mono at 13px with 1.6 line-height</div>
+          <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--muted-foreground);margin-top:2px;">--font-mono: 'JetBrains Mono', ui-monospace, monospace</div>
+        </div>
+      </div>
+
+      <h3 style="font-size:0.8rem;font-weight:600;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:0.05em;margin:16px 0 8px;">Type Scale</h3>
+      <div class="sh-table" style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+        <table class="sh-table">
+          <thead><tr><th>Level</th><th>Style</th><th>Size</th><th>Weight</th></tr></thead>
+          <tbody>
+            <tr><td>H1</td><td style="font-size:2rem;font-weight:700;letter-spacing:-0.025em;">Title</td><td>2rem (32px)</td><td>700</td></tr>
+            <tr><td>H2</td><td style="font-size:1.25rem;font-weight:600;">Section</td><td>1.25rem (20px)</td><td>600</td></tr>
+            <tr><td>H3</td><td style="font-size:1.125rem;font-weight:600;">Card Title</td><td>1.125rem (18px)</td><td>600</td></tr>
+            <tr><td>Body</td><td style="font-size:0.875rem;">Standard Text</td><td>0.875rem (14px)</td><td>400</td></tr>
+            <tr><td>Code</td><td style="font-family:var(--font-mono);font-size:0.8125rem;">Code Blocks</td><td>0.8125rem (13px)</td><td>400</td></tr>
+            <tr><td>Small</td><td style="font-size:0.75rem;color:var(--muted-foreground);">Labels &amp; Meta</td><td>0.75rem (12px)</td><td>500</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03: COMPONENTS -->
+<section class="section-card">
+  <div class="sh-card">
+    <div class="sh-card-header">
+      <div><h2>03. Components</h2><p>All shadcn components with live preview + code example.</p></div>
+    </div>
+    <div class="sh-card-content">
+
+      <!-- Buttons -->
+      <h3 style="font-size:0.9rem;font-weight:600;margin-bottom:8px;">Buttons</h3>
+      <div class="showcase-label">Variants (click to test)</div>
+      <div class="demo-area" style="margin-bottom:12px;">
+        <button class="sh-btn sh-btn-primary" onclick="toast('Primary')">Primary</button>
+        <button class="sh-btn sh-btn-secondary" onclick="toast('Secondary')">Secondary</button>
+        <button class="sh-btn sh-btn-outline" onclick="toast('Outline')">Outline</button>
+        <button class="sh-btn sh-btn-ghost" onclick="toast('Ghost')">Ghost</button>
+        <button class="sh-btn sh-btn-destructive" onclick="toast('Destructive')">Destructive</button>
+        <button class="sh-btn sh-btn-primary" disabled>Disabled</button>
+      </div>
+      <div class="showcase-label">Sizes</div>
+      <div class="demo-area" style="margin-bottom:12px;">
+        <button class="sh-btn sh-btn-sm sh-btn-primary">Small</button>
+        <button class="sh-btn sh-btn-primary">Default</button>
+        <button class="sh-btn sh-btn-lg sh-btn-primary">Large</button>
+        <button class="sh-btn sh-btn-icon sh-btn-outline"><i data-lucide="search" style="width:16px;height:16px;"></i></button>
+        <button class="sh-btn sh-btn-icon sh-btn-ghost"><i data-lucide="settings" style="width:16px;height:16px;"></i></button>
+      </div>
+      <div class="sh-code" style="font-size:0.7rem;">
+<span class="cm">&lt;!-- Button classes --&gt;</span>
+&lt;button class="<span class="hl">sh-btn sh-btn-primary</span>"&gt;Primary&lt;/button&gt;
+&lt;button class="<span class="hl">sh-btn sh-btn-sm sh-btn-outline</span>"&gt;Small Outline&lt;/button&gt;
+&lt;button class="<span class="hl">sh-btn sh-btn-lg sh-btn-ghost</span>"&gt;Large Ghost&lt;/button&gt;
+&lt;button class="<span class="hl">sh-btn sh-btn-icon sh-btn-primary</span>"&gt;&lt;i data-lucide="search"&gt;&lt;/i&gt;&lt;/button&gt;</div>
+
+      <!-- Cards -->
+      <h3 style="font-size:0.9rem;font-weight:600;margin:20px 0 8px;">Cards</h3>
+      <div class="grid-3" style="margin-bottom:12px;">
+        <div class="sh-card sh-card-hover">
+          <div class="sh-card-header"><h3>Gunicorn</h3><p>Production WSGI server</p></div>
+          <div class="sh-card-content">Manages worker processes, handles concurrent requests. Use exec-form CMD in Dockerfile.</div>
+        </div>
+        <div class="sh-card sh-card-hover">
+          <div class="sh-card-header"><h3>Layer Caching</h3><p>Docker optimization</p></div>
+          <div class="sh-card-content">Copy requirements.txt first, pip install, then copy code. Avoids reinstalling deps on every build.</div>
+        </div>
+        <div class="sh-card sh-card-hover">
+          <div class="sh-card-header"><h3>Port Binding</h3><p>0.0.0.0 not 127.0.0.1</p></div>
+          <div class="sh-card-content">Inside a container, 127.0.0.1 binds to localhost only. Cloud Run health check won't reach it.</div>
+        </div>
+      </div>
+      <div class="sh-code" style="font-size:0.7rem;">
+<span class="cm">&lt;!-- Card with hover lift --&gt;</span>
+&lt;div class="<span class="hl">sh-card sh-card-hover</span>"&gt;
+  &lt;div class="<span class="hl">sh-card-header</span>"&gt;
+    &lt;h3&gt;Title&lt;/h3&gt;&lt;p&gt;Subtitle&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="<span class="hl">sh-card-content</span>"&gt;Content&lt;/div&gt;
+&lt;/div&gt;</div>
+
+      <!-- Badges -->
+      <h3 style="font-size:0.9rem;font-weight:600;margin:20px 0 8px;">Badges</h3>
+      <div class="demo-area" style="margin-bottom:12px;">
+        <span class="sh-badge sh-badge-default">default</span>
+        <span class="sh-badge sh-badge-secondary">secondary</span>
+        <span class="sh-badge sh-badge-destructive">destructive</span>
+        <span class="sh-badge sh-badge-outline">outline</span>
+        <span class="sh-badge sh-badge-success">success</span>
+      </div>
+      <div class="sh-code" style="font-size:0.7rem;">
+&lt;span class="<span class="hl">sh-badge sh-badge-default</span>"&gt;default&lt;/span&gt;
+&lt;span class="<span class="hl">sh-badge sh-badge-success</span>"&gt;success&lt;/span&gt;</div>
+
+      <!-- Tabs -->
+      <h3 style="font-size:0.9rem;font-weight:600;margin:20px 0 8px;">Tabs</h3>
+      <div class="sh-tabs">
+        <button class="sh-tab active" onclick="event.preventDefault();switchSCTab(this,'sct1')">Flask</button>
+        <button class="sh-tab" onclick="event.preventDefault();switchSCTab(this,'sct2')">Gunicorn</button>
+        <button class="sh-tab" onclick="event.preventDefault();switchSCTab(this,'sct3')">Cloud Run</button>
+      </div>
+      <div class="sh-tab-panel active" id="sct1" style="padding:12px 0;font-size:0.875rem;color:var(--muted-foreground);">Flask is a lightweight WSGI web framework. Handles route dispatching, request parsing, and response generation.</div>
+      <div class="sh-tab-panel" id="sct2" style="padding:12px 0;font-size:0.875rem;color:var(--muted-foreground);">Gunicorn is a production WSGI server. Manages worker processes, handles concurrent connections.</div>
+      <div class="sh-tab-panel" id="sct3" style="padding:12px 0;font-size:0.875rem;color:var(--muted-foreground);">Cloud Run is a managed compute platform. Auto-scales from 0, charges per request.</div>
+
+      <!-- Tables -->
+      <h3 style="font-size:0.9rem;font-weight:600;margin:20px 0 8px;">Tables</h3>
+      <div class="sh-code" style="font-size:0.7rem;">
+&lt;table class="<span class="hl">sh-table</span>"&gt;
+  &lt;thead&gt;&lt;tr&gt;&lt;th&gt;Header&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+  &lt;tbody&gt;&lt;tr&gt;&lt;td&gt;Data&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;
+&lt;/table&gt;</div>
+
+      <!-- Code Blocks -->
+      <h3 style="font-size:0.9rem;font-weight:600;margin:20px 0 8px;">Code Blocks</h3>
+      <div class="sh-code">
+<span class="cm"># main.py</span>
+<span class="kw">from</span> flask <span class="kw">import</span> Flask
+app = Flask(__name__)
+<span class="hl">@app</span>.route(<span class="str">"/"</span>)
+<span class="kw">def</span> hello():
+    <span class="kw">return</span> {<span class="str">"message"</span>: <span class="str">"Hello from GCP!"</span>}
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    app.run(host=<span class="str">"0.0.0.0"</span>, port=8080)</div>
+      <div class="sh-code" style="font-size:0.7rem;">
+<span class="cm">&lt;!-- Code block --&gt;</span>
+&lt;div class="<span class="hl">sh-code</span>"&gt;
+  &lt;span class="<span class="hl">cm</span>"&gt;# comment&lt;/span&gt;
+  &lt;span class="<span class="hl">kw</span>"&gt;def&lt;/span&gt; &lt;span class="<span class="hl">fn</span>"&gt;hello&lt;/span&gt;():
+&lt;/div&gt;</div>
+
+      <!-- Progress -->
+      <h3 style="font-size:0.9rem;font-weight:600;margin:20px 0 8px;">Progress</h3>
+      <div class="demo-area">
+        <div style="width:100%;">
+          <div class="progress-bar"><div class="fill" style="width:65%;"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px;font-family:var(--font-mono);font-size:0.7rem;color:var(--muted-foreground);"><span>0%</span><span>65%</span><span>100%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04: CSS TOKENS REFERENCE -->
+<section class="section-card" id="howto">
+  <div class="sh-card">
+    <div class="sh-card-header">
+      <div><h2>04. How to Use</h2><p>Copy the CSS block below into any HTML file to get shadcn theming.</p></div>
+    </div>
+    <div class="sh-card-content">
+      <div class="sh-code" style="font-size:0.7rem;">
+<span class="cm">/* 1. Paste this in any HTML &lt;style&gt; block */</span>
+<span class="hl">:root {</span>
+  --background: #ffffff;   --foreground: #09090b;
+  --card: #ffffff;          --card-foreground: #09090b;
+  --primary: #18181b;       --primary-foreground: #fafafa;
+  --secondary: #f4f4f5;     --secondary-foreground: #18181b;
+  --muted: #f4f4f5;         --muted-foreground: #71717a;
+  --border: #e4e4e7;        --input: #e4e4e7;
+  --ring: #18181b;          --radius: 0.5rem;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+<span class="hl">}</span>
+
+<span class="cm">/* 2. Add dark mode support */</span>
+@media (prefers-color-scheme: dark) { :root { ... } }
+
+<span class="cm">/* 3. Load fonts */</span>
+&lt;link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"&gt;
+
+<span class="cm">/* 4. Use classes: sh-btn, sh-card, sh-badge, sh-table, sh-code, sh-tabs */</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 05: TELEGRAM QUIZ -->
+<section class="section-card">
+  <div class="sh-card">
+    <div class="sh-card-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div><h2>05. Telegram Quiz</h2><p>Full quiz component — Telegram dark theme with confetti celebrations, vote bars, grade ranking.</p></div>
+        <span class="sh-badge sh-badge-default">new</span>
+      </div>
+    </div>
+    <div class="sh-card-content">
+      <div class="sh-code" style="font-size:0.7rem;margin-bottom:12px;">
+<span class="cm">&lt;!-- Canvas for confetti + floating reactions --&gt;
+&lt;canvas id="confettiCanvas"&gt;&lt;/canvas&gt;
+&lt;!-- Structure: tg-wrap &gt; tg-bar + tg-sbar + tg-msgs + tg-next --&gt;
+&lt;!-- Classes: tb, qcard, qcard-opt, expl, res, tg-next-inner --&gt;</span></div>
+
+      <div style="display:flex;justify-content:center;">
+        <canvas id="confettiCanvas" style="display:none;"></canvas>
+        <div class="tg-wrap" id="tgApp">
+          <div class="tg-bar">
+            <div class="tg-av">K</div>
+            <div class="tg-bar-info">
+              <div class="tg-bar-name">Krishna Prep Bot</div>
+              <div class="tg-bar-status"><span class="dot"></span>online · GCP Quiz</div>
+            </div>
+          </div>
+          <div class="tg-sbar">
+            <div style="display:flex;gap:6px;">
+              <span class="tg-spill q">📋 <span id="qNum">0</span>/10</span>
+              <span class="tg-spill c">✓ <span id="cNum">0</span></span>
+              <span class="tg-spill w">✗ <span id="wNum">0</span></span>
+            </div>
+            <div class="tg-sprog">
+              <div class="tg-strack"><div class="tg-sfill" id="sFill" style="width:0%"></div></div>
+              <span id="sPct">0%</span>
+            </div>
+          </div>
+          <div class="tg-msgs" id="tgMsgs"></div>
+          <div class="tg-next"><button class="tg-next-inner" id="tgNext">Next →</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <div class="container" style="display:flex;justify-content:space-between;width:100%;">
+    <span>shadcn Design System v1.0</span>
+    <span>Copy-paste components. No React. No Tailwind.</span>
+  </div>
+</footer>
+
+<div id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--primary);color:var(--primary-foreground);padding:0.75rem 1.25rem;border-radius:var(--radius);font-size:0.875rem;font-weight:500;z-index:200;box-shadow:var(--shadow-lg);opacity:0;transition:opacity .3s;pointer-events:none;">Copied!</div>
+
+<script>
+var tokens = [
+  {name:'--background',val:'#ffffff',dark:'#09090b',cat:'core'},
+  {name:'--foreground',val:'#09090b',dark:'#fafafa',cat:'core'},
+  {name:'--card',val:'#ffffff',dark:'#09090b',cat:'core'},
+  {name:'--card-foreground',val:'#09090b',dark:'#fafafa',cat:'core'},
+  {name:'--primary',val:'#18181b',dark:'#fafafa',cat:'core'},
+  {name:'--primary-foreground',val:'#fafafa',dark:'#18181b',cat:'core'},
+  {name:'--secondary',val:'#f4f4f5',dark:'#27272a',cat:'core'},
+  {name:'--secondary-foreground',val:'#18181b',dark:'#fafafa',cat:'core'},
+  {name:'--muted',val:'#f4f4f5',dark:'#27272a',cat:'core'},
+  {name:'--muted-foreground',val:'#71717a',dark:'#a1a1aa',cat:'core'},
+  {name:'--border',val:'#e4e4e7',dark:'#27272a',cat:'core'},
+  {name:'--input',val:'#e4e4e7',dark:'#27272a',cat:'core'},
+  {name:'--ring',val:'#18181b',dark:'#d4d4d8',cat:'core'},
+  {name:'--radius',val:'0.5rem',dark:'0.5rem',cat:'core'},
+  {name:'--font-sans',val:'Inter, system-ui',dark:'Inter, system-ui',cat:'core'},
+  {name:'--font-mono',val:'JetBrains Mono',dark:'JetBrains Mono',cat:'core'},
+  {name:'--success',val:'#16a34a',dark:'#166534',cat:'semantic'},
+  {name:'--destructive',val:'#ef4444',dark:'#7f1d1d',cat:'semantic'},
+];
+
+function renderTokens(){
+  var isDark=document.documentElement.getAttribute('data-theme')==='dark'||
+    (window.matchMedia('(prefers-color-scheme:dark)').matches&&!document.documentElement.getAttribute('data-theme'));
+  ['colorTable','semanticTable'].forEach(function(id){
+    var filter=id==='semanticTable'?'semantic':'core';
+    var el=document.getElementById(id);
+    el.innerHTML=tokens.filter(function(t){return t.cat===filter;}).map(function(t){
+      var val=isDark?t.dark:t.val;
+      var showSwatch=t.name.match(/^(--(background|foreground|card|primary|secondary|muted|border|input|ring|success|destructive|accent))/);
+      var sw=showSwatch?'<div class="swatch" style="background:'+val+'"></div>':'';
+      return '<div class="token-item" onclick="copyToken(\''+t.name+'\',\''+val+'\')" title="Click to copy">'+
+        sw+'<div class="name">'+t.name+'</div><div class="val">'+val+'</div></div>';
+    }).join('');
+  });
+}
+
+function filterTokens(){
+  var q=document.getElementById('tokenSearch').value.toLowerCase();
+  document.querySelectorAll('.token-item').forEach(function(el){
+    el.style.display=el.textContent.toLowerCase().includes(q)?'block':'none';
+  });
+}
+
+function copyToken(name,val){
+  var text=name+': '+val+';';
+  navigator.clipboard.writeText(text);
+  var t=document.getElementById('toast');
+  t.textContent='Copied: '+text;
+  t.style.opacity='1';
+  setTimeout(function(){t.style.opacity='0';},1500);
+}
+
+function copyAllCSS(){
+  var css=':root {\n'+
+    tokens.map(function(t){var val=document.documentElement.getAttribute('data-theme')==='dark'?t.dark:t.val;return '  '+t.name+': '+val+';';}).join('\n')+
+    '\n}';
+  navigator.clipboard.writeText(css);
+  var t=document.getElementById('toast');
+  t.textContent='Copied all CSS tokens!';
+  t.style.opacity='1';
+  setTimeout(function(){t.style.opacity='0';},2000);
+}
+
+function toggleDark(){
+  var d=document.documentElement;
+  if(d.getAttribute('data-theme')==='dark'){d.removeAttribute('data-theme');}
+  else{d.setAttribute('data-theme','dark');}
+  renderTokens();
+  setTimeout(function(){if(typeof lucide!=='undefined')lucide.createIcons();},50);
+}
+
+function switchSCTab(btn,id){
+  btn.parentElement.querySelectorAll('.sh-tab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  var c=btn.closest('.sh-card-content')||btn.closest('.sh-card')||document;
+  c.querySelectorAll('.sh-tab-panel').forEach(function(p){p.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.style.opacity='1';
+  setTimeout(function(){t.style.opacity='0';},1500);
+}
+
+document.addEventListener('DOMContentLoaded',function(){renderTokens();if(typeof lucide!=='undefined')lucide.createIcons();startTgQuiz();});
+
+/* ── TELEGRAM QUIZ ── */
+var QUIZ = [
+  {q: 'A2A (Agent-to-Agent) Protocol primary purpose enti?', opts: ['OAuth2 authentication', 'Agents discover, call, collaborate', 'Model outputs compress', 'Agent costs monitor'], ans: 1, topic: 'ADK + A2A',
+   exp: 'A2A lets agents expose a capability card so other agents discover and delegate. Like microservices for AI agents — foundation of multi-agent orchestration.'},
+  {q: 'BigQuery Vector Search kosam Google recommend chese embedding model edi?', opts: ['text-embedding-gecko-001', 'text-bison@002', 'text-embedding-004', 'embedding-001 (PaLM2)'], ans: 2, topic: 'BigQuery Vector Search',
+   exp: 'text-embedding-004 is the latest — 768-dimensional dense embeddings with improved multilingual quality. Natively supported in BigQuery ML via GENERATE_EMBEDDING().'},
+  {q: 'Vertex AI RAG Engine lo document chunks store/retrieve chese component edi?', opts: ['Model Registry', 'Reasoning Engine', 'Corpus (Vector Store)', 'Pipeline Store'], ans: 2, topic: 'RAG Engine',
+   exp: 'A Corpus is a managed vector store holding chunked documents with embeddings. Query time lo query embed chesi ANN search chestundi corpus lo.'},
+  {q: 'Gemini API lo "Grounding with Google Search" em chestundi?', opts: ['GPU acceleration enable', 'Outputs restrict cheyadam', 'Real-time web results connect chesi hallucination reduce', 'Temperature 0 lock'], ans: 2, topic: 'Grounding',
+   exp: 'Grounding attaches real-time Google Search results as context to Gemini — like a live knowledge update. Critical for time-sensitive queries and factual accuracy.'},
+  {q: 'LangGraph advantage enti simple LangChain chain meeda?', opts: ['Faster inference', 'Built-in PDF parsing', 'Stateful cyclical workflows with conditional branching', 'Lower token cost'], ans: 2, topic: 'LangGraph',
+   exp: 'LangGraph models AI workflow as a directed graph with state. Nodes = steps, edges = transitions — loops possible! Enables reflection, retry, multi-agent patterns.'},
+  {q: 'Cloud Run lo cold start latency prevent chese feature edi?', opts: ['CPU boost', 'Minimum instances', 'Startup CPU boost', 'Concurrency multiplier'], ans: 1, topic: 'Cloud Run',
+   exp: '--min-instances=1 keeps at least one container warm. Combined with startup CPU boost gives near-zero cold start P99. Critical for Gemini-backed APIs.'},
+  {q: 'Constitutional AI self-critique fine-tuning lo enduku use chestaru?', opts: ['Safety filters pass data generate', 'Model scores responses against principles, then revises', 'Auto deployment gating', 'LoRA compress'], ans: 1, topic: 'Constitutional AI',
+   exp: 'Constitutional AI has model score its response against principles (Helpful? Honest? Harmless?), then revise if fails. Scalable alignment without human labelers.'},
+  {q: 'Vertex AI SFT lo training dataset ki required format enti?', opts: ['Parquet schema', 'CSV input/output columns', 'JSONL input_text output_text', 'TFRecord'], ans: 2, topic: 'Vertex AI SFT',
+   exp: 'Vertex AI SFT expects JSONL in GCS: {"input_text": "...", "output_text": "..."}. input_text includes system + user turn for instruction tuning.'},
+  {q: 'Vertex AI Memory Bank enduku use chestaru?', opts: ['Cheaper storage', 'Persistent user-level episodic memory across sessions', 'Faster embeddings', 'Image support'], ans: 1, topic: 'Memory Bank',
+   exp: 'Memory Bank maintains per-user memory. Agent reads at session start, writes at end — remembers past interactions. RAG only retrieves from static corpus.'},
+  {q: 'Banking ETL → LLM pipeline lo Gemini enrichment mundu landing zone edi best?', opts: ['Cloud Spanner', 'Memorystore', 'BigQuery', 'Filestore'], ans: 2, topic: 'ETL → LLM',
+   exp: 'BigQuery is ideal — ETL writes cleaned data, BigQuery ML calls GENERATE_TEXT() with Gemini to enrich all within SQL. No data movement.'}
+];
+
+var cur = 0, tgC = 0, tgW = 0, answered = false, tgNext = document.getElementById('tgNext');
+var canvas = document.getElementById('confettiCanvas'), ctx, particles = [], confettiRunning = false;
+
+function initCanvas(){
+  if(!canvas) return;
+  canvas.style.display = 'block';
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  ctx = canvas.getContext('2d');
+}
+window.addEventListener('resize',function(){if(canvas){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}});
+
+function launchConfetti(count){
+  if(!ctx) initCanvas();
+  var cols = ['#5eaeff','#4caf93','#ffd54f','#e57373','#a78bfa','#fb7185','#34d399'];
+  for(var i=0;i<count;i++){
+    particles.push({
+      x: Math.random()*canvas.width, y: -10,
+      w: Math.random()*8+4, h: Math.random()*4+2,
+      color: cols[Math.floor(Math.random()*cols.length)],
+      vx: (Math.random()-0.5)*4, vy: Math.random()*3+2,
+      rot: Math.random()*360, rotV: (Math.random()-0.5)*8, life: 1
+    });
+  }
+  if(!confettiRunning) animConfetti();
+}
+function animConfetti(){
+  confettiRunning = true;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles = particles.filter(function(p){return p.life>0;});
+  particles.forEach(function(p){
+    p.x+=p.vx; p.y+=p.vy; p.rot+=p.rotV; p.vy+=0.08; p.life-=0.008;
+    ctx.save();
+    ctx.translate(p.x,p.y);
+    ctx.rotate(p.rot*Math.PI/180);
+    ctx.globalAlpha = Math.max(0,p.life);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    ctx.restore();
+  });
+  if(particles.length>0) requestAnimationFrame(animConfetti);
+  else confettiRunning = false;
+}
+
+function showReaction(emoji, delay){
+  setTimeout(function(){
+    var el = document.createElement('div');
+    el.className = 'reaction';
+    el.textContent = emoji;
+    el.style.left = (Math.random()*40+30)+'vw';
+    el.style.bottom = '100px';
+    document.body.appendChild(el);
+    setTimeout(function(){el.remove();},1300);
+  },delay);
+}
+
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
+function ts(){var d=new Date();return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);}
+
+function updateScore(){
+  document.getElementById('qNum').textContent = cur;
+  document.getElementById('cNum').textContent = tgC;
+  document.getElementById('wNum').textContent = tgW;
+  var pct = Math.round(cur/QUIZ.length*100);
+  document.getElementById('sFill').style.width = pct+'%';
+  document.getElementById('sPct').textContent = pct+'%';
+}
+
+function addMsg(html,delay){
+  return new Promise(function(r){
+    setTimeout(function(){
+      var div = document.createElement('div');
+      div.innerHTML = html;
+      document.getElementById('tgMsgs').appendChild(div.firstElementChild);
+      document.getElementById('tgMsgs').scrollTop = document.getElementById('tgMsgs').scrollHeight;
+      r();
+    },delay);
+  });
+}
+
+function showTyping(){
+  var el = document.createElement('div');
+  el.className = 'typing';
+  el.id = 'typing';
+  el.innerHTML = '<div class="tind"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  document.getElementById('tgMsgs').appendChild(el);
+  setTimeout(function(){el.classList.add('show');},30);
+  document.getElementById('tgMsgs').scrollTop = document.getElementById('tgMsgs').scrollHeight;
+  return el;
+}
+function hideTyping(el){
+  el.classList.remove('show');
+  setTimeout(function(){el.remove();},300);
+}
+
+function buildQCard(idx){
+  var q = QUIZ[idx];
+  var opts = q.opts.map(function(o,i){
+    return '<div class="qcard-opt" id="opt-'+idx+'-'+i+'" onclick="pick('+idx+','+i+')">'+
+      '<div class="vbar" id="bar-'+idx+'-'+i+'"></div>'+
+      '<div class="circle" id="cir-'+idx+'-'+i+'">'+String.fromCharCode(65+i)+'</div>'+
+      '<div class="text">'+o+'</div>'+
+      '<div class="pct" id="pct-'+idx+'-'+i+'"></div></div>';
+  }).join('');
+  return '<div class="tb bot"><div class="qcard" id="qcard-'+idx+'">'+
+    '<div class="qcard-top"><div class="qcard-icon">📚</div><div class="qcard-meta"><div class="qcard-channel">Krishna Prep Bot</div><div class="qcard-topic">'+q.topic+' · Q'+(idx+1)+'/'+QUIZ.length+'</div></div></div>'+
+    '<div class="qcard-q">'+q.q+'</div><div class="qcard-opts">'+opts+'</div>'+
+    '<div class="qcard-foot"><span class="qcard-votes" id="votes-'+idx+'">👥 0 voted</span><span class="qcard-badge">Quiz</span></div></div></div>';
+}
+
+async function pick(idx,selected){
+  if(answered) return;
+  answered = true;
+  var q = QUIZ[idx];
+  var isCorrect = selected === q.ans;
+  var total = Math.floor(Math.random()*60)+30;
+  var remaining = 100;
+  var pcts = q.opts.map(function(_,i){
+    if(i===q.ans) return null;
+    var p = Math.floor(Math.random()*15)+5;
+    remaining -= p;
+    return p;
+  });
+  pcts[q.ans] = Math.max(remaining,40);
+  var sum = pcts.reduce(function(a,b){return a+b;},0);
+  var norm = pcts.map(function(p){return Math.round(p/sum*100);});
+
+  q.opts.forEach(function(_,i){
+    var el = document.getElementById('opt-'+idx+'-'+i);
+    var bar = document.getElementById('bar-'+idx+'-'+i);
+    var pct = document.getElementById('pct-'+idx+'-'+i);
+    var cir = document.getElementById('cir-'+idx+'-'+i);
+    el.classList.add('voted');
+    setTimeout(function(){
+      bar.style.width = norm[i]+'%';
+      pct.textContent = norm[i]+'%';
+      if(i===q.ans && i!==selected) el.classList.add('reveal');
+      if(i===q.ans) cir.textContent = '✓';
+      if(i===selected && isCorrect) el.classList.add('correct');
+      if(i===selected && !isCorrect){ el.classList.add('wrong'); cir.textContent = '✗'; }
+    },i*70);
+  });
+
+  setTimeout(function(){
+    document.getElementById('votes-'+idx).textContent = '👥 '+total+' voted';
+  },400);
+
+  if(isCorrect){
+    tgC++;
+    showReaction('🎉',0);
+    showReaction('✨',150);
+    launchConfetti(40);
+    await addMsg('<div class="tb user">✅ Correct!<div class="time">'+ts()+'</div></div>',0);
+  } else {
+    tgW++;
+    showReaction('🤔',0);
+    await addMsg('<div class="tb user">❌ Missed: '+q.opts[q.ans]+'<div class="time">'+ts()+'</div></div>',0);
+  }
+  cur++;
+  updateScore();
+
+  var typ = showTyping();
+  await sleep(700);
+  hideTyping(typ);
+  await sleep(200);
+
+  var expRow = document.createElement('div');
+  expRow.className = 'expl';
+  expRow.innerHTML = '<div class="box"><div><div class="head">💡 '+q.topic+'</div><div>'+q.exp+'</div></div></div>';
+  document.getElementById('tgMsgs').appendChild(expRow);
+  document.getElementById('tgMsgs').scrollTop = document.getElementById('tgMsgs').scrollHeight;
+
+  await sleep(300);
+  if(cur >= QUIZ.length){
+    tgNext.textContent = '🏆 See Results';
+    tgNext.onclick = showResults;
+  } else {
+    tgNext.textContent = 'Next →';
+    tgNext.onclick = nextQ;
+  }
+  tgNext.classList.add('show');
+}
+
+async function nextQ(){
+  tgNext.classList.remove('show');
+  answered = false;
+  var typ = showTyping();
+  await sleep(500);
+  hideTyping(typ);
+  await sleep(200);
+  var div = document.createElement('div');
+  div.innerHTML = buildQCard(cur);
+  document.getElementById('tgMsgs').appendChild(div.firstElementChild);
+  document.getElementById('tgMsgs').scrollTop = document.getElementById('tgMsgs').scrollHeight;
+}
+
+async function showResults(){
+  tgNext.classList.remove('show');
+  var pct = Math.round(tgC/QUIZ.length*100);
+  var grade, gc, emoji, msg;
+  if(pct>=90){grade='S RANK';gc='#ffd54f';emoji='🏆';msg='Exceptional! You\'re crushing it anna! 🔥';}
+  else if(pct>=70){grade='A RANK';gc='#4caf93';emoji='🎯';msg='Strong! A few more rounds and you\'ll hit 100%. Keep going!';}
+  else if(pct>=50){grade='B RANK';gc='#5eaeff';emoji='📈';msg='Good foundation. Focus on missed topics and re-drill.';}
+  else{grade='C RANK';gc='#e57373';emoji='💪';msg='Tough round — review explanations and come back stronger!';}
+
+  if(pct>=50){launchConfetti(80);showReaction('🎉',100);showReaction('🎊',300);showReaction('🎆',500);showReaction('✨',700);}
+  await sleep(300);
+
+  var div = document.createElement('div');
+  div.innerHTML = '<div class="res"><div class="res-emoji">'+emoji+'</div><div class="res-title">Quiz Complete!</div>'+
+    '<div class="res-grade" style="background:'+gc+'20;color:'+gc+';border:1px solid '+gc+'40">'+grade+'</div>'+
+    '<div class="res-score" style="color:'+gc+'">'+pct+'%</div>'+
+    '<div class="res-bars"><div class="res-bar-row"><span class="label" style="color:#4caf93">Correct</span><div class="track"><div class="fill" style="background:#4caf93;width:0" data-w="'+(tgC*10)+'%"></div></div><span class="val" style="color:#4caf93">'+tgC+'</span></div>'+
+    '<div class="res-bar-row"><span class="label" style="color:#e57373">Wrong</span><div class="track"><div class="fill" style="background:#e57373;width:0" data-w="'+(tgW*10)+'%"></div></div><span class="val" style="color:#e57373">'+tgW+'</span></div></div>'+
+    '<div class="res-msg">'+msg+'</div><button class="res-btn" onclick="resetTgQuiz()">🔄 Retry Quiz</button></div>';
+  document.getElementById('tgMsgs').appendChild(div.firstElementChild);
+  document.getElementById('tgMsgs').scrollTop = document.getElementById('tgMsgs').scrollHeight;
+
+  setTimeout(function(){
+    document.querySelectorAll('[data-w]').forEach(function(el){el.style.width=el.dataset.w;});
+  },400);
+}
+
+function resetTgQuiz(){
+  cur=0;tgC=0;tgW=0;answered=false;
+  document.getElementById('tgMsgs').innerHTML = '';
+  tgNext.classList.remove('show');
+  tgNext.textContent = 'Next →';
+  tgNext.onclick = nextQ;
+  updateScore();
+  startTgQuiz();
+}
+
+async function startTgQuiz(){
+  initCanvas();
+  document.getElementById('tgMsgs').innerHTML = '';
+  await sleep(200);
+  var div = document.createElement('div');
+  div.innerHTML = buildQCard(0);
+  document.getElementById('tgMsgs').appendChild(div.firstElementChild);
+  document.getElementById('tgMsgs').scrollTop = document.getElementById('tgMsgs').scrollHeight;
+}
+</script>
+</body>
+</html>

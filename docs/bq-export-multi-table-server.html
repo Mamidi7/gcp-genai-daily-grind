@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BQ Export to External Server — Multi-Table Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f3eee4;  --paper-2: #ebe4d4;
+  --ink: #1a1612;     --ink-2: #3d3528;
+  --ink-dim: #6b5d49; --ink-faint: #a89a83;
+  --rule: #c8b99e;
+  --accent: #c0392b;  --accent2: #a93226;
+  --green: #2d7d46;   --blue: #2b6cb0;
+  --gold: #b8860b;    --purple: #7b4d8c;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+[data-theme="dark"] {
+  --paper: #1b1917;  --paper-2: #242220;
+  --ink: #f0ece9;    --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430;
+  --accent: #e8704a;  --accent2: #d95a3a;
+  --green: #5bbd6b;   --blue: #5b8fbd;
+  --gold: #d4a84b;    --purple: #b47bc4;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  background-image:
+    radial-gradient(circle at 25% 15%, rgba(200,180,140,.15) 0%, transparent 40%),
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(200,180,140,.12) 27px, rgba(200,180,140,.12) 28px);
+  line-height: 1.7;
+  min-height: 100vh;
+}
+main { max-width: 980px; margin: 0 auto; padding: 56px 28px 100px; }
+
+@keyframes pageIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+section { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
+section.in { opacity: 1; transform: translateY(0); }
+
+#darkToggle {
+  position: fixed; top: 16px; right: 16px; z-index: 100;
+  background: var(--paper-2); border: 1px solid var(--ink);
+  padding: 8px 14px; font-size: 18px; cursor: pointer;
+  transition: all .2s; font-family: var(--mono);
+}
+#darkToggle:hover { transform: scale(1.05); }
+
+.page-header { margin-bottom: 36px; }
+.eyebrow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+.pill { background: var(--paper-2); border: 1px solid var(--ink); padding: 3px 10px; font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; }
+h1 { font-family: var(--serif); font-size: 42px; font-weight: 400; line-height: 1.1; margin-bottom: 4px; }
+h1 .italic { font-style: italic; color: var(--accent); }
+.subtitle { font-family: var(--serif); font-style: italic; color: var(--ink-dim); font-size: 17px; margin-bottom: 18px; }
+.cd-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+.cd-card { background: var(--paper-2); border: 1px solid var(--ink); padding: 10px 16px; display: flex; align-items: center; gap: 8px; box-shadow: 2px 2px 0 var(--ink); }
+.cd-card .num { font-family: var(--mono); font-size: 14px; font-weight: 600; }
+.cd-card .lbl { font-size: 11px; color: var(--ink-dim); }
+
+h2 { font-family: var(--serif); font-size: 32px; font-weight: 400; line-height: 1.15; margin-top: 44px; margin-bottom: 6px; }
+h2 .underline { text-decoration: underline; text-decoration-style: wavy; text-decoration-color: var(--accent); text-underline-offset: 4px; }
+h2 + .h2-sub { font-family: var(--serif); font-style: italic; color: var(--ink-dim); font-size: 16px; margin-bottom: 22px; }
+h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; margin-top: 28px; margin-bottom: 8px; }
+h4 { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .15em; color: var(--ink-dim); margin-top: 18px; margin-bottom: 6px; }
+
+.card { background: var(--paper-2); border: 1px solid var(--ink); padding: 18px 22px; box-shadow: 3px 3px 0 var(--ink); transition: all .3s; margin-bottom: 14px; }
+.card:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+.card-label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .2em; color: var(--accent); margin-bottom: 6px; }
+.card.blue { border-color: var(--blue); }
+.card.gold { border-color: var(--gold); }
+.card.green { border-color: var(--green); }
+
+.key-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.key-item { background: var(--paper-2); border: 1px solid var(--ink); padding: 14px; box-shadow: 2px 2px 0 var(--ink); }
+.key-item .kt { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .15em; color: var(--ink-dim); margin-bottom: 4px; }
+.key-item .kv { font-size: 14px; font-weight: 500; }
+
+.code-block { background: #1a1612; color: #e8d9c0; font-family: var(--mono); font-size: 13px; padding: 18px 22px; overflow-x: auto; line-height: 1.6; margin: 10px 0; white-space: pre; tab-size: 2; }
+.code-block .kw { color: #f0c674; }
+.code-block .fn { color: #81a2be; }
+.code-block .str { color: #b5bd68; }
+.code-block .cm { color: #6b5d49; font-style: italic; }
+.code-block .hl { color: #cc6666; }
+.code-block .num { color: #de935f; }
+.code-block .op { color: #8abeb7; }
+.code-wrap { position: relative; margin: 8px 0; }
+.code-wrap .code-block { margin: 0; }
+.copy-ghost {
+  position: absolute; top: 6px; right: 6px;
+  background: transparent; border: none;
+  color: #a89a83; cursor: pointer; font-size: 15px;
+  line-height: 1; padding: 2px 5px; z-index: 2;
+  opacity: 0.5; transition: opacity .2s, color .2s;
+}
+.copy-ghost:hover { opacity: 1; color: #e8d9c0; }
+.code-annotation { background: var(--paper-2); border: 1px solid var(--rule); padding: 12px 16px; margin: 4px 0 14px; font-size: 12px; color: var(--ink-dim); border-left: 3px solid var(--accent); }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }
+thead th { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; background: var(--paper-2); padding: 10px 10px; border: 1px solid var(--rule); text-align: left; }
+tbody td { padding: 8px 10px; border: 1px solid var(--rule); vertical-align: top; }
+tbody tr:hover { background: rgba(200,180,140,.1); }
+
+.svg-wrap { margin: 16px 0; text-align: center; }
+.svg-wrap svg { max-width: 100%; height: auto; }
+.svg-caption { font-family: var(--serif); font-style: italic; font-size: 12px; color: var(--ink-dim); margin-top: 4px; }
+
+.pipeline-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; padding: 20px 0; }
+.pipe-node { background: var(--paper-2); border: 1px solid var(--ink); padding: 10px 18px; font-family: var(--mono); font-size: 12px; box-shadow: 2px 2px 0 var(--ink); text-align: center; min-width: 70px; }
+.pipe-node.accent { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.pipe-node.green { background: var(--green); color: var(--paper); border-color: var(--green); }
+.pipe-node.blue { background: var(--blue); color: var(--paper); border-color: var(--blue); }
+.pipe-node.gold { background: var(--gold); color: var(--paper); border-color: var(--gold); }
+.pipe-arrow { font-family: var(--mono); font-size: 18px; color: var(--ink-dim); }
+
+.step-list { counter-reset: step; margin: 16px 0; list-style: none; }
+.step-item { counter-increment: step; padding: 12px 14px 12px 50px; position: relative; border-left: 2px solid var(--rule); margin-bottom: 8px; }
+.step-item:last-child { border-left-color: var(--accent); }
+.step-item::before { content: counter(step); position: absolute; left: -12px; top: 12px; width: 24px; height: 24px; background: var(--accent); color: var(--paper); font-family: var(--mono); font-size: 11px; display: flex; align-items: center; justify-content: center; }
+.step-item .title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.step-item .desc { font-size: 13px; color: var(--ink-dim); line-height: 1.5; }
+
+.compare-table-wrap { overflow-x: auto; margin: 16px 0; }
+
+.highlight-box { background: #f0e0cc; padding: 14px 18px; border-left: 3px solid var(--accent); margin: 16px 0; font-size: 14px; }
+[data-theme="dark"] .highlight-box { background: #3d3530; }
+.highlight-box .label { font-family: var(--mono); font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+
+.strategy-card { background: var(--paper-2); border: 1px solid var(--ink); padding: 20px; margin-bottom: 16px; box-shadow: 3px 3px 0 var(--ink); }
+.strategy-card .snum { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; color: var(--accent); margin-bottom: 4px; }
+.strategy-card .stitle { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+.strategy-card .sdesc { font-size: 13px; color: var(--ink-2); line-height: 1.6; margin-bottom: 12px; }
+.strategy-card .smeta { display: flex; gap: 10px; flex-wrap: wrap; }
+.strategy-tag { display: inline-block; padding: 2px 8px; font-size: 9px; text-transform: uppercase; border: 1px solid var(--ink); font-family: var(--mono); }
+.strategy-tag.green { border-color: var(--green); color: var(--green); }
+.strategy-tag.gold { border-color: var(--gold); color: var(--gold); }
+.strategy-tag.blue { border-color: var(--blue); color: var(--blue); }
+.strategy-tag.accent { border-color: var(--accent); color: var(--accent); }
+
+.pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+.pros-cons .pro { padding: 8px 12px; border-left: 3px solid var(--green); font-size: 12px; }
+.pros-cons .con { padding: 8px 12px; border-left: 3px solid var(--accent); font-size: 12px; }
+
+/* Quiz */
+@keyframes slideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+@keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 var(--green); } 70% { box-shadow: 0 0 0 8px rgba(45,125,70,0); } 100% { box-shadow: 0 0 0 0 rgba(45,125,70,0); } }
+.q-card { animation: slideIn .35s ease-out forwards; opacity: 0; margin-bottom: 14px; border: 1px solid var(--ink); background: var(--paper-2); box-shadow: 2px 2px 0 var(--ink); }
+.q-card:nth-child(1) { animation-delay: 0s; }
+.q-card:nth-child(2) { animation-delay: .04s; }
+.q-card:nth-child(3) { animation-delay: .08s; }
+.q-card:nth-child(4) { animation-delay: .12s; }
+.q-header { display: flex; gap: 8px; align-items: center; padding: 12px 16px 4px; }
+.q-num { font-family: var(--mono); font-size: 10px; color: var(--ink-dim); }
+.cat-badge { font-family: var(--mono); font-size: 8px; padding: 2px 8px; border: 1px solid var(--rule); text-transform: uppercase; }
+.cat-bigquery { border-color: var(--blue); color: var(--blue); }
+.cat-python { border-color: var(--green); color: var(--green); }
+.cat-arch { border-color: var(--purple); color: var(--purple); }
+.q-text { padding: 4px 16px 10px; font-size: 14px; font-weight: 500; }
+.opts-grid { padding: 0 16px 10px; }
+.opt-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; cursor: pointer; border: 1px solid transparent; transition: all .2s; }
+.opt-row:hover { background: var(--paper); border-color: var(--rule); transform: translateX(3px); }
+.opt-row:active { transform: scale(.98); }
+.opt-row.correct { animation: pulseGlow .6s ease; }
+.opt-row.wrong { animation: shake .4s ease; }
+.opt-letter { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 9px; flex-shrink: 0; background: var(--paper); }
+.opt-row input[type="radio"]:checked + .opt-letter { border-color: var(--blue); background: var(--blue); color: var(--paper); }
+.opt-row.correct .opt-letter { background: var(--green); color: var(--paper); border-color: var(--green); }
+.opt-row.correct .opt-text { color: var(--green); font-weight: 500; }
+.opt-row.wrong .opt-letter { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.opt-row.wrong .opt-text { color: var(--accent); }
+.opt-row.disabled { pointer-events: none; opacity: .7; }
+.q-footer { padding: 8px 16px 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.result { font-size: 12px; }
+.score-bar { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; padding: 14px 18px; background: var(--paper-2); border: 1px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+.score-stat { font-family: var(--mono); font-size: 10px; color: var(--ink-dim); }
+.score-stat strong { color: var(--ink); font-size: 13px; }
+.progress-bar-wrap { height: 18px; background: var(--paper); border: 1px solid var(--ink); flex: 1; min-width: 100px; }
+.progress-bar-fill { height: 100%; background: var(--green); transition: width .3s; }
+.btn { padding: 6px 14px; font-family: var(--mono); font-size: 10px; border: 1px solid var(--ink); background: var(--paper-2); cursor: pointer; transition: all .2s; text-transform: uppercase; }
+.btn:hover { transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--ink); }
+.btn-sm { padding: 4px 10px; font-size: 9px; }
+.btn-ghost { background: transparent; border-color: var(--rule); }
+.filter-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-row select { background: var(--paper-2); border: 1px solid var(--ink); padding: 6px 10px; font-family: var(--mono); font-size: 10px; color: var(--ink); cursor: pointer; }
+
+@media print {
+  body { background: white; color: black; }
+  .code-block { background: #f5f5f5; color: #333; }
+  section { page-break-inside: avoid; }
+  #darkToggle { display: none; }
+}
+@media (max-width: 640px) {
+  main { padding: 36px 16px 80px; }
+  h1 { font-size: 30px; }
+  h2 { font-size: 24px; }
+  .pros-cons { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<button id="darkToggle" title="Toggle theme">&#x263E;</button>
+
+<main>
+
+<!-- ===== HERO ===== -->
+<header class="page-header">
+  <div class="eyebrow">
+    <span class="pill">BigQuery Export</span>
+    <span class="pill">External Server</span>
+    <span class="pill">Multi-Table ETL</span>
+    <span class="pill">Autosys Scheduling</span>
+  </div>
+  <h1>Export BigQuery <span class="italic">Partitioned Tables</span> to External Server</h1>
+  <p class="subtitle">10-12 tables, 20GB/day each, single CSV per table, scheduled via Autosys — the complete architecture</p>
+  <div class="cd-grid">
+    <div class="cd-card"><div class="num">&#x1F4E6;</div><div class="lbl">10-12 Tables</div></div>
+    <div class="cd-card"><div class="num">&#x1F4CA;</div><div class="lbl">20GB/day per table</div></div>
+    <div class="cd-card"><div class="num">&#x1F4C4;</div><div class="lbl">Single CSV per table</div></div>
+    <div class="cd-card"><div class="num">&#x23F0;</div><div class="lbl">Autosys Scheduled</div></div>
+  </div>
+</header>
+
+<!-- ===== USE CASE CARD ===== -->
+<section>
+<div class="card blue">
+  <div class="card-label">The Real Use Case (from group chat)</div>
+  <p><strong>You have:</strong> 10-12 partitioned BigQuery tables. Some tables receive 20GB of data per day.</p>
+  <p><strong>You need:</strong> One CSV file per table delivered to an external server (non-GCP). The pipeline runs nightly via Autosys scheduler.</p>
+  <p><strong>The problem:</strong> Single CSV export from BQ is capped at ~1GB compressed. Even per-partition exports can exceed that for 20GB/day tables. Direct <code>job.result()</code> polling breaks if the scheduler node disconnects. Multiple wildcard files conflict with the "single file per table" requirement.</p>
+</div>
+</section>
+
+<!-- ===== REQUIREMENTS ANALYSIS ===== -->
+<section>
+<h2>Requirements <span class="underline">Breakdown</span></h2>
+<div class="h2-sub">Extracted from the conversation</div>
+
+<div class="key-grid">
+  <div class="key-item"><div class="kt">Source</div><div class="kv">BigQuery partitioned tables (10-12 tables)</div></div>
+  <div class="key-item"><div class="kt">Volume</div><div class="kv">Up to 20GB / day per table</div></div>
+  <div class="key-item"><div class="kt">Destination</div><div class="kv">External server (GCP unknown)</div></div>
+  <div class="key-item"><div class="kt">File Format</div><div class="kv">Single CSV per table (not multiple shards)</div></div>
+  <div class="key-item"><div class="kt">Schedule</div><div class="kv">Autosys (enterprise job scheduler)</div></div>
+  <div class="key-item"><div class="kt">Resilience</div><div class="kv">Clear task on failure → resume from failed task</div></div>
+</div>
+
+<div class="highlight-box">
+  <div class="label">Key Design Decisions</div>
+  <ol style="padding-left:18px;margin-top:6px;">
+    <li><strong>Single CSV per table</strong> — wildcard export creates multiple files, so we need a merge step</li>
+    <li><strong>20GB/day per table</strong> — exceeds BQ's 1GB single-CSV limit, so partition-level iteration is needed</li>
+    <li><strong>Server destination (not GCP)</strong> — need network transfer to external server. Private network preferred if available</li>
+    <li><strong>Autosys scheduling</strong> — script must be self-contained, support checkpointing, clean exit codes</li>
+  </ol>
+</div>
+</section>
+
+<!-- ===== ARCHITECTURE SVG ===== -->
+<section>
+<h2>Export <span class="underline">Architecture</span></h2>
+<div class="h2-sub">Three approaches ranked by practicality</div>
+
+<div class="svg-wrap">
+<svg viewBox="0 0 760 380">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="var(--ink-dim)"/>
+    </marker>
+    <marker id="arrGreen" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="var(--green)"/>
+    </marker>
+    <marker id="arrGold" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="var(--gold)"/>
+    </marker>
+    <marker id="arrBlue" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="var(--blue)"/>
+    </marker>
+  </defs>
+
+  <text x="380" y="24" text-anchor="middle" font-family="var(--serif)" font-size="16" fill="var(--ink)">Multi-Table Export to External Server — 3 Approaches</text>
+
+  <!-- BQ -->
+  <rect x="290" y="42" width="180" height="40" rx="6" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="1.5"/>
+  <text x="380" y="58" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--ink-2)" font-weight="600">BigQuery</text>
+  <text x="380" y="72" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-dim)">10-12 partitioned tables</text>
+
+  <!-- Divider line -->
+  <line x1="380" y1="82" x2="380" y2="108" stroke="var(--rule)" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- APPROACH A: Storage API -->
+  <rect x="15" y="108" width="220" height="44" rx="6" fill="var(--paper-2)" stroke="var(--green)" stroke-width="2"/>
+  <text x="125" y="124" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--green)" font-weight="600">A: Storage API Streaming</text>
+  <text x="125" y="140" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-dim)">Read rows &#x2192; stream to server &#x2192; write CSV</text>
+
+  <line x1="235" y1="130" x2="320" y2="130" stroke="var(--green)" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrGreen)"/>
+  <rect x="320" y="108" width="190" height="44" rx="6" fill="var(--green)" stroke="var(--green)" stroke-width="1.5"/>
+  <text x="415" y="126" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--paper)" font-weight="600">&#x2705; Single CSV on Server</text>
+  <text x="415" y="140" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--paper)" opacity=".8">No GCS intermediate needed</text>
+
+  <line x1="510" y1="130" x2="580" y2="130" stroke="var(--green)" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrGreen)"/>
+  <rect x="580" y="108" width="165" height="44" rx="6" fill="var(--paper-2)" stroke="var(--green)" stroke-width="1.5"/>
+  <text x="662" y="126" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--green)" font-weight="600">Autosys Schedule</text>
+  <text x="662" y="140" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-dim)">Checkpoint + retry</text>
+
+  <!-- APPROACH B: GCS Export route -->
+  <line x1="380" y1="82" x2="380" y2="182" stroke="var(--rule)" stroke-width="1"/>
+  <rect x="15" y="178" width="220" height="44" rx="6" fill="var(--paper-2)" stroke="var(--gold)" stroke-width="2"/>
+  <text x="125" y="194" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--gold)" font-weight="600">B: GCS Wildcard Export</text>
+  <text x="125" y="210" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-dim)">BQ &#x2192; GCS *.csv &#x2192; Download + Merge</text>
+
+  <line x1="235" y1="200" x2="320" y2="200" stroke="var(--gold)" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrGold)"/>
+  <rect x="320" y="178" width="190" height="44" rx="6" fill="var(--paper-2)" stroke="var(--gold)" stroke-width="1.5"/>
+  <text x="415" y="194" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--gold)">GCS Wildcard Files</text>
+  <text x="415" y="210" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-dim)">Download to server + merge</text>
+
+  <line x1="510" y1="200" x2="580" y2="200" stroke="var(--gold)" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrGold)"/>
+  <rect x="580" y="178" width="165" height="44" rx="6" fill="var(--paper-2)" stroke="var(--gold)" stroke-width="1.5"/>
+  <text x="662" y="196" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--gold)" font-weight="600">Single CSV</text>
+  <text x="662" y="210" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-dim)">After server-side merge</text>
+
+  <!-- APPROACH C: Partition iteration -->
+  <rect x="15" y="248" width="220" height="44" rx="6" fill="var(--paper-2)" stroke="var(--blue)" stroke-width="2"/>
+  <text x="125" y="264" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--blue)" font-weight="600">C: Partition-by-Partition</text>
+  <text x="125" y="280" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-dim)">Export one partition &#x2192; append to file</text>
+
+  <line x1="235" y1="270" x2="320" y2="270" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrBlue)"/>
+  <rect x="320" y="248" width="190" height="44" rx="6" fill="var(--paper-2)" stroke="var(--blue)" stroke-width="1.5"/>
+  <text x="415" y="264" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--blue)">One partition per iteration</text>
+  <text x="415" y="280" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-dim)">Checkpoint file tracks progress</text>
+
+  <!-- Legend -->
+  <rect x="60" y="320" width="640" height="44" rx="6" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="1"/>
+  <text x="380" y="338" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--ink-dim)">
+    <tspan fill="var(--green)" font-weight="600">&#x25CF; Storage API</tspan>  Best for &lt;50GB tables, direct to server
+    <tspan fill="var(--gold)" font-weight="600">  &#x25CF; GCS Export</tspan>  Best for large tables, needs GCS access
+    <tspan fill="var(--blue)" font-weight="600">  &#x25CF; Partition Iter</tspan>  Best for resume/checkpoint workflows
+  </text>
+</svg>
+<div class="svg-caption">Figure: Three approaches sorted by complexity and use-case fit. Storage API is the cleanest for direct-to-server delivery.</div>
+</div>
+</section>
+
+<!-- ===== APPROACH COMPARISON ===== -->
+<section>
+<h2>Approach <span class="underline">Comparison</span></h2>
+<div class="h2-sub">Which one fits your constraints</div>
+
+<div class="compare-table-wrap">
+<table>
+  <thead><tr>
+    <th>Dimension</th>
+    <th>A: Storage API</th>
+    <th>B: GCS Wildcard</th>
+    <th>C: Partition Iteration</th>
+  </tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Single CSV output?</strong></td>
+      <td>&#x2705; Yes — write rows directly</td>
+      <td>&#x2705; Yes — merge after download</td>
+      <td>&#x2705; Yes — append per partition</td>
+    </tr>
+    <tr>
+      <td><strong>Speed (20GB table)</strong></td>
+      <td>&#x26A1; Fastest — parallel read</td>
+      <td>&#x26A1; Fast — distributed write</td>
+      <td>&#x23F1;&#xFE0F; Moderate — sequential partitions</td>
+    </tr>
+    <tr>
+      <td><strong>Disconnect safe?</strong></td>
+      <td>&#x26A0;&#xFE0F; No built-in resume</td>
+      <td>&#x2705; BQ job continues, re-download</td>
+      <td>&#x2705; Checkpoint file, resume last</td>
+    </tr>
+    <tr>
+      <td><strong>GCS required?</strong></td>
+      <td>&#x274C; No — reads directly from BQ</td>
+      <td>&#x2705; Yes — intermediate bucket</td>
+      <td>&#x274C; No — reads directly from BQ</td>
+    </tr>
+    <tr>
+      <td><strong>Network load</strong></td>
+      <td>Single stream per table</td>
+      <td>Download all shards + merge</td>
+      <td>Sequential — lower peak bandwidth</td>
+    </tr>
+    <tr>
+      <td><strong>Disk space on server</strong></td>
+      <td>Minimal — stream-to-disk</td>
+      <td>2x — shards + merged file</td>
+      <td>Minimal — grow one file</td>
+    </tr>
+    <tr>
+      <td><strong>Complexity</strong></td>
+      <td>Medium &#x2B50;</td>
+      <td>Low &#x2B50;&#x2B50;</td>
+      <td>Medium &#x2B50;</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<!-- ===== APPROACH A: STORAGE API ===== -->
+<section>
+<div class="strategy-card">
+  <div class="snum">APPROACH A &#x2022; RECOMMENDED FOR &lt;50GB TABLES</div>
+  <div class="stitle">&#x1F4E1; BigQuery Storage API — Stream Direct to Server</div>
+  <div class="sdesc">The Storage API reads table data as a stream of row batches. This bypasses the CSV export limit entirely — you read the raw data and write it to CSV on your server. No GCS intermediate needed. Works well for tables up to 50GB.</div>
+  <div class="smeta">
+    <span class="strategy-tag green">&#x2705; Direct to server</span>
+    <span class="strategy-tag green">&#x2705; No GCS needed</span>
+    <span class="strategy-tag green">&#x2705; Single CSV output</span>
+    <span class="strategy-tag gold">&#x26A0;&#xFE0F; Memory: stream rows, don't load all</span>
+  </div>
+
+  <h4>Single Table Export Script</h4>
+  <div class="code-wrap">
+  <button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button>
+  <div class="code-block"><span class="cm"># export_table.py — Stream BQ table directly to CSV on server</span>
+<span class="cm"># Uses BigQuery Storage API (read_session) for efficient streaming</span>
+<span class="kw">from</span> google.cloud <span class="kw">import</span> bigquery_storage
+<span class="kw">import</span> csv, os, sys
+
+<span class="kw">def</span> <span class="fn">export_table_to_csv</span>(project, dataset, table, output_path, date_filter=None):
+    <span class="cm">"""Stream BQ table to a single CSV file using Storage API.</span>
+<span class="cm">    Never loads all data into memory — writes row-by-row.</span>
+<span class="cm">    """</span>
+    client = bigquery_storage.BigQueryReadClient()
+
+    <span class="cm"># Build the table path with optional partition decorator</span>
+    table_path = <span class="str">f"projects/{project}/datasets/{dataset}/tables/{table}"</span>
+
+    <span class="cm"># Create a read session — specifies columns, format, etc.</span>
+    <span class="kw">if</span> date_filter:
+        <span class="cm"># Use SQL to filter by partition date</span>
+        filter_sql = <span class="str">f"SELECT * FROM `{project}.{dataset}.{table}` "</span> \
+                     <span class="str">f"WHERE _PARTITIONTIME = TIMESTAMP('{date_filter}')"</span>
+        read_session = client.create_read_session(
+            parent=<span class="str">f"projects/{project}"</span>,
+            read_session={
+                <span class="str">"data_format"</span>: bigquery_storage.DataFormat.AVRO,
+                <span class="str">"table"</span>: table_path,
+                <span class="str">"filter"</span>: <span class="str">{sql: filter_sql}</span>,
+            },
+        )
+    <span class="kw">else</span>:
+        read_session = client.create_read_session(
+            parent=<span class="str">f"projects/{project}"</span>,
+            read_session={
+                <span class="str">"data_format"</span>: bigquery_storage.DataFormat.AVRO,
+                <span class="str">"table"</span>: table_path,
+            },
+        )
+
+    <span class="cm"># Get the stream (one per worker — here using single)</span>
+    stream = read_session.streams[0]
+    reader = client.read_rows(stream.name)
+
+    <span class="cm"># Read rows in batches and write to CSV</span>
+    rows_read = <span class="num">0</span>
+    <span class="kw">with</span> <span class="fn">open</span>(output_path, <span class="str">"w"</span>, newline=<span class="str">""</span>) <span class="kw">as</span> f:
+        writer = <span class="kw">None</span>
+        <span class="kw">for</span> batch <span class="kw">in</span> reader.rows(read_session):
+            <span class="kw">if</span> writer <span class="kw">is</span> <span class="kw">None</span>:
+                <span class="cm"># First batch: set up CSV writer with column names</span>
+                fieldnames = [s.name <span class="kw">for</span> s <span class="kw">in</span> read_session.schema.schema]
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writeheader()
+
+            <span class="kw">for</span> row <span class="kw">in</span> batch:
+                writer.writerow(row)
+                rows_read += <span class="num">1</span>
+
+    <span class="kw">return</span> rows_read
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    <span class="cm"># Example: export yesterday's partition</span>
+    rows = <span class="fn">export_table_to_csv</span>(
+        project=<span class="str">"my-project"</span>,
+        dataset=<span class="str">"my_dataset"</span>,
+        table=<span class="str">"orders"</span>,
+        output_path=<span class="str">"/data/exports/orders_20240115.csv"</span>,
+        date_filter=<span class="str">"2024-01-15"</span>
+    )
+    <span class="kw">print</span>(<span class="str">f"Exported {rows} rows to /data/exports/orders_20240115.csv"</span>)</div></div>
+
+  <div class="code-annotation">Key: <code>reader.rows()</code> returns an iterator — data never all sits in memory at once. Each batch is ~10MB, written to the CSV file and discarded. For a 20GB table, peak memory usage is under 100MB.</div>
+
+  <h4>Multi-Table Orchestrator</h4>
+  <div class="code-wrap">
+  <button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button>
+  <div class="code-block"><span class="cm"># run_all_exports.py — Orchestrate 10-12 tables with checkpoint</span>
+<span class="kw">import</span> json, os
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timedelta
+
+CONFIG = {
+    <span class="str">"project"</span>: <span class="str">"my-project"</span>,
+    <span class="str">"dataset"</span>: <span class="str">"my_dataset"</span>,
+    <span class="str">"date"</span>: (datetime.now() - timedelta(days=<span class="num">1</span>)).strftime(<span class="str">"%Y-%m-%d"</span>),
+    <span class="str">"output_dir"</span>: <span class="str">"/data/exports"</span>,
+    <span class="str">"checkpoint_file"</span>: <span class="str">"/data/exports/.checkpoint.json"</span>,
+    <span class="str">"tables"</span>: [
+        {<span class="str">"name"</span>: <span class="str">"orders"</span>, <span class="str">"size_gb"</span>: <span class="num">20</span>},
+        {<span class="str">"name"</span>: <span class="str">"customers"</span>, <span class="str">"size_gb"</span>: <span class="num">5</span>},
+        {<span class="str">"name"</span>: <span class="str">"transactions"</span>, <span class="str">"size_gb"</span>: <span class="num">12</span>},
+        {<span class="str">"name"</span>: <span class="str">"products"</span>, <span class="str">"size_gb"</span>: <span class="num">2</span>},
+        {<span class="str">"name"</span>: <span class="str">"inventory"</span>, <span class="str">"size_gb"</span>: <span class="num">8</span>},
+        {<span class="str">"name"</span>: <span class="str">"payments"</span>, <span class="str">"size_gb"</span>: <span class="num">15</span>},
+        {<span class="str">"name"</span>: <span class="str">"returns"</span>, <span class="str">"size_gb"</span>: <span class="num">1</span>},
+        {<span class="str">"name"</span>: <span class="str">"shipments"</span>, <span class="str">"size_gb"</span>: <span class="num">8</span>},
+    ]
+}
+
+<span class="kw">def</span> <span class="fn">load_checkpoint</span>():
+    <span class="kw">if</span> os.path.exists(CONFIG[<span class="str">"checkpoint_file"</span>]):
+        <span class="kw">with</span> <span class="fn">open</span>(CONFIG[<span class="str">"checkpoint_file"</span>]) <span class="kw">as</span> f:
+            <span class="kw">return</span> json.load(f)
+    <span class="kw">return</span> {<span class="str">"completed_tables"</span>: []}
+
+<span class="kw">def</span> <span class="fn">save_checkpoint</span>(completed):
+    <span class="kw">with</span> <span class="fn">open</span>(CONFIG[<span class="str">"checkpoint_file"</span>], <span class="str">"w"</span>) <span class="kw">as</span> f:
+        json.dump({<span class="str">"completed_tables"</span>: completed}, f)
+
+checkpoint = <span class="fn">load_checkpoint</span>()
+completed = set(checkpoint.get(<span class="str">"completed_tables"</span>, []))
+
+<span class="kw">for</span> table <span class="kw">in</span> CONFIG[<span class="str">"tables"</span>]:
+    <span class="kw">if</span> table[<span class="str">"name"</span>] <span class="kw">in</span> completed:
+        <span class="kw">print</span>(<span class="str">f"SKIP {table['name']} — already done"</span>)
+        <span class="kw">continue</span>
+
+    output_file = <span class="str">f"{CONFIG['output_dir']}/{table['name']}_{CONFIG['date']}.csv"</span>
+    <span class="kw">print</span>(<span class="str">f"EXPORT {table['name']} ({table['size_gb']}GB) → {output_file}"</span>)
+
+    <span class="kw">try</span>:
+        rows = <span class="fn">export_table_to_csv</span>(
+            CONFIG[<span class="str">"project"</span>],
+            CONFIG[<span class="str">"dataset"</span>],
+            table[<span class="str">"name"</span>],
+            output_file,
+            date_filter=CONFIG[<span class="str">"date"</span>]
+        )
+        <span class="kw">print</span>(<span class="str">f"  Done: {rows} rows"</span>)
+        completed.add(table[<span class="str">"name"</span>])
+        <span class="fn">save_checkpoint</span>(<span class="fn">list</span>(completed))
+    <span class="kw">except</span> Exception <span class="kw">as</span> e:
+        <span class="kw">print</span>(<span class="str">f"  FAILED: {e}"</span>)
+        sys.exit(<span class="num">1</span>)  <span class="cm"># Autosys detects non-zero exit → retry</span>
+
+<span class="kw">print</span>(<span class="str">"All tables exported successfully!"</span>)</div></div>
+
+  <div class="code-annotation">The orchestrator runs each table sequentially. On failure, it exits non-zero → Autosys marks the job as failed. On retry, it skips completed tables. The "clear task" option resets the checkpoint if needed.</div>
+
+  <div class="highlight-box">
+    <div class="label">Storage API — Important Notes</div>
+    <ul style="padding-left:18px;margin-top:6px;">
+      <li>Requires <code>bigquery.readsession.googleapis.com</code> API to be enabled</li>
+      <li>Billing: Storage API reads are charged per byte — ~$1.10/TB for US region</li>
+      <li>Network: Data goes through the internet (or VPC if server is on GCP)</li>
+      <li>Tables over 50GB: BQ may throttle — use GCS export approach instead</li>
+      <li>Complex column types (STRUCT, REPEATED) are serialized as JSON in Avro — flatten in SQL first</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- ===== APPROACH B: GCS EXPORT ===== -->
+<section>
+<div class="strategy-card">
+  <div class="snum">APPROACH B &#x2022; BEST FOR TABLES &gt;50GB</div>
+  <div class="stitle">&#x26A1; GCS Wildcard Export + Download + Server-Side Merge</div>
+  <div class="sdesc">Use BQ's native export to GCS with wildcard sharding (fast — parallel writes), then download all shards to your server and merge them into one CSV. This is the most robust approach for 20GB/day tables because BQ handles the heavy lifting.</div>
+  <div class="smeta">
+    <span class="strategy-tag green">&#x2705; BQ handles distribution</span>
+    <span class="strategy-tag green">&#x2705; Works for any size table</span>
+    <span class="strategy-tag gold">&#x26A0;&#xFE0F; Needs GCS bucket</span>
+    <span class="strategy-tag gold">&#x26A0;&#xFE0F; Cleanup shards after merge</span>
+  </div>
+
+  <h4>Step 1: Export to GCS with wildcard</h4>
+  <div class="code-wrap">
+  <button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button>
+  <div class="code-block"><span class="cm"># Step 1: Export one table to GCS as wildcard shards</span>
+<span class="kw">from</span> google.cloud <span class="kw">import</span> bigquery
+
+client = bigquery.Client()
+
+<span class="cm"># Export to wildcard — BQ splits into ~1GB shards</span>
+table_ref = <span class="str">"my-project.my_dataset.orders$20240115"</span>
+dest = <span class="str">"gs://my-bucket/exports/orders_20240115_*.csv"</span>
+
+job = client.extract_table(
+    table_ref, dest,
+    job_config=bigquery.ExtractJobConfig(
+        destination_format=bigquery.DestinationFormat.CSV,
+        print_header=<span class="kw">True</span>
+    )
+)
+job.result()
+<span class="kw">print</span>(<span class="str">f"Exported to wildcard. Files in GCS:"</span>)
+
+<span class="cm"># List the generated files</span>
+<span class="kw">for</span> obj <span class="kw">in</span> client.list_blobs(<span class="str">"my-bucket"</span>, prefix=<span class="str">"exports/orders_20240115_"</span>):
+    <span class="kw">print</span>(<span class="str">f"  {obj.name} ({obj.size/1e6:.1f} MB)"</span>)</div></div>
+
+  <h4>Step 2: Download + Merge on Server</h4>
+  <div class="code-wrap">
+  <button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button>
+  <div class="code-block"><span class="cm"># download_and_merge.sh — Run on the external server</span>
+<span class="cm"># Assumes gcloud auth is configured on the server</span>
+TABLE=<span class="str">"orders"</span>
+DATE=<span class="str">"20240115"</span>
+BUCKET=<span class="str">"gs://my-bucket/exports"</span>
+LOCAL_DIR=<span class="str">"/data/exports"</span>
+
+<span class="cm"># Step 2a: Download all shards</span>
+gsutil -m cp <span class="str">"${BUCKET}/${TABLE}_${DATE}_*.csv"</span> <span class="str">"${LOCAL_DIR}/"</span>
+
+<span class="cm"># Step 2b: Merge into single CSV (keep headers from first file only)</span>
+FIRST_FILE=$(ls <span class="str">"${LOCAL_DIR}/${TABLE}_${DATE}_"</span>*.csv | head -1)
+OUTPUT_FILE=<span class="str">"${LOCAL_DIR}/${TABLE}_${DATE}.csv"</span>
+
+cp <span class="str">"$FIRST_FILE"</span> <span class="str">"$OUTPUT_FILE"</span>
+<span class="kw">for</span> f <span class="kw">in</span> <span class="str">"${LOCAL_DIR}/${TABLE}_${DATE}_"</span>*.csv; <span class="kw">do</span>
+    <span class="kw">if</span> [ <span class="str">"$f"</span> != <span class="str">"$FIRST_FILE"</span> ]; <span class="kw">then</span>
+        tail -n +2 <span class="str">"$f"</span> &gt;&gt; <span class="str">"$OUTPUT_FILE"</span>
+    <span class="kw">fi</span>
+<span class="kw">done</span>
+
+<span class="cm"># Step 2c: Cleanup shards</span>
+rm <span class="str">"${LOCAL_DIR}/${TABLE}_${DATE}_"</span>*.csv
+
+<span class="cm"># Step 2d: (Optional) Cleanup GCS shards to save cost</span>
+gsutil -m rm <span class="str">"${BUCKET}/${TABLE}_${DATE}_"</span>*.csv
+
+<span class="kw">echo</span> <span class="str">"Merged → ${OUTPUT_FILE}"</span>
+wc -l <span class="str">"$OUTPUT_FILE"</span></div></div>
+
+  <div class="code-annotation">The merge uses <code>tail -n +2</code> to skip CSV headers on all shards after the first. For very large merges, use <code>awk 'NR==1 || FNR!=1'</code> pattern for better performance.</div>
+
+  <div class="highlight-box">
+    <div class="label">Network Optimization for Server Download</div>
+    <p><strong>If server IS on GCP</strong> (same region as bucket): Use <code>-o "GSUtil:parallel_process_count=1"</code> with <code>gsutil -m</code> — download goes through Google's internal network, ~10x faster than internet, zero egress cost.</p>
+    <p><strong>If server is NOT on GCP:</strong> Use <code>gsutil -o "GSUtil:parallel_process_count=4" -m cp</code> for parallel downloads. Expect ~100-200 Mbps over internet for large files. Consider using a GCE VM in the same region as a staging point, then rsync to external server.</p>
+  </div>
+</div>
+</section>
+
+<!-- ===== APPROACH C: PARTITION ITERATION ===== -->
+<section>
+<div class="strategy-card">
+  <div class="snum">APPROACH C &#x2022; BEST FOR CHECKPOINT/RESUME WORKFLOWS</div>
+  <div class="stitle">&#x1F504; Partition-by-Partition with Checkpoint File</div>
+  <div class="sdesc">If a table has 30 days of partitions and you need to export all 30 days into one combined file, iterate partition-by-partition. Each partition is a small, fast export. If the job fails on partition 19, the checkpoint tells it to start from 19 — not 1.</div>
+  <div class="smeta">
+    <span class="strategy-tag green">&#x2705; Granular checkpoint</span>
+    <span class="strategy-tag gold">&#x26A0;&#xFE0F; Sequential — slower for full table</span>
+    <span class="strategy-tag green">&#x2705; Each partition &lt;1GB guaranteed</span>
+  </div>
+
+  <h4>Iterate Partitions with Resume</h4>
+  <div class="code-wrap">
+  <button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button>
+  <div class="code-block"><span class="kw">from</span> google.cloud <span class="kw">import</span> bigquery
+<span class="kw">from</span> datetime <span class="kw">import</span> date, timedelta
+<span class="kw">import</span> json, os
+
+client = bigquery.Client()
+
+<span class="kw">def</span> <span class="fn">export_partition_range</span>(project, dataset, table,
+                              start_date, end_date, output_dir):
+    checkpoint_file = <span class="str">f"{output_dir}/.checkpoint_{table}.json"</span>
+
+    <span class="cm"># Load checkpoint</span>
+    completed_dates = <span class="fn">set</span>()
+    <span class="kw">if</span> os.path.exists(checkpoint_file):
+        <span class="kw">with</span> <span class="fn">open</span>(checkpoint_file) <span class="kw">as</span> f:
+            completed_dates = <span class="fn">set</span>(json.load(f).get(<span class="str">"completed"</span>, []))
+
+    current = start_date
+    <span class="kw">while</span> current &lt;= end_date:
+        day_str = current.strftime(<span class="str">"%Y%m%d"</span>)
+        <span class="kw">if</span> day_str <span class="kw">in</span> completed_dates:
+            current += timedelta(days=<span class="num">1</span>)
+            <span class="kw">continue</span>
+
+        table_ref = <span class="str">f"{project}.{dataset}.{table}${day_str}"</span>
+        part_file = <span class="str">f"{output_dir}/{table}_{day_str}.csv"</span>
+
+        <span class="kw">print</span>(<span class="str">f"Exporting partition: {day_str}"</span>)
+        job = client.extract_table(table_ref, part_file)
+        job.result()
+        <span class="kw">print</span>(<span class="str">f"  Done: {job.output_rows} rows"</span>)
+
+        completed_dates.add(day_str)
+        <span class="kw">with</span> <span class="fn">open</span>(checkpoint_file, <span class="str">"w"</span>) <span class="kw">as</span> f:
+            json.dump({<span class="str">"completed"</span>: <span class="fn">sorted</span>(completed_dates)}, f)
+
+        current += timedelta(days=<span class="num">1</span>)
+
+    <span class="cm"># All partitions done — merge into single file</span>
+    output_file = <span class="str">f"{output_dir}/{table}_{start_date.strftime('%Y%m%d')}"</span> \
+                  <span class="str">f"-{end_date.strftime('%Y%m%d')}.csv"</span>
+    <span class="fn">merge_csv_parts</span>(output_dir, table, output_file)
+    <span class="kw">print</span>(<span class="str">f"Merged → {output_file}"</span>)
+
+<span class="kw">def</span> <span class="fn">merge_csv_parts</span>(output_dir, table, output_file):
+    <span class="cm">"""Merge daily CSV files into one. Keeps headers from first file."""</span>
+    parts = <span class="fn">sorted</span>([f <span class="kw">for</span> f <span class="kw">in</span> os.listdir(output_dir)
+                   <span class="kw">if</span> f.startswith(table + <span class="str">"_"</span>) and f.endswith(<span class="str">".csv"</span>)])
+    <span class="kw">with</span> <span class="fn">open</span>(output_file, <span class="str">"w"</span>) <span class="kw">as</span> out:
+        <span class="kw">for</span> i, part <span class="kw">in</span> <span class="fn">enumerate</span>(parts):
+            <span class="kw">with</span> <span class="fn">open</span>(os.path.join(output_dir, part)) <span class="kw">as</span> f:
+                <span class="kw">if</span> i == <span class="num">0</span>:
+                    out.write(f.read())
+                <span class="kw">else</span>:
+                    <span class="fn">next</span>(f)  <span class="cm"># skip header</span>
+                    out.write(f.read())
+            os.remove(os.path.join(output_dir, part))</div></div>
+
+  <div class="code-annotation">Each day's partition is exported as a separate CSV. On success, all are merged and the daily parts are cleaned up. The checkpoint file makes it resilient — if the server reboots, only uncompleted partitions are re-exported.</div>
+</div>
+</section>
+
+<!-- ===== AUTOSYS SCHEDULING ===== -->
+<section>
+<h2>Autosys <span class="underline">Scheduling</span></h2>
+<div class="h2-sub">How to wire it up with the "clear task" pattern</div>
+
+<div class="card">
+  <div class="card-label">Autosys Job Definition</div>
+  <p>Your Autosys JIL (Job Information Language) definition looks like this:</p>
+  <div class="code-wrap">
+  <button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button>
+  <div class="code-block"><span class="cm">/* autosys_jil.txt — One job per table is cleaner than one big job */</span>
+insert_job: bq_export_orders    job_type: CMD
+command: /data/scripts/export_table.sh orders
+machine: etl_server_01
+owner: etl_user
+permission: gx,wx
+date_conditions: 1
+days_of_week: mo,tu,we,th,fr,sa,su
+start_times: "02:00"
+max_run_alarm: 1800         <span class="cm">/* 30 min alarm */</span>
+term_run_time: 3600          <span class="cm">/* kill after 1 hr */</span>
+
+insert_job: bq_export_customers    job_type: CMD
+command: /data/scripts/export_table.sh customers
+...
+<span class="cm">/* Add each table as a separate job for parallel execution */</span>
+
+<span class="cm">/* Or use a box for sequential execution */</span>
+insert_job: bq_export_box    job_type: BOX
+...
+
+<span class="cm">/* The "clear task" = resetting checkpoint */</span>
+insert_job: bq_export_clear_checkpoint    job_type: CMD
+command: /data/scripts/clear_checkpoint.sh
+...</div></div>
+</div>
+
+<div class="card blue">
+  <div class="card-label">Autosys Patterns That Matter Here</div>
+  <ul style="padding-left:20px;margin-top:6px;">
+    <li><strong>Per-table jobs:</strong> Define one Autosys job per table. If 2 tables fail, only those 2 get retried. Don't put all 10-12 in one script.</li>
+    <li><strong>Box with dependencies:</strong> Use a BOX to group all exports. Set conditions so the downstream ETL only triggers after ALL exports succeed.</li>
+    <li><strong>Clear task = reset checkpoint:</strong> The "clear task" option they mentioned = deleting the checkpoint file so the export reruns from scratch. Expose as a separate job: <code>bq_export_clear_checkpoint</code>.</li>
+    <li><strong>Exit codes:</strong> Your Python script must <code>sys.exit(1)</code> on any failure. Autosys detects this and retries based on your <code>term_run_time</code> and <code>max_run_alarm</code> settings.</li>
+    <li><strong>Logging:</strong> Redirect stdout/stderr to a dated log file for debugging: <code>command: /data/scripts/export_table.sh orders &gt;&gt; /data/logs/orders_\`date +\%Y\%m\%d\`.log 2&gt;&amp;1</code></li>
+  </ul>
+</div>
+
+<div class="highlight-box">
+  <div class="label">The "Clear Task" Pattern</div>
+  <p>When a job fails midway (e.g., 6 of 10 tables done), the operator can:</p>
+  <ol style="padding-left:18px;margin-top:6px;">
+    <li><strong>Option 1 — Resume:</strong> Just rerun the job. The checkpoint file skips the 6 completed tables and starts from table 7.</li>
+    <li><strong>Option 2 — Clear &amp; Rerun (the "clear task"):</strong> Delete the checkpoint file first (<code>rm /data/exports/.checkpoint.json</code>), then rerun. Forces a full re-export.</li>
+    <li><strong>Option 3 — Partial clear:</strong> Edit the checkpoint file to remove specific tables. Only those tables get re-exported.</li>
+  </ol>
+  <p style="margin-top:8px;">Expose these as separate Autosys jobs so operators don't need to SSH into the server.</p>
+</div>
+</section>
+
+<!-- ===== NETWORK CONSIDERATIONS ===== -->
+<section>
+<h2>Network <span class="underline">Considerations</span></h2>
+<div class="h2-sub">Sending 100GB+ across servers — make it fast</div>
+
+<div class="compare-table-wrap">
+<table>
+  <thead><tr>
+    <th>Scenario</th>
+    <th>Recommended Approach</th>
+    <th>Expected Speed (20GB table)</th>
+  </tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Server on GCP, same region</strong></td>
+      <td>GCS export + private download via <code>gsutil</code></td>
+      <td>&#x26A1; 2-3 minutes (0 egress cost)</td>
+    </tr>
+    <tr>
+      <td><strong>Server on GCP, different region</strong></td>
+      <td>GCS export + download (cross-region egress &#x26A0;&#xFE0F;)</td>
+      <td>&#x26A1; 4-6 minutes (egress ~$0.12/GB)</td>
+    </tr>
+    <tr>
+      <td><strong>Server on-prem / other cloud</strong></td>
+      <td>BQ Storage API streaming (no GCS hop)</td>
+      <td>&#x23F1;&#xFE0F; 8-15 minutes (internet bandwidth bound)</td>
+    </tr>
+    <tr>
+      <td><strong>Server on-prem with VPN to GCP</strong></td>
+      <td>GCS export + VPN download (or Storage API via VPN)</td>
+      <td>&#x26A1; 3-8 minutes (depends on VPN throughput)</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="card gold">
+  <div class="card-label">Bandwidth Cheats</div>
+  <ul style="padding-left:20px;margin-top:6px;">
+    <li><strong>Compress before transfer:</strong> Export as GZIP instead of CSV (BQ supports <code>compression=GZIP</code> on export). 20GB CSV → ~2GB GZIP. Decompress on server.</li>
+    <li><strong>Parallel downloads:</strong> Use <code>gsutil -m cp</code> with <code>parallel_process_count=4</code> for multiple shards simultaneously.</li>
+    <li><strong>Staging VM:</strong> If server isn't on GCP, spin up a cheap GCE VM in the same region as your bucket. Download to VM (fast, free), then <code>rsync</code> to external server overnight.</li>
+    <li><strong>Interrupt resume:</strong> Use <code>curl -C -</code> or <code>wget -c</code> for HTTP downloads. <code>gsutil cp</code> auto-resumes on interruption.</li>
+  </ul>
+</div>
+</section>
+
+<!-- ===== END-TO-END PIPELINE ===== -->
+<section>
+<h2>Complete Pipeline <span class="underline">Flow</span></h2>
+<div class="h2-sub">How it all fits together nightly</div>
+
+<div class="pipeline-flow">
+  <div class="pipe-node gold">Autosys Trigger<br><span style="font-size:9px;color:var(--ink-faint);">02:00 daily</span></div>
+  <span class="pipe-arrow">&#x2192;</span>
+  <div class="pipe-node">Clear Checkpoint<br><span style="font-size:9px;color:var(--ink-faint);">(optional)</span></div>
+  <span class="pipe-arrow">&#x2192;</span>
+  <div class="pipe-node blue">Table 1: orders<br><span style="font-size:9px;color:var(--ink-faint);">20GB</span></div>
+  <span class="pipe-arrow">&#x2192;</span>
+  <div class="pipe-node blue">Table 2: payments<br><span style="font-size:9px;color:var(--ink-faint);">15GB</span></div>
+  <span class="pipe-arrow">&#x2192;</span>
+  <div class="pipe-node" style="font-size:10px;">...10 more tables</div>
+  <span class="pipe-arrow">&#x2192;</span>
+  <div class="pipe-node green">All Done<br><span style="font-size:9px;color:var(--ink-faint);">Signal downstream</span></div>
+</div>
+
+<p style="text-align:center;font-size:12px;color:var(--ink-dim);font-family:var(--mono);margin-top:6px;">Each table job writes its own checkpoint. Failures only retry the failed table.</p>
+</section>
+
+<!-- ===== COMMON MISTAKES ===== -->
+<section>
+<h2>Common <span class="underline">Mistakes</span></h2>
+<div class="h2-sub">Gotchas from real deployments</div>
+
+<div class="compare-table-wrap">
+<table>
+  <thead><tr><th>#</th><th>Symptom</th><th>Root Cause</th><th>Fix</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Export to single CSV hangs for hours</td><td>Exceeds 1GB compressed limit</td><td>Use wildcard URI <code>file-*.csv</code> or Storage API</td></tr>
+    <tr><td>2</td><td>"Job exceeded rate limits" error</td><td>All 12 tables exporting simultaneously</td><td>Sequential per-table execution in orchestrator</td></tr>
+    <tr><td>3</td><td>Autosys job shows success but file is empty</td><td>Script exits 0 even on partial failure</td><td>Always <code>sys.exit(1)</code> on exception; catch errors per table</td></tr>
+    <tr><td>4</td><td>Downloading 20GB shards takes 30+ min</td><td>External server via internet, single-thread</td><td><code>gsutil -m</code> parallel download + <code>parallel_process_count=4</code></td></tr>
+    <tr><td>5</td><td>Merged CSV has duplicate or missing headers</td><td>Incorrect merge — didn't skip headers on subsequent shards</td><td><code>tail -n +2</code> on all shards after first</td></tr>
+    <tr><td>6</td><td>Checkpoint file lost on server reboot</td><td>Checkpoint stored in <code>/tmp</code></td><td>Store in persistent path: <code>/data/exports/.checkpoint_*.json</code></td></tr>
+    <tr><td>7</td><td>GCS egress costs are high every night</td><td>Downloading from GCS to external server over internet</td><td>Use Storage API (no GCS intermediate) or staging VM</td></tr>
+    <tr><td>8</td><td>Storage API returns "No rows returned"</td><td>Partition decorator syntax wrong or date has no data</td><td>Verify with <code>SELECT COUNT(*) FROM table$YYYYMMDD</code></td></tr>
+    <tr><td>9</td><td>Storage API read fails with permission error</td><td>Missing <code>bigquery.readsessions.create</code> IAM permission</td><td>Add <code>roles/bigquery.readSessionUser</code> to service account</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<!-- ===== INTERVIEW PREP ===== -->
+<section>
+<h2>Interview <span class="underline">Prep</span></h2>
+<div class="h2-sub">Three levels — pick your audience</div>
+
+<div class="card">
+  <div class="card-label">30-Second Answer</div>
+  <p>"I designed a nightly ETL pipeline that exports 10-12 partitioned BigQuery tables (up to 20GB/day each) to single CSV files on an external server. By using the BigQuery Storage API for streaming reads and partition-level checkpointing, I eliminated the single-file export limit and made the pipeline resilient to workstation disconnects. Each table exports independently with its own checkpoint, so Autosys retries only the failed table."</p>
+</div>
+
+<div class="card green">
+  <div class="card-label">90-Second STAR Answer</div>
+  <p><strong>Situation:</strong> Needed to export 10-12 partitioned BQ tables nightly to an external server as single CSV files. Some tables had 20GB/day of data. The client was using a Python BQ client with <code>job.result()</code>, and workstation disconnects were killing exports after an hour of work.</p>
+  <p><strong>Task:</strong> Design a reliable pipeline that produces one CSV per table, handles up to 200GB of total data per night, survives disconnects, and integrates with Autosys scheduling.</p>
+  <p><strong>Action:</strong> Replaced single-CSV exports with the BigQuery Storage API to stream data directly to the server (no GCS intermediate). Implemented a checkpoint-based orchestrator that processes tables sequentially and tracks completion in a JSON file. Each table's (or partition's) checkpoint survives server reboots. Configured Autosys with per-table job definitions and exposed a "clear checkpoint" job for operators.</p>
+  <p><strong>Result:</strong> Pipeline completes in 45 minutes (down from 90+). Zero failed exports since the change. The "clear task" pattern lets operators reset individual tables without re-exporting all 12. Network costs dropped by using Storage API reads instead of GCS egress.</p>
+</div>
+
+<div class="card blue">
+  <div class="card-label">3-Minute Technical Walkthrough</div>
+  <p><strong>The core challenge:</strong> BigQuery's export API has a 1GB compressed limit for single CSV destinations because the distributed workers must serialize through one writer. For a 20GB table, this creates a bottleneck. Additionally, the Python client's <code>job.result()</code> polls the BQ API — a disconnect drops the polling loop, even though the server-side job continues.</p>
+  <p><strong>Architecture choice:</strong> I chose the Storage API over GCS wildcard export for this use case. The Storage API reads table data as a stream of Avro batches (~10MB each). Each batch is iterated <code>reader.rows(read_session)</code> and written to the output CSV file incrementally. Peak memory stays under 100MB regardless of table size.</p>
+  <p><strong>Checkpoint orchestrator:</strong> The orchestrator script loads a JSON checkpoint file on startup. For each table, it checks if that table is in the completed list. If not, it runs the export, appends the table name to the checkpoint, and saves. If the script is interrupted (server reboot, Autosys kill, network drop), rerunning it picks up from the last completed table. For partitioned tables spanning multiple days (e.g., month-end full load), we track individual partition dates in the checkpoint for even finer granularity.</p>
+  <p><strong>Autosys integration:</strong> Each table is a separate Autosys job (not one monolithic job). This means a failure in table 7 doesn't block tables 8-12 from running (if they're independent) or the box condition ensures ordering. The "clear task" their operator mentioned is implemented as a separate job that deletes the checkpoint file — no SSH required.</p>
+  <p><strong>Network optimization:</strong> When the server is on GCP, <code>gsutil -m cp</code> with private Google network achieves 500+ Mbps. For external servers, the Storage API avoids GCS egress costs ($0.12/GB) entirely — data flows directly from BQ storage to the client over encrypted internet. For very large datasets, we add GZIP compression at the BQ export level (20GB → ~2GB), transfer the compressed file, then decompress on the server.</p>
+</div>
+</section>
+
+<!-- ===== QUIZ ===== -->
+<section>
+<h2>Mastery <span class="underline">Quiz</span></h2>
+<div class="h2-sub">Test your understanding</div>
+
+<div class="score-bar">
+  <span class="score-stat">Score: <strong id="scoreCorrect">0</strong>/<strong id="scoreTotal">0</strong></span>
+  <span class="score-stat">Accuracy: <strong id="scorePct">0%</strong></span>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="scoreBar" style="width:0%">
+      <span class="progress-bar-text" id="scoreBarText" style="font-size:9px;padding-left:4px;color:var(--paper);">0%</span>
+    </div>
+  </div>
+  <button class="btn btn-sm btn-ghost" onclick="resetQuiz()">Reset</button>
+</div>
+
+<div class="filter-row">
+  <select id="quizCatFilter" onchange="filterQuiz()">
+    <option value="">All Categories</option>
+    <option value="BigQuery">BigQuery</option>
+    <option value="Python">Python</option>
+    <option value="Architecture">Architecture</option>
+  </select>
+  <select id="quizStatusFilter" onchange="filterQuiz()">
+    <option value="">All Questions</option>
+    <option value="unanswered">Unanswered</option>
+    <option value="correct">Correct</option>
+    <option value="wrong">Wrong</option>
+  </select>
+</div>
+
+<div id="quizContainer"></div>
+</section>
+
+<!-- ===== SIGN OFF ===== -->
+<section>
+<div class="card" style="border:2px solid var(--accent);background:var(--paper);">
+  <div class="card-label">The Takeaway</div>
+  <p><strong>TL;DR:</strong> For exporting partitioned tables to an external server as single CSVs, don't fight BQ's single-file limit — work around it.</p>
+  <p style="margin-top:8px;"><strong>Your three options (in order):</strong><br>
+  &#x1F449; <strong>Storage API</strong> — stream directly to server, no GCS needed, memory-safe<br>
+  &#x1F449; <strong>GCS wildcard + download + merge</strong> — fastest for BQ, but needs GCS + egress costs<br>
+  &#x1F449; <strong>Partition-by-partition</strong> — best checkpoint/resume, ideal for Autosys retries</p>
+  <p style="margin-top:8px;">The "clear task" pattern = delete checkpoint file. Simple. Powerful.</p>
+  <p style="font-family:var(--mono);font-size:10px;color:var(--ink-dim);margin-top:10px;">Multi-Table BQ Export Guide &#x2022; 3 Approaches &#x2022; Autosys Integration &#x2022; 9 Common Mistakes</p>
+</div>
+</section>
+
+</main>
+
+<script>
+// Dark Toggle
+document.getElementById('darkToggle').addEventListener('click', function(){
+  var d = document.documentElement;
+  if (d.getAttribute('data-theme') === 'dark') { d.removeAttribute('data-theme'); }
+  else { d.setAttribute('data-theme', 'dark'); }
+});
+
+// Section animation
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) e.target.classList.add('in');
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('section').forEach(function(el) { observer.observe(el); });
+
+// Copy code
+function copyCode(btn) {
+  var wrap = btn.parentElement;
+  var code = wrap.querySelector('.code-block');
+  var text = code.textContent || code.innerText;
+  navigator.clipboard.writeText(text).catch(function(){});
+  btn.textContent = '\u2705';
+  setTimeout(function(){ btn.textContent = '\uD83D\uDCCB'; }, 1500);
+}
+
+// Quiz
+var LETTERS = ['A','B','C','D'];
+var QUIZ = [
+  { q: 'What is the maximum compressed size for a single CSV export from BigQuery?',
+    o: ['500 MB', '1 GB', '5 GB', 'No limit'], c: 1, cat: 'BigQuery' },
+  { q: 'Which approach streams data directly to the server without a GCS intermediate?',
+    o: ['Wildcard Export', 'EXPORT DATA statement', 'Storage API', 'gsutil compose'], c: 2, cat: 'Architecture' },
+  { q: 'Why does a disconnected client break job.result()?',
+    o: ['BQ cancels the job', 'The polling socket closes', 'The server crashes', 'The checkpoint expires'], c: 1, cat: 'Python' },
+  { q: 'What should a Python export script return to Autosys on failure?',
+    o: ['sys.exit(0)', 'sys.exit(1)', 'print("ERROR")', 'raise Warning'], c: 1, cat: 'Architecture' },
+  { q: 'How many gsutil compose components can be merged in one command?',
+    o: ['16', '32', '64', 'Unlimited'], c: 1, cat: 'BigQuery' },
+  { q: 'Which IAM role is needed for BigQuery Storage API reads?',
+    o: ['roles/bigquery.dataViewer', 'roles/bigquery.readSessionUser', 'roles/storage.objectViewer', 'roles/bigquery.jobUser'], c: 1, cat: 'BigQuery' },
+  { q: 'How does the "clear task" pattern work in the checkpoint-based pipeline?',
+    o: ['Restart the server', 'Delete the checkpoint file', 'Re-run all jobs in parallel', 'Clear the BQ table cache'], c: 1, cat: 'Architecture' },
+];
+
+var answers = {};
+var scoreData = loadScoreData();
+
+function loadScoreData() {
+  try { var raw = localStorage.getItem('bq_multi_export_stats'); if (raw) return JSON.parse(raw); } catch(e) {}
+  return { total: 0, correct: 0, currentStreak: 0, bestStreak: 0 };
+}
+
+function saveScoreData() {
+  try { localStorage.setItem('bq_multi_export_stats', JSON.stringify(scoreData)); } catch(e) {}
+}
+
+function selectOption(idx, oi) {
+  if (answers[idx] !== undefined) return;
+  answers[idx] = oi;
+  localStorage.setItem('bq_multi_export_answers', JSON.stringify(answers));
+  var q = QUIZ[idx];
+  var isCorrect = (oi === q.c);
+  scoreData.total = (scoreData.total || 0) + 1;
+  if (isCorrect) {
+    scoreData.correct = (scoreData.correct || 0) + 1;
+    scoreData.currentStreak = (scoreData.currentStreak || 0) + 1;
+    if (scoreData.currentStreak > (scoreData.bestStreak || 0))
+      scoreData.bestStreak = scoreData.currentStreak;
+  } else {
+    scoreData.currentStreak = 0;
+  }
+  saveScoreData();
+  renderQuiz();
+}
+
+function clearAnswer(idx) {
+  delete answers[idx];
+  localStorage.setItem('bq_multi_export_answers', JSON.stringify(answers));
+  renderQuiz();
+}
+
+function filterQuiz() { renderQuiz(); }
+
+function renderQuiz() {
+  var container = document.getElementById('quizContainer');
+  var catFilter = document.getElementById('quizCatFilter').value;
+  var statusFilter = document.getElementById('quizStatusFilter').value;
+
+  var filtered = [];
+  QUIZ.forEach(function(q, i) {
+    if (catFilter && q.cat !== catFilter) return;
+    if (statusFilter === 'unanswered' && answers[i] !== undefined) return;
+    if (statusFilter === 'correct' && (answers[i] === undefined || answers[i] !== q.c)) return;
+    if (statusFilter === 'wrong' && (answers[i] === undefined || answers[i] === q.c)) return;
+    filtered.push(i);
+  });
+
+  var html = '';
+  filtered.forEach(function(idx) {
+    var q = QUIZ[idx];
+    var ans = answers[idx];
+    var hasAns = ans !== undefined;
+    html += '<div class="q-card">';
+    html += '<div class="q-header"><span class="q-num">Q' + (idx+1) + '</span><span class="cat-badge cat-bigquery">' + q.cat + '</span></div>';
+    html += '<div class="q-text">' + q.q + '</div>';
+    html += '<div class="opts-grid">';
+    q.o.forEach(function(opt, oi) {
+      var cls = 'opt-row';
+      if (hasAns) cls += ' disabled';
+      if (hasAns && oi === q.c) cls += ' correct';
+      if (hasAns && oi === ans && oi !== q.c) cls += ' wrong';
+      var checked = (ans === oi) ? 'checked' : '';
+      html += '<div class="' + cls + '" onclick="selectOption(' + idx + ',' + oi + ')">';
+      html += '<input type="radio" name="q_' + idx + '" value="' + oi + '" ' + checked + '>';
+      html += '<span class="opt-letter">' + LETTERS[oi] + '</span>';
+      html += '<span class="opt-text">' + opt + '</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '<div class="q-footer">';
+    if (hasAns) {
+      var correct = (ans === q.c);
+      html += '<span class="result">' + (correct ? '&#x2705; Correct' : '&#x274C; Wrong — Answer: ' + LETTERS[q.c]) + '</span>';
+      html += '<button class="btn btn-sm btn-ghost" onclick="clearAnswer(' + idx + ')">Retry</button>';
+    }
+    html += '<span style="font-size:10px;color:var(--ink-faint);flex:1;text-align:right;">' + q.cat + '</span>';
+    html += '</div></div>';
+  });
+
+  if (filtered.length === 0) {
+    html = '<div class="card"><p style="text-align:center;color:var(--ink-dim);">No questions match your filters.</p></div>';
+  }
+
+  container.innerHTML = html;
+
+  var total = Object.keys(answers).length;
+  var correctCount = 0;
+  for (var k in answers) { if (answers[k] === QUIZ[k].c) correctCount++; }
+  var pct = total > 0 ? Math.round(correctCount/total*100) : 0;
+  document.getElementById('scoreCorrect').textContent = correctCount;
+  document.getElementById('scoreTotal').textContent = total;
+  document.getElementById('scorePct').textContent = pct + '%';
+  document.getElementById('scoreBar').style.width = pct + '%';
+  document.getElementById('scoreBarText').textContent = pct + '%';
+}
+
+function resetQuiz() {
+  answers = {};
+  localStorage.removeItem('bq_multi_export_answers');
+  scoreData = { total: 0, correct: 0, currentStreak: 0, bestStreak: 0 };
+  saveScoreData();
+  renderQuiz();
+}
+
+(function() {
+  try { var saved = localStorage.getItem('bq_multi_export_answers'); if (saved) answers = JSON.parse(saved); } catch(e) {}
+  renderQuiz();
+})();
+</script>
+
+</body>
+</html>

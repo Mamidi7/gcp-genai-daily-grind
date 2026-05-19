@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flask → Cloud Run — Blueprint</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --c-bg: #f8fafc;
+  --c-canvas: #ffffff;
+  --c-border: #cbd5e1;
+  --c-text-main: #0f172a;
+  --c-text-sub: #64748b;
+  --c-accent: #dc2626;
+  --c-green: #16a34a;
+  --c-blue: #2563eb;
+  --font-ui: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:var(--font-ui);background:var(--c-bg);padding:32px;
+  min-height:100vh;
+}
+.container{max-width:1000px;margin:0 auto;}
+.canvas{
+  background:var(--c-canvas);border:1px solid var(--c-border);
+  padding:28px 32px;
+}
+.header{border-bottom:1px solid var(--c-border);padding-bottom:12px;margin-bottom:20px;}
+.header .title{font-size:18px;font-weight:600;color:var(--c-text-main);margin-bottom:2px;}
+.header .sub{font-size:11px;font-weight:500;color:var(--c-text-sub);text-transform:uppercase;letter-spacing:0.05em;}
+
+.section{margin-bottom:24px;}
+.section .label{font-family:var(--font-mono);font-size:11px;color:var(--c-text-sub);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;border-bottom:1px solid var(--c-border);padding-bottom:4px;}
+
+/* Blueprint grid components */
+.bp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--c-border);border:1px solid var(--c-border);}
+.bp-cell{background:var(--c-canvas);padding:12px 14px;min-height:70px;}
+.bp-cell .bp-label{font-family:var(--font-mono);font-size:10px;color:var(--c-text-sub);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;}
+.bp-cell .bp-value{font-family:var(--font-mono);font-size:13px;color:var(--c-text-main);font-weight:500;}
+
+/* Component spec box */
+.comp-spec{border:1px solid var(--c-border);padding:12px 14px;margin-bottom:8px;}
+.comp-spec .spec-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.comp-spec .spec-name{font-family:var(--font-mono);font-size:12px;font-weight:500;color:var(--c-text-main);}
+.comp-spec .spec-type{font-family:var(--font-mono);font-size:9px;color:var(--c-text-sub);text-transform:uppercase;letter-spacing:0.05em;}
+
+.code-box{background:var(--c-canvas);border:1px solid var(--c-border);padding:10px 12px;font-family:var(--font-mono);font-size:12px;line-height:1.6;color:var(--c-text-main);overflow-x:auto;margin-bottom:8px;}
+.code-box .cm{color:var(--c-text-sub);}
+.code-box .hl{color:var(--c-blue);}
+.code-box .str{color:var(--c-green);}
+
+.spec-table{width:100%;border-collapse:collapse;font-size:12px;border:1px solid var(--c-border);}
+.spec-table th{font-family:var(--font-mono);font-size:9px;color:var(--c-text-sub);text-transform:uppercase;letter-spacing:0.05em;padding:6px 8px;border-bottom:1px solid var(--c-border);text-align:left;background:var(--c-bg);}
+.spec-table td{padding:6px 8px;border-bottom:1px solid var(--c-border);font-family:var(--font-mono);font-size:11px;color:var(--c-text-main);}
+.spec-table .sym{color:var(--c-accent);}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+@media(max-width:650px){.grid-2,.bp-grid{grid-template-columns:1fr;}}
+
+footer{margin-top:16px;padding-top:10px;border-top:1px solid var(--c-border);display:flex;justify-content:space-between;font-size:10px;font-family:var(--font-mono);color:var(--c-text-sub);}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="canvas">
+
+<div class="header">
+  <div class="title">Flask → Cloud Run — Architecture Specification</div>
+  <div class="sub">v1.0 / Request Lifecycle & Component Spec</div>
+</div>
+
+<section class="section">
+  <div class="label">Component topology</div>
+  <div class="bp-grid">
+    <div class="bp-cell">
+      <div class="bp-label">CLIENT</div>
+      <div class="bp-value">HTTP Request</div>
+      <div style="font-size:10px;color:var(--c-text-sub);margin-top:2px;">curl / browser / app</div>
+    </div>
+    <div class="bp-cell">
+      <div class="bp-label">INGRESS</div>
+      <div class="bp-value">Cloud Run</div>
+      <div style="font-size:10px;color:var(--c-text-sub);margin-top:2px;">port 8080 · managed</div>
+    </div>
+    <div class="bp-cell">
+      <div class="bp-label">WSGI</div>
+      <div class="bp-value">Gunicorn</div>
+      <div style="font-size:10px;color:var(--c-text-sub);margin-top:2px;">worker processes</div>
+    </div>
+    <div class="bp-cell">
+      <div class="bp-label">APP</div>
+      <div class="bp-value">Flask</div>
+      <div style="font-size:10px;color:var(--c-text-sub);margin-top:2px;">route handlers</div>
+    </div>
+  </div>
+  <div style="font-family:var(--font-mono);font-size:10px;color:var(--c-text-sub);margin-top:4px;">
+    Flow: Browser → Cloud Run (port 8080) → Gunicorn (WSGI workers) → Flask (app routes) → Response
+  </div>
+</section>
+
+<section class="section">
+  <div class="label">File specification</div>
+
+  <div class="comp-spec">
+    <div class="spec-header">
+      <span class="spec-name">main.py</span>
+      <span class="spec-type">application</span>
+    </div>
+    <div class="code-box">
+<span class="cm"># Flask application entry point</span>
+<span class="hl">from</span> flask <span class="hl">import</span> Flask
+
+app = Flask(__name__)
+
+<span class="hl">@app</span>.route(<span class="str">"/"</span>)
+<span class="hl">def</span> hello():
+    <span class="hl">return</span> {<span class="str">"message"</span>: <span class="str">"Hello from Cloud Run"</span>}
+
+<span class="hl">@app</span>.route(<span class="str">"/health"</span>)
+<span class="hl">def</span> health():
+    <span class="hl">return</span> {<span class="str">"status"</span>: <span class="str">"healthy"</span>}
+
+<span class="hl">if</span> __name__ == <span class="str">"__main__"</span>:
+    app.run(host=<span class="str">"0.0.0.0"</span>, port=8080)
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="comp-spec">
+      <div class="spec-header">
+        <span class="spec-name">requirements.txt</span>
+        <span class="spec-type">dependencies</span>
+      </div>
+      <div class="code-box" style="margin:0;">
+flask==3.1.0
+gunicorn==23.0.0
+      </div>
+    </div>
+    <div class="comp-spec">
+      <div class="spec-header">
+        <span class="spec-name">Dockerfile</span>
+        <span class="spec-type">container</span>
+      </div>
+      <div class="code-box" style="margin:0;">
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+CMD ["gunicorn", "--bind", \
+     "0.0.0.0:8080", "main:app"]
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="label">Failure modes</div>
+  <table class="spec-table">
+    <thead><tr><th>ID</th><th>Symptom</th><th>Cause</th><th>Resolution</th></tr></thead>
+    <tbody>
+      <tr><td>F01</td><td class="sym">Container crash under load</td><td>dev server, no gunicorn</td><td>CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]</td></tr>
+      <tr><td>F02</td><td class="sym">Slow build (3min+)</td><td>deps reinstalled every build</td><td>COPY requirements.txt first, then RUN pip install</td></tr>
+      <tr><td>F03</td><td class="sym">Health check 503</td><td>no /health endpoint</td><td>add health route, bind 0.0.0.0:8080</td></tr>
+      <tr><td>F04</td><td class="sym">Image size 800MB+</td><td>python:latest base</td><td>FROM python:3.11-slim</td></tr>
+      <tr><td>F05</td><td class="sym">Build context bloat</td><td>venv + .git included</td><td>add .dockerignore</td></tr>
+      <tr><td>F06</td><td class="sym">Cold start 5s+</td><td>no min-instances</td><td>gcloud run deploy --min-instances=1</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="section">
+  <div class="label">Key commands</div>
+  <div class="code-box" style="font-size:11px;">
+<span class="cm"># Build & deploy</span>
+gcloud builds submit --tag gcr.io/$PROJECT/flask-app
+gcloud run deploy flask-app --image gcr.io/$PROJECT/flask-app --region us-central1
+
+<span class="cm"># Verify</span>
+curl https://&lt;service-url&gt;/health
+
+<span class="cm"># Logs</span>
+gcloud run logs read --service flask-app --region us-central1
+  </div>
+</section>
+
+<footer>
+  <span>Flask → Cloud Run · Blueprinter Style</span>
+  <span>Engineering specification v1.0</span>
+</footer>
+
+</div>
+</div>
+</body>
+</html>

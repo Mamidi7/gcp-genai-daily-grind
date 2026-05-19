@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GCP Prep — Design System</title>
+<link rel="stylesheet" href="design-system.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">GCP Prep <span>Design System</span></div>
+    <div class="d-flex align-center gap-md">
+      <button class="btn btn-sm btn-outline" onclick="copyAllCSS()" title="Copy all CSS tokens to clipboard">Copy CSS</button>
+      <button id="darkToggle" onclick="toggleDark()" aria-label="Toggle dark mode">
+        <svg viewBox="0 0 16 16" fill="none"> <circle cx="8" cy="8" r="3.5" stroke="currentColor" stroke-width="1.3"/> <line x1="8" y1="1" x2="8" y2="3" stroke="currentColor" stroke-width="1.3"/> <line x1="8" y1="13" x2="8" y2="15" stroke="currentColor" stroke-width="1.3"/> <line x1="1" y1="8" x2="3" y2="8" stroke="currentColor" stroke-width="1.3"/> <line x1="13" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/> <line x1="3.05" y1="3.05" x2="4.46" y2="4.46" stroke="currentColor" stroke-width="1.3"/> <line x1="11.54" y1="11.54" x2="12.95" y2="12.95" stroke="currentColor" stroke-width="1.3"/> <line x1="3.05" y1="12.95" x2="4.46" y2="11.54" stroke="currentColor" stroke-width="1.3"/> <line x1="11.54" y1="4.46" x2="12.95" y2="3.05" stroke="currentColor" stroke-width="1.3"/> </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ===== SECTION 01: HERO ===== -->
+<section class="section">
+  <div class="eyebrow"><span class="pill">v1.0</span> May 19, 2026</div>
+  <h1>Design System</h1>
+  <p class="sub">Notebook paper theme — color palette, typography, components &amp; animation tokens for all GCP prep HTMLs</p>
+  <div class="toolbar">
+    <a href="design-system.css" class="btn btn-accent" download>Download CSS</a>
+    <button class="btn" onclick="scrollToSection('howto')">How to Use</button>
+  </div>
+</section>
+
+<!-- ===== SECTION 02: COLOR PALETTE ===== -->
+<section class="section">
+  <h2><span class="hash">01</span> Color Palette</h2>
+  <p class="text-dim mb-3">Click any row to copy the CSS variable. Light mode is default; toggle dark at top to see dark equivalents.</p>
+
+  <div class="token-search">
+    <input type="text" class="token-search-input" id="tokenSearch" placeholder="Filter tokens by name..." oninput="filterTokens()">
+  </div>
+
+  <h3>Core Tokens</h3>
+  <div id="colorTable"></div>
+
+  <h3 class="mt-3">Semantic / Accent Colors</h3>
+  <div id="semanticTable"></div>
+</section>
+
+<!-- ===== SECTION 03: TYPOGRAPHY ===== -->
+<section class="section">
+  <h2><span class="hash">02</span> Typography</h2>
+  <div class="font-card">
+    <div class="font-sample" style="font-family:var(--serif);font-size:48px;font-weight:400;">Serif Heading</div>
+    <div class="font-meta">--serif: Georgia, 'Times New Roman', serif &middot; Font-size: 34-80px &middot; Weight: 400</div>
+    <div style="margin-top:14px;height:1px;background:var(--rule);"></div>
+    <div class="font-sample" style="font-family:var(--sans);font-size:15px;line-height:1.65;margin-top:14px;">Body text set in Inter at 15px with 1.65 line-height. This is the default body text for all cards and paragraphs. For longer form reading, the line-height creates enough breathing room.</div>
+    <div class="font-meta">--sans: 'Inter', system-ui, sans-serif &middot; Font-size: 15px &middot; Line-height: 1.65</div>
+    <div style="margin-top:14px;height:1px;background:var(--rule);"></div>
+    <div class="font-sample" style="font-family:var(--mono);font-size:13px;margin-top:14px;color:var(--ink-dim);">mono-text: Code blocks use IBM Plex Mono at 13px</div>
+    <div class="font-meta">--mono: 'IBM Plex Mono', ui-monospace, monospace &middot; Font-size: 13px (code)</div>
+  </div>
+
+  <h3>Type Scale</h3>
+  <div class="component-row component-row-full">
+    <div class="type-h1">H1 — Title</div>
+    <div class="type-h2">H2 — Section</div>
+    <div class="type-h3">H3 — Card Title</div>
+    <div class="type-body">Body — Standard Text</div>
+    <div class="type-code">Code — Inline &amp; Blocks</div>
+    <div class="type-eyebrow">Eyebrow — Labels &amp; Meta</div>
+  </div>
+</section>
+
+<!-- ===== SECTION 04: COMPONENTS ===== -->
+<section class="section">
+  <h2><span class="hash">03</span> Components</h2>
+
+  <!-- Card -->
+  <h3>Card</h3>
+  <div class="component-row">
+    <div class="card">
+      <div class="card-label">Card Label</div>
+      <p class="card-body">Standard notebook card with 3px shadow offset. Hover to see animation.</p>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">CSS Usage</div>
+      <div class="code-block" style="font-size:11px;padding:12px 14px;">
+&lt;div class="card"&gt;
+  &lt;div class="card-label"&gt;LABEL&lt;/div&gt;
+  &lt;p class="card-body"&gt;Content&lt;/p&gt;
+&lt;/div&gt;</div>
+    </div>
+  </div>
+
+  <!-- Buttons -->
+  <h3>Button</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Variants</div>
+      <div class="demo-row">
+        <button class="btn">Default</button>
+        <button class="btn btn-accent">Accent</button>
+        <button class="btn btn-outline">Outline</button>
+        <button class="btn btn-ghost">Ghost</button>
+        <button class="btn" disabled>Disabled</button>
+      </div>
+      <div class="demo-row mt-2">
+        <button class="btn btn-sm">Small</button>
+        <button class="btn btn-accent">Default</button>
+        <button class="btn btn-lg btn-accent">Large</button>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">CSS Classes</div>
+      <div class="code-block" style="font-size:11px;padding:12px 14px;">
+.btn           /* default */
+.btn-accent    /* red */
+.btn-outline   /* dim border */
+.btn-ghost     /* transparent */
+.btn-sm        /* small */
+.btn-lg        /* large */
+:disabled      /* disabled state */</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <h3>Tab Bar</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Example</div>
+      <div class="tab-bar">
+        <button class="tab-item active">Service</button>
+        <button class="tab-item">Infrastructure</button>
+        <button class="tab-item">Deploy</button>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">Tab Panels</div>
+      <div class="tab-bar" id="tabDemoBar">
+        <button class="tab-item active" onclick="switchTab(0)">Vertex AI</button>
+        <button class="tab-item" onclick="switchTab(1)">Cloud Run</button>
+        <button class="tab-item" onclick="switchTab(2)">BigQuery</button>
+      </div>
+      <div class="tab-panel active" id="tabPanel0"><p class="mb-0">Vertex AI: Unified ML platform for building, deploying, and managing models.</p></div>
+      <div class="tab-panel" id="tabPanel1"><p class="mb-0">Cloud Run: Fully managed serverless container runtime with auto-scaling.</p></div>
+      <div class="tab-panel" id="tabPanel2"><p class="mb-0">BigQuery: Serverless data warehouse with built-in ML and vector search.</p></div>
+    </div>
+  </div>
+
+  <!-- Progress Ring -->
+  <h3>Progress Ring</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Example</div>
+      <div class="demo-row">
+        <svg width="48" height="48" viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="18" fill="none" stroke="var(--rule)" stroke-width="3"/>
+          <circle cx="24" cy="24" r="18" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"
+            stroke-dasharray="113.1" stroke-dashoffset="56.55" transform="rotate(-90 24 24)"/>
+          <text x="24" y="24" text-anchor="middle" dominant-baseline="central" font-family="var(--mono)" font-size="10" fill="var(--ink-dim)">50%</text>
+        </svg>
+        <svg width="48" height="48" viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="18" fill="none" stroke="var(--rule)" stroke-width="3"/>
+          <circle cx="24" cy="24" r="18" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round"
+            stroke-dasharray="113.1" stroke-dashoffset="22.62" transform="rotate(-90 24 24)"/>
+          <text x="24" y="24" text-anchor="middle" dominant-baseline="central" font-family="var(--mono)" font-size="10" fill="var(--ink-dim)">80%</text>
+        </svg>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">CSS</div>
+      <div class="code-block" style="font-size:11px;padding:12px 14px;">
+.pct-ring .bg { stroke: var(--rule); }
+.pct-ring .fg { stroke: var(--accent);
+  stroke-dasharray: 113.1;
+  stroke-dashoffset: 56.55; /* 50% */ }</div>
+    </div>
+  </div>
+
+  <!-- Definition Block -->
+  <h3>Definition Block</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Example</div>
+      <div class="def-block">
+        <div class="term">Gunicorn</div>
+        <div class="desc">WSGI HTTP server for running Python web applications in production. Sits between Cloud Run and Flask.</div>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">CSS</div>
+      <div class="code-block" style="font-size:11px;padding:12px 14px;">
+&lt;div class="def-block"&gt;
+  &lt;div class="term"&gt;TERM&lt;/div&gt;
+  &lt;div class="desc"&gt;Description...&lt;/div&gt;
+&lt;/div&gt;</div>
+    </div>
+  </div>
+
+  <!-- Metadata Card -->
+  <h3>Metadata Card (cd-card)</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Example</div>
+      <div class="demo-row">
+        <div class="cd-card">
+          <div class="num">3</div>
+          <div class="label">Endpoints</div>
+        </div>
+        <div class="cd-card">
+          <div class="num">&#x1f433;</div>
+          <div class="label">Docker</div>
+        </div>
+        <div class="cd-card">
+          <div class="num">99%</div>
+          <div class="label">Uptime</div>
+        </div>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">CSS</div>
+      <div class="code-block" style="font-size:11px;padding:12px 14px;">
+&lt;div class="cd-card"&gt;
+  &lt;div class="num"&gt;3&lt;/div&gt;
+  &lt;div class="label"&gt;Endpoints&lt;/div&gt;
+&lt;/div&gt;</div>
+    </div>
+  </div>
+
+  <!-- Code Block -->
+  <h3>Code Block</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Example</div>
+      <div class="code-block">
+<span class="comment"># This is a comment</span>
+<span class="keyword">def</span> <span class="func">hello</span>():
+    <span class="keyword">return</span> <span class="string">"Hello, GCP!"</span></div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">Highlighting Classes</div>
+      <div class="code-block" style="font-size:11px;padding:12px 14px;">
+.code-block .comment  /* gray comment */
+.code-block .keyword  /* orange keyword */
+.code-block .func     /* blue function */
+.code-block .string   /* green string */
+.code-block .number   /* gold number */</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 05: FORM ELEMENTS ===== -->
+<section class="section">
+  <h2><span class="hash">04</span> Form Elements</h2>
+  <p class="text-dim mb-3">Notebook-paper styled form controls with 2px shadow offset. Focus state shifts accent shadow.</p>
+
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Text Input</div>
+      <div class="form-group">
+        <label class="form-label" for="demoInput">Endpoint Name</label>
+        <input type="text" class="form-input" id="demoInput" placeholder="e.g. gemini-chat-endpoint">
+        <div class="form-hint">Lowercase letters, hyphens allowed</div>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">Input States</div>
+      <div class="form-group">
+        <label class="form-label" for="demoInput2">Normal Input</label>
+        <input type="text" class="form-input" id="demoInput2" placeholder="Normal state">
+      </div>
+      <div class="form-group mb-0">
+        <label class="form-label" for="demoInput3">Disabled Input</label>
+        <input type="text" class="form-input" id="demoInput3" value="Read only" disabled>
+      </div>
+    </div>
+  </div>
+
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Textarea</div>
+      <div class="form-group mb-0">
+        <label class="form-label" for="demoTextarea">Configuration</label>
+        <textarea class="form-textarea" id="demoTextarea" placeholder="Paste your config here..." rows="3"></textarea>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">Select Dropdown</div>
+      <div class="form-group mb-0">
+        <label class="form-label" for="demoSelect">Region</label>
+        <select class="form-select" id="demoSelect">
+          <option>us-central1</option>
+          <option>us-east1</option>
+          <option>europe-west1</option>
+          <option>asia-southeast1</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Checkboxes</div>
+      <label class="form-check">
+        <input type="checkbox" checked>
+        <span class="check-box"></span>
+        <span class="check-label">Enable logging</span>
+      </label>
+      <label class="form-check">
+        <input type="checkbox">
+        <span class="check-box"></span>
+        <span class="check-label">Enable monitoring</span>
+      </label>
+      <label class="form-check">
+        <input type="checkbox" disabled>
+        <span class="check-box"></span>
+        <span class="check-label" style="opacity:.4;">Auto-scale (disabled)</span>
+      </label>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">Radio Buttons</div>
+      <label class="form-check">
+        <input type="radio" name="demoRadio" checked>
+        <span class="check-box"></span>
+        <span class="check-label">Small (1 vCPU)</span>
+      </label>
+      <label class="form-check">
+        <input type="radio" name="demoRadio">
+        <span class="check-box"></span>
+        <span class="check-label">Medium (2 vCPU)</span>
+      </label>
+      <label class="form-check">
+        <input type="radio" name="demoRadio">
+        <span class="check-box"></span>
+        <span class="check-label">Large (4 vCPU)</span>
+      </label>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">Toggle Switches</div>
+      <label class="form-toggle">
+        <input type="checkbox" checked>
+        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        <span class="toggle-label">Notifications</span>
+      </label>
+      <label class="form-toggle">
+        <input type="checkbox">
+        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        <span class="toggle-label">Dark mode</span>
+      </label>
+      <label class="form-toggle" style="margin-bottom:0;">
+        <input type="checkbox" disabled>
+        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        <span class="toggle-label" style="opacity:.4;">VPN (disabled)</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Inline Form Row</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Project</label>
+          <input type="text" class="form-input" placeholder="my-project" value="gcp-prep">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Region</label>
+          <select class="form-select">
+            <option>us-central1</option>
+            <option>us-east1</option>
+          </select>
+        </div>
+        <div class="form-group mb-0">
+          <label class="form-label">vCPUs</label>
+          <input type="number" class="form-input" value="2" min="1" max="8">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 06: DATA DISPLAY ===== -->
+<section class="section">
+  <h2><span class="hash">05</span> Data Display</h2>
+
+  <!-- Table -->
+  <h3>Table <span class="text-dim" style="font-family:var(--mono);font-size:10px;text-transform:lowercase;letter-spacing:0;">(click headers to sort)</span></h3>
+  <div class="table-container">
+    <table class="ds-table striped" id="demoTable">
+      <thead>
+        <tr>
+          <th class="sortable" onclick="sortTable(0)">Service</th>
+          <th class="sortable" onclick="sortTable(1)">Region</th>
+          <th class="sortable" onclick="sortTable(2)">Status</th>
+          <th class="sortable" onclick="sortTable(3)">Latency</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Vertex AI</td><td>us-central1</td><td><span class="badge badge-green">Active</span></td><td>120ms</td></tr>
+        <tr><td>Cloud Run</td><td>us-east1</td><td><span class="badge badge-green">Active</span></td><td>95ms</td></tr>
+        <tr><td>BigQuery</td><td>us-central1</td><td><span class="badge badge-accent">Degraded</span></td><td>340ms</td></tr>
+        <tr><td>Cloud Functions</td><td>europe-west1</td><td><span class="badge badge-green">Active</span></td><td>145ms</td></tr>
+        <tr><td>Cloud Storage</td><td>asia-southeast1</td><td><span class="badge badge-gold">Maintenance</span></td><td>80ms</td></tr>
+        <tr><td>Cloud Build</td><td>us-central1</td><td><span class="badge badge-green">Active</span></td><td>200ms</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Badges -->
+  <h3>Badges / Pills</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Variants</div>
+      <div class="demo-row">
+        <span class="badge">Default</span>
+        <span class="badge badge-accent">Accent</span>
+        <span class="badge badge-green">Active</span>
+        <span class="badge badge-blue">Info</span>
+        <span class="badge badge-gold">Warning</span>
+        <span class="badge badge-outline">Outline</span>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">Sizes</div>
+      <div class="demo-row">
+        <span class="badge badge-sm">Tiny</span>
+        <span class="badge badge-green">Normal</span>
+        <span class="badge badge-lg badge-accent">Large</span>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">CSS Classes</div>
+      <div class="code-block" style="font-size:11px;padding:12px 14px;">
+.badge           /* default */
+.badge-accent    /* red */
+.badge-green     /* green */
+.badge-blue      /* blue */
+.badge-gold      /* gold */
+.badge-outline   /* dim border */
+.badge-sm        /* smaller */
+.badge-lg        /* larger */</div>
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  <h3>Progress Bar</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Determinate Bars</div>
+      <div class="demo-stack">
+        <div>
+          <div class="progress-label"><span>Deployment</span><span>75%</span></div>
+          <div class="progress-bar"><div class="progress-bar-fill" style="width:75%"></div></div>
+        </div>
+        <div>
+          <div class="progress-label"><span>Training</span><span>45%</span></div>
+          <div class="progress-bar"><div class="progress-bar-fill blue" style="width:45%"></div></div>
+        </div>
+        <div>
+          <div class="progress-label"><span>Validation</span><span>90%</span></div>
+          <div class="progress-bar"><div class="progress-bar-fill green" style="width:90%"></div></div>
+        </div>
+        <div>
+          <div class="progress-label"><span>Review</span><span>30%</span></div>
+          <div class="progress-bar"><div class="progress-bar-fill gold" style="width:30%"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">CSS</div>
+      <div class="code-block" style="font-size:11px;padding:12px 14px;">
+&lt;div class="progress-bar"&gt;
+  &lt;div class="progress-bar-fill"
+       style="width:75%"&gt;&lt;/div&gt;
+&lt;/div&gt;
+/* Variants:
+   .green, .blue, .gold */</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 07: FEEDBACK ===== -->
+<section class="section">
+  <h2><span class="hash">06</span> Feedback</h2>
+
+  <!-- Alerts -->
+  <h3>Alerts / Banners</h3>
+  <div class="component-row component-row-full">
+    <div class="comp-box">
+      <div class="comp-label">Alert Variants</div>
+      <div class="alert alert-info">
+        <span class="alert-icon">&#x2139;</span>
+        <div class="alert-content">
+          <div class="alert-title">Information</div>
+          <div class="alert-message">Vertex AI embeddings updated to text-embedding-004. No action required.</div>
+        </div>
+        <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+      </div>
+      <div class="alert alert-success">
+        <span class="alert-icon">&#x2713;</span>
+        <div class="alert-content">
+          <div class="alert-title">Deployment Successful</div>
+          <div class="alert-message">Cloud Run service deployed to us-central1 in 42s. Endpoint is live.</div>
+        </div>
+        <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+      </div>
+      <div class="alert alert-warning">
+        <span class="alert-icon">&#x26A0;</span>
+        <div class="alert-content">
+          <div class="alert-title">Quota Warning</div>
+          <div class="alert-message">You are at 85% of your Vertex AI prediction quota. Consider requesting an increase.</div>
+        </div>
+        <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+      </div>
+      <div class="alert alert-error mb-0">
+        <span class="alert-icon">&#x2716;</span>
+        <div class="alert-content">
+          <div class="alert-title">Connection Error</div>
+          <div class="alert-message">Failed to connect to BigQuery. Check your credentials and try again.</div>
+        </div>
+        <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toasts -->
+  <h3>Toasts / Notifications</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Demo Triggers</div>
+      <p class="text-dim" style="font-size:13px;">Click to trigger a toast notification (check bottom-right corner).</p>
+      <div class="demo-row">
+        <button class="btn btn-sm btn-accent" onclick="showToast('error','Deployment failed: timeout exceeded')">Error Toast</button>
+        <button class="btn btn-sm" onclick="showToast('success','Pipeline completed successfully')">Success Toast</button>
+        <button class="btn btn-sm btn-outline" onclick="showToast('info','New model version available')">Info Toast</button>
+        <button class="btn btn-sm btn-outline" onclick="showToast('warning','Quota at 85%')">Warning Toast</button>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">Toast Container</div>
+      <div class="code-block" style="font-size:11px;padding:12px 14px;">
+/* Fixed to bottom-right */
+.toast-container {
+  position: fixed;
+  bottom: 30px; right: 30px;
+  z-index: 300;
+}
+/* JS: showToast(type, msg) */</div>
+    </div>
+  </div>
+
+  <!-- Skeleton -->
+  <h3>Skeleton Loading</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Loading Placeholders</div>
+      <div class="skeleton skeleton-heading"></div>
+      <div class="skeleton skeleton-text"></div>
+      <div class="skeleton skeleton-text"></div>
+      <div class="skeleton skeleton-text"></div>
+
+      <div class="skeleton-row mt-2">
+        <div class="skeleton skeleton-avatar"></div>
+        <div class="skeleton-lines">
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text"></div>
+        </div>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">CSS Usage</div>
+      <div class="code-block" style="font-size:11px;padding:12px 14px;">
+&lt;div class="skeleton skeleton-heading"&gt;&lt;/div&gt;
+&lt;div class="skeleton skeleton-text"&gt;&lt;/div&gt;
+&lt;div class="skeleton skeleton-avatar"&gt;&lt;/div&gt;
+&lt;div class="skeleton skeleton-thumbnail"&gt;&lt;/div&gt;</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 08: NAVIGATION ===== -->
+<section class="section">
+  <h2><span class="hash">07</span> Navigation</h2>
+
+  <!-- Breadcrumbs -->
+  <h3>Breadcrumb</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Example</div>
+      <nav class="breadcrumb">
+        <a href="#" class="breadcrumb-item">Home</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href="#" class="breadcrumb-item">Projects</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href="#" class="breadcrumb-item">GCP Prep</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-item current">Design System</span>
+      </nav>
+      <nav class="breadcrumb mb-0">
+        <a href="#" class="breadcrumb-item">Vertex AI</a>
+        <span class="breadcrumb-sep">&rsaquo;</span>
+        <a href="#" class="breadcrumb-item">Endpoints</a>
+        <span class="breadcrumb-sep">&rsaquo;</span>
+        <span class="breadcrumb-item current">gemini-chat</span>
+      </nav>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">HTML</div>
+      <div class="code-block" style="font-size:11px;padding:12px 14px;">
+&lt;nav class="breadcrumb"&gt;
+  &lt;a href="#" class="breadcrumb-item"&gt;Home&lt;/a&gt;
+  &lt;span class="breadcrumb-sep"&gt;/&lt;/span&gt;
+  &lt;span class="breadcrumb-item current"&gt;Page&lt;/span&gt;
+&lt;/nav&gt;</div>
+    </div>
+  </div>
+
+  <!-- Accordion -->
+  <h3>Accordion / Collapsible</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Example</div>
+      <div class="accordion">
+        <div class="accordion-item open">
+          <button class="accordion-header" onclick="toggleAccordion(this)">
+            <span>What is Vertex AI?</span>
+            <span class="accordion-icon">+</span>
+          </button>
+          <div class="accordion-body">
+            <p>Vertex AI is Google Cloud's unified ML platform that lets you build, train, and deploy models at scale. It integrates with BigQuery, Cloud Storage, and Cloud Run.</p>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-header" onclick="toggleAccordion(this)">
+            <span>How does Cloud Run work?</span>
+            <span class="accordion-icon">+</span>
+          </button>
+          <div class="accordion-body">
+            <p>Cloud Run is a fully managed serverless container runtime. It auto-scales from zero based on request traffic and charges only for compute time used.</p>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <button class="accordion-header" onclick="toggleAccordion(this)">
+            <span>What is BigQuery VECTOR_SEARCH?</span>
+            <span class="accordion-icon">+</span>
+          </button>
+          <div class="accordion-body">
+            <p>BigQuery VECTOR_SEARCH lets you perform semantic similarity search directly in SQL, without needing a separate vector database like ChromaDB.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">CSS + JS</div>
+      <div class="code-block" style="font-size:11px;padding:12px 14px;">
+&lt;div class="accordion-item"&gt;
+  &lt;button class="accordion-header"
+    onclick="toggleAccordion(this)"&gt;
+    &lt;span&gt;Title&lt;/span&gt;
+    &lt;span class="accordion-icon"&gt;+&lt;/span&gt;
+  &lt;/button&gt;
+  &lt;div class="accordion-body"&gt;
+    &lt;p&gt;Content...&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+/* JS: toggle parent .open class */</div>
+    </div>
+  </div>
+
+  <!-- Tooltip -->
+  <h3>Tooltip</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Positions</div>
+      <div class="demo-row">
+        <span class="tooltip-container">
+          <span class="btn btn-sm">Hover top</span>
+          <span class="tooltip">Top tooltip</span>
+        </span>
+        <span class="tooltip-container tooltip-bottom">
+          <span class="btn btn-sm">Hover bottom</span>
+          <span class="tooltip">Bottom tooltip</span>
+        </span>
+        <span class="tooltip-container tooltip-right">
+          <span class="btn btn-sm">Hover right</span>
+          <span class="tooltip">Right tooltip</span>
+        </span>
+        <span class="tooltip-container tooltip-left">
+          <span class="btn btn-sm">Hover left</span>
+          <span class="tooltip">Left tooltip</span>
+        </span>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">HTML</div>
+      <div class="code-block" style="font-size:11px;padding:12px 14px;">
+&lt;span class="tooltip-container"&gt;
+  &lt;span&gt;Hover me&lt;/span&gt;
+  &lt;span class="tooltip"&gt;Tooltip text&lt;/span&gt;
+&lt;/span&gt;
+/* Positions:
+   .tooltip-bottom
+   .tooltip-right
+   .tooltip-left */</div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <h3>Modal / Overlay</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Demo</div>
+      <button class="btn btn-accent" onclick="openModal('demoModal')">Open Modal</button>
+      <p class="text-dim mt-2" style="font-size:12px;">Modal opens centered with backdrop overlay. Close via X button or clicking backdrop.</p>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">HTML</div>
+      <div class="code-block" style="font-size:11px;padding:12px 14px;">
+&lt;div class="modal-overlay" id="myModal"&gt;
+  &lt;div class="modal"&gt;
+    &lt;div class="modal-header"&gt;
+      &lt;div class="modal-title"&gt;Title&lt;/div&gt;
+      &lt;button class="modal-close"&gt;&times;&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div class="modal-body"&gt;...&lt;/div&gt;
+    &lt;div class="modal-footer"&gt;
+      &lt;button class="btn"&gt;Cancel&lt;/button&gt;
+      &lt;button class="btn btn-accent"&gt;Confirm&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 09: ANIMATIONS ===== -->
+<section class="section">
+  <h2><span class="hash">08</span> Animations</h2>
+
+  <h3>Page Entrance</h3>
+  <div class="usage-card">
+    <code>@keyframes pageIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }</code>
+    <p class="mt-2" style="color:var(--ink-dim);font-size:13px;">Every <code class="inline-code">&lt;section&gt;</code> gets this. Trigger via IntersectionObserver adding class "in".</p>
+  </div>
+
+  <h3>SVG Pipeline Flow</h3>
+  <div class="usage-card">
+    <code>@keyframes pipeFlow { to { stroke-dashoffset: -18; } }</code>
+    <p class="mt-2" style="color:var(--ink-dim);font-size:13px;">Animated arrow for data flow diagrams. Use with <code class="inline-code">stroke-dasharray: 6 3</code>.</p>
+    <svg width="200" height="30" style="margin-top:10px;display:block;">
+      <line x1="10" y1="15" x2="190" y2="15" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 3" style="animation:pipeFlow .8s linear infinite;"/>
+    </svg>
+  </div>
+
+  <h3>Stamp Entrance</h3>
+  <div class="usage-card">
+    <code>@keyframes stampIn { from { opacity: 0; transform: rotate(-12deg) scale(1.6); } to { opacity: .85; transform: rotate(3deg) scale(1); } }</code>
+    <p class="mt-2" style="color:var(--ink-dim);font-size:13px;">Hero accent stamp. Typically positioned <code class="inline-code">position: absolute; top: 0; right: 0;</code> and animated with <code class="inline-code">animation: stampIn .4s .6s cubic-bezier(.2,.8,.3,1.4) forwards;</code></p>
+  </div>
+
+  <h3>Pulse (for indicators)</h3>
+  <div class="usage-card">
+    <code>@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }</code>
+    <p class="mt-2" style="color:var(--ink-dim);font-size:13px;">For "live" indicators, loading states.</p>
+    <div class="demo-row mt-2">
+      <span class="badge badge-green" style="animation:pulse 2s ease infinite;">Live</span>
+    </div>
+  </div>
+
+  <h3>Skeleton Shimmer</h3>
+  <div class="usage-card">
+    <code>@keyframes skeletonShimmer { 0% { left: -100%; } 100% { left: 100%; } }</code>
+    <p class="mt-2" style="color:var(--ink-dim);font-size:13px;">Shimmer sweep across skeleton loading placeholders.</p>
+  </div>
+
+  <h3>Toast Entrance / Exit</h3>
+  <div class="usage-card">
+    <code>@keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }</code>
+    <p class="mt-2" style="color:var(--ink-dim);font-size:13px;">Slide-up entrance for toast notifications.</p>
+  </div>
+</section>
+
+<!-- ===== SECTION 10: LAYOUT TOKENS ===== -->
+<section class="section">
+  <h2><span class="hash">09</span> Layout Tokens</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="usage-card">
+      <code>main { max-width: 1100px; margin: 0 auto; padding: 40px 28px 100px; }</code>
+      <p class="mt-1" style="font-size:13px;color:var(--ink-dim);">Standard page width</p>
+    </div>
+    <div class="usage-card">
+      <code>section { margin-bottom: 48px; }</code>
+      <p class="mt-1" style="font-size:13px;color:var(--ink-dim);">Section spacing</p>
+    </div>
+    <div class="usage-card">
+      <code>.component-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }</code>
+      <p class="mt-1" style="font-size:13px;color:var(--ink-dim);">Component demo grid</p>
+    </div>
+    <div class="usage-card">
+      <code>.eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; }</code>
+      <p class="mt-1" style="font-size:13px;color:var(--ink-dim);">Section meta labels</p>
+    </div>
+    <div class="usage-card">
+      <code>.card { background: var(--paper-2); border: 1px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); }</code>
+      <p class="mt-1" style="font-size:13px;color:var(--ink-dim);">Standard card with 3px shadow</p>
+    </div>
+    <div class="usage-card">
+      <code>.toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 12px 0; }</code>
+      <p class="mt-1" style="font-size:13px;color:var(--ink-dim);">Action bar for buttons</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 11: COMPONENT PLAYGROUND ===== -->
+<section class="section">
+  <h2><span class="hash">10</span> Component Playground</h2>
+  <p class="text-dim mb-3">Tweak design tokens below and see the effect live on a sample card + button.</p>
+
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Token Controls</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">--paper</label>
+          <input type="color" class="form-input" id="playPaper" value="#f3eee4" oninput="updatePlayground()" style="height:36px;padding:4px;">
+        </div>
+        <div class="form-group">
+          <label class="form-label">--ink</label>
+          <input type="color" class="form-input" id="playInk" value="#1a1612" oninput="updatePlayground()" style="height:36px;padding:4px;">
+        </div>
+        <div class="form-group">
+          <label class="form-label">--accent</label>
+          <input type="color" class="form-input" id="playAccent" value="#c0392b" oninput="updatePlayground()" style="height:36px;padding:4px;">
+        </div>
+        <div class="form-group">
+          <label class="form-label">--paper-2</label>
+          <input type="color" class="form-input" id="playPaper2" value="#ebe4d4" oninput="updatePlayground()" style="height:36px;padding:4px;">
+        </div>
+      </div>
+      <button class="btn btn-sm mt-2" onclick="resetPlayground()">Reset to defaults</button>
+    </div>
+
+    <div class="comp-box">
+      <div class="comp-label">Live Preview</div>
+      <div id="playgroundCard" class="card" style="background:var(--paper-2);border-color:var(--ink);box-shadow:3px 3px 0 var(--ink);">
+        <div class="card-label">Preview Card</div>
+        <p class="card-body" style="color:var(--ink-2);">This card reflects the token values from the color pickers. Resize the playground area.</p>
+      </div>
+      <div class="demo-row mt-2">
+        <button id="playgroundBtn" class="btn btn-accent" style="background:var(--accent);border-color:var(--accent);color:var(--paper);">Sample Button</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 12: HOW TO USE ===== -->
+<section class="section" id="howto">
+  <h2><span class="hash">11</span> How to Use</h2>
+  <div class="usage-card">
+    <p class="mb-2"><strong>1. Link the CSS file</strong></p>
+    <div class="code-block" style="font-size:11px;padding:12px 14px;">
+&lt;link rel="stylesheet" href="design-system.css"&gt;</div>
+    <p class="mt-2 mb-0 text-dim" style="font-size:13px;">Place this in your HTML <code class="inline-code">&lt;head&gt;</code>. The CSS file automatically imports Google Fonts via @import.</p>
+  </div>
+
+  <div class="usage-card">
+    <p class="mb-2"><strong>2. Add the dark mode toggle button (optional)</strong></p>
+    <div class="code-block" style="font-size:11px;padding:12px 14px;">
+&lt;button id="darkToggle" onclick="
+  var d=document.documentElement;
+  if(d.getAttribute('data-theme')==='dark'){
+    d.removeAttribute('data-theme');
+  } else {
+    d.setAttribute('data-theme','dark');
+  }
+"&gt;Toggle dark&lt;/button&gt;</div>
+    <p class="mt-2 mb-0 text-dim" style="font-size:13px;">The CSS automatically switches all colors when <code class="inline-code">[data-theme="dark"]</code> is set on <code class="inline-code">&lt;html&gt;</code>.</p>
+  </div>
+
+  <div class="usage-card">
+    <p class="mb-2"><strong>3. Use the component classes</strong></p>
+    <p class="text-dim" style="font-size:13px;">All components use flat CSS class names — no BEM, no utilities framework. Just drop <code class="inline-code">class="card"</code>, <code class="inline-code">class="btn btn-accent"</code>, etc. See the sections above for every component's HTML pattern.</p>
+  </div>
+
+  <div class="usage-card">
+    <p class="mb-2"><strong>4. Section entrance animations</strong></p>
+    <div class="code-block" style="font-size:11px;padding:12px 14px;">
+&lt;section class="section"&gt;...&lt;/section&gt;
+&lt;script&gt;
+var obs = new IntersectionObserver(function(e) {
+  e.forEach(function(e) {
+    if(e.isIntersecting) e.target.classList.add('in');
+  });
+}, {threshold: 0.1});
+document.querySelectorAll('.section').forEach(function(e) { obs.observe(e); });
+&lt;/script&gt;</div>
+  </div>
+
+  <div class="usage-card">
+    <p class="mb-2"><strong>5. Using in design system HTMLs</strong></p>
+    <p class="text-dim" style="font-size:13px;">Since this repo uses HTML instead of Markdown for planning/communication (Thariq Shihipar pattern), place the CSS reference in your artifact's <code class="inline-code">&lt;head&gt;</code>. No build step required — it works from the filesystem.</p>
+  </div>
+</section>
+
+<footer style="margin-top:60px;padding-top:20px;border-top:2px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--ink-faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+  <span>GCP Prep Design System v1.0</span>
+  <span>Extracted from day8-flask-cloud-run-notebook.html &middot; Enhanced with 12+ new components</span>
+</footer>
+
+</main>
+
+<!-- Toast containers -->
+<div id="toast" class="copy-toast">Copied!</div>
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="demoModal" onclick="if(event.target===this)closeModal('demoModal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Deployment Details</div>
+      <button class="modal-close" onclick="closeModal('demoModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p><strong>Service:</strong> gemini-chat-endpoint</p>
+      <p><strong>Region:</strong> us-central1</p>
+      <p><strong>Status:</strong> <span class="badge badge-green">Running</span></p>
+      <p><strong>URL:</strong> <code class="inline-code">https://gemini-chat-xyz-uc.a.run.app</code></p>
+      <p><strong>Min instances:</strong> 1 &middot; <strong>Max instances:</strong> 10</p>
+      <p class="mb-0"><strong>Last deployed:</strong> 2026-05-19 14:32 UTC</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('demoModal')">Close</button>
+      <button class="btn btn-accent" onclick="closeModal('demoModal');showToast('success','Action confirmed')">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== COLORS DATA ===== */
+var colors = [
+  {name:'--paper', light:'#f3eee4', dark:'#1b1917', cat:'Core'},
+  {name:'--paper-2', light:'#ebe4d4', dark:'#242220', cat:'Core'},
+  {name:'--ink', light:'#1a1612', dark:'#f0ece9', cat:'Core'},
+  {name:'--ink-2', light:'#3d3528', dark:'#c5bbb2', cat:'Core'},
+  {name:'--ink-dim', light:'#6b5d49', dark:'#9a9088', cat:'Core'},
+  {name:'--ink-faint', light:'#a89a83', dark:'#6b625c', cat:'Core'},
+  {name:'--rule', light:'#c8b99e', dark:'#3a3430', cat:'Core'},
+  {name:'--accent', light:'#c0392b', dark:'#e8704a', cat:'Core'},
+  {name:'--accent2', light:'#a93226', dark:'#d95a3a', cat:'Core'},
+  {name:'--green', light:'#2d7d46', dark:'#5bbd6b', cat:'Core'},
+  {name:'--blue', light:'#2b6cb0', dark:'#5b8fbd', cat:'Core'},
+  {name:'--gold', light:'#b8860b', dark:'#d4a84b', cat:'Core'},
+  {name:'--highlight', light:'#fff59d', dark:'#7a5a3a', cat:'Core'},
+  {name:'--n1', light:'#c0392b', dark:'#e8704a', cat:'Semantic'},
+  {name:'--n2', light:'#2b6cb0', dark:'#5b8fbd', cat:'Semantic'},
+  {name:'--n3', light:'#2d7d46', dark:'#5bbd6b', cat:'Semantic'},
+  {name:'--n4', light:'#b8860b', dark:'#d4a84b', cat:'Semantic'}
+];
+
+/* ===== COLOR TABLE RENDER ===== */
+function renderTable(containerId, filterCat){
+  var el = document.getElementById(containerId);
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  var filtered = colors.filter(function(c){ return c.cat === filterCat; });
+  el.innerHTML = filtered.map(function(c){
+    var hex = isDark ? c.dark : c.light;
+    return '<div class="color-row" onclick="copyVar(\''+c.name+'\')" title="Click to copy '+c.name+'" data-name="'+c.name+'">'+
+      '<div class="color-swatch" style="background:'+hex+'"></div>'+
+      '<span class="color-name">'+c.name+'</span>'+
+      '<span class="color-hex">'+hex.toUpperCase()+'</span>'+
+      '<div class="color-preview" style="background:'+hex+'"></div>'+
+    '</div>';
+  }).join('');
+}
+
+renderTable('colorTable', 'Core');
+renderTable('semanticTable', 'Semantic');
+
+/* ===== TOKEN SEARCH / FILTER ===== */
+function filterTokens(){
+  var q = document.getElementById('tokenSearch').value.toLowerCase();
+  document.querySelectorAll('.color-row').forEach(function(row){
+    var name = row.getAttribute('data-name').toLowerCase();
+    row.style.display = name.indexOf(q) === -1 ? 'none' : '';
+  });
+}
+
+/* ===== DARK MODE TOGGLE ===== */
+function toggleDark(){
+  var d = document.documentElement;
+  if(d.getAttribute('data-theme') === 'dark'){
+    d.removeAttribute('data-theme');
+  } else {
+    d.setAttribute('data-theme', 'dark');
+  }
+  renderTable('colorTable', 'Core');
+  renderTable('semanticTable', 'Semantic');
+}
+
+/* ===== COPY TO CLIPBOARD ===== */
+function copyVar(name){
+  var val = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  var text = name + ': ' + val + ';';
+  navigator.clipboard.writeText(text).catch(function(){});
+  var t = document.getElementById('toast');
+  t.textContent = 'Copied: ' + name;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 1500);
+}
+
+function copyAllCSS(){
+  /* Copy all color tokens as CSS variable declarations */
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  var lines = colors.map(function(c){
+    var hex = isDark ? c.dark : c.light;
+    return '  ' + c.name + ': ' + hex + ';';
+  }).join('\n');
+  var text = ':root {\n' + lines + '\n}';
+  navigator.clipboard.writeText(text).catch(function(){});
+  var t = document.getElementById('toast');
+  t.textContent = 'Copied all CSS tokens';
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 1500);
+}
+
+/* ===== INTERSECTION OBSERVER (entrance animation) ===== */
+var obs = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting) e.target.classList.add('in');
+  });
+}, {threshold: 0.1});
+document.querySelectorAll('.section').forEach(function(e){ obs.observe(e); });
+
+/* ===== TAB SWITCH ===== */
+function switchTab(index){
+  var bar = document.getElementById('tabDemoBar');
+  var items = bar.querySelectorAll('.tab-item');
+  items.forEach(function(t,i){
+    t.classList.toggle('active', i === index);
+  });
+  for(var i=0; i<3; i++){
+    document.getElementById('tabPanel' + i).classList.toggle('active', i === index);
+  }
+}
+
+/* ===== TABLE SORT ===== */
+var sortDir = [true, true, true, true];
+function sortTable(col){
+  var table = document.getElementById('demoTable');
+  var tbody = table.querySelector('tbody');
+  var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+  var headers = table.querySelectorAll('th');
+
+  headers.forEach(function(h){ h.classList.remove('sort-asc','sort-desc'); });
+  sortDir[col] = !sortDir[col];
+  headers[col].classList.add(sortDir[col] ? 'sort-asc' : 'sort-desc');
+
+  rows.sort(function(a,b){
+    var va = a.cells[col].textContent.trim().toLowerCase();
+    var vb = b.cells[col].textContent.trim().toLowerCase();
+    /* Natural sort for mixed text + numbers */
+    var na = parseFloat(va), nb = parseFloat(vb);
+    if(!isNaN(na) && !isNaN(nb)){
+      return sortDir[col] ? na - nb : nb - na;
+    }
+    if(va < vb) return sortDir[col] ? -1 : 1;
+    if(va > vb) return sortDir[col] ? 1 : -1;
+    return 0;
+  });
+
+  rows.forEach(function(r){ tbody.appendChild(r); });
+}
+
+/* ===== ACCORDION TOGGLE ===== */
+function toggleAccordion(header){
+  var item = header.parentElement;
+  item.classList.toggle('open');
+}
+
+/* ===== MODAL ===== */
+function openModal(id){
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+}
+
+/* ===== TOAST NOTIFICATION ===== */
+function showToast(type, message){
+  var container = document.getElementById('toastContainer');
+  var icons = {success:'\u2713', error:'\u2716', info:'\u2139', warning:'\u26A0'};
+  var toast = document.createElement('div');
+  toast.className = 'toast toast-' + type;
+  toast.innerHTML =
+    '<span class="toast-icon">' + (icons[type] || '') + '</span>' +
+    '<span class="toast-message">' + message + '</span>' +
+    '<button class="toast-dismiss" onclick="this.parentElement.classList.add(\'removing\');setTimeout(function(){this.parentElement.remove()}.bind(this),300)">&times;</button>';
+  container.appendChild(toast);
+  setTimeout(function(){
+    toast.classList.add('removing');
+    setTimeout(function(){ if(toast.parentElement) toast.remove(); }, 300);
+  }, 4000);
+}
+
+/* ===== COMPONENT PLAYGROUND ===== */
+function updatePlayground(){
+  var paper = document.getElementById('playPaper').value;
+  var ink = document.getElementById('playInk').value;
+  var accent = document.getElementById('playAccent').value;
+  var paper2 = document.getElementById('playPaper2').value;
+
+  var card = document.getElementById('playgroundCard');
+  card.style.background = paper2;
+  card.style.borderColor = ink;
+  card.style.boxShadow = '3px 3px 0 ' + ink;
+  card.querySelector('.card-body').style.color = ink;
+
+  var btn = document.getElementById('playgroundBtn');
+  btn.style.background = accent;
+  btn.style.borderColor = accent;
+  btn.style.color = paper;
+}
+
+function resetPlayground(){
+  document.getElementById('playPaper').value = '#f3eee4';
+  document.getElementById('playInk').value = '#1a1612';
+  document.getElementById('playAccent').value = '#c0392b';
+  document.getElementById('playPaper2').value = '#ebe4d4';
+  updatePlayground();
+}
+
+/* ===== SCROLL TO SECTION ===== */
+function scrollToSection(id){
+  var el = document.getElementById(id);
+  if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* ===== KEYBOARD: ESC closes modal ===== */
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){
+    document.querySelectorAll('.modal-overlay.open').forEach(function(m){
+      m.classList.remove('open');
+    });
+  }
+});
+</script>
+</body>
+</html>

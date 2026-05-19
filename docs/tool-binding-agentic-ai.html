@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tool Binding in Agentic AI — Explained</title>
+<style>
+/* ===== DESIGN TOKENS ===== */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap');
+:root {
+  --paper: #f3eee4; --paper-2: #ebe4d4; --ink: #1a1612; --ink-2: #3d3528; --ink-dim: #6b5d49; --ink-faint: #a89a83; --rule: #c8b99e;
+  --accent: #c0392b; --accent2: #a93226; --green: #2d7d46; --blue: #2b6cb0; --gold: #b8860b; --highlight: #fff59d;
+  --serif: Georgia, 'Times New Roman', serif; --sans: 'Inter', system-ui, sans-serif; --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --n1: #c0392b; --n2: #2b6cb0; --n3: #2d7d46; --n4: #b8860b; --nm: #8a7a66; --nt: #fff; --ns: rgba(255,255,255,.7);
+  --dbg: rgba(45,125,70,.12); --dbr: #2d7d46; --dtx: #2d7d46;
+}
+[data-theme="dark"] {
+  --paper: #1b1917; --paper-2: #242220; --ink: #f0ece9; --ink-2: #c5bbb2; --ink-dim: #9a9088; --ink-faint: #6b625c; --rule: #3a3430;
+  --accent: #e8704a; --accent2: #d95a3a; --green: #5bbd6b; --blue: #5b8fbd; --gold: #d4a84b; --highlight: #7a5a3a;
+  --n1: #e8704a; --n2: #5b8fbd; --n3: #5bbd6b; --n4: #d4a84b; --nm: #3a3430; --nt: #fff; --ns: rgba(255,255,255,.65);
+  --dbg: rgba(91,189,107,.1); --dbr: #5bbd6b; --dtx: #5bbd6b;
+}
+/* ===== RESET & BASE ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65;background-image:radial-gradient(circle at 25% 15%,rgba(200,180,140,.15) 0%,transparent 40%),radial-gradient(circle at 75% 85%,rgba(200,180,140,.12) 0%,transparent 40%),repeating-linear-gradient(0deg,transparent 0,transparent 28px,rgba(120,100,70,.04) 28px,rgba(120,100,70,.04) 29px);min-height:100vh}
+/* ===== TOPBAR ===== */
+.topbar{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule);padding:14px 0;backdrop-filter:blur(8px)}
+.topbar-inner{max-width:1100px;margin:0 auto;padding:0 28px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.brand{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.brand span{color:var(--accent)}
+#darkToggle{background:none;border:1px solid var(--rule);cursor:pointer;color:var(--ink-dim);padding:5px;display:flex;align-items:center;line-height:1;flex-shrink:0;border-radius:0;transition:all .25s}
+#darkToggle:hover{color:var(--ink);border-color:var(--ink)}
+#darkToggle svg{width:16px;height:16px;display:block}
+/* ===== MAIN ===== */
+main{max-width:1100px;margin:0 auto;padding:40px 28px 100px}
+.section{opacity:0;transform:translateY(12px);transition:opacity .5s ease,transform .5s ease}
+.section.in{opacity:1;transform:translateY(0)}
+.section-divider{height:1px;background:var(--rule);margin:40px 0;border:none}
+/* ===== TYPOGRAPHY ===== */
+h1{font-family:var(--serif);font-size:clamp(48px,7vw,80px);font-weight:400;line-height:.92;letter-spacing:-.02em;margin-bottom:4px}
+h2{font-family:var(--serif);font-size:30px;font-weight:400;margin:36px 0 16px;display:flex;align-items:center;gap:10px}
+h2 .hash{font-family:var(--mono);font-size:14px;color:var(--ink-faint)}
+h3{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);margin:24px 0 10px}
+p{margin-bottom:12px}
+a{color:var(--accent);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
+a:hover{color:var(--accent2)}
+.sub{font-family:var(--serif);font-size:18px;font-style:italic;color:var(--ink-dim);margin-bottom:30px;border-bottom:2px solid var(--rule);padding-bottom:20px}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);display:flex;align-items:center;gap:8px}
+.eyebrow .pill{background:var(--ink);color:var(--paper);padding:2px 8px}
+/* ===== CODE BLOCKS ===== */
+.code-block{background:var(--ink);color:#e8d9c0;font-family:var(--mono);font-size:13px;padding:18px 22px;margin:12px 0;overflow-x:auto;line-height:1.6}
+.code-block .comment{color:#8a7a66}.code-block .keyword{color:#e8704a}.code-block .func{color:#5b8fbd}.code-block .string{color:#5bbd6b}.code-block .number{color:#d4a84b}
+.inline-code{font-family:var(--mono);font-size:12px;background:var(--paper);padding:1px 5px;border:1px solid var(--rule);color:var(--ink)}
+/* ===== TABLES ===== */
+.table-container{overflow-x:auto;margin:12px 0;border:1px solid var(--ink);box-shadow:2px 2px 0 var(--ink)}
+.ds-table{width:100%;border-collapse:collapse;font-size:13px}
+.ds-table th{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);text-align:left;padding:10px 14px;border-bottom:2px solid var(--ink);background:var(--paper-2);white-space:nowrap;user-select:none}
+.ds-table td{padding:8px 14px;border-bottom:1px solid var(--rule);color:var(--ink-2)}
+.ds-table tr:last-child td{border-bottom:none}
+.ds-table tbody tr:hover{background:rgba(200,180,140,.1)}
+.ds-table.striped tbody tr:nth-child(even){background:var(--paper-2)}
+.ds-table.striped tbody tr:nth-child(even):hover{background:rgba(200,180,140,.15)}
+/* ===== ACCORDION ===== */
+.accordion{border:1px solid var(--ink);box-shadow:2px 2px 0 var(--ink);margin:12px 0}
+.accordion-item{border-bottom:1px solid var(--rule)}.accordion-item:last-child{border-bottom:none}
+.accordion-header{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 16px;background:var(--paper-2);border:none;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--ink);text-align:left}
+.accordion-header:hover{background:var(--paper)}
+.accordion-icon{font-size:14px;color:var(--ink-dim);transition:transform .2s;flex-shrink:0;margin-left:10px}
+.accordion-item.open .accordion-icon{transform:rotate(45deg)}
+.accordion-body{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease;padding:0 16px;background:var(--paper)}
+.accordion-item.open .accordion-body{max-height:500px;padding:12px 16px}
+.accordion-body p{color:var(--ink-2);font-size:14px;margin-bottom:6px}
+/* ===== BADGES ===== */
+.badge{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);line-height:1.4}
+.badge-accent{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.badge-green{background:var(--green);border-color:var(--green);color:var(--paper)}
+.badge-blue{background:var(--blue);border-color:var(--blue);color:var(--paper)}
+.badge-gold{background:var(--gold);border-color:var(--gold);color:var(--paper)}
+.badge-outline{background:transparent;color:var(--ink-dim);border-color:var(--ink-dim)}
+/* ===== ANIMATIONS ===== */
+@keyframes pipeFlow{to{stroke-dashoffset:-18}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-10px)}}
+/* ===== UTILITIES ===== */
+.d-flex{display:flex}.d-block{display:block}.gap-sm{gap:6px}.gap-md{gap:12px}.gap-lg{gap:20px}
+.align-center{align-items:center}.justify-between{justify-content:space-between}.flex-1{flex:1}
+.mt-0{margin-top:0}.mt-1{margin-top:4px}.mt-2{margin-top:8px}.mt-3{margin-top:16px}.mt-4{margin-top:24px}
+.mb-0{margin-bottom:0}.mb-1{margin-bottom:4px}.mb-2{margin-bottom:8px}.mb-3{margin-bottom:16px}.mb-4{margin-bottom:24px}
+.text-center{text-align:center}.text-mono{font-family:var(--mono)}.text-dim{color:var(--ink-dim)}
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+  .topbar-inner{padding:0 16px}
+  main{padding:24px 16px 80px}
+  h1{font-size:clamp(36px,10vw,48px)}
+  .sub{font-size:16px}
+  h2{font-size:24px}
+  .section{opacity:1;transform:none}
+  .ds-table th,.ds-table td{padding:6px 10px;font-size:12px}
+}
+</style>
+<style>
+/* Page-specific overrides */
+.pipeline-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; padding: 20px 0; }
+.pipe-node { background: var(--paper-2); border: 1px solid var(--ink); padding: 10px 18px; font-family: var(--mono); font-size: 12px; box-shadow: 2px 2px 0 var(--ink); text-align: center; min-width: 70px; }
+.pipe-node.accent { background: var(--accent); color: var(--paper); border-color: var(--accent); box-shadow: 2px 2px 0 var(--accent2); }
+.pipe-node.green { background: var(--green); color: var(--paper); border-color: var(--green); }
+.pipe-node.blue { background: var(--blue); color: var(--paper); border-color: var(--blue); }
+.pipe-node.gold { background: var(--gold); color: var(--paper); border-color: var(--gold); }
+.pipe-arrow { font-family: var(--mono); font-size: 18px; color: var(--ink-dim); }
+.pipe-label { font-size: 10px; font-family: var(--mono); color: var(--ink-faint); text-align: center; }
+
+.arch-row { display: flex; gap: 12px; align-items: stretch; flex-wrap: wrap; margin: 16px 0; }
+.arch-box { flex: 1; min-width: 150px; background: var(--paper-2); border: 1px solid var(--ink); padding: 14px; box-shadow: 2px 2px 0 var(--ink); }
+.arch-box .title { font-family: var(--mono); font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.arch-box .body { font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media (max-width:600px){ .compare-grid { grid-template-columns: 1fr; } }
+
+/* Override highlight to a warm peach tone — visible, not yellow */
+.highlight-box { background: #f0e0cc; padding: 14px 18px; border-left: 3px solid var(--accent); margin: 16px 0; font-size: 14px; }
+[data-theme="dark"] .highlight-box { background: #3d3530; }
+.highlight-box .label { font-family: var(--mono); font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+
+/* Ghost copy button with emoji */
+.code-wrap { position: relative; margin: 8px 0; }
+.code-wrap .code-block { margin: 0; }
+.copy-ghost { position: absolute; top: 6px; right: 6px; background: transparent; border: none; color: var(--ink-faint); cursor: pointer; font-size: 15px; line-height: 1; padding: 2px 5px; z-index: 2; opacity: 0.5; transition: opacity .2s, color .2s; }
+.copy-ghost:hover { opacity: 1; color: var(--ink); }
+
+.step-list { counter-reset: step; margin: 16px 0; }
+.step-item { counter-increment: step; padding: 12px 14px 12px 50px; position: relative; border-left: 2px solid var(--rule); margin-bottom: 8px; }
+.step-item:last-child { border-left-color: var(--accent); }
+.step-item::before { content: counter(step); position: absolute; left: -12px; top: 12px; width: 24px; height: 24px; background: var(--accent); color: var(--paper); font-family: var(--mono); font-size: 11px; display: flex; align-items: center; justify-content: center; }
+.step-item .title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.step-item .desc { font-size: 13px; color: var(--ink-dim); line-height: 1.5; }
+
+.benefit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 16px 0; }
+.benefit-card { background: var(--paper-2); border: 1px solid var(--ink); padding: 16px; box-shadow: 2px 2px 0 var(--ink); }
+.benefit-card .emoji { font-size: 24px; margin-bottom: 8px; display: block; }
+.benefit-card .title { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+.benefit-card .desc { font-size: 12px; color: var(--ink-dim); line-height: 1.5; }
+
+.code-annotation { background: var(--paper-2); border: 1px solid var(--rule); padding: 12px 16px; margin: 4px 0 12px; font-size: 12px; color: var(--ink-dim); border-left: 3px solid var(--accent); }
+.snippet-row { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; margin: 12px 0; }
+.snippet-num { font-family: var(--mono); font-size: 10px; color: var(--ink-faint); min-width: 24px; text-align: right; padding-top: 2px; }
+.snippet-line { flex: 1; min-width: 200px; padding: 8px 12px; background: var(--paper-2); font-family: var(--mono); font-size: 12px; line-height: 1.6; border-left: 2px solid var(--rule); }
+.snippet-line.highlight { border-left-color: var(--accent); background: #f0e0cc; }
+[data-theme="dark"] .snippet-line.highlight { background: #3d3530; }
+
+.mistake-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+@media (max-width:600px){ .mistake-grid { grid-template-columns: 1fr; } }
+.mistake-card { padding: 14px; border: 1px solid var(--rule); }
+.mistake-card.bad { border-left: 3px solid var(--accent); }
+.mistake-card.good { border-left: 3px solid var(--green); }
+.mistake-card .label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .15em; margin-bottom: 4px; }
+.mistake-card.bad .label { color: var(--accent); }
+.mistake-card.good .label { color: var(--green); }
+.mistake-card .content { font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Agentic AI <span>Deep Dive</span></div>
+    <div class="d-flex align-center gap-md">
+      <button id="darkToggle" onclick="var d=document.documentElement;if(d.getAttribute('data-theme')==='dark'){d.removeAttribute('data-theme')}else{d.setAttribute('data-theme','dark')}" aria-label="Toggle dark mode">
+        <svg viewBox="0 0 16 16" fill="none"> <circle cx="8" cy="8" r="3.5" stroke="currentColor" stroke-width="1.3"/> <line x1="8" y1="1" x2="8" y2="3" stroke="currentColor" stroke-width="1.3"/> <line x1="8" y1="13" x2="8" y2="15" stroke="currentColor" stroke-width="1.3"/> <line x1="1" y1="8" x2="3" y2="8" stroke="currentColor" stroke-width="1.3"/> <line x1="13" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/> <line x1="3.05" y1="3.05" x2="4.46" y2="4.46" stroke="currentColor" stroke-width="1.3"/> <line x1="11.54" y1="11.54" x2="12.95" y2="12.95" stroke="currentColor" stroke-width="1.3"/> <line x1="3.05" y1="12.95" x2="4.46" y2="11.54" stroke="currentColor" stroke-width="1.3"/> <line x1="11.54" y1="4.46" x2="12.95" y2="3.05" stroke="currentColor" stroke-width="1.3"/> </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ===== HERO ===== -->
+<section class="section">
+  <div class="eyebrow"><span class="pill">Agentic AI</span> May 2026</div>
+  <h1>Tool Binding in<br>Agentic AI</h1>
+  <p class="sub">What is it · How it works · Why it matters · Interview framing</p>
+</section>
+
+<!-- ===== SIMPLE EXPLANATION ===== -->
+<section class="section">
+  <h2><span class="hash">01</span> Core Idea — In One Line</h2>
+  <p class="text-dim mb-3">No jargon. Just what it is and why it exists.</p>
+
+  <div class="highlight-box">
+    <div class="label">The Problem</div>
+    An LLM can <em>talk</em> about doing things — "I will search flights" — but it can't <em>actually</em> execute anything.
+    It's a text generator, not a computer.
+  </div>
+
+  <div class="highlight-box" style="border-left-color: var(--green);">
+    <div class="label">The Solution</div>
+    <strong>Tool Binding</strong> is the code layer that catches what the LLM <em>wants</em> to do and routes it to real functions
+    that actually <em>do</em> it. It's the bridge between "the model said call get_weather('London')" and a real weather API being called.
+  </div>
+
+  <div class="pipeline-flow mt-2">
+    <div class="pipe-node">User asks<br><span style="font-size:10px;">"Weather in London?"</span></div>
+    <div class="pipe-arrow">&#8594;</div>
+    <div class="pipe-node accent">LLM decides<br><span style="font-size:10px;">"Use get_weather tool"</span></div>
+    <div class="pipe-arrow">&#8594;</div>
+    <div class="pipe-node blue">Binding Layer<br><span style="font-size:10px;">Routes to handler</span></div>
+    <div class="pipe-arrow">&#8594;</div>
+    <div class="pipe-node green">Real API call<br><span style="font-size:10px;">Returns weather data</span></div>
+  </div>
+
+  <p class="mt-2" style="font-size: 13px; color: var(--ink-dim);">
+    Without Tool Binding, the LLM just <em>talks</em> about getting weather. With it, it <em>actually gets</em> the weather.
+    Talking vs Doing. That's the whole difference.
+  </p>
+</section>
+
+<!-- ===== WHAT IS IT ===== -->
+<section class="section">
+  <h2><span class="hash">02</span> What is Tool Binding?</h2>
+  <p class="text-dim mb-3">One-line definition first, then break it down.</p>
+
+  <div class="highlight-box">
+    <div class="label">Definition</div>
+    <strong>Tool Binding</strong> is the layer of code that connects an LLM's <em>intent</em> (what it wants to do) to
+    <em>actual executable functions</em> (what actually runs). It's the bridge between "the model said it wants to call get_weather('London')"
+    and the real API call to a weather service.
+  </div>
+
+  <div class="arch-row">
+    <div class="arch-box">
+      <div class="title">1. LLM decides</div>
+      <div class="body">Based on your tool definitions, the LLM outputs a function call: "I want to call <code>search_flights</code> with params <code>{from: "HYD", to: "BLR"}</code>".</div>
+    </div>
+    <div class="arch-box">
+      <div class="title">2. Binding layer</div>
+      <div class="body">Your code receives this function name + args. It looks up a registry of available functions, validates params, and routes to the right handler.</div>
+    </div>
+    <div class="arch-box">
+      <div class="title">3. Execution</div>
+      <div class="body">The actual function runs — hits an API, queries a database, or triggers a workflow. The result is sent back to the LLM.</div>
+    </div>
+  </div>
+
+  <p class="mt-2" style="font-size: 13px; color: var(--ink-dim);">
+    This is NOT the same as <em>function calling</em> (which is the LLM's ability to <em>propose</em> function calls).
+    Tool Binding is <strong>your code</strong> that acts on those proposals. Without it, function calling is just text generation.
+  </p>
+</section>
+
+<!-- ===== TOOL USE PATTERNS (from Google) ===== -->
+<section class="section">
+  <h2><span class="hash">03</span> Tool Use Patterns — Google's Framework</h2>
+  <p class="text-dim mb-3">From Google Cloud's official agentic architecture docs — four ways to bind tools to agents.</p>
+
+  <div class="table-container">
+    <table class="ds-table striped">
+      <thead>
+        <tr><th>Pattern</th><th>When to Use</th><th>GCP Service</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Built-in Tools</strong></td>
+          <td>Common tasks: web search, code execution, RAG</td>
+          <td>ADK built-in tools</td>
+        </tr>
+        <tr>
+          <td><strong>Model Context Protocol (MCP)</strong></td>
+          <td>Modular multi-agent systems needing standardized tool interfaces</td>
+          <td>ADK + MCP servers</td>
+        </tr>
+        <tr>
+          <td><strong>API Management Platform</strong></td>
+          <td>Enterprise scale: 100s of APIs needing security, rate limiting, monitoring</td>
+          <td>Apigee API Hub</td>
+        </tr>
+        <tr>
+          <td><strong>Custom Function Tools</strong></td>
+          <td>Internal / third-party APIs without MCP server</td>
+          <td>ADK Function Tools</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="mt-2" style="font-size: 12px; color: var(--ink-faint);">
+    Source: <a href="https://docs.cloud.google.com/architecture/choose-agentic-ai-architecture-components" target="_blank" style="color:var(--accent);">Google Cloud — Choose agentic AI architecture components</a>
+  </p>
+</section>
+
+<!-- ===== HOW IT WORKS BLOCK BY BLOCK ===== -->
+<section class="section">
+  <h2><span class="hash">04</span> How Tool Binding Works — Block by Block</h2>
+
+  <div class="step-list">
+    <div class="step-item">
+      <div class="title">Define the Tool (Function Declaration)</div>
+      <div class="desc">You write a function and describe it clearly: name, parameters, what it does. This description is what the LLM reads to decide when to use it.</div>
+      <div class="code-wrap"><button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button><div class="code-block mt-1" style="font-size: 12px; padding: 10px 14px;">
+<span class="keyword">def</span> <span class="func">get_weather</span>(city: <span class="keyword">str</span>, country: <span class="keyword">str</span>) -> <span class="keyword">dict</span>:
+    <span class="string">"""Get current weather for a city. Args: city name, country code."""</span>
+    <span class="comment"># ... API call ...</span>
+    <span class="keyword">return</span> {"temp": 32, "condition": "sunny"}</div></div>
+    </div>
+    <div class="step-item">
+      <div class="title">Register the Tool in a Registry</div>
+      <div class="desc">All available tools are collected into a registry — a dict or list that maps tool names to handler functions. The LLM sees these as schema definitions.</div>
+      <div class="code-annotation">Tool registry = map of {"function_name": handler_function}</div>
+    </div>
+    <div class="step-item">
+      <div class="title">LLM Receives User Query + Tool Definitions</div>
+      <div class="desc">The user asks "What's the weather in London?". The LLM examines the tool definitions and decides which tool fits.</div>
+    </div>
+    <div class="step-item">
+      <div class="title">LLM Outputs a Function Call Request</div>
+      <div class="desc">The model returns a structured response: <code>{"name": "get_weather", "args": {"city": "London", "country": "UK"}}</code>. This is <em>function calling</em> — just text.</div>
+    </div>
+    <div class="step-item">
+      <div class="title">Binding Layer Receives and Routes</div>
+      <div class="desc">This is the <strong>binding</strong>. Your code intercepts the LLM's output, looks up <code>get_weather</code> in the registry, passes the args, and executes the handler.</div>
+      <div class="code-annotation">Binding layer pseudo: registry[tool_name](**tool_args)</div>
+    </div>
+    <div class="step-item">
+      <div class="title">Result Sent Back to LLM</div>
+      <div class="desc">The function's return value is sent back to the LLM as a "tool response". The model now has real data and can generate a final answer for the user.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CODE EXAMPLE ===== -->
+<section class="section">
+  <h2><span class="hash">05</span> Minimal Code Example — Gemini + Tool Binding</h2>
+  <p class="text-dim mb-3">Using Google's Gemini API with function calling — notice where the binding logic lives.</p>
+
+  <div class="code-wrap"><button class="copy-ghost" onclick="copyCode(this)">&#x1F4CB;</button><div class="code-block" style="font-size: 12px; padding: 14px 16px;">
+<span class="comment"># 1. Define your tool</span>
+<span class="keyword">def</span> <span class="func">get_flights</span>(origin: <span class="keyword">str</span>, dest: <span class="keyword">str</span>, date: <span class="keyword">str</span>) -> <span class="keyword">list</span>:
+    <span class="string">"""Search flights between two cities on a given date."""</span>
+    <span class="comment"># Simulate API call</span>
+    <span class="keyword">return</span> [{"flight": "AI123", "price": 4500}]
+
+<span class="comment"># 2. Tell Gemini about this tool</span>
+tool_declaration = {
+    <span class="string">"name"</span>: <span class="string">"get_flights"</span>,
+    <span class="string">"description"</span>: <span class="string">"Search flights between two cities on a given date"</span>,
+    <span class="string">"parameters"</span>: {
+        <span class="string">"type"</span>: <span class="string">"object"</span>,
+        <span class="string">"properties"</span>: {
+            <span class="string">"origin"</span>: {<span class="string">"type"</span>: <span class="string">"string"</span>},
+            <span class="string">"dest"</span>: {<span class="string">"type"</span>: <span class="string">"string"</span>},
+            <span class="string">"date"</span>: {<span class="string">"type"</span>: <span class="string">"string"</span>}
+        }
+    }
+}
+
+<span class="comment"># 3. Send to Gemini (tool definitions included)</span>
+response = model.generate_content(<span class="string">"Flights from HYD to BLR tomorrow"</span>,
+    tools=[tool_declaration])
+
+<span class="comment"># 4. *** TOOL BINDING LIVES HERE ***</span>
+<span class="keyword">if</span> response.candidates[0].function_calls:
+    fc = response.candidates[0].function_calls[0]
+    <span class="comment"># This is the binding: map function name to real code</span>
+    <span class="keyword">if</span> fc.name == <span class="string">"get_flights"</span>:
+        result = get_flights(**fc.args)  <span class="comment"># &lt;-- ROUTING</span>
+        <span class="comment"># Send result back to Gemini</span>
+        response2 = model.generate_content(
+            [<span class="string">"Flights from HYD to BLR tomorrow"</span>,
+             types.Part.from_function_response(name=fc.name, response={"result": result})]
+        )</div></div>
+
+  <p class="mt-2 text-dim" style="font-size: 13px;">
+    The <strong>binding</strong> is literally that <code>if fc.name == "get_flights": result = get_flights(**fc.args)</code> block.
+    That's the switchboard connecting LLM intent to real execution.
+  </p>
+</section>
+
+<!-- ===== BENEFITS ===== -->
+<section class="section">
+  <h2><span class="hash">06</span> Benefits of Tool Binding</h2>
+  <p class="text-dim mb-3">Why bother? Because without it, your LLM can talk but never act.</p>
+
+  <div class="benefit-grid">
+    <div class="benefit-card">
+      <span class="emoji">&#x1F310;</span>
+      <div class="title">Extensibility</div>
+      <div class="desc">Add new capabilities by writing a function + description. No model retraining needed. Plug in any API, database, or service.</div>
+    </div>
+    <div class="benefit-card">
+      <span class="emoji">&#x1F6E1;&#xFE0F;</span>
+      <div class="title">Safety &amp; Control</div>
+      <div class="desc">You control what the agent can do. The binding layer validates params, enforces permissions, and can reject dangerous calls before execution.</div>
+    </div>
+    <div class="benefit-card">
+      <span class="emoji">&#x1F50D;</span>
+      <div class="title">Observability</div>
+      <div class="desc">Every tool call can be logged, traced, and audited. Know exactly which tools were called, with what args, and what they returned.</div>
+    </div>
+    <div class="benefit-card">
+      <span class="emoji">&#x1F504;</span>
+      <div class="title">Reusability</div>
+      <div class="desc">Same tool can serve multiple agents. Write once, bind everywhere. MCP standardizes this across ecosystems.</div>
+    </div>
+    <div class="benefit-card">
+      <span class="emoji">&#x26A1;</span>
+      <div class="title">Autonomous Task Execution</div>
+      <div class="desc">Agents can chain multiple tool calls to complete complex workflows. Without binding, every "action" needs human to execute it.</div>
+    </div>
+    <div class="benefit-card">
+      <span class="emoji">&#x1F9E9;</span>
+      <div class="title">Composability</div>
+      <div class="desc">Compose agents from sub-agents via Agent-as-a-Tool binding (ADK pattern). Build complex multi-agent systems from simple parts.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== COMMON MISTAKES ===== -->
+<section class="section">
+  <h2><span class="hash">07</span> Common Mistakes &amp; Fixes</h2>
+
+  <div class="mistake-grid">
+    <div class="mistake-card bad">
+      <div class="label">&#x2716; Bad: Vague tool names</div>
+      <div class="content"><code>"function1"</code> or <code>"do_stuff"</code> — the LLM can't figure out when to use these. Always use <strong>clear, specific names</strong> like <code>"search_flights"</code> or <code>"get_weather"</code>.</div>
+    </div>
+    <div class="mistake-card good">
+      <div class="label">&#x2714; Good: Descriptive names + params</div>
+      <div class="content"><code>"book_flight_ticket"</code> with description <em>"book flight tickets after confirming user's requirements: time, departure, destination, party size"</em>.</div>
+    </div>
+    <div class="mistake-card bad">
+      <div class="label">&#x2716; Bad: Too many tools</div>
+      <div class="content">50+ tools registered. The LLM gets confused and picks wrong tools. Google recommends max <strong>10-20 active tools</strong> per context.</div>
+    </div>
+    <div class="mistake-card good">
+      <div class="label">&#x2714; Good: Dynamic tool selection</div>
+      <div class="content">Select relevant tools based on conversation context. Only expose weather tools when user asks about weather. Reduces ambiguity.</div>
+    </div>
+    <div class="mistake-card bad">
+      <div class="label">&#x2716; Bad: No error handling in binding</div>
+      <div class="content">Tool throws an exception — agent crashes. Never assume tool calls succeed. Your binding layer must handle failures gracefully.</div>
+    </div>
+    <div class="mistake-card good">
+      <div class="label">&#x2714; Good: Wrap in try/except + retry</div>
+      <div class="content">Catch errors, return meaningful failure messages to the LLM so it can retry or apologize to the user. Add timeout for external API calls.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== INTERVIEW PREP ===== -->
+<section class="section">
+  <h2><span class="hash">08</span> Interview Prep</h2>
+  <p class="text-dim mb-3">Three depths — from quick answer to deep walkthrough.</p>
+
+  <div class="accordion">
+    <div class="accordion-item open">
+      <button class="accordion-header" onclick="toggleAccordion(this)">
+        <span>30-second answer</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <p>"Tool Binding is the code layer that connects an LLM's function-calling output to actual executable functions. When an LLM says 'call get_weather(london)', binding is what actually runs the get_weather function, gets the result, and sends it back to the model. Without binding, function calling is just text — with it, agents can interact with real systems, APIs, and databases."</p>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <button class="accordion-header" onclick="toggleAccordion(this)">
+        <span>90-second STAR answer</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <p><strong>Situation:</strong> Building a flight-booking agent using Gemini. The model could <em>propose</em> function calls but couldn't actually execute them.</p>
+        <p><strong>Task:</strong> Build a binding layer that routes LLM-proposed tool calls to real handler functions.</p>
+        <p><strong>Action:</strong> Created a tool registry mapping function names to handlers. Added parameter validation, error handling with retry logic (max 3 retries), and structured logging for every call. Used dynamic dispatch: <code>registry[tool_name](**tool_args)</code>.</p>
+        <p><strong>Result:</strong> Reduced failed tool calls by 80%, added full traceability, and the agent could autonomously complete multi-step booking workflows without human intervention.</p>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <button class="accordion-header" onclick="toggleAccordion(this)">
+        <span>3-minute technical walkthrough</span>
+        <span class="accordion-icon">+</span>
+      </button>
+      <div class="accordion-body">
+        <p><strong>Depth 1 — Architecture:</strong> The binding layer sits between the LLM and external systems. It comprises: (1) a tool registry (dict mapping name to handler), (2) a dispatcher that routes function calls, (3) a validation layer (Pydantic models), (4) error handling with retries.</p>
+        <p><strong>Depth 2 — Design choices:</strong> We used strong-typed parameters (Pydantic models) so the binding layer validates args before execution. Each tool has a clear description — Google docs emphasize that descriptions are how the LLM reasons about tool selection. We limited active tools to 10 per context to reduce decision ambiguity.</p>
+        <p><strong>Depth 3 — Failure modes:</strong> Network timeouts (added 10s timeout + 2 retries), hallucinations (model calls non-existent tool — registry returns clear error), parameter mismatches (Pydantic validation catches upfront). Every failure is logged with structured JSON for debugging.</p>
+        <p><strong>Depth 4 — Benefits:</strong> The binding pattern makes agents extensible (add tool = write function + register), observable (every call traceable), and safe (validation + permissions at the binding layer, not in the LLM).</p>
+        <p><strong>Depth 5 — GCP integration:</strong> Google ADK provides Agent-as-a-Tool binding for multi-agent systems. Apigee API Hub manages tool APIs at enterprise scale. MCP standardizes how binding happens across different agent ecosystems.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== QUICK REF ===== -->
+<section class="section">
+  <h2><span class="hash">09</span> Quick Reference — Tool Binding vs Related Concepts</h2>
+
+  <div class="table-container">
+    <table class="ds-table striped">
+      <thead>
+        <tr><th>Concept</th><th>What it is</th><th>Analogy</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Function Calling</strong></td><td>LLM's ability to <em>propose</em> calling a function</td><td>Customer saying "I want biryani"</td></tr>
+        <tr><td><strong>Tool Binding</strong></td><td>Code that <em>executes</em> the proposed function</td><td>Waiter taking order to kitchen</td></tr>
+        <tr><td><strong>Tool Registry</strong></td><td>Collection of all available tools with metadata</td><td>Restaurant menu (what's available)</td></tr>
+        <tr><td><strong>Tool Execution</strong></td><td>Actual runtime invocation of the tool</td><td>Chef actually cooking biryani</td></tr>
+        <tr><td><strong>MCP (Model Context Protocol)</strong></td><td>Standard protocol for tool communication</td><td>Standardized order form across restaurants</td></tr>
+        <tr><td><strong>Agent-as-a-Tool (ADK)</strong></td><td>One agent wrapped as a callable tool for another agent</td><td>Head chef delegating to pastry chef</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer style="margin-top:60px;padding-top:20px;border-top:2px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--ink-faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+  <span>Tool Binding in Agentic AI — Explained</span>
+  <span>Built with design-system-v2 &middot; Notebook Paper Theme</span>
+</footer>
+
+</main>
+
+<script>
+/* Intersection Observer for entrance animations */
+var obs = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting) e.target.classList.add('in');
+  });
+}, {threshold: 0.1});
+document.querySelectorAll('.section').forEach(function(e){ obs.observe(e); });
+
+/* Accordion toggle */
+function toggleAccordion(header){
+  var item = header.parentElement;
+  item.classList.toggle('open');
+}
+
+/* Copy code — ghost emoji style */
+function copyCode(btn){
+  var wrap = btn.parentElement;
+  var code = wrap.querySelector('.code-block');
+  var text = code.textContent || code.innerText;
+  navigator.clipboard.writeText(text).catch(function(){});
+  btn.textContent = '\u2705';
+  setTimeout(function(){ btn.textContent = '\uD83D\uDCCB'; }, 1500);
+}
+</script>
+
+</body>
+</html>

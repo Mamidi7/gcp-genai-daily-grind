@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GCP Prep — Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* ===== NOTEBOOK PAPER THEME ===== */
+  --paper: #f3eee4;  --paper-2: #ebe4d4;
+  --ink: #1a1612;     --ink-2: #3d3528;
+  --ink-dim: #6b5d49; --ink-faint: #a89a83;
+  --rule: #c8b99e;
+  --accent: #c0392b;  --accent2: #a93226;
+  --green: #2d7d46;   --blue: #2b6cb0;
+  --gold: #b8860b;
+  --highlight: #fff59d;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  /* derived semantic colors */
+  --n1: #c0392b; --n2: #2b6cb0; --n3: #2d7d46; --n4: #b8860b;
+  --nm: #8a7a66; --nt: #ffffff; --ns: rgba(255,255,255,.7);
+  --dbg: rgba(45,125,70,.12); --dbr: #2d7d46; --dtx: #2d7d46;
+}
+[data-theme="dark"] {
+  --paper: #1b1917;  --paper-2: #242220;
+  --ink: #f0ece9;    --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430;
+  --accent: #e8704a;  --accent2: #d95a3a;
+  --green: #5bbd6b;   --blue: #5b8fbd;
+  --gold: #d4a84b;
+  --highlight: #7a5a3a;
+  --n1: #e8704a; --n2: #5b8fbd; --n3: #5bbd6b; --n4: #d4a84b;
+  --nm: #3a3430; --nt: #ffffff; --ns: rgba(255,255,255,.65);
+  --dbg: rgba(91,189,107,.1); --dbr: #5bbd6b; --dtx: #5bbd6b;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:15px;line-height:1.65;
+  background-image:radial-gradient(circle at 25% 15%,rgba(200,180,140,.15) 0%,transparent 40%),
+                   radial-gradient(circle at 75% 85%,rgba(200,180,140,.12) 0%,transparent 40%),
+                   repeating-linear-gradient(0deg,transparent 0,transparent 28px,rgba(120,100,70,.04) 28px,rgba(120,100,70,.04) 29px);
+  min-height:100vh;
+}
+.topbar{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule);padding:14px 0;backdrop-filter:blur(8px);}
+.topbar-inner{max-width:1100px;margin:0 auto;padding:0 28px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;}
+.brand{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);}
+.brand span{color:var(--accent);}
+#darkToggle{background:none;border:1px solid var(--rule);cursor:pointer;color:var(--ink-dim);padding:5px;display:flex;align-items:center;line-height:1;flex-shrink:0;border-radius:0;transition:all .25s;}
+#darkToggle:hover{color:var(--ink);border-color:var(--ink);}
+#darkToggle svg{width:16px;height:16px;display:block;}
+
+main{max-width:1100px;margin:0 auto;padding:40px 28px 100px;}
+h1{font-family:var(--serif);font-size:56px;font-weight:400;line-height:1;letter-spacing:-.02em;margin-bottom:4px;}
+.sub{font-family:var(--serif);font-size:18px;font-style:italic;color:var(--ink-dim);margin-bottom:30px;border-bottom:2px solid var(--rule);padding-bottom:20px;}
+h2{font-family:var(--serif);font-size:30px;font-weight:400;margin:36px 0 16px;display:flex;align-items:center;gap:10px;}
+h2 .hash{font-family:var(--mono);font-size:14px;color:var(--ink-faint);}
+h3{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);margin:24px 0 10px;}
+
+.token-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:12px 0;}
+.token-card{background:var(--paper-2);border:1px solid var(--ink);padding:14px;box-shadow:2px 2px 0 var(--ink);cursor:pointer;transition:all .2s;}
+.token-card:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink);}
+.token-card .name{font-family:var(--mono);font-size:11px;color:var(--ink-dim);margin-bottom:6px;}
+.token-card .value{font-family:var(--mono);font-size:13px;color:var(--ink);}
+.token-card .swatch{width:100%;height:24px;border:1px solid var(--rule);margin-bottom:8px;}
+
+.color-row{display:flex;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--rule);font-family:var(--mono);font-size:12px;cursor:pointer;transition:background .2s;}
+.color-row:hover{background:rgba(200,180,140,.12);}
+.color-swatch{width:32px;height:32px;border:1px solid var(--rule);flex-shrink:0;}
+.color-name{width:120px;flex-shrink:0;color:var(--ink-2);}
+.color-hex{width:90px;flex-shrink:0;color:var(--ink-dim);font-size:11px;}
+.color-preview{flex:1;height:28px;border:1px solid var(--rule);}
+
+.font-card{background:var(--paper-2);border:1px solid var(--ink);padding:18px 22px;margin:12px 0;box-shadow:2px 2px 0 var(--ink);}
+.font-sample{line-height:1.2;margin-bottom:4px;}
+.font-meta{font-family:var(--mono);font-size:10px;color:var(--ink-dim);}
+
+.copy-toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 20px;font-family:var(--mono);font-size:11px;z-index:100;opacity:0;transition:opacity .3s;}
+.copy-toast.show{opacity:1;}
+
+.component-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin:16px 0;}
+.comp-box{background:var(--paper-2);border:1px solid var(--ink);padding:20px;box-shadow:2px 2px 0 var(--ink);}
+.comp-box .comp-label{font-family:var(--mono);font-size:9px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px;}
+
+.btn{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:7px 14px;border:1px solid var(--ink);background:var(--paper);cursor:pointer;color:var(--ink);transition:all .2s;display:inline-block;}
+.btn:hover{background:var(--ink);color:var(--paper);}
+.btn-accent{background:var(--accent);color:var(--paper);border-color:var(--accent);}
+.btn-accent:hover{background:var(--accent2);}
+
+.card-demo{background:var(--paper-2);border:1px solid var(--ink);padding:18px 22px;box-shadow:3px 3px 0 var(--ink);transition:all .3s;}
+.card-demo:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--ink);}
+
+.code-demo{background:var(--ink);color:#e8d9c0;font-family:var(--mono);font-size:13px;padding:18px 22px;margin:12px 0;}
+
+.section{opacity:0;transform:translateY(12px);transition:opacity .5s ease,transform .5s ease;}
+.section.in{opacity:1;transform:translateY(0);}
+
+.usage-card{background:var(--paper-2);border:1px solid var(--ink);padding:16px;margin:10px 0;}
+.usage-card code{font-family:var(--mono);font-size:12px;background:var(--paper);padding:1px 5px;border:1px solid var(--rule);}
+
+.tab-bar{display:flex;gap:0;border:1px solid var(--ink);background:var(--paper-2);margin:12px 0;}
+.tab-item{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:7px 16px;background:transparent;border:none;cursor:pointer;color:var(--ink-dim);transition:all .2s;}
+.tab-item+.tab-item{border-left:1px solid var(--ink);}
+.tab-item:hover{color:var(--ink);}
+.tab-item.active{background:var(--ink);color:var(--paper);}
+
+.def-block{border-left:3px solid var(--accent);padding:10px 14px;margin:10px 0;}
+.def-block .term{font-family:var(--mono);font-size:9px;text-transform:uppercase;color:var(--accent);}
+.def-block .desc{color:var(--ink-2);font-size:14px;}
+
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);display:flex;align-items:center;gap:8px;}
+.eyebrow .pill{background:var(--ink);color:var(--paper);padding:2px 8px;}
+
+/* animation demos */
+@keyframes pipeFlow{to{stroke-dashoffset:-18;}}
+@keyframes stampIn{from{opacity:0;transform:rotate(-12deg) scale(1.6);}to{opacity:.85;transform:rotate(3deg) scale(1);}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">GCP Prep <span>Design System</span></div>
+    <button id="darkToggle" onclick="var d=document.documentElement;if(d.getAttribute('data-theme')==='dark'){d.removeAttribute('data-theme');}else{d.setAttribute('data-theme','dark');}" aria-label="Toggle dark mode">
+      <svg viewBox="0 0 16 16" fill="none"> <circle cx="8" cy="8" r="3.5" stroke="currentColor" stroke-width="1.3"/> <line x1="8" y1="1" x2="8" y2="3" stroke="currentColor" stroke-width="1.3"/> <line x1="8" y1="13" x2="8" y2="15" stroke="currentColor" stroke-width="1.3"/> <line x1="1" y1="8" x2="3" y2="8" stroke="currentColor" stroke-width="1.3"/> <line x1="13" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.3"/> <line x1="3.05" y1="3.05" x2="4.46" y2="4.46" stroke="currentColor" stroke-width="1.3"/> <line x1="11.54" y1="11.54" x2="12.95" y2="12.95" stroke="currentColor" stroke-width="1.3"/> <line x1="3.05" y1="12.95" x2="4.46" y2="11.54" stroke="currentColor" stroke-width="1.3"/> <line x1="11.54" y1="4.46" x2="12.95" y2="3.05" stroke="currentColor" stroke-width="1.3"/> </svg>
+    </button>
+  </div>
+</div>
+
+<main>
+
+<section class="section">
+  <div class="eyebrow"><span class="pill">v1.0</span> May 19, 2026</div>
+  <h1>Design System</h1>
+  <p class="sub">Notebook paper theme — color palette, typography, components &amp; animation tokens for all GCP prep HTMLs</p>
+</section>
+
+<section class="section">
+  <h2><span class="hash">01</span> Color Palette</h2>
+  <p style="color:var(--ink-dim);margin-bottom:14px;">Click any row to copy the CSS variable. Light mode is default; toggle dark at top to see dark equivalents.</p>
+
+  <h3>Core Tokens</h3>
+  <div id="colorTable"></div>
+
+  <h3 style="margin-top:20px;">Semantic / Accent Colors</h3>
+  <div id="semanticTable"></div>
+</section>
+
+<section class="section">
+  <h2><span class="hash">02</span> Typography</h2>
+  <div class="font-card">
+    <div class="font-sample" style="font-family:var(--serif);font-size:48px;font-weight:400;">Serif Heading</div>
+    <div class="font-meta">--serif: Georgia, 'Times New Roman', serif · Font-size: 34-80px · Weight: 400</div>
+    <div style="margin-top:14px;height:1px;background:var(--rule);"></div>
+    <div class="font-sample" style="font-family:var(--sans);font-size:15px;line-height:1.65;margin-top:14px;">Body text set in Inter at 15px with 1.65 line-height. This is the default body text for all cards and paragraphs. For longer form reading, the line-height creates enough breathing room.</div>
+    <div class="font-meta">--sans: 'Inter', system-ui, sans-serif · Font-size: 15px · Line-height: 1.65</div>
+    <div style="margin-top:14px;height:1px;background:var(--rule);"></div>
+    <div class="font-sample" style="font-family:var(--mono);font-size:13px;margin-top:14px;color:var(--ink-dim);">mono-text: Code blocks use IBM Plex Mono at 13px</div>
+    <div class="font-meta">--mono: 'IBM Plex Mono', ui-monospace, monospace · Font-size: 13px (code)</div>
+  </div>
+
+  <h3>Type Scale</h3>
+  <div class="component-row" style="grid-template-columns:1fr;">
+    <div style="font-family:var(--serif);font-size:clamp(48px,7vw,80px);line-height:.92;">H1 — Title</div>
+    <div style="font-family:var(--serif);font-size:34px;font-weight:400;line-height:1.1;">H2 — Section</div>
+    <div style="font-family:var(--sans);font-size:20px;font-weight:500;">H3 — Card Title</div>
+    <div style="font-family:var(--sans);font-size:15px;">Body — Standard Text</div>
+    <div style="font-family:var(--mono);font-size:13px;">Code — Inline &amp; Blocks</div>
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);">Eyebrow — Labels &amp; Meta</div>
+  </div>
+</section>
+
+<section class="section">
+  <h2><span class="hash">03</span> Components</h2>
+
+  <h3>Card</h3>
+  <div class="component-row">
+    <div class="card-demo">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px;">CARD LABEL</div>
+      <p style="font-size:14px;color:var(--ink-2);">Standard notebook card with 3px shadow offset. Hover to see animation.</p>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">CSS</div>
+      <div class="code-demo" style="font-size:11px;padding:12px 14px;">
+.card {
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 18px 22px;
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: all .3s;
+}
+.card:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+      </div>
+    </div>
+  </div>
+
+  <h3>Button</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Variants</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn">Default</button>
+        <button class="btn btn-accent">Accent</button>
+        <button class="btn" style="opacity:.4;" disabled>Disabled</button>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">CSS</div>
+      <div class="code-demo" style="font-size:11px;padding:12px 14px;">
+.btn {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 7px 14px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  cursor: pointer;
+  color: var(--ink);
+}
+.btn:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+      </div>
+    </div>
+  </div>
+
+  <h3>Tab Bar</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Example</div>
+      <div class="tab-bar">
+        <button class="tab-item active">Service</button>
+        <button class="tab-item">Infrastructure</button>
+        <button class="tab-item">Deploy</button>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">CSS</div>
+      <div class="code-demo" style="font-size:11px;padding:12px 14px;">
+.tabs {
+  display: flex; gap: 0;
+  border: 1px solid var(--ink);
+  background: var(--paper-2);
+}
+.tab {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  cursor: pointer;
+  color: var(--ink-dim);
+}
+.tab.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+      </div>
+    </div>
+  </div>
+
+  <h3>Progress Ring</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Example</div>
+      <div style="display:flex;gap:20px;align-items:center;">
+        <svg width="48" height="48" viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="18" fill="none" stroke="var(--rule)" stroke-width="3"/>
+          <circle cx="24" cy="24" r="18" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"
+            stroke-dasharray="113.1" stroke-dashoffset="56.55" transform="rotate(-90 24 24)"/>
+          <text x="24" y="24" text-anchor="middle" dominant-baseline="central" font-family="var(--mono)" font-size="10" fill="var(--ink-dim)">50%</text>
+        </svg>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">CSS</div>
+      <div class="code-demo" style="font-size:11px;padding:12px 14px;">
+.pct-ring .bg {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 3;
+}
+.pct-ring .fg {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: stroke-dashoffset .5s ease;
+}
+      </div>
+    </div>
+  </div>
+
+  <h3>Definition Block</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Example</div>
+      <div class="def-block">
+        <div class="term">Gunicorn</div>
+        <div class="desc">WSGI HTTP server for running Python web applications in production. Sits between Cloud Run and Flask.</div>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">CSS</div>
+      <div class="code-demo" style="font-size:11px;padding:12px 14px;">
+.def-block {
+  border-left: 3px solid var(--accent);
+  padding: 10px 14px;
+}
+.def-block .term {
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+      </div>
+    </div>
+  </div>
+
+  <h3>Metadata Card (cd-card)</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Example</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <div style="background:var(--paper-2);border:1px solid var(--ink);padding:8px 16px;min-width:90px;box-shadow:3px 3px 0 var(--ink);text-align:center;">
+          <div style="font-family:var(--serif);font-size:26px;font-style:italic;color:var(--accent);line-height:1;">3</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--ink-dim);letter-spacing:.08em;text-transform:uppercase;">Endpoints</div>
+        </div>
+        <div style="background:var(--paper-2);border:1px solid var(--ink);padding:8px 16px;min-width:90px;box-shadow:3px 3px 0 var(--ink);text-align:center;">
+          <div style="font-family:var(--serif);font-size:26px;font-style:italic;color:var(--accent);line-height:1;">🐳</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--ink-dim);letter-spacing:.08em;text-transform:uppercase;">Docker</div>
+        </div>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">CSS</div>
+      <div class="code-demo" style="font-size:11px;padding:12px 14px;">
+.cd-card {
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 8px 16px;
+  min-width: 90px;
+  box-shadow: 3px 3px 0 var(--ink);
+  text-align: center;
+}
+.cd-card .num {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-style: italic;
+  color: var(--accent);
+}
+      </div>
+    </div>
+  </div>
+
+  <h3>Code Block</h3>
+  <div class="component-row">
+    <div class="comp-box">
+      <div class="comp-label">Example</div>
+      <div class="code-demo">
+<span style="color:#8a7a66;"># This is a comment</span>
+<span style="color:#e8704a;">def</span> <span style="color:#5b8fbd;">hello</span>():
+    <span style="color:#e8704a;">return</span> <span style="color:#5bbd6b;">"Hello, GCP!"</span>
+      </div>
+    </div>
+    <div class="comp-box">
+      <div class="comp-label">CSS</div>
+      <div class="code-demo" style="font-size:11px;padding:12px 14px;">
+.code-block {
+  background: var(--ink);
+  color: #e8d9c0;
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 18px 22px;
+}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2><span class="hash">04</span> Animations</h2>
+
+  <h3>Page Entrance</h3>
+  <div class="usage-card">
+    <code>@keyframes pageIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }</code>
+    <p style="margin-top:8px;color:var(--ink-dim);font-size:13px;">Every <code style="font-size:11px;">&lt;section&gt;</code> gets this. Trigger via IntersectionObserver adding class "in".</p>
+  </div>
+
+  <h3>SVG Pipeline Flow</h3>
+  <div class="usage-card">
+    <code>@keyframes pipeFlow { to { stroke-dashoffset: -18; } }</code>
+    <p style="margin-top:8px;color:var(--ink-dim);font-size:13px;">Animated arrow for data flow diagrams. Use with <code style="font-size:11px;">stroke-dasharray: 6 3</code>.</p>
+    <svg width="200" height="30" style="margin-top:10px;display:block;">
+      <line x1="10" y1="15" x2="190" y2="15" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 3" style="animation:pipeFlow .8s linear infinite;"/>
+    </svg>
+  </div>
+
+  <h3>Stamp Entrance</h3>
+  <div class="usage-card">
+    <code>@keyframes stampIn { from { opacity: 0; transform: rotate(-12deg) scale(1.6); } to { opacity: .85; transform: rotate(3deg) scale(1); } }</code>
+    <p style="margin-top:8px;color:var(--ink-dim);font-size:13px;">Hero accent stamp. Typically positioned <code style="font-size:11px;">position: absolute; top: 0; right: 0;</code> and animated with <code style="font-size:11px;">animation: stampIn .4s .6s cubic-bezier(.2,.8,.3,1.4) forwards;</code></p>
+  </div>
+
+  <h3>Pulse (for indicators)</h3>
+  <div class="usage-card">
+    <code>@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }</code>
+    <p style="margin-top:8px;color:var(--ink-dim);font-size:13px;">For "live" indicators, loading states.</p>
+  </div>
+</section>
+
+<section class="section">
+  <h2><span class="hash">05</span> Layout Tokens</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="usage-card">
+      <code>main { max-width: 980px; margin: 0 auto; padding: 56px 28px 100px; }</code>
+      <p style="margin-top:6px;font-size:13px;color:var(--ink-dim);">Standard page width</p>
+    </div>
+    <div class="usage-card">
+      <code>section { margin-bottom: 48px; }</code>
+      <p style="margin-top:6px;font-size:13px;color:var(--ink-dim);">Section spacing</p>
+    </div>
+    <div class="usage-card">
+      <code>.key-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }</code>
+      <p style="margin-top:6px;font-size:13px;color:var(--ink-dim);">Key-value card grid</p>
+    </div>
+    <div class="usage-card">
+      <code>.eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; }</code>
+      <p style="margin-top:6px;font-size:13px;color:var(--ink-dim);">Section meta labels</p>
+    </div>
+    <div class="usage-card">
+      <code>.h2-sub { font-family: var(--serif); font-style: italic; color: var(--ink-dim); }</code>
+      <p style="margin-top:6px;font-size:13px;color:var(--ink-dim);">Subtitle below h2</p>
+    </div>
+    <div class="usage-card">
+      <code>@media print { body { background: white; color: black; } }</code>
+      <p style="margin-top:6px;font-size:13px;color:var(--ink-dim);">Print-friendly reset</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2><span class="hash">06</span> How to Use</h2>
+  <div class="usage-card">
+    <p style="margin-bottom:8px;"><strong>1. Copy the CSS variables block</strong></p>
+    <div class="code-demo" style="font-size:11px;padding:12px 14px;">
+:root {
+  --paper: #f3eee4;  --paper-2: #ebe4d4;
+  --ink: #1a1612;     --ink-2: #3d3528;
+  --ink-dim: #6b5d49; --ink-faint: #a89a83;
+  --rule: #c8b99e;
+  --accent: #c0392b;  --accent2: #a93226;
+  --green: #2d7d46;   --blue: #2b6cb0;
+  --gold: #b8860b;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --highlight: #fff59d;
+}
+    </div>
+    <p style="margin-top:12px;margin-bottom:8px;"><strong>2. Include dark mode override</strong></p>
+    <div class="code-demo" style="font-size:11px;padding:12px 14px;">
+[data-theme="dark"] {
+  --paper: #1b1917;  --paper-2: #242220;
+  --ink: #f0ece9;    --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430;
+  --accent: #e8704a;  --accent2: #d95a3a;
+  --green: #5bbd6b;   --blue: #5b8fbd;
+  --gold: #d4a84b;
+  --highlight: #7a5a3a;
+}
+    </div>
+    <p style="margin-top:12px;margin-bottom:8px;"><strong>3. Add dark toggle JS</strong></p>
+    <div class="code-demo" style="font-size:11px;padding:12px 14px;">
+document.getElementById('darkToggle').addEventListener('click', function() {
+  var d = document.documentElement;
+  if (d.getAttribute('data-theme') === 'dark') {
+    d.removeAttribute('data-theme');
+  } else {
+    d.setAttribute('data-theme', 'dark');
+  }
+});
+    </div>
+    <p style="margin-top:12px;margin-bottom:8px;"><strong>4. Import fonts</strong></p>
+    <div class="code-demo" style="font-size:11px;padding:12px 14px;">
+&lt;link href="https://fonts.googleapis.com/css2?
+  family=IBM+Plex+Mono:wght@400;500;600&
+  family=Inter:wght@300;400;500;600&display=swap"
+  rel="stylesheet"&gt;
+    </div>
+  </div>
+</section>
+
+<footer style="margin-top:60px;padding-top:20px;border-top:2px solid var(--rule);font-family:var(--mono);font-size:10px;color:var(--ink-faint);display:flex;justify-content:space-between;">
+  <span>GCP Prep Design System v1.0</span>
+  <span>Extracted from day8-flask-cloud-run-notebook.html</span>
+</footer>
+
+</main>
+
+<div id="toast" class="copy-toast">Copied!</div>
+
+<script>
+var colors = [
+  {name:'--paper', light:'#f3eee4', dark:'#1b1917', cat:'Core'},
+  {name:'--paper-2', light:'#ebe4d4', dark:'#242220', cat:'Core'},
+  {name:'--ink', light:'#1a1612', dark:'#f0ece9', cat:'Core'},
+  {name:'--ink-2', light:'#3d3528', dark:'#c5bbb2', cat:'Core'},
+  {name:'--ink-dim', light:'#6b5d49', dark:'#9a9088', cat:'Core'},
+  {name:'--ink-faint', light:'#a89a83', dark:'#6b625c', cat:'Core'},
+  {name:'--rule', light:'#c8b99e', dark:'#3a3430', cat:'Core'},
+  {name:'--accent', light:'#c0392b', dark:'#e8704a', cat:'Core'},
+  {name:'--accent2', light:'#a93226', dark:'#d95a3a', cat:'Core'},
+  {name:'--green', light:'#2d7d46', dark:'#5bbd6b', cat:'Core'},
+  {name:'--blue', light:'#2b6cb0', dark:'#5b8fbd', cat:'Core'},
+  {name:'--gold', light:'#b8860b', dark:'#d4a84b', cat:'Core'},
+  {name:'--highlight', light:'#fff59d', dark:'#7a5a3a', cat:'Core'},
+  {name:'--n1', light:'#c0392b', dark:'#e8704a', cat:'Semantic'},
+  {name:'--n2', light:'#2b6cb0', dark:'#5b8fbd', cat:'Semantic'},
+  {name:'--n3', light:'#2d7d46', dark:'#5bbd6b', cat:'Semantic'},
+  {name:'--n4', light:'#b8860b', dark:'#d4a84b', cat:'Semantic'}
+];
+
+function renderTable(containerId, filterCat){
+  var el = document.getElementById(containerId);
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  el.innerHTML = colors.filter(function(c){ return c.cat === filterCat; }).map(function(c){
+    var hex = isDark ? c.dark : c.light;
+    return '<div class="color-row" onclick="copyVar(\''+c.name+'\')" title="Click to copy '+c.name+'">'+
+      '<div class="color-swatch" style="background:'+hex+'"></div>'+
+      '<span class="color-name">'+c.name+'</span>'+
+      '<span class="color-hex">'+hex.toUpperCase()+'</span>'+
+      '<div class="color-preview" style="background:'+hex+'"></div>'+
+    '</div>';
+  }).join('');
+}
+
+renderTable('colorTable', 'Core');
+renderTable('semanticTable', 'Semantic');
+
+document.getElementById('darkToggle').addEventListener('click', function(){
+  var d=document.documentElement;
+  if(d.getAttribute('data-theme')==='dark'){
+    d.removeAttribute('data-theme');
+  } else {
+    d.setAttribute('data-theme','dark');
+  }
+  renderTable('colorTable', 'Core');
+  renderTable('semanticTable', 'Semantic');
+});
+
+function copyVar(name){
+  var val = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  var text = name + ': ' + val + ';';
+  navigator.clipboard.writeText(text);
+  var t=document.getElementById('toast');
+  t.textContent='Copied: '+name;
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},1500);
+}
+
+var obs=new IntersectionObserver(function(e){
+  e.forEach(function(e){
+    if(e.isIntersecting) e.target.classList.add('in');
+  });
+},{threshold:0.1});
+document.querySelectorAll('.section').forEach(function(e){obs.observe(e);});
+</script>
+</body>
+</html>
