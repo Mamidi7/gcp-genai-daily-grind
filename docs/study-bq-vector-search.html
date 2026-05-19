@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BigQuery Vector Search — Study Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+:root{--background:#ffffff;--foreground:#09090b;--card:#ffffff;--card-foreground:#09090b;--primary:#18181b;--primary-foreground:#fafafa;--secondary:#f4f4f5;--secondary-foreground:#18181b;--muted:#f4f4f5;--muted-foreground:#71717a;--accent:#f4f4f5;--accent-foreground:#18181b;--destructive:#ef4444;--success:#16a34a;--warning:#f59e0b;--border:#e4e4e7;--input:#e4e4e7;--ring:#18181b;--radius:0.5rem;--radius-sm:calc(var(--radius)-2px);--radius-lg:calc(var(--radius)+2px);--font-sans:'Inter',system-ui,-apple-system,sans-serif;--font-mono:'JetBrains Mono',ui-monospace,monospace;--shadow-sm:0 1px 2px 0 rgb(0 0 0 /0.05);--shadow:0 1px 3px 0 rgb(0 0 0 /0.1),0 1px 2px -1px rgb(0 0 0 /0.1);--shadow-md:0 4px 6px -1px rgb(0 0 0 /0.1),0 2px 4px -2px rgb(0 0 0 /0.1);--shadow-lg:0 10px 15px -3px rgb(0 0 0 /0.1),0 4px 6px -4px rgb(0 0 0 /0.1);}
+[data-theme="dark"]{--background:#09090b;--foreground:#fafafa;--card:#09090b;--card-foreground:#fafafa;--primary:#fafafa;--primary-foreground:#18181b;--secondary:#27272a;--secondary-foreground:#fafafa;--muted:#27272a;--muted-foreground:#a1a1aa;--accent:#27272a;--accent-foreground:#fafafa;--destructive:#7f1d1d;--success:#166534;--warning:#92400e;--border:#27272a;--input:#27272a;--ring:#d4d4d8;--shadow-sm:0 1px 2px 0 rgb(0 0 0 /0.3);--shadow:0 1px 3px 0 rgb(0 0 0 /0.4),0 1px 2px -1px rgb(0 0 0 /0.3);--shadow-md:0 4px 6px -1px rgb(0 0 0 /0.4),0 2px 4px -2px rgb(0 0 0 /0.3);--shadow-lg:0 10px 15px -3px rgb(0 0 0 /0.4),0 4px 6px -4px rgb(0 0 0 /0.3);}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font-sans);background:var(--background);color:var(--foreground);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+.container{max-width:960px;margin:0 auto;padding:0 20px;}
+
+/* shadcn components */
+.sh-btn{display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;border-radius:var(--radius-sm);font-size:0.875rem;font-weight:500;line-height:1;white-space:nowrap;transition:all 0.15s ease;cursor:pointer;outline:none;border:1px solid transparent;padding:0.5rem 1rem;height:2.25rem;font-family:var(--font-sans);}
+.sh-btn:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ring);}
+.sh-btn:disabled{opacity:0.5;pointer-events:none;}
+.sh-btn:active{transform:translateY(1px);}
+.sh-btn-primary{background:var(--primary);color:var(--primary-foreground);}
+.sh-btn-primary:hover{opacity:0.9;}
+.sh-btn-outline{border-color:var(--input);background:transparent;color:var(--foreground);}
+.sh-btn-outline:hover{background:var(--accent);}
+.sh-btn-ghost{background:transparent;color:var(--foreground);}
+.sh-btn-ghost:hover{background:var(--accent);}
+.sh-btn-sm{padding:0.25rem 0.75rem;height:2rem;font-size:0.8125rem;}
+
+.sh-card{border-radius:var(--radius);border:1px solid var(--border);background:var(--card);color:var(--card-foreground);box-shadow:var(--shadow-sm);transition:box-shadow 0.2s,transform 0.2s;}
+.sh-card-hover:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.sh-card-header{padding:1.25rem 1.25rem 0;display:flex;flex-direction:column;gap:0.25rem;}
+.sh-card-header h3{font-size:1.125rem;font-weight:600;margin:0;line-height:1.4;}
+.sh-card-header p{font-size:0.875rem;color:var(--muted-foreground);margin:0;}
+.sh-card-content{padding:1.25rem;font-size:0.875rem;line-height:1.6;}
+
+.sh-badge{display:inline-flex;align-items:center;border-radius:calc(var(--radius)-2px);border:1px solid transparent;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;line-height:1.25;white-space:nowrap;}
+.sh-badge-default{background:var(--primary);color:var(--primary-foreground);}
+.sh-badge-secondary{background:var(--secondary);color:var(--secondary-foreground);}
+.sh-badge-outline{border-color:var(--border);color:var(--foreground);}
+.sh-badge-success{background:var(--success);color:#fff;}
+
+.sh-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1rem;}
+.sh-tab{padding:0.5rem 1rem;font-size:0.875rem;font-weight:500;color:var(--muted-foreground);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;font-family:var(--font-sans);}
+.sh-tab:hover{color:var(--foreground);}
+.sh-tab.active{color:var(--foreground);border-bottom-color:var(--foreground);}
+.sh-tab-panel{display:none;padding:0.5rem 0;}
+.sh-tab-panel.active{display:block;}
+
+.sh-table{width:100%;border-collapse:collapse;}
+.sh-table th{text-align:left;padding:0.75rem 1rem;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted-foreground);border-bottom:1px solid var(--border);}
+.sh-table td{padding:0.75rem 1rem;border-bottom:1px solid var(--border);font-size:0.875rem;}
+.sh-table tbody tr:hover{background:var(--muted);}
+
+.sh-code{border-radius:var(--radius);background:var(--muted);padding:1.25rem 1.5rem;font-family:var(--font-mono);font-size:0.8125rem;line-height:1.8;overflow-x:auto;margin:0.75rem 0;position:relative;border:1px solid var(--border);}
+.sh-code .hl{color:#dc2626;font-weight:500;}
+.sh-code .cm{color:var(--muted-foreground);font-style:italic;}
+.sh-code .str{color:#16a34a;}
+.sh-code .kw{color:#9333ea;}
+.sh-code .fn{color:#2563eb;}
+.code-hint{margin-top:-0.5rem;padding:0 0.25rem 0.75rem;font-size:0.75rem;color:var(--muted-foreground);}
+.sh-code + .code-hint{margin-top:-0.5rem;padding:0 0.25rem 0.75rem;font-size:0.75rem;color:var(--muted-foreground);}
+
+.sh-separator{border:none;height:1px;background:var(--border);margin:1.5rem 0;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+@media(max-width:640px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+/* Topbar */
+.topbar{position:sticky;top:0;z-index:50;background:var(--background);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;}
+.topbar-inner{max-width:960px;margin:0 auto;width:100%;padding:0 20px;display:flex;justify-content:space-between;align-items:center;}
+.brand{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.brand span{color:var(--muted-foreground);font-weight:400;}
+
+.page-header{padding:2rem 0 0.5rem;}
+.page-header h1{font-size:1.75rem;font-weight:700;letter-spacing:-0.025em;line-height:1.2;}
+.page-header .desc{font-size:0.95rem;color:var(--muted-foreground);margin-top:0.25rem;}
+
+.section-mb{margin-bottom:1.5rem;}
+.section-title{font-size:1rem;font-weight:600;margin-bottom:0.75rem;display:flex;align-items:center;gap:8px;}
+
+.arch-svg{width:100%;max-width:700px;height:auto;display:block;margin:0 auto;}
+.demo-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.mt-1{margin-top:8px;}
+.mb-1{margin-bottom:8px;}
+
+/* Steps list */
+.step-list{counter-reset:step;margin:8px 0;}
+.step-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);counter-increment:step;}
+.step-item:last-child{border-bottom:none;}
+.step-num{width:26px;height:26px;border-radius:50%;background:var(--primary);color:var(--primary-foreground);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-c{flex:1;}
+.step-title{font-size:0.85rem;font-weight:600;}
+.step-desc{font-size:0.8rem;color:var(--muted-foreground);margin-top:2px;line-height:1.5;}
+
+/* Key-value grid */
+.kv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin:8px 0;}
+.kv-item{padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);}
+.kv-label{font-size:0.65rem;color:var(--muted-foreground);text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
+.kv-val{font-size:0.8rem;font-weight:500;margin-top:2px;}
+
+/* ── QUIZ CARD ── */
+.qz-card{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--card);animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both;}
+.qz-head{display:flex;align-items:center;gap:8px;padding:14px 16px 0;}
+.qz-icon{width:28px;height:28px;border-radius:50%;background:var(--primary);color:var(--primary-foreground);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.qz-meta{flex:1;}
+.qz-channel{font-size:12px;font-weight:600;}
+.qz-topic{font-size:10px;color:var(--muted-foreground);margin-top:1px;}
+.qz-q{padding:10px 16px 12px;font-size:0.9rem;font-weight:600;line-height:1.5;}
+.qz-opts{display:flex;flex-direction:column;gap:1px;background:var(--border);margin:0 16px 12px;border-radius:var(--radius-sm);overflow:hidden;}
+.qz-opt{padding:10px 12px;background:var(--card);display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .12s;font-size:0.85rem;position:relative;overflow:hidden;}
+.qz-opt:hover{background:var(--secondary);}
+.qz-opt:active{transform:scale(.98);}
+.qz-opt.voted{pointer-events:none;}
+.qz-opt .letter{width:20px;height:20px;border-radius:50%;border:2px solid var(--muted-foreground);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;transition:all .25s;color:var(--muted-foreground);}
+.qz-opt .vbar{position:absolute;left:0;top:0;bottom:0;width:0;transition:width .6s cubic-bezier(.16,1,.3,1);background:var(--secondary);}
+.qz-opt .text{z-index:1;flex:1;position:relative;}
+.qz-opt .pct{font-size:12px;font-weight:600;color:var(--muted-foreground);min-width:30px;text-align:right;z-index:1;opacity:0;transition:opacity .25s;}
+.qz-opt.voted .pct{opacity:1;}
+.qz-opt.correct .vbar{background:rgba(22,163,74,.12);}
+.qz-opt.wrong .vbar{background:rgba(239,68,68,.1);}
+.qz-opt.reveal .vbar{background:rgba(22,163,74,.08);}
+.qz-opt.correct .letter{border-color:var(--success);background:var(--success);color:#fff;}
+.qz-opt.wrong .letter{border-color:var(--destructive);background:var(--destructive);color:#fff;}
+.qz-opt.reveal .letter{border-color:var(--success);background:transparent;color:var(--success);}
+.qz-exp{padding:0 16px 12px;font-size:0.82rem;color:var(--muted-foreground);line-height:1.6;display:none;}
+.qz-exp.show{display:block;}
+.qz-exp .label{font-size:10px;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;}
+.qz-next{display:inline-flex;align-items:center;gap:6px;padding:6px 20px;margin:0 16px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);color:var(--foreground);font-size:0.82rem;font-weight:500;cursor:pointer;transition:all .12s;font-family:var(--font-sans);}
+.qz-next:hover{border-color:var(--ring);background:var(--secondary);}
+.qz-next:disabled{opacity:.35;pointer-events:none;}
+.qz-next.show{display:inline-flex;}
+.qz-foot{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 12px;}
+.qz-vote{font-size:11px;color:var(--muted-foreground);}
+
+/* ── COPY BUTTON ── */
+.copy-btn{position:absolute;top:10px;right:10px;z-index:2;width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--muted-foreground);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s;opacity:0;line-height:1;}
+.sh-code:hover .copy-btn{opacity:1;}
+.copy-btn:hover{border-color:var(--ring);color:var(--foreground);background:var(--secondary);}
+.copy-btn.copied{border-color:var(--success);color:var(--success);background:rgba(22,163,74,.08);}
+
+@keyframes popIn{0%{transform:scale(.9);opacity:0;}60%{transform:scale(1.03);}100%{transform:scale(1);opacity:1;}}
+
+footer{margin-top:3rem;padding:1.5rem 0;border-top:1px solid var(--border);text-align:center;font-size:0.8rem;color:var(--muted-foreground);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><i data-lucide="database" style="width:18px;height:18px;"></i>BigQuery Vector Search</div>
+    <div style="display:flex;gap:6px;">
+      <button class="sh-btn sh-btn-sm sh-btn-ghost" onclick="toggleDark()"><i data-lucide="moon" style="width:16px;height:16px;"></i></button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- HEADER -->
+<div class="page-header">
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+    <span class="sh-badge sh-badge-default">study</span>
+    <span class="sh-badge sh-badge-secondary">BigQuery</span>
+    <span class="sh-badge sh-badge-outline">Vector Search</span>
+    <span class="sh-badge sh-badge-success">hot topic</span>
+  </div>
+  <h1>BigQuery Vector Search</h1>
+  <div class="desc">Semantic search directly in SQL — embeddings, vector indexes, ANN search. High-signal interview topic for Applied AI roles.</div>
+</div>
+
+<hr class="sh-separator" />
+
+<!-- 1: WHAT & ARCHITECTURE -->
+<div class="section-mb">
+  <div class="section-title"><i data-lucide="git-branch" style="width:16px;height:16px;color:var(--muted-foreground);"></i> Architecture</div>
+  <div class="sh-card">
+    <div class="sh-card-content" style="text-align:center;">
+      <svg viewBox="0 0 720 100" class="arch-svg">
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--muted-foreground)"/></marker>
+          <marker id="arr-p" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--primary)"/></marker>
+        </defs>
+        <rect x="15" y="25" width="130" height="42" rx="8" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="80" y="42" style="font-size:9px;fill:var(--foreground);text-anchor:middle;font-weight:600;font-family:var(--font-sans);">Raw Data</text>
+        <text x="80" y="55" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">GCS / Pub/Sub</text>
+
+        <line x1="145" y1="46" x2="195" y2="46" stroke="var(--muted-foreground)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+        <circle r="3" fill="var(--primary)" opacity="0">
+          <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.8;1" dur="1.5s" repeatCount="indefinite"/>
+          <animate attributeName="cx" values="150;165;180" dur="1.5s" repeatCount="indefinite"/>
+          <animate attributeName="cy" values="46;46;46" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+
+        <rect x="195" y="25" width="130" height="42" rx="8" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="260" y="42" style="font-size:9px;fill:var(--foreground);text-anchor:middle;font-weight:600;font-family:var(--font-sans);">BigQuery ETL</text>
+        <text x="260" y="55" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">ELT + cleansing</text>
+
+        <line x1="325" y1="46" x2="375" y2="46" stroke="var(--muted-foreground)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+        <circle r="3" fill="var(--primary)" opacity="0">
+          <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.8;1" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+          <animate attributeName="cx" values="330;345;360" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+          <animate attributeName="cy" values="46;46;46" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+        </circle>
+
+        <rect x="375" y="25" width="130" height="42" rx="8" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="440" y="42" style="font-size:9px;fill:var(--foreground);text-anchor:middle;font-weight:600;font-family:var(--font-sans);">ML.GENERATE_EMBEDDING</text>
+        <text x="440" y="55" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">text → 768-dim vector</text>
+
+        <line x1="505" y1="46" x2="555" y2="46" stroke="var(--muted-foreground)" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-p)"/>
+        <circle r="3" fill="var(--primary)" opacity="0">
+          <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.8;1" dur="1.5s" begin="1s" repeatCount="indefinite"/>
+          <animate attributeName="cx" values="510;525;540" dur="1.5s" begin="1s" repeatCount="indefinite"/>
+          <animate attributeName="cy" values="46;46;46" dur="1.5s" begin="1s" repeatCount="indefinite"/>
+        </circle>
+
+        <rect x="555" y="25" width="130" height="42" rx="8" fill="var(--card)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="620" y="42" style="font-size:9px;fill:var(--foreground);text-anchor:middle;font-weight:600;font-family:var(--font-sans);">VECTOR_SEARCH</text>
+        <text x="620" y="55" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">ANN + top-K results</text>
+
+        <text x="80" y="82" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">Step 1: Ingest</text>
+        <text x="260" y="82" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">Step 2: Clean</text>
+        <text x="440" y="82" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">Step 3: Embed</text>
+        <text x="620" y="82" style="font-size:7px;fill:var(--muted-foreground);text-anchor:middle;font-family:var(--font-mono);">Step 4: Search</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- 2: CONCEPT CARDS -->
+<div class="grid-3 section-mb">
+  <div class="sh-card sh-card-hover">
+    <div class="sh-card-header"><h3><i data-lucide="layers" style="width:16px;height:16px;display:inline;vertical-align:middle;"></i> Embeddings</h3><p>text-embedding-004</p></div>
+    <div class="sh-card-content">768-dimensional dense vectors. Google's latest model. Supports multilingual semantic precision. Call via <code style="font-size:12px;">ML.GENERATE_EMBEDDING()</code> directly in SQL.</div>
+  </div>
+  <div class="sh-card sh-card-hover">
+    <div class="sh-card-header"><h3><i data-lucide="list" style="width:16px;height:16px;display:inline;vertical-align:middle;"></i> VECTOR INDEX</h3><p>IVF algorithm</p></div>
+    <div class="sh-card-content">Approximate Nearest Neighbor index. Partitions vectors into clusters (num_lists). Without it, VECTOR_SEARCH falls back to brute force O(n) — slow on large data.</div>
+  </div>
+  <div class="sh-card sh-card-hover">
+    <div class="sh-card-header"><h3><i data-lucide="search" style="width:16px;height:16px;display:inline;vertical-align:middle;"></i> VECTOR_SEARCH</h3><p>ANN query</p></div>
+    <div class="sh-card-content">Returns top-K nearest neighbors by distance. Supports COSINE, EUCLIDEAN, DOT_PRODUCT. No separate vector DB needed — all inside BigQuery.</div>
+  </div>
+</div>
+
+<!-- 3: KEY-VALUE REFERENCE -->
+<div class="section-mb">
+  <div class="section-title"><i data-lucide="info" style="width:16px;height:16px;color:var(--muted-foreground);"></i> Quick Reference</div>
+  <div class="kv-grid">
+    <div class="kv-item"><div class="kv-label">Embedding Model</div><div class="kv-val">text-embedding-004</div></div>
+    <div class="kv-item"><div class="kv-label">Dimensions</div><div class="kv-val">768</div></div>
+    <div class="kv-item"><div class="kv-label">Index Type</div><div class="kv-val">IVF (Inverted File)</div></div>
+    <div class="kv-item"><div class="kv-label">Distance</div><div class="kv-val">COSINE, EUCLIDEAN, DOT_PRODUCT</div></div>
+    <div class="kv-item"><div class="kv-label">Search</div><div class="kv-val">VECTOR_SEARCH()</div></div>
+    <div class="kv-item"><div class="kv-label">Use Case</div><div class="kv-val">RAG, dedup, semantic search</div></div>
+  </div>
+</div>
+
+<!-- 4: SQL CODE (TABS) -->
+<div class="section-mb">
+  <div class="section-title"><i data-lucide="code" style="width:16px;height:16px;color:var(--muted-foreground);"></i> SQL Implementation</div>
+  <div class="sh-card">
+    <div class="sh-card-content">
+      <div class="sh-tabs">
+        <button class="sh-tab active" onclick="switchTab(this,'s1')">Step 1: Embed</button>
+        <button class="sh-tab" onclick="switchTab(this,'s2')">Step 2: Index</button>
+        <button class="sh-tab" onclick="switchTab(this,'s3')">Step 3: Search</button>
+        <button class="sh-tab" onclick="switchTab(this,'s4')">Full Pipeline</button>
+      </div>
+      <div class="sh-tab-panel active" id="s1">
+        <div class="sh-code">
+          <button class="copy-btn" onclick="copyCode(this)" data-copied="✅">📋</button>
+<span class="cm">-- Generate embeddings for your text data</span>
+<span class="kw">CREATE OR REPLACE TABLE</span> <span class="fn">my_dataset.documents</span> <span class="kw">AS</span>
+<span class="kw">SELECT</span>
+  doc_id,
+  content,
+  <span class="fn">ML.GENERATE_EMBEDDING</span>(
+    <span class="kw">MODEL</span> <span class="fn">my_dataset.embedding_model</span>,
+    (<span class="kw">SELECT</span> content <span class="kw">AS</span> text <span class="kw">FROM</span> <span class="fn">my_dataset.raw_docs</span>)
+  ) <span class="kw">AS</span> embedding
+<span class="kw">FROM</span> <span class="fn">my_dataset.raw_docs</span>;</div>
+        <div class="code-hint">Model must reference <code>text-embedding-004</code> via <code>CREATE MODEL ... REMOTE WITH CONNECTION</code></div>
+      </div>
+      <div class="sh-tab-panel" id="s2">
+        <div class="sh-code">
+          <button class="copy-btn" onclick="copyCode(this)" data-copied="✅">📋</button>
+<span class="cm">-- Create vector index for ANN search</span>
+<span class="kw">CREATE VECTOR INDEX</span> <span class="fn">my_doc_index</span>
+<span class="kw">ON</span> <span class="fn">my_dataset.documents</span>(embedding)
+<span class="kw">OPTIONS</span>(
+  distance_type = <span class="str">'COSINE'</span>,
+  index_type   = <span class="str">'IVF'</span>,
+  ivf_options  = <span class="str">'{"num_lists": 100}'</span>
+);</div>
+        <div class="code-hint">⏳ Index build is async — check with <code>SELECT * FROM ML.INDEX_INFO(...)</code></div>
+      </div>
+      <div class="sh-tab-panel" id="s3">
+        <div class="sh-code">
+          <button class="copy-btn" onclick="copyCode(this)" data-copied="✅">📋</button>
+<span class="cm">-- Semantic search: find top-5 similar documents</span>
+<span class="kw">SELECT</span>
+  doc_id,
+  content,
+  distance
+<span class="kw">FROM</span>
+  <span class="fn">VECTOR_SEARCH</span>(
+    <span class="kw">TABLE</span> <span class="fn">my_dataset.documents</span>,
+    <span class="str">'embedding'</span>,
+    <span class="hl">(</span>
+      <span class="kw">SELECT</span> embedding
+      <span class="kw">FROM</span> <span class="fn">ML.GENERATE_EMBEDDING</span>(
+        <span class="kw">MODEL</span> <span class="fn">my_dataset.embedding_model</span>,
+        (<span class="str">'fraud detection in real-time transactions'</span> <span class="kw">AS</span> text)
+      )
+    <span class="hl">)</span>,
+    top_k         => <span class="hl">5</span>,
+    distance_type => <span class="str">'COSINE'</span>
+  );</div>
+      </div>
+      <div class="sh-tab-panel" id="s4">
+        <div class="sh-code">
+          <button class="copy-btn" onclick="copyCode(this)" data-copied="✅">📋</button>
+<span class="cm">-- End-to-end: ETL → Embed → Index → Search</span>
+<span class="cm">--</span>
+<span class="cm">-- 1. Load raw data into BigQuery</span>
+<span class="kw">LOAD DATA INTO</span> <span class="fn">my_dataset.raw_docs</span>
+<span class="kw">FROM FILES</span> (...);
+
+<span class="cm">-- 2. Generate embeddings (see Step 1 tab)</span>
+<span class="cm">-- 3. Build VECTOR INDEX (see Step 2 tab) — async operation</span>
+<span class="cm">-- 4. Semantic search (see Step 3 tab) — real-time</span>
+
+<span class="cm">-- Bonus: Enrich with Gemini</span>
+<span class="kw">SELECT</span>
+  doc_id,
+  content,
+  <span class="fn">ML.GENERATE_TEXT</span>(
+    <span class="kw">MODEL</span> <span class="fn">my_dataset.gemini_model</span>,
+    (<span class="str">'Summarize this document: '</span> <span class="hl">||</span> content)
+  ) <span class="kw">AS</span> summary
+<span class="kw">FROM</span> <span class="fn">my_dataset.documents</span>;</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5: COMPARISON TABLE -->
+<div class="section-mb">
+  <div class="section-title"><i data-lucide="list" style="width:16px;height:16px;color:var(--muted-foreground);"></i> Vector Search vs Traditional</div>
+  <div class="sh-card">
+    <div class="sh-card-content" style="padding:0;">
+      <table class="sh-table">
+        <thead><tr><th>Aspect</th><th>Traditional (LIKE/REGEX)</th><th>Vector Search</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight:500;">Match</td><td>Exact keyword / pattern</td><td>Semantic similarity</td></tr>
+          <tr><td style="font-weight:500;">"Bank" match</td><td>Only "bank"</td><td>"bank", "finance", "lending"</td></tr>
+          <tr><td style="font-weight:500;">Language</td><td>Single language</td><td>Multilingual</td></tr>
+          <tr><td style="font-weight:500;">Speed</td><td>O(n) scan</td><td>O(log n) with index</td></tr>
+          <tr><td style="font-weight:500;">Infra</td><td>SQL only</td><td>SQL + index</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 6: INTERVIEW PREP -->
+<div class="section-mb">
+  <div class="section-title"><i data-lucide="message-square" style="width:16px;height:16px;color:var(--muted-foreground);"></i> Interview Questions</div>
+  <div class="grid-2">
+    <div class="sh-card">
+      <div class="sh-card-header">
+        <div style="display:flex;justify-content:space-between;"><h3>30-Second Answer</h3><span class="sh-badge sh-badge-success">quick</span></div>
+      </div>
+      <div class="sh-card-content" style="font-size:0.8rem;color:var(--muted-foreground);">
+        "BigQuery Vector Search lets you do semantic search directly in SQL. Generate embeddings with <code style="font-size:11px;">ML.GENERATE_EMBEDDING()</code>, build a VECTOR INDEX, then call <code style="font-size:11px;">VECTOR_SEARCH()</code> for ANN. No separate vector DB needed."
+      </div>
+    </div>
+    <div class="sh-card">
+      <div class="sh-card-header">
+        <div style="display:flex;justify-content:space-between;"><h3>Common Mistake</h3><span class="sh-badge sh-badge-default">avoid</span></div>
+      </div>
+      <div class="sh-card-content" style="font-size:0.8rem;color:var(--muted-foreground);">
+        ❌ Calling <code style="font-size:11px;">VECTOR_SEARCH()</code> without creating the index first. Without it, BigQuery brute-force scans all rows — O(n) and extremely slow on large tables.
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="sh-separator" />
+
+<!-- 7: QUIZ CARD -->
+<div class="section-mb">
+  <div class="section-title"><i data-lucide="zap" style="width:16px;height:16px;color:var(--muted-foreground);"></i> Test Yourself</div>
+  <div class="qz-card" id="qzCard">
+    <div class="qz-head">
+      <div class="qz-icon">📋</div>
+      <div class="qz-meta">
+        <div class="qz-channel">Quick Quiz</div>
+        <div class="qz-topic" id="qzTopic">Vector Search · Q1/3</div>
+      </div>
+    </div>
+    <div class="qz-q" id="qzQuestion">Loading...</div>
+    <div class="qz-opts" id="qzOpts"></div>
+    <div class="qz-exp" id="qzExp"></div>
+    <div class="qz-foot">
+      <span class="qz-vote" id="qzVote">👥 0 voted</span>
+      <button class="qz-next" id="qzNext" onclick="qzNext()">Next →</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  GCP Prep — BigQuery Vector Search &middot; shadcn + Telegram Quiz
+</footer>
+
+<script>
+/* ── TABS ── */
+function switchTab(btn,id){
+  var parent=btn.closest('.sh-card-content')||btn.parentElement;
+  parent.querySelectorAll('.sh-tab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  parent.querySelectorAll('.sh-tab-panel').forEach(function(p){p.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+}
+
+function toggleDark(){
+  var d=document.documentElement;
+  if(d.getAttribute('data-theme')==='dark'){d.removeAttribute('data-theme');}
+  else{d.setAttribute('data-theme','dark');}
+  setTimeout(function(){if(typeof lucide!=='undefined')lucide.createIcons();},30);
+}
+
+function copyCode(btn){
+  var code = btn.parentElement.cloneNode(true);
+  var copyBtn = code.querySelector('.copy-btn');
+  if(copyBtn) copyBtn.remove();
+  var text = code.textContent.trim();
+  try {
+    navigator.clipboard.writeText(text);
+  } catch(e) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+  btn.textContent = '✅';
+  btn.classList.add('copied');
+  setTimeout(function(){
+    btn.textContent = '📋';
+    btn.classList.remove('copied');
+  },1800);
+}
+
+/* ── QUIZ CARD ── */
+var qData = [
+  {q: 'Which embedding model does Google recommend for BigQuery Vector Search?', opts: ['text-embedding-gecko-001', 'text-bison@002', 'text-embedding-004', 'embedding-001 (PaLM2)'], ans: 2, topic: 'Embeddings',
+   exp: 'text-embedding-004 is the latest — 768-dimensional dense embeddings with improved multilingual quality. Natively supported in BigQuery ML via GENERATE_EMBEDDING().'},
+  {q: 'What happens if you call VECTOR_SEARCH without creating a VECTOR INDEX?', opts: ['Returns an error', 'Uses brute-force O(n) scan', 'Creates index automatically', 'Skips the search'], ans: 1, topic: 'Indexing',
+   exp: 'Without a VECTOR INDEX, BigQuery brute-force scans every row. O(n) is extremely slow on large tables. Always build the index first with CREATE VECTOR INDEX.'},
+  {q: 'VECTOR_SEARCH supports which distance types?', opts: ['COSINE only', 'COSINE, EUCLIDEAN, DOT_PRODUCT', 'COSINE, MANHATTAN, CHEBYSHEV', 'EUCLIDEAN only'], ans: 1, topic: 'Distance',
+   exp: 'VECTOR_SEARCH supports COSINE (default), EUCLIDEAN, and DOT_PRODUCT. COSINE is most common for text similarity since it measures angle between vectors.'}
+];
+var cq = 0, score = 0, a = false, totalQ = qData.length;
+
+function loadQ(idx){
+  if(idx >= totalQ){ showDone(); return; }
+  a = false;
+  var q = qData[idx];
+  document.getElementById('qzTopic').textContent = q.topic + ' · Q'+(idx+1)+'/'+totalQ;
+  document.getElementById('qzQuestion').textContent = q.q;
+  document.getElementById('qzExp').innerHTML = '';
+  document.getElementById('qzExp').classList.remove('show');
+  document.getElementById('qzVote').textContent = '👥 0 voted';
+  document.getElementById('qzNext').textContent = (idx === totalQ-1) ? '🏆 See Results' : 'Next →';
+  document.getElementById('qzNext').classList.remove('show');
+
+  var c = document.getElementById('qzOpts');
+  c.innerHTML = '';
+  q.opts.forEach(function(o,i){
+    var el = document.createElement('div');
+    el.className = 'qz-opt';
+    el.id = 'opt-'+i;
+    el.innerHTML = '<div class="vbar" id="bar-'+i+'"></div><div class="letter" id="letter-'+i+'">'+String.fromCharCode(65+i)+'</div><div class="text">'+o+'</div><div class="pct" id="pct-'+i+'"></div>';
+    el.onclick = function(){ handleAnswer(i); };
+    c.appendChild(el);
+  });
+}
+
+function handleAnswer(s){
+  if(a) return;
+  a = true;
+  var q = qData[cq];
+  var correct = s === q.ans;
+  var t = Math.floor(Math.random()*50)+25;
+  var rm = 100;
+  var ps = q.opts.map(function(_,i){
+    if(i===q.ans) return null;
+    var p = Math.floor(Math.random()*12)+5;
+    rm -= p; return p;
+  });
+  ps[q.ans] = Math.max(rm,45);
+  var sm = ps.reduce(function(a,b){return a+b;},0);
+  var nm = ps.map(function(p){return Math.round(p/sm*100);});
+
+  q.opts.forEach(function(_,i){
+    var el = document.getElementById('opt-'+i);
+    var bar = document.getElementById('bar-'+i);
+    var pt = document.getElementById('pct-'+i);
+    var lt = document.getElementById('letter-'+i);
+    el.classList.add('voted');
+    setTimeout(function(){
+      bar.style.width = nm[i]+'%';
+      pt.textContent = nm[i]+'%';
+      if(i===q.ans && i!==s) el.classList.add('reveal');
+      if(i===q.ans) lt.textContent = '✓';
+      if(i===s && correct) el.classList.add('correct');
+      if(i===s && !correct){ el.classList.add('wrong'); lt.textContent = '✗'; }
+    },i*60);
+  });
+
+  setTimeout(function(){ document.getElementById('qzVote').textContent = '👥 '+t+' voted'; }, 400);
+
+  if(correct) score++;
+
+  setTimeout(function(){
+    var ex = document.getElementById('qzExp');
+    ex.innerHTML = '<div class="label">💡 '+(correct?'Correct!':'Missed')+' — '+q.topic+'</div>'+q.exp;
+    ex.classList.add('show');
+    document.getElementById('qzNext').classList.add('show');
+  }, 500);
+}
+
+function qzNext(){
+  cq++;
+  if(cq >= totalQ){ showDone(); return; }
+  loadQ(cq);
+}
+
+function showDone(){
+  var pct = Math.round(score/totalQ*100);
+  var g, gc, em, msg;
+  if(pct>=90){g='S RANK';gc='#16a34a';em='🏆';msg='Exceptional anna! 🔥';}
+  else if(pct>=70){g='A RANK';gc='#16a34a';em='🎯';msg='Strong! Review the missed one and retry.';}
+  else if(pct>=50){g='B RANK';gc='#2563eb';em='📈';msg='Good foundation. Review explanations.';}
+  else{g='C RANK';gc='#dc2626';em='💪';msg='Review the topic and come back stronger!';}
+
+  document.getElementById('qzCard').innerHTML =
+    '<div style="padding:24px 20px;text-align:center;"><div style="font-size:40px;margin-bottom:8px;">'+em+'</div>'+
+    '<div style="font-size:18px;font-weight:700;margin-bottom:4px;">Quiz Complete!</div>'+
+    '<div style="display:inline-block;padding:4px 16px;border-radius:100px;font-size:12px;font-weight:700;background:'+gc+'15;color:'+gc+';border:1px solid '+gc+'30;margin-bottom:10px;">'+g+'</div>'+
+    '<div style="font-size:32px;font-weight:700;color:'+gc+';margin:8px 0;">'+pct+'%</div>'+
+    '<div style="display:flex;justify-content:center;gap:16px;margin:12px 0;">'+
+    '<span style="display:flex;align-items:center;gap:6px;font-size:13px;"><span style="color:#16a34a;font-weight:700;">'+score+'</span> Correct</span>'+
+    '<span style="display:flex;align-items:center;gap:6px;font-size:13px;"><span style="color:#dc2626;font-weight:700;">'+(totalQ-score)+'</span> Wrong</span></div>'+
+    '<div style="font-size:13px;color:var(--muted-foreground);margin-bottom:16px;">'+msg+'</div>'+
+    '<button onclick="location.reload()" style="padding:10px 28px;border:none;border-radius:8px;background:var(--primary);color:var(--primary-foreground);font-size:13px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif;">🔄 Retry Quiz</button></div>';
+}
+
+document.addEventListener('DOMContentLoaded',function(){if(typeof lucide!=='undefined')lucide.createIcons();loadQ(0);});
+</script>
+</body>
+</html>
