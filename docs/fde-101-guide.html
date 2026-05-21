@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forward Deployed Engineering 101 — Subba Rao Anna Explains</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f3eee4;  --paper-2: #ebe4d4;
+  --ink: #1a1612;     --ink-2: #3d3528;
+  --ink-dim: #6b5d49; --ink-faint: #a89a83;
+  --rule: #c8b99e;
+  --accent: #c0392b;  --accent2: #a93226;
+  --green: #2d7d46;   --blue: #2b6cb0;
+  --gold: #b8860b;    --purple: #7b4d8c;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+[data-theme="dark"] {
+  --paper: #1b1917;  --paper-2: #242220;
+  --ink: #f0ece9;    --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430;
+  --accent: #e8704a;  --accent2: #d95a3a;
+  --green: #5bbd6b;   --blue: #5b8fbd;
+  --gold: #d4a84b;    --purple: #b07cc4;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  background-image: radial-gradient(circle at 25% 15%, rgba(200,180,140,.15) 0%, transparent 40%);
+  line-height: 1.6;
+}
+main { max-width: 980px; margin: 0 auto; padding: 48px 28px 100px; }
+
+/* Dark Toggle */
+#darkToggle {
+  position: fixed; top: 16px; right: 16px; z-index: 100;
+  background: var(--paper-2); border: 1px solid var(--ink);
+  color: var(--ink); font-size: 18px; width: 42px; height: 42px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  box-shadow: 2px 2px 0 var(--ink); transition: all .2s;
+  font-family: var(--sans);
+}
+#darkToggle:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ink); }
+
+/* Section animations */
+section { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
+section.in { opacity: 1; transform: translateY(0); }
+@keyframes pageIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes stampIn { from { opacity: 0; transform: rotate(-12deg) scale(1.6); } to { opacity: .85; transform: rotate(3deg) scale(1); } }
+
+/* Hero */
+.hero { margin-bottom: 48px; }
+.hero .eyebrow { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.hero .pill { display: inline-block; padding: 4px 12px; border: 1px solid var(--ink); font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .03em; background: var(--paper-2); }
+.hero h1 { font-family: var(--serif); font-size: 42px; line-height: 1.1; margin-bottom: 8px; }
+.hero .subtitle { font-family: var(--serif); font-style: italic; color: var(--ink-dim); font-size: 19px; }
+.cd-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 20px; }
+.cd-card { background: var(--paper-2); border: 1px solid var(--ink); padding: 14px; text-align: center; box-shadow: 2px 2px 0 var(--ink); }
+.cd-card .num { font-family: var(--serif); font-size: 28px; line-height: 1.2; color: var(--accent); }
+.cd-card .lbl { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-dim); }
+
+/* Cards */
+.card { background: var(--paper-2); border: 1px solid var(--ink); padding: 18px 22px; box-shadow: 3px 3px 0 var(--ink); transition: all .3s; margin-bottom: 16px; }
+.card:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+.card-label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .15em; color: var(--accent); margin-bottom: 8px; }
+
+/* Telugu Card */
+.tel-card { background: var(--paper-2); border: 1px solid var(--ink); padding: 20px 24px; box-shadow: 3px 3px 0 var(--ink); margin-bottom: 20px; }
+.tel-card .label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .15em; color: var(--accent); margin-bottom: 10px; }
+.tel-card p { margin-bottom: 8px; line-height: 1.7; }
+
+/* Section headers */
+h2 { font-family: var(--serif); font-size: 30px; font-weight: 400; line-height: 1.15; margin: 40px 0 8px; }
+h2 .uline { text-decoration: underline; text-decoration-style: wavy; text-decoration-color: var(--accent); }
+h2 + .h2-sub { font-family: var(--serif); font-style: italic; color: var(--ink-dim); font-size: 16px; margin-bottom: 24px; }
+h3 { font-family: var(--serif); font-size: 20px; font-weight: 400; margin: 24px 0 8px; }
+h4 { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-dim); margin: 16px 0 6px; }
+
+/* Grid layouts */
+.key-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 16px 0; }
+.key-item { background: var(--paper-2); border: 1px solid var(--ink); padding: 16px; box-shadow: 2px 2px 0 var(--ink); }
+.key-item .icon { font-size: 22px; display: block; margin-bottom: 6px; }
+.key-item .title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.key-item .desc { font-size: 12px; color: var(--ink-dim); line-height: 1.5; }
+
+/* Phase Cards */
+.phase-card { background: var(--paper-2); border: 1px solid var(--ink); padding: 20px 24px; margin-bottom: 16px; box-shadow: 3px 3px 0 var(--ink); }
+.phase-card .pnum { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; color: var(--accent); margin-bottom: 2px; }
+.phase-card .ptitle { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.phase-card .pdesc { font-size: 13px; color: var(--ink-2); line-height: 1.7; margin-bottom: 10px; }
+.phase-card .pmeta { display: flex; gap: 8px; flex-wrap: wrap; }
+.phase-card .tag { display: inline-block; padding: 2px 8px; border: 1px solid var(--ink); font-family: var(--mono); font-size: 9px; text-transform: uppercase; }
+.phase-card .tag.accent { border-color: var(--accent); color: var(--accent); }
+.phase-card .tag.green { border-color: var(--green); color: var(--green); }
+.phase-card .tag.blue { border-color: var(--blue); color: var(--blue); }
+.phase-card .tag.gold { border-color: var(--gold); color: var(--gold); }
+
+/* Checkpoint Cards */
+.cp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 16px 0; }
+.cp-card { background: var(--paper-2); border: 1px solid var(--ink); padding: 16px; box-shadow: 2px 2px 0 var(--ink); }
+.cp-card .cp-num { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; color: var(--blue); margin-bottom: 4px; }
+.cp-card .cp-title { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+.cp-card .cp-days { font-family: var(--mono); font-size: 9px; color: var(--ink-faint); margin-bottom: 8px; }
+.cp-card ul { list-style: none; padding: 0; }
+.cp-card li { font-size: 12px; color: var(--ink-2); padding: 4px 0 4px 16px; position: relative; line-height: 1.5; }
+.cp-card li::before { content: '→'; position: absolute; left: 0; color: var(--ink-dim); }
+
+/* Mapping Table */
+.map-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+.map-table th { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .1em; padding: 10px 12px; border: 1px solid var(--rule); background: var(--paper-2); text-align: left; }
+.map-table td { padding: 10px 12px; border: 1px solid var(--rule); vertical-align: top; line-height: 1.5; }
+.map-table tr:hover { background: rgba(200,180,140,.12); }
+.map-table .fde-term { font-weight: 600; color: var(--blue); }
+.map-table .your-term { color: var(--green); }
+
+/* Code block */
+.code-block { background: var(--ink); color: #e8d9c0; font-family: var(--mono); font-size: 13px; padding: 18px 22px; overflow-x: auto; margin: 12px 0; line-height: 1.6; }
+.code-wrap { position: relative; margin: 8px 0; }
+.code-wrap .code-block { margin: 0; }
+.copy-ghost { position: absolute; top: 6px; right: 6px; background: transparent; border: none; color: var(--ink-faint); cursor: pointer; font-size: 15px; line-height: 1; padding: 2px 5px; z-index: 2; opacity: 0.5; transition: opacity .2s, color .2s; }
+.copy-ghost:hover { opacity: 1; color: var(--ink); }
+
+/* Interview accordion */
+.interview-acc { border: 1px solid var(--rule); margin-bottom: 10px; }
+.interview-acc .acc-header { padding: 14px 18px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 500; font-size: 14px; background: var(--paper-2); }
+.interview-acc .acc-header:hover { background: var(--paper); }
+.interview-acc .acc-body { padding: 16px 18px; display: none; font-size: 13px; line-height: 1.7; color: var(--ink-2); }
+.interview-acc.open .acc-body { display: block; }
+
+/* Flow pipeline */
+.pipeline-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; padding: 24px 0; }
+.pipe-node { background: var(--paper-2); border: 1px solid var(--ink); padding: 12px 20px; font-family: var(--mono); font-size: 11px; box-shadow: 2px 2px 0 var(--ink); text-align: center; min-width: 80px; }
+.pipe-node.accent { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.pipe-node.green { background: var(--green); color: var(--paper); border-color: var(--green); }
+.pipe-node.blue { background: var(--blue); color: var(--paper); border-color: var(--blue); }
+.pipe-node.gold { background: var(--gold); color: var(--paper); border-color: var(--gold); }
+.pipe-arrow { font-family: var(--mono); font-size: 20px; color: var(--ink-dim); }
+
+/* Blockquote */
+blockquote { border-left: 3px solid var(--accent); padding: 12px 18px; margin: 16px 0; background: var(--paper-2); font-family: var(--serif); font-style: italic; font-size: 15px; }
+blockquote cite { display: block; font-family: var(--mono); font-size: 10px; font-style: normal; color: var(--ink-dim); margin-top: 6px; }
+
+/* Highlight box */
+.highlight-box { background: #f0e0cc; padding: 14px 18px; border-left: 3px solid var(--accent); margin: 16px 0; font-size: 14px; }
+[data-theme="dark"] .highlight-box { background: #3d3530; }
+.highlight-box .hl-label { font-family: var(--mono); font-size: 9px; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+
+/* SVG */
+.svg-wrap { margin: 20px 0; text-align: center; }
+.svg-wrap svg { max-width: 100%; height: auto; }
+.svg-caption { font-family: var(--serif); font-style: italic; font-size: 12px; color: var(--ink-dim); margin-top: 6px; }
+
+/* Lists */
+ul, ol { padding-left: 22px; margin: 10px 0; }
+li { margin-bottom: 4px; }
+
+/* Strong in text */
+strong { font-weight: 600; }
+
+/* Print */
+@media print {
+  body { background: white; color: black; }
+  .card, .cp-card, .phase-card, .tel-card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+  section { page-break-inside: avoid; }
+  body { font-size: 14pt; line-height: 1.8; }
+  #darkToggle { display: none; }
+}
+</style>
+</head>
+<body>
+<button id="darkToggle" title="Toggle theme">◐</button>
+<main>
+
+<!-- ═══ HERO ═══ -->
+<section>
+  <header class="hero">
+    <div class="eyebrow">
+      <span class="pill">🔥 Hottest Role in Tech</span>
+      <span class="pill">Applied AI</span>
+      <span class="pill">Subba Rao Anna Explains</span>
+    </div>
+    <h1>Forward Deployed Engineering <span style="font-style:italic;">101</span></h1>
+    <p class="subtitle">Why AI companies are hiring FDEs — and what it means for your prep</p>
+    <div class="cd-grid">
+      <div class="cd-card"><div class="num">3</div><div class="lbl">Phases</div></div>
+      <div class="cd-card"><div class="num">30</div><div class="lbl">Days to Crack</div></div>
+      <div class="cd-card"><div class="num">🎯</div><div class="lbl">Your Prep Maps</div></div>
+      <div class="cd-card"><div class="num">🧩</div><div class="lbl">Terminology</div></div>
+    </div>
+  </header>
+</section>
+
+<!-- ═══ TELUGU ANALOGY ═══ -->
+<section>
+  <div class="tel-card">
+    <div class="label">Telugu lo — FDE enti?</div>
+    <p><strong>FDE ante = "Pulse velte, medicine pette vaadu" la untadi.</strong> Customer daggara kurchuni problem artham chesukuntadu, immediate ga code rayadu, deploy chestadu.</p>
+    <p><strong>Audit = Hospital lo rogi ni parikshinchadam la.</strong> Emi problem, ekkada bottleneck, ekkada agent pettali — antha map cheskovatam. Constraints emiti, automate cheyalsindena kooda decide cheyali.</p>
+    <p><strong>Evals = Tests cheyadam la.</strong> "Ee agent correct ga pani chestunda?" ani measure cheyali. Mana test suite laaga — human steps trace chesi grade pettali.</p>
+    <p><strong>Deployment = Medicine ivvatam la.</strong> Production lo petti, small ga start chesi, confidence vachaka feature lu add cheyadam. Server restart chesi, health check verify chesinattu.</p>
+    <div style="margin-top:12px;padding:10px 14px;border:1px solid var(--rule);font-size:12px;color:var(--ink-dim);">
+      <strong>Flow:</strong> Customer Problem → Audit (map boltu-necks) → Prototype → Evals (golden dataset) → Deployment (small scope → layer up)
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CORE THESIS ═══ -->
+<section>
+  <h2>Why AI Companies Need <span class="uline">FDEs</span></h2>
+  <p class="h2-sub">Vas (@vasuman) from Varick breaks down the hottest role in tech</p>
+
+  <blockquote>
+    If you believe intelligence is becoming commoditized, the only competitive edge is how and where you use it. Determining how and where companies use it becomes the most important role — and that is the role of a Forward Deployed Engineer.
+    <cite>— Vas, Forward Deployed Engineering 101</cite>
+  </blockquote>
+
+  <div class="key-grid">
+    <div class="key-item">
+      <span class="icon">🧠</span>
+      <div class="title">Intelligence is Commoditized</div>
+      <div class="desc">The AI models themselves are table stakes. The moat is how you deploy them into real business workflows.</div>
+    </div>
+    <div class="key-item">
+      <span class="icon">🏗️</span>
+      <div class="title">Customer-Specific Context</div>
+      <div class="desc">You can't build for an environment without being IN the environment. Palantir's Special Forces model in Afghanistan proves this.</div>
+    </div>
+    <div class="key-item">
+      <span class="icon">💵</span>
+      <div class="title">Million-Dollar Hire</div>
+      <div class="desc">FDE = Engineer who codes into an unfamiliar codebase + communicates business impact to non-tech VPs + closes deals.</div>
+    </div>
+    <div class="key-item">
+      <span class="icon">🎯</span>
+      <div class="title">Your Target Role</div>
+      <div class="desc">Anthropic, OpenAI, Google, Varick — all are hiring FDEs. This is exactly the job your GCP/GenAI prep targets.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ THE 3 PHASES ═══ -->
+<section>
+  <h2>The <span class="uline">3 Phases</span> of an FDE</h2>
+  <p class="h2-sub">Audit → Evals → Deployment. The entire job in three verbs.</p>
+
+  <!-- Phase 1 -->
+  <div class="phase-card">
+    <div class="pnum">PHASE 1</div>
+    <div class="ptitle">🔍 Audit</div>
+    <div class="pdesc">You're on-site with the client, mapping processes and workflows across teams. Two weeks with rev ops, one week with procurement, a full month with finance. You learn what their job looks like, where the bottlenecks are, and where AI agents could deliver value. <strong>Equally important: you figure out what NOT to automate.</strong></div>
+    <div class="pmeta">
+      <span class="tag accent">On-site</span>
+      <span class="tag">Workflow Mapping</span>
+      <span class="tag green">SCOPE</span>
+      <span class="tag">Prototype</span>
+    </div>
+  </div>
+
+  <div class="highlight-box">
+    <div class="hl-label">FDE's 3 Principles for What to Automate</div>
+    <strong>1. Rules + Variable Inputs = Agent.</strong> Workflow can be distilled into rules but inputs are different (email vs PDF vs image) + involves calling tools → put an agent in.<br>
+    <strong>2. Rules + Predictable Inputs = Code.</strong> If both are predictable, code is faster and cheaper. Don't over-engineer.<br>
+    <strong>3. Needs Pattern Recognition = Keep Human.</strong> Domain expertise that can't be distilled → leave it manual.
+  </div>
+
+  <!-- Phase 2 -->
+  <div class="phase-card">
+    <div class="pnum">PHASE 2</div>
+    <div class="ptitle">📊 Evals</div>
+    <div class="pdesc">If a customer is spending millions on an AI deployment, they need to know it's working. A good eval doesn't just check final answer correctness — it verifies the AI is thinking like a human would. Trace the human's steps and grade the AI on each one. Start with 20 golden examples of "what great looks like" and measure everything against them.</div>
+    <div class="pmeta">
+      <span class="tag blue">Golden Dataset</span>
+      <span class="tag">Step-by-step Grading</span>
+      <span class="tag green">ROI Proof</span>
+    </div>
+  </div>
+
+  <!-- Phase 3 -->
+  <div class="phase-card">
+    <div class="pnum">PHASE 3</div>
+    <div class="ptitle">🚀 Deployment</div>
+    <div class="pdesc">Avoid large-scale data migrations. Instead, build APIs over existing data layers (SharePoint, databases) and place a model as an orchestrator on top. Create a sandbox in the company's infra for safe testing. <strong>Start small:</strong> one workflow, get it working, then layer on capabilities. Start with read-only (agent catches bugs, writes tickets), only if that works give it write permissions (push PRs).</div>
+    <div class="pmeta">
+      <span class="tag accent">Sandbox First</span>
+      <span class="tag green">Smallest Unit of Autonomy</span>
+      <span class="tag gold">Layer Up</span>
+    </div>
+  </div>
+
+  <!-- Pipeline Flow -->
+  <div class="pipeline-flow">
+    <div class="pipe-node accent">Audit</div>
+    <span class="pipe-arrow">→</span>
+    <div class="pipe-node blue">Evals</div>
+    <span class="pipe-arrow">→</span>
+    <div class="pipe-node green">Deploy</div>
+    <span class="pipe-arrow">→</span>
+    <div class="pipe-node gold">Layer Up</div>
+  </div>
+</section>
+
+<!-- ═══ 30-DAY ROADMAP ═══ -->
+<section>
+  <h2>30-Day <span class="uline">Roadmap</span> to FDE</h2>
+  <p class="h2-sub">4 checkpoints. Build these skills and your portfolio speaks for itself.</p>
+
+  <div class="cp-grid">
+    <div class="cp-card">
+      <div class="cp-num">CHECKPOINT 1</div>
+      <div class="cp-title">Agent Fundamentals</div>
+      <div class="cp-days">Day 1-7</div>
+      <ul>
+        <li>Agent loop: prompt → model → response → next step</li>
+        <li>Tool calling (API call + web search)</li>
+        <li>Guardrails: input validation, max-step limit, output filtering</li>
+        <li>Context window vs external memory</li>
+        <li>Audit trail: log every prompt, tool call, response</li>
+      </ul>
+    </div>
+    <div class="cp-card">
+      <div class="cp-num">CHECKPOINT 2</div>
+      <div class="cp-title">Demo to Production</div>
+      <div class="cp-days">Day 8-14</div>
+      <ul>
+        <li>Structured outputs (always return JSON)</li>
+        <li>What breaks when demo goes to prod</li>
+        <li>Checkpointing: save state every N steps</li>
+        <li>Error handling patterns</li>
+      </ul>
+    </div>
+    <div class="cp-card">
+      <div class="cp-num">CHECKPOINT 3</div>
+      <div class="cp-title">Production Hardening</div>
+      <div class="cp-days">Day 15-21</div>
+      <ul>
+        <li>Retry logic + exponential backoff (1s→2s→4s→8s→16s cap)</li>
+        <li>Cost optimization: cheaper models per subtask</li>
+        <li>Golden dataset for evals (20 real queries, labeled)</li>
+        <li>Multi-agent pipelines + parallel architectures</li>
+      </ul>
+    </div>
+    <div class="cp-card">
+      <div class="cp-num">CHECKPOINT 4</div>
+      <div class="cp-title">Communication</div>
+      <div class="cp-days">Day 22-30</div>
+      <ul>
+        <li>Review everything, communicate out loud</li>
+        <li>Tie everything to business metrics</li>
+        <li>Portfolio walkthrough: tech stack + iterations + outcomes</li>
+        <li>Explain to a non-technical VP in plain English</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="highlight-box">
+    <div class="hl-label">Key Insight</div>
+    <strong>Lack of communication ability is a deal-breaker for the FDE role.</strong> If you can't explain what AI can and can't do to a non-technical decision maker, there won't be a deployment. The portfolio is table stakes — <strong>how you talk about it</strong> is the differentiator.
+  </div>
+</section>
+
+<!-- ═══ FDE TERMINOLOGY ➜ YOUR PREP ═══ -->
+<section>
+  <h2>FDE Terminology <span class="uline">Mapped</span> to Your Prep</h2>
+  <p class="h2-sub">Everything you're already building — here's what FDEs call it. Use this in interviews.</p>
+
+  <table class="map-table">
+    <thead>
+      <tr>
+        <th>What You Build (Your Prep)</th>
+        <th>What FDEs Call It</th>
+        <th>FDE Interview Framing</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="your-term">FastAPI + Gemini API pipeline</td>
+        <td class="fde-term">Agent Loop (prompt → model → response → tool call)</td>
+        <td>"I built an agent orchestration layer that routes user requests through model calls with structured output enforcement."</td>
+      </tr>
+      <tr>
+        <td class="your-term">Health Records PDF → BigQuery pipeline</td>
+        <td class="fde-term">Audit Phase: Workflow Mapping + Data Pipeline</td>
+        <td>"Mapped the clinical data ingestion workflow, identified bottlenecks in PDF parsing, and built a pipeline that extracts structured records."</td>
+      </tr>
+      <tr>
+        <td class="your-term">RAG pipeline with embeddings</td>
+        <td class="fde-term">Golden Dataset + Eval Framework</td>
+        <td>"Built a retrieval system with 20 hand-labeled golden queries as the evaluation baseline, measured recall/precision before deploying."</td>
+      </tr>
+      <tr>
+        <td class="your-term">Retry logic + error handling in pipeline</td>
+        <td class="fde-term">Checkpointing + Retry with Exponential Backoff</td>
+        <td>"Implemented checkpointing every N steps with exponential backoff (1s→2s→4s→16s cap) so failed API calls don't lose progress."</td>
+      </tr>
+      <tr>
+        <td class="your-term">Gunicorn + Cloud Run deployment</td>
+        <td class="fde-term">Deployment Phase: API Layer Over Existing Infra</td>
+        <td>"Deployed a containerized API service on serverless compute — the FDE pattern of building APIs over existing data layers without migrations."</td>
+      </tr>
+      <tr>
+        <td class="your-term">Implementation-notes.md (Thariq pattern)</td>
+        <td class="fde-term">Audit Trail</td>
+        <td>"Every prompt, tool call, and decision gets logged with timestamps. This audit trail saved us during debugging when an agent went off-course."</td>
+      </tr>
+      <tr>
+        <td class="your-term">Input validation + guardrails</td>
+        <td class="fde-term">Agent Guardrails</td>
+        <td>"Added input validation, max-step limits, and output filtering before anything reaches the user — catching bad data 3 stages earlier."</td>
+      </tr>
+      <tr>
+        <td class="your-term">JSON mode / structured output</td>
+        <td class="fde-term">Structured Output Enforcement</td>
+        <td>"Enforced structured JSON outputs from the model so downstream systems can parse reliably without errors."</td>
+      </tr>
+      <tr>
+        <td class="your-term">Cost tracking per API call</td>
+        <td class="fde-term">Cost Optimization: Cheaper Models per Subtask</td>
+        <td>"Assigned cheaper models for routine subtasks and reserved expensive reasoning for complex decisions — tracked cost per query."</td>
+      </tr>
+      <tr>
+        <td class="your-term">Health check + monitoring endpoints</td>
+        <td class="fde-term">Evals: Production Monitoring</td>
+        <td>"Built eval harness that traces each step of the human workflow and grades the agent. Executives used this to trust the ROI."</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══ TERMINOLOGY CHEAT SHEET ═══ -->
+<section>
+  <h2>Cheat Sheet: When Your Topic Comes <span class="uline">Up</span></h2>
+  <p class="h2-sub">During an interview, if you talk about X — call it Y (the FDE term).</p>
+
+  <div class="key-grid">
+    <div class="key-item" style="border-left:3px solid var(--blue);">
+      <div class="title">🤖 Agent Topic Comes Up</div>
+      <div class="desc">Say "I built an <strong>agent loop</strong> with tool calling and guardrails. The loop is prompt → model → structured response → tool execution → next step."</div>
+    </div>
+    <div class="key-item" style="border-left:3px solid var(--green);">
+      <div class="title">📊 Evals Topic Comes Up</div>
+      <div class="desc">Say "I built a <strong>golden dataset</strong> of 20 labeled queries. Each eval traces the human's steps and grades the agent on each checkpoint."</div>
+    </div>
+    <div class="key-item" style="border-left:3px solid var(--accent);">
+      <div class="title">🔧 Deployment Topic Comes Up</div>
+      <div class="desc">Say "I followed the FDE pattern: <strong>APIs over existing data</strong>, no migrations. Sandbox first, smallest unit of autonomy, then layer up."</div>
+    </div>
+    <div class="key-item" style="border-left:3px solid var(--gold);">
+      <div class="title">🐛 Debugging Topic Comes Up</div>
+      <div class="desc">Say "I maintained an <strong>audit trail</strong> — every prompt, tool call, and response logged with timestamps. This caught a silent failure pattern."</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <div class="card-label">How to Use This in an Interview</div>
+    <p style="font-size:13px;color:var(--ink-2);"><strong>Interviewer:</strong> "Tell me about a time you deployed an AI system."</p>
+    <p style="font-size:13px;color:var(--ink-2);margin-top:6px;"><strong>You (with FDE framing):</strong> "I followed the Forward Deployed Engineering pattern — start with an <strong>audit</strong> of the data pipeline, build <strong>evals</strong> with a golden dataset of 20 hand-labeled queries, then <strong>deploy</strong> as an API over the existing database. Smallest unit of autonomy first — read-only agent that writes tickets — then layer up."</p>
+  </div>
+</section>
+
+<!-- ═══ INTERVIEW PREP ═══ -->
+<section>
+  <h2>Interview <span class="uline">Prep</span></h2>
+  <p class="h2-sub">Three depths — 30 seconds, 90 seconds, 3 minutes.</p>
+
+  <div class="interview-acc" onclick="toggleAcc(this)">
+    <div class="acc-header">
+      <span>⏱️ 30-Second Answer</span>
+      <span>▼</span>
+    </div>
+    <div class="acc-body">
+      <p>Forward Deployed Engineers bridge the gap between AI capabilities and real business problems. We go on-site with customers, map their workflows, identify where AI agents create value (and where they don't), build evaluations that prove ROI, and deploy incrementally — starting with the smallest unit of autonomy and layering up. It's the hottest role in tech because intelligence is becoming a commodity, so competitive advantage comes from <em>how</em> and <em>where</em> you deploy it.</p>
+    </div>
+  </div>
+
+  <div class="interview-acc" onclick="toggleAcc(this)">
+    <div class="acc-header">
+      <span>⏱️ 90-Second STAR Answer</span>
+      <span>▼</span>
+    </div>
+    <div class="acc-body">
+      <p><strong>Situation:</strong> Our team needed to deploy an AI-powered health records pipeline for a clinic that stored data across PDFs, spreadsheets, and legacy systems.</p>
+      <p><strong>Task:</strong> Build an automated pipeline that extracts lab values and trends, without migrating any existing data.</p>
+      <p><strong>Action:</strong> I followed the FDE playbook — audited the workflow (PDF parsing bottleneck identified), built a golden dataset of 20 labeled records for evals, deployed a FastAPI layer over existing files (no migration), started with read-only extraction, verified accuracy, then layered on trend analysis.</p>
+      <p><strong>Result:</strong> Lab extraction accuracy improved from manual errors to consistent structured output. Pipeline cost <strong>$2/day</strong> on Gemini API, zero infrastructure migration needed. Audit trail logged every step for debugging.</p>
+    </div>
+  </div>
+
+  <div class="interview-acc" onclick="toggleAcc(this)">
+    <div class="acc-header">
+      <span>⏱️ 3-Minute Technical Walkthrough</span>
+      <span>▼</span>
+    </div>
+    <div class="acc-body">
+      <p><strong>The FDE role has three phases — let's walk through each with a real example.</strong></p>
+      <br>
+      <p><strong>Phase 1: Audit.</strong> I sat with the clinic team and mapped their data workflow. PDF reports come in, nurses manually enter lab values into spreadsheets. Bottleneck: PDF parsing consumes 40 min/day. Two rules: (a) if the report format varies (different labs = different layouts), use an agent; (b) if the decision requires medical judgment (is this trend dangerous?), keep a human in the loop. Result: automate extraction, flag anomalies for human review.</p>
+      <br>
+      <p><strong>Phase 2: Evals.</strong> I built a golden dataset — 20 PDFs where I hand-extracted the correct values. The eval checks: did the agent find the right field? Did it handle missing values correctly? Did it flag uncertainty? Each step gets graded. Executives saw the numbers and approved deployment.</p>
+      <br>
+      <p><strong>Phase 3: Deployment.</strong> No database migration. FastAPI endpoints over the existing folder structure. Agent loop: receive PDF → Gemini 2.5 Flash extracts → structured JSON returned → appended to a daily log. Started small: extraction only (read), verified for 2 weeks, then layered on "detect worsening trends" (write flags). Cost: $0.002 per PDF on Gemini, ~100 PDFs/day = $0.20/day. 100x cheaper than manual entry with zero data migration risk.</p>
+      <br>
+      <p><strong>Key learning:</strong> The eval phase is what executives care about most. If you can't prove ROI, you won't get the deployment. That's why golden datasets and step-by-step grading matter more than the agent itself.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ WHAT THIS MEANS FOR YOUR PREP ═══ -->
+<section>
+  <h2>What This <span class="uline">Changes</span> for Your Prep</h2>
+  <p class="h2-sub">Small framing shifts that make a big difference.</p>
+
+  <div class="card">
+    <div class="card-label">When You Work on... Say It Like This</div>
+    <div style="margin: 12px 0;">
+      <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--rule);align-items:flex-start;">
+        <span style="font-size:9px;font-family:var(--mono);color:var(--ink-faint);white-space:nowrap;min-width:50px;">BEFORE</span>
+        <span style="text-decoration:line-through;color:var(--ink-dim);font-size:13px;">"I built a FastAPI + Gemini pipeline"</span>
+      </div>
+      <div style="display:flex;gap:10px;padding:8px 0;align-items:flex-start;">
+        <span style="font-size:9px;font-family:var(--mono);color:var(--green);white-space:nowrap;min-width:50px;">AFTER</span>
+        <span style="color:var(--ink);font-size:13px;font-weight:500;">"I built an agent loop with structured output enforcement, deployed as an API over existing data — no migration needed."</span>
+      </div>
+    </div>
+    <div style="margin: 12px 0;">
+      <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--rule);align-items:flex-start;">
+        <span style="font-size:9px;font-family:var(--mono);color:var(--ink-faint);white-space:nowrap;min-width:50px;">BEFORE</span>
+        <span style="text-decoration:line-through;color:var(--ink-dim);font-size:13px;">"I added input validation to my API"</span>
+      </div>
+      <div style="display:flex;gap:10px;padding:8px 0;align-items:flex-start;">
+        <span style="font-size:9px;font-family:var(--mono);color:var(--green);white-space:nowrap;min-width:50px;">AFTER</span>
+        <span style="color:var(--ink);font-size:13px;font-weight:500;">"I implemented agent guardrails — input validation, token limits, and output filtering — catching bad data before it reaches the model."</span>
+      </div>
+    </div>
+    <div style="margin: 12px 0;">
+      <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--rule);align-items:flex-start;">
+        <span style="font-size:9px;font-family:var(--mono);color:var(--ink-faint);white-space:nowrap;min-width:50px;">BEFORE</span>
+        <span style="text-decoration:line-through;color:var(--ink-dim);font-size:13px;">"I wrote implementation notes while coding"</span>
+      </div>
+      <div style="display:flex;gap:10px;padding:8px 0;align-items:flex-start;">
+        <span style="font-size:9px;font-family:var(--mono);color:var(--green);white-space:nowrap;min-width:50px;">AFTER</span>
+        <span style="color:var(--ink);font-size:13px;font-weight:500;">"I maintained an audit trail — every prompt, tool call, and decision logged with timestamps for debugging and accountability."</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight-box">
+    <div class="hl-label">Bottom Line</div>
+    <strong>Every time we discuss a topic from now on</strong>, I'll flag the FDE terminology. When you're building an API — I'll say "this is the deployment phase." When you're debugging — "this is why audit trails matter in FDE." When you're testing prompts — "this is eval phase with golden datasets."<br><br>
+    <p style="font-size:13px;color:var(--ink-2);">This isn't new work. It's the same work you're already doing, framed so it resonates with the people who hire FDEs.</p>
+  </div>
+</section>
+
+<!-- ═══ SUBBA RAO SIGN-OFF ═══ -->
+<section>
+  <div class="card" style="background:var(--paper);border:2px solid var(--accent);">
+    <div class="card-label">Subba Rao Anna — Final Word</div>
+    <p>Baagundi babu! Vas article lo unna concepts anni already nee prep lo cover avtunnayi — just different names tho. RAG pipeline ante FDEs "golden dataset + eval framework" antaru. Retry logic ante "checkpointing with exponential backoff" antaru.</p>
+    <p>Inka mukhyam enti ante: <strong>communicate cheyagaladam</strong> is the real deal-breaker. Nuvvu build chesindi complexity, kaani interview lo cheppali simple business impact ga. That's the FDE skill.</p>
+    <p style="font-family:var(--mono);font-size:10px;color:var(--ink-dim);">Source: x.com/vasuman/status/2057177266984226892 · Varick FDE Team</p>
+  </div>
+</section>
+
+</main>
+
+<script>
+// Dark toggle
+document.getElementById('darkToggle').addEventListener('click', function(){
+  var d = document.documentElement;
+  if(d.getAttribute('data-theme') === 'dark') { d.removeAttribute('data-theme'); }
+  else { d.setAttribute('data-theme', 'dark'); }
+});
+
+// Section entrance animations
+var observer = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting) e.target.classList.add('in');
+  });
+},{threshold: 0.1});
+document.querySelectorAll('section').forEach(function(el){ observer.observe(el); });
+
+// Accordion toggle
+function toggleAcc(el) {
+  el.classList.toggle('open');
+  var body = el.querySelector('.acc-body');
+  var arrow = el.querySelector('.acc-header span:last-child');
+  if (el.classList.contains('open')) {
+    body.style.display = 'block';
+    arrow.textContent = '▲';
+  } else {
+    body.style.display = 'none';
+    arrow.textContent = '▼';
+  }
+}
+
+// Copy button
+document.querySelectorAll('.copy-ghost').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var code = this.parentElement.querySelector('.code-block') || this.parentElement.querySelector('code');
+    var text = code.textContent || code.innerText;
+    navigator.clipboard.writeText(text).catch(function(){});
+    this.textContent = '\u2705';
+    var self = this;
+    setTimeout(function(){ self.textContent = '\uD83D\uDCCB'; }, 1500);
+  });
+});
+</script>
+</body>
+</html>
