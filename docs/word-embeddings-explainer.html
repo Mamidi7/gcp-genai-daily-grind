@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Word Embeddings — Why Words Are Points in Space</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --paper: #F3EEE4;
+  --ink: #1a1a1a;
+  --muted: #6b6560;
+  --accent: #c45c3e;
+  --accent-soft: #c45c3e18;
+  --card-bg: #FDFBF7;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.04);
+  --font-serif: "Source Serif Pro", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+  --rule: #dcd6cc;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-serif);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.7;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* === Animated background blobs (adapted from open-design liquid-bg-hero) === */
+.bg-blobs {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+}
+.blob {
+  position: absolute; border-radius: 50%; mix-blend-mode: soft-light; filter: blur(80px);
+  will-change: transform; opacity: 0.45;
+}
+@keyframes float1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(60px,-40px) scale(1.12)} }
+@keyframes float2 { 0%,100%{transform:translate(0,0) scale(1.05)} 50%{transform:translate(-50px,30px) scale(0.92)} }
+@keyframes float3 { 0%,100%{transform:translate(0,0) scale(0.95)} 50%{transform:translate(40px,50px) scale(1.08)} }
+.b1 { width:500px; height:500px; background:#e8ddd0; top:-120px; left:-80px; animation: float1 14s ease-in-out infinite; }
+.b2 { width:440px; height:440px; background:#d4c8b8; top:35%; right:-100px; animation: float2 12s ease-in-out infinite; }
+.b3 { width:400px; height:400px; background:#f0e6d8; bottom:-80px; left:25%; animation: float3 16s ease-in-out infinite; opacity: 0.35; }
+.b4 { width:320px; height:320px; background:#dcd0c0; top:65%; left:8%; animation: float1 18s ease-in-out infinite; opacity: 0.3; }
+
+@media (prefers-reduced-motion: reduce) {
+  .blob { animation: none; opacity: 0.2; }
+}
+
+/* === Page structure === */
+.page { position: relative; z-index: 1; max-width: 820px; margin: 0 auto; padding: 48px 24px 80px; }
+
+header.site-header {
+  text-align: center; padding-bottom: 40px; border-bottom: 1px solid var(--rule); margin-bottom: 40px;
+}
+.site-header .tag {
+  font-family: var(--font-sans); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+}
+.site-header h1 {
+  font-size: clamp(32px, 5vw, 52px); font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; margin-bottom: 12px;
+}
+.site-header .subtitle {
+  font-family: var(--font-sans); font-size: 17px; color: var(--muted); font-weight: 400; max-width: 560px; margin: 0 auto;
+}
+
+/* === Sections === */
+section { margin-bottom: 48px; }
+section h2 {
+  font-family: var(--font-sans); font-size: 13px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent);
+  margin-bottom: 16px; font-weight: 600;
+}
+section h3 {
+  font-family: var(--font-sans); font-size: 20px; font-weight: 700; margin-bottom: 12px; line-height: 1.3;
+}
+
+.card {
+  background: var(--card-bg); border-radius: 12px; box-shadow: var(--card-shadow);
+  padding: 28px; margin-bottom: 20px;
+}
+.card p { margin-bottom: 12px; }
+.card p:last-child { margin-bottom: 0; }
+
+.inline-code {
+  font-family: var(--font-mono); font-size: 0.88em; background: #ede8df; padding: 1px 5px; border-radius: 4px; color: var(--ink);
+}
+
+/* === Core / Problem / Solution blocks === */
+.trio-grid {
+  display: grid; gap: 16px;
+}
+@media (min-width: 640px) {
+  .trio-grid { grid-template-columns: repeat(3, 1fr); }
+}
+.trio-block {
+  background: var(--card-bg); border-radius: 12px; padding: 24px; box-shadow: var(--card-shadow);
+}
+.trio-block .label {
+  font-family: var(--font-sans); font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--accent); font-weight: 600; margin-bottom: 10px;
+}
+.trio-block h4 { font-family: var(--font-sans); font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.trio-block p { font-size: 15px; color: var(--muted); line-height: 1.6; }
+
+/* === Canvas visualization === */
+.vis-wrap {
+  background: var(--card-bg); border-radius: 12px; box-shadow: var(--card-shadow); padding: 24px; margin-bottom: 24px;
+}
+.vis-header {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;
+}
+.vis-header h3 { font-family: var(--font-sans); font-size: 18px; font-weight: 700; margin: 0; }
+.vis-controls {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.vis-controls button {
+  font-family: var(--font-sans); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 8px 16px; border-radius: 8px; border: 1.5px solid var(--rule); background: transparent; color: var(--ink); cursor: pointer; transition: all 0.2s;
+}
+.vis-controls button:hover { background: var(--accent-soft); border-color: var(--accent); }
+.vis-controls button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+#embedCanvas {
+  width: 100%; height: 400px; border-radius: 8px; background: #f7f4ef; cursor: crosshair;
+  border: 1px solid var(--rule);
+}
+
+.vis-caption {
+  margin-top: 12px; font-family: var(--font-sans); font-size: 13px; color: var(--muted); text-align: center;
+}
+
+/* === Code blocks === */
+.code-block {
+  position: relative; background: #1e1c1a; border-radius: 10px; overflow: hidden; margin: 16px 0;
+}
+.code-block pre {
+  padding: 20px 20px 20px 20px; overflow-x: auto; font-family: var(--font-mono); font-size: 13px; line-height: 1.65; color: #e8e0d5;
+  max-height: 420px; overflow-y: auto;
+}
+.code-block .copy-btn {
+  position: absolute; top: 10px; right: 10px;
+  font-family: var(--font-sans); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 6px 12px; border-radius: 6px; border: none; background: rgba(255,255,255,0.12); color: #fff; cursor: pointer; opacity: 0; transition: opacity 0.2s;
+}
+.code-block:hover .copy-btn { opacity: 1; }
+.code-block .copy-btn.copied { background: #4caf50; }
+
+/* === Syntax colours (very light) === */
+.kw { color: #c792ea; } /* keyword */
+.str { color: #c3e88d; } /* string */
+.num { color: #f78c6c; } /* number */
+.cmt { color: #676360; } /* comment */
+.fn { color: #82aaff; } /* function */
+
+/* === Callout === */
+.callout {
+  border-left: 3px solid var(--accent); padding: 16px 20px; background: var(--accent-soft); border-radius: 0 8px 8px 0; margin: 20px 0;
+}
+.callout p { margin: 0; font-size: 15px; }
+.callout strong { font-family: var(--font-sans); }
+
+/* === Footer === */
+.page-footer {
+  margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--rule);
+  text-align: center; font-family: var(--font-sans); font-size: 12px; color: var(--muted); letter-spacing: 0.05em;
+}
+</style>
+</head>
+<body>
+
+<div class="bg-blobs" aria-hidden="true">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <div class="blob b4"></div>
+</div>
+
+<div class="page">
+
+<header class="site-header">
+  <div class="tag">Concept Explainer &middot; NLP &middot; Day 18</div>
+  <h1>Why Words Are Points in Space</h1>
+  <p class="subtitle">How word embeddings turn language into numbers, and why "king minus man plus woman equals queen" is not magic — it is geometry.</p>
+</header>
+
+<!-- === TRIO === -->
+<section>
+  <h2>The One-Sentence Story</h2>
+  <div class="trio-grid">
+    <div class="trio-block">
+      <div class="label">Core Idea</div>
+      <h4>Words become vectors</h4>
+      <p>Every word is turned into a list of numbers (a vector). Words with similar meanings end up close together in that number-space.</p>
+    </div>
+    <div class="trio-block">
+      <div class="label">Problem</div>
+      <h4>Computers cannot read</h4>
+      <p>A computer does not know that "king" and "monarch" are related. Raw text is just bytes. We need a numerical representation.</p>
+    </div>
+    <div class="trio-block">
+      <div class="label">Solution</div>
+      <h4>Train embeddings from context</h4>
+      <p>A neural network learns to predict a word from its neighbours. The hidden layer weights become the embedding vector.</p>
+    </div>
+  </div>
+</section>
+
+<!-- === VISUALIZATION === -->
+<section>
+  <h2>Live Demo</h2>
+  <div class="vis-wrap">
+    <div class="vis-header">
+      <h3>2D Embedding Space (simplified projection)</h3>
+      <div class="vis-controls">
+        <button id="btn-reset" class="active">Reset</button>
+        <button id="btn-arith">Show Arithmetic</button>
+        <button id="btn-clusters">Show Clusters</button>
+      </div>
+    </div>
+    <canvas id="embedCanvas" width="800" height="400"></canvas>
+    <p class="vis-caption">Drag dots to move them. Click "Show Arithmetic" to see king&nbsp;&minus;&nbsp;man&nbsp;+&nbsp;woman&nbsp;&rarr;&nbsp;queen.</p>
+  </div>
+</section>
+
+<!-- === HOW IT WORKS === -->
+<section>
+  <h2>How It Works</h2>
+  <div class="card">
+    <p>Think of a thesaurus. "King", "queen", "prince", "monarch" belong on the same page. "Apple", "banana", "pear" belong on another.</p>
+    <p>Embeddings do the same thing, but in <strong>300-dimensional space</strong> instead of paper pages. You cannot draw 300 dimensions, so below we show a <strong>2D projection</strong> — the same idea, flattened for your screen.</p>
+  </div>
+
+  <div class="callout">
+    <p><strong>Key insight:</strong> The distance between two embedding vectors measures <em>semantic similarity</em>. Close = similar meaning. Far = different meaning.</p>
+  </div>
+
+  <h3>The Classic Example</h3>
+  <p style="margin-bottom:12px">This is the most famous embedding arithmetic. It works because the model learned the <em>gender</em> direction and the <em>royalty</em> direction as separate axes in vector space.</p>
+
+  <div class="code-block">
+    <button class="copy-btn">Copy</button>
+    <pre><span class="cmt"># Word embedding arithmetic (conceptual)</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cmt"># Each vector is 300 numbers long</span>
+king_vec   = embeddings[<span class="str">"king"</span>]      <span class="cmt"># shape: (300,)</span>
+man_vec    = embeddings[<span class="str">"man"</span>]
+woman_vec  = embeddings[<span class="str">"woman"</span>]
+
+<span class="cmt"># Vector arithmetic</span>
+result_vec = king_vec - man_vec + woman_vec
+
+<span class="cmt"># Find the closest word to this new vector</span>
+closest_word = nearest_neighbor(result_vec)
+<span class="cmt"># Output: "queen"</span></pre>
+  </div>
+</section>
+
+<!-- === TRAINING === -->
+<section>
+  <h2>How Are They Trained?</h2>
+  <div class="card">
+    <p>The simplest mental model: <strong>predict the missing word</strong>.</p>
+    <p>Take a sentence. Mask one word. Train a neural network to guess it from the words around it. After training millions of sentences, the network's internal weights <em>are</em> the embeddings.</p>
+    <p style="margin-top:12px"><strong>Two famous approaches:</strong></p>
+    <p><span class="inline-code">Word2Vec</span> (Mikolov, 2013) — predicts a word from its neighbours. Fast, simple, still useful.</p>
+    <p><span class="inline-code">BERT</span> (Devlin, 2018) — predicts masked words using deep bidirectional context. State-of-the-art for many tasks.</p>
+  </div>
+
+  <div class="code-block">
+    <button class="copy-btn">Copy</button>
+    <pre><span class="cmt"># GCP Vertex AI — get text embeddings in production</span>
+<span class="kw">from</span> google.cloud <span class="kw">import</span> aiplatform
+<span class="kw">from</span> vertexai.language_models <span class="kw">import</span> TextEmbeddingModel
+
+model = TextEmbeddingModel.from_pretrained(<span class="str">"text-embedding-004"</span>)
+
+<span class="cmt"># Batch embed — real production pattern</span>
+inputs = [<span class="str">"king"</span>, <span class="str">"queen"</span>, <span class="str">"man"</span>, <span class="str">"woman"</span>]
+embeddings = model.get_embeddings(inputs)
+
+<span class="kw">for</span> text, emb <span class="kw">in</span> <span class="fn">zip</span>(inputs, embeddings):
+    <span class="fn">print</span>(<span class="str">f"{text}: {len(emb.values)} dimensions"</span>)
+<span class="cmt"># king: 768 dimensions</span></pre>
+  </div>
+</section>
+
+<!-- === WHY IT MATTERS === -->
+<section>
+  <h2>Why This Matters for RAG</h2>
+  <div class="card">
+    <p><strong>Retrieval-Augmented Generation (RAG)</strong> needs to find the right document chunks to feed an LLM. It does this by:</p>
+    <p style="margin-left:16px">1. Embedding the user's question into a vector.<br/>
+    2. Searching a <strong>vector database</strong> for the closest document chunks.<br/>
+    3. Passing those chunks as context to the LLM.</p>
+    <p style="margin-top:12px">If the embeddings are poor, the wrong chunks come back. The LLM hallucinates. The whole pipeline fails.</p>
+  </div>
+
+  <div class="code-block">
+    <button class="copy-btn">Copy</button>
+    <pre><span class="cmt"># BigQuery VECTOR_SEARCH — zero-infrastructure RAG retrieval</span>
+<span class="kw">SELECT</span>
+  query.id <span class="kw">AS</span> question_id,
+  base.text <span class="kw">AS</span> matched_chunk,
+  distance
+<span class="kw">FROM</span> VECTOR_SEARCH(
+  <span class="kw">TABLE</span> <span class="str">`project.dataset.doc_embeddings`</span>,   <span class="cmt">-- base table</span>
+  <span class="str">'embedding'</span>,                                    <span class="cmt">-- embedding column</span>
+  (<span class="kw">SELECT</span> embedding <span class="kw">FROM</span> <span class="str">`project.dataset.query_embeddings`</span> <span class="kw">WHERE</span> id = <span class="num">1</span>),
+  top_k => <span class="num">5</span>
+) <span class="kw">AS</span> result</pre>
+  </div>
+</section>
+
+<!-- === INTERVIEW PREP === -->
+<section>
+  <h2>Interview Corner</h2>
+  <div class="trio-grid">
+    <div class="trio-block">
+      <div class="label">30-Second Pitch</div>
+      <p>"Word embeddings turn text into dense vectors. Similar words cluster together. You can do arithmetic: king minus man plus woman gives you a vector closest to queen. In production, I use Vertex AI's text-embedding-004 and BigQuery VECTOR_SEARCH for retrieval."</p>
+    </div>
+    <div class="trio-block">
+      <div class="label">90-Second STAR</div>
+      <p><strong>Situation:</strong> Building a RAG pipeline for technical docs.<br/>
+      <strong>Task:</strong> Needed retrieval that understood semantic similarity, not just keyword match.<br/>
+      <strong>Action:</strong> Chose text-embedding-004, chunked docs at 512 tokens, stored in BigQuery with VECTOR_SEARCH.<br/>
+      <strong>Result:</strong> Retrieved relevant chunks even when user queries used different words.</p>
+    </div>
+    <div class="trio-block">
+      <div class="label">Deep Follow-Up</div>
+      <p>"How would you handle a query that uses slang or domain jargon the embedding model never saw?"<br/><br/>
+      <strong>Answer:</strong> Fine-tune on domain corpus, or use hybrid search (BM25 + vector), or add query expansion with an LLM rewrite step.</p>
+    </div>
+  </div>
+</section>
+
+<div class="page-footer">
+  Built for interview prep &middot; Open in a browser, walk through it aloud &middot; Adapted from open-design frame-liquid-bg-hero technique
+</div>
+
+</div><!-- /page -->
+
+<script>
+/* =============================================================
+   EMBEDDING VISUALISATION — Canvas 2D, no external libraries
+   ============================================================= */
+const canvas = document.getElementById('embedCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, DPR;
+let words = [];
+let animId = null;
+let mode = 'reset'; // reset | arith | clusters
+let animTime = 0;
+
+/* Word data: x,y are the 2D projection coordinates */
+const WORD_DATA = [
+  { id: 'king',   label: 'king',   x: 180, y: 140, cluster: 'royalty', color: '#c45c3e' },
+  { id: 'queen',  label: 'queen',  x: 220, y: 160, cluster: 'royalty', color: '#c45c3e' },
+  { id: 'prince', label: 'prince', x: 160, y: 180, cluster: 'royalty', color: '#c45c3e' },
+  { id: 'man',    label: 'man',    x: 140, y: 280, cluster: 'gender-m', color: '#4a7c8c' },
+  { id: 'woman',  label: 'woman',  x: 260, y: 300, cluster: 'gender-f', color: '#8c6a9c' },
+  { id: 'dog',    label: 'dog',    x: 560, y: 120, cluster: 'animal',  color: '#6a8c4a' },
+  { id: 'cat',    label: 'cat',    x: 580, y: 150, cluster: 'animal',  color: '#6a8c4a' },
+  { id: 'wolf',   label: 'wolf',   x: 540, y: 170, cluster: 'animal',  color: '#6a8c4a' },
+  { id: 'apple',  label: 'apple',  x: 580, y: 300, cluster: 'fruit',   color: '#c4a03e' },
+  { id: 'banana', label: 'banana', x: 600, y: 340, cluster: 'fruit',   color: '#c4a03e' },
+  { id: 'pear',   label: 'pear',   x: 550, y: 330, cluster: 'fruit',   color: '#c4a03e' },
+];
+
+function resize() {
+  const rect = canvas.getBoundingClientRect();
+  DPR = window.devicePixelRatio || 1;
+  W = Math.floor(rect.width);
+  H = Math.floor(rect.height);
+  canvas.width = W * DPR;
+  canvas.height = H * DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+
+function initWords() {
+  const scaleX = W / 800;
+  const scaleY = H / 400;
+  words = WORD_DATA.map(w => ({
+    ...w,
+    cx: w.x * scaleX,
+    cy: w.y * scaleY,
+    tx: w.x * scaleX, // target
+    ty: w.y * scaleY,
+    r: 6,
+    hover: false,
+    dragging: false,
+  }));
+}
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+/* ===== Drawing ===== */
+function drawClusterZones() {
+  if (mode !== 'clusters') return;
+  const zones = {
+    royalty:  { cx: 0, cy: 0, n: 0, color: 'rgba(196,92,62,0.08)' },
+    gender:   { cx: 0, cy: 0, n: 0, color: 'rgba(74,124,140,0.08)' },
+    animal:   { cx: 0, cy: 0, n: 0, color: 'rgba(106,140,74,0.08)' },
+    fruit:    { cx: 0, cy: 0, n: 0, color: 'rgba(196,160,62,0.08)' },
+  };
+  for (const w of words) {
+    let key = w.cluster;
+    if (key === 'gender-m' || key === 'gender-f') key = 'gender';
+    if (zones[key]) {
+      zones[key].cx += w.cx; zones[key].cy += w.cy; zones[key].n++;
+    }
+  }
+  for (const k of Object.keys(zones)) {
+    const z = zones[k]; if (!z.n) continue;
+    z.cx /= z.n; z.cy /= z.n;
+    ctx.beginPath();
+    ctx.fillStyle = z.color;
+    ctx.arc(z.cx, z.cy, 55, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawConnections() {
+  if (mode !== 'arith') return;
+  const get = id => words.find(w => w.id === id);
+  const king = get('king'), man = get('man'), woman = get('woman'), queen = get('queen');
+  if (!king || !man || !woman || !queen) return;
+
+  // Compute the arithmetic point: king - man + woman (visualised as a path)
+  const mx = (king.cx - man.cx + woman.cx);
+  const my = (king.cy - man.cy + woman.cy);
+
+  // Draw dashed path: king -> (king-man) -> +woman -> result
+  ctx.setLineDash([6, 4]);
+  ctx.lineWidth = 1.5;
+
+  // king -> result helper line (ghost)
+  ctx.strokeStyle = 'rgba(196,92,62,0.25)';
+  ctx.beginPath(); ctx.moveTo(king.cx, king.cy); ctx.lineTo(mx, my); ctx.stroke();
+
+  // man -> woman (the "direction" being added)
+  ctx.strokeStyle = 'rgba(74,124,140,0.5)';
+  ctx.beginPath(); ctx.moveTo(man.cx, man.cy); ctx.lineTo(woman.cx, woman.cy); ctx.stroke();
+
+  // Result marker
+  const pulse = Math.sin(animTime * 0.004) * 0.5 + 0.5;
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.strokeStyle = `rgba(196,92,62,${0.4 + pulse * 0.4})`;
+  ctx.lineWidth = 2;
+  ctx.arc(mx, my, 10 + pulse * 6, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Label near result
+  ctx.fillStyle = '#1a1a1a';
+  ctx.font = '600 12px Inter, sans-serif';
+  ctx.fillText('king − man + woman', mx + 14, my - 8);
+  ctx.fillStyle = '#c45c3e';
+  ctx.fillText('≈ queen', mx + 14, my + 8);
+
+  // Small vector arrows
+  drawArrow(man.cx, man.cy, woman.cx, woman.cy, 'rgba(74,124,140,0.6)');
+}
+
+function drawArrow(x1, y1, x2, y2, color) {
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  const len = Math.hypot(x2 - x1, y2 - y1);
+  if (len < 10) return;
+  const head = 8;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - head * Math.cos(angle - 0.4), y2 - head * Math.sin(angle - 0.4));
+  ctx.lineTo(x2 - head * Math.cos(angle + 0.4), y2 - head * Math.sin(angle + 0.4));
+  ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  // Background hint
+  ctx.fillStyle = '#f7f4ef';
+  ctx.fillRect(0, 0, W, H);
+
+  // Axis labels
+  ctx.fillStyle = '#b0a99c';
+  ctx.font = '500 11px Inter, sans-serif';
+  ctx.fillText('← similar meaning →', W / 2 - 55, H - 10);
+
+  drawClusterZones();
+  drawConnections();
+
+  // Words
+  for (const w of words) {
+    // Glow on hover
+    if (w.hover) {
+      ctx.beginPath();
+      ctx.fillStyle = w.color + '22';
+      ctx.arc(w.cx, w.cy, 18, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Dot
+    ctx.beginPath();
+    ctx.fillStyle = w.color;
+    ctx.arc(w.cx, w.cy, w.r, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Ring for royalty
+    if (w.cluster === 'royalty') {
+      ctx.beginPath();
+      ctx.strokeStyle = w.color + '55';
+      ctx.lineWidth = 1.5;
+      ctx.arc(w.cx, w.cy, 12, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // Label
+    ctx.fillStyle = '#2a2622';
+    ctx.font = '600 13px Inter, sans-serif';
+    ctx.fillText(w.label, w.cx + 12, w.cy + 4);
+  }
+}
+
+function update() {
+  animTime += 16;
+  // Gentle drift toward targets
+  for (const w of words) {
+    if (w.dragging) continue;
+    w.cx = lerp(w.cx, w.tx, 0.06);
+    w.cy = lerp(w.cy, w.ty, 0.06);
+  }
+  draw();
+  animId = requestAnimationFrame(update);
+}
+
+/* ===== Interaction ===== */
+function getMousePos(e) {
+  const rect = canvas.getBoundingClientRect();
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+canvas.addEventListener('mousedown', e => {
+  const { x, y } = getMousePos(e);
+  for (const w of words) {
+    const d = Math.hypot(w.cx - x, w.cy - y);
+    if (d < 18) { w.dragging = true; w.cx = x; w.cy = y; break; }
+  }
+});
+window.addEventListener('mousemove', e => {
+  const { x, y } = getMousePos(e);
+  let hit = false;
+  for (const w of words) {
+    const d = Math.hypot(w.cx - x, w.cy - y);
+    w.hover = d < 18;
+    if (w.hover) hit = true;
+    if (w.dragging) { w.cx = x; w.cy = y; w.tx = x; w.ty = y; }
+  }
+  canvas.style.cursor = hit || words.some(w => w.dragging) ? 'grab' : 'crosshair';
+});
+window.addEventListener('mouseup', () => { words.forEach(w => w.dragging = false); });
+
+/* ===== Buttons ===== */
+document.getElementById('btn-reset').addEventListener('click', () => {
+  mode = 'reset'; setActive('btn-reset'); initWords();
+});
+document.getElementById('btn-arith').addEventListener('click', () => {
+  mode = 'arith'; setActive('btn-arith');
+});
+document.getElementById('btn-clusters').addEventListener('click', () => {
+  mode = 'clusters'; setActive('btn-clusters');
+});
+
+function setActive(id) {
+  document.querySelectorAll('.vis-controls button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ===== Copy buttons ===== */
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const pre = btn.nextElementSibling;
+    if (!pre) return;
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+    });
+  });
+});
+
+/* ===== Init ===== */
+window.addEventListener('resize', () => { resize(); initWords(); });
+resize();
+initWords();
+update();
+</script>
+
+</body>
+</html>
