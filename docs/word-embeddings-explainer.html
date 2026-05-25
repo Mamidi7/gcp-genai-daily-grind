@@ -301,20 +301,81 @@ header .subtitle {
 .code-block .copy-btn {
   position:absolute;
   top:8px; right:12px;
-  background:transparent;
+  background:rgba(58,50,44,0.4);
   border:1.5px solid #3A322C;
   color:#8A7E74;
-  padding:5px 10px;
-  border-radius:8px;
-  font-size:1.05rem;
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  font-size:1rem;
   cursor:pointer;
-  transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  font-family:inherit;
-  line-height:1;
+  transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:visible;
 }
-.code-block .copy-btn:hover { border-color:var(--accent); color:var(--accent); transform:scale(1.2); }
-.code-block .copy-btn:active { transform:scale(0.9); }
-.code-block .copy-btn.copied { border-color:#8FA68E; color:#8FA68E; transform:scale(1.15); }
+.code-block .copy-btn:hover {
+  border-color:var(--accent);
+  color:var(--accent);
+  background:rgba(212,165,116,0.1);
+  transform:scale(1.15) rotate(4deg);
+  box-shadow:0 0 20px rgba(212,165,116,0.2);
+}
+.code-block .copy-btn:active { transform:scale(0.88) rotate(-2deg); }
+.code-block .copy-btn.copied {
+  border-color:#8FA68E;
+  color:#8FA68E;
+  background:rgba(143,166,142,0.15);
+  transform:scale(1.25) rotate(0deg);
+  box-shadow:0 0 24px rgba(143,166,142,0.35);
+}
+
+/* Ripple on click */
+.code-block .copy-btn .ripple {
+  position:absolute;
+  border-radius:50%;
+  background:var(--accent);
+  opacity:0.5;
+  transform:scale(0);
+  animation:rippleAnim 0.5s ease-out forwards;
+  pointer-events:none;
+}
+@keyframes rippleAnim {
+  to { transform:scale(4); opacity:0; }
+}
+
+/* Copied tooltip that floats up */
+.copy-toast {
+  position:absolute;
+  top:-28px;
+  right:0;
+  background:var(--ink);
+  color:var(--cream);
+  padding:4px 10px;
+  border-radius:6px;
+  font-size:0.72rem;
+  font-family:'SF Mono','Consolas',monospace;
+  opacity:0;
+  transform:translateY(6px);
+  transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  white-space:nowrap;
+  pointer-events:none;
+}
+.copy-toast.show {
+  opacity:1;
+  transform:translateY(0);
+}
+.copy-toast::after {
+  content:'';
+  position:absolute;
+  bottom:-4px;
+  right:12px;
+  width:8px;
+  height:8px;
+  background:var(--ink);
+  transform:rotate(45deg);
+}
 
 .interview-box {
   background:var(--card-bg);
@@ -542,12 +603,34 @@ document.querySelectorAll('.tilt-card').forEach(card => {
 
 /* ─── Copy Buttons ─── */
 document.querySelectorAll('.copy-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
+  // Add toast element
+  const toast = document.createElement('span');
+  toast.className = 'copy-toast';
+  toast.textContent = 'Copied!';
+  btn.appendChild(toast);
+
+  btn.addEventListener('click', (e) => {
+    // Ripple
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+    btn.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 500);
+
     const code = document.getElementById('code-' + btn.dataset.code).textContent;
     navigator.clipboard.writeText(code).then(() => {
       btn.textContent = '✓';
       btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = '⧉'; btn.classList.remove('copied'); }, 2000);
+      toast.classList.add('show');
+      setTimeout(() => {
+        btn.textContent = '⧉';
+        btn.classList.remove('copied');
+        toast.classList.remove('show');
+      }, 1800);
     });
   });
 });
