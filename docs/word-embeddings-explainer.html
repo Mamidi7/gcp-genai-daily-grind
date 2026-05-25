@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Word Embeddings — Interactive Explainer</title>
 <style>
-/* ─── Design Tokens ─── */
 :root {
   --cream: #F3EEE4;
   --cream-dark: #E8E0D2;
@@ -35,7 +34,6 @@ body {
   position:relative;
 }
 
-/* ─── Film Grain Overlay ─── */
 body::after {
   content:'';
   position:fixed;
@@ -48,7 +46,6 @@ body::after {
   background-size:200px 200px;
 }
 
-/* ─── Animated Gradient Blobs ─── */
 .blob-container {
   position:fixed;
   inset:0;
@@ -78,10 +75,8 @@ body::after {
   body::after { opacity:0.02; }
 }
 
-/* ─── Layout ─── */
-.container { max-width:900px; margin:0 auto; padding:40px 20px; position:relative; z-index:1; }
+.container { max-width:1000px; margin:0 auto; padding:40px 20px; position:relative; z-index:1; }
 
-/* ─── Scroll Reveal Base ─── */
 .reveal {
   opacity:0;
   transform:translateY(40px);
@@ -89,23 +84,21 @@ body::after {
 }
 .reveal.visible { opacity:1; transform:translateY(0); }
 
-/* ─── Header ─── */
 header { text-align:center; margin-bottom:60px; padding-top:20px; }
 header h1 {
-  font-size:2.8rem;
+  font-size:3rem;
   font-weight:400;
-  letter-spacing:-0.5px;
+  letter-spacing:-1px;
   margin-bottom:12px;
   color:var(--ink);
 }
 header .subtitle {
-  font-size:1.1rem;
+  font-size:1.15rem;
   color:var(--ink-light);
   font-style:italic;
-  opacity:0; /* starts hidden for scramble */
+  opacity:0;
 }
 
-/* ─── 3D Tilt Cards ─── */
 .tilt-card {
   background:var(--card-bg);
   border-radius:var(--radius);
@@ -131,7 +124,7 @@ header .subtitle {
 
 .trio-grid {
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
   gap:20px;
   margin-bottom:50px;
 }
@@ -145,9 +138,8 @@ header .subtitle {
 }
 .trio-card p { font-size:0.98rem; color:var(--ink-light); line-height:1.65; }
 
-/* ─── Section Titles ─── */
 .section-title {
-  font-size:1.5rem;
+  font-size:1.6rem;
   font-weight:400;
   margin:50px 0 24px;
   padding-bottom:12px;
@@ -166,7 +158,6 @@ header .subtitle {
 }
 .reveal.visible .section-title::after { width:160px; }
 
-/* ─── Canvas Container ─── */
 .canvas-wrap {
   background:var(--card-bg);
   border-radius:var(--radius);
@@ -186,35 +177,54 @@ header .subtitle {
 }
 #embedCanvas {
   width:100%;
-  height:420px;
+  height:480px;
   border-radius:10px;
-  background:linear-gradient(160deg, #FAF7F2 0%, #F5F0E8 100%);
+  background:linear-gradient(160deg, #FAF7F2 0%, #F0EBE2 100%);
   cursor:crosshair;
   touch-action:none;
 }
 
-/* ─── Tooltip ─── */
 #tooltip {
   position:fixed;
-  background:rgba(44,36,32,0.92);
+  background:rgba(44,36,32,0.94);
   color:var(--cream);
-  padding:10px 14px;
-  border-radius:8px;
+  padding:16px;
+  border-radius:10px;
   font-size:0.82rem;
   font-family:'SF Mono','Consolas',monospace;
   pointer-events:none;
   opacity:0;
   transition:opacity 0.2s ease;
   z-index:1000;
-  box-shadow:0 4px 12px rgba(0,0,0,0.2);
-  max-width:220px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.25);
+  width:260px;
   line-height:1.5;
 }
 #tooltip.show { opacity:1; }
-#tooltip .tt-word { color:var(--accent); font-weight:600; font-size:0.9rem; margin-bottom:4px; }
-#tooltip .tt-dim { color:#B0A89E; font-size:0.75rem; }
+#tooltip .tt-word { color:var(--accent); font-weight:600; font-size:0.95rem; margin-bottom:8px; }
 
-/* ─── Controls ─── */
+.dim-bar {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:4px;
+}
+.dim-label { width:18px; color:#A09084; font-size:0.72rem; text-align:right; }
+.dim-track {
+  flex:1;
+  height:6px;
+  background:rgba(255,255,255,0.08);
+  border-radius:3px;
+  overflow:hidden;
+  position:relative;
+}
+.dim-fill {
+  height:100%;
+  border-radius:3px;
+  transition:width 0.4s ease;
+  background:var(--accent);
+}
+
 .controls {
   display:flex;
   gap:12px;
@@ -264,7 +274,6 @@ header .subtitle {
 .legend span { display:flex; align-items:center; gap:6px; }
 .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
 
-/* ─── Code Blocks ─── */
 .code-block {
   background:#1E1A17;
   border-radius:12px;
@@ -305,7 +314,6 @@ header .subtitle {
 .code-block .copy-btn:hover { border-color:var(--accent); color:var(--accent); }
 .code-block .copy-btn.copied { border-color:#8FA68E; color:#8FA68E; }
 
-/* ─── Interview Corner ─── */
 .interview-box {
   background:var(--card-bg);
   border-radius:var(--radius);
@@ -332,17 +340,15 @@ header .subtitle {
 }
 .interview-box .reveal-btn:hover { color:var(--ink); }
 
-/* ─── Responsive ─── */
 @media (max-width:640px) {
   header h1 { font-size:2rem; }
   .trio-grid { grid-template-columns:1fr; }
-  #embedCanvas { height:320px; }
+  #embedCanvas { height:340px; }
 }
 </style>
 </head>
 <body>
 
-<!-- Animated blobs -->
 <div class="blob-container" aria-hidden="true">
   <div class="blob blob-1"></div>
   <div class="blob blob-2"></div>
@@ -357,7 +363,6 @@ header .subtitle {
   <p class="subtitle" id="subTitle">How computers turn words into numbers that carry meaning</p>
 </header>
 
-<!-- Trio Cards -->
 <div class="trio-grid">
   <div class="tilt-card trio-card reveal">
     <h3>Core Idea</h3>
@@ -369,15 +374,14 @@ header .subtitle {
   </div>
   <div class="tilt-card trio-card reveal">
     <h3>The Solution</h3>
-    <p>Neural networks learn vectors by reading millions of sentences. Words appearing in similar contexts end up with similar vectors. Math on vectors = math on meaning.</p>
+    <p>Neural networks learn vectors by reading millions of sentences. Words in similar contexts end up with similar vectors. Math on vectors = math on meaning.</p>
   </div>
 </div>
 
-<!-- Canvas Section -->
 <section class="reveal">
   <h2 class="section-title">Live Embedding Space</h2>
   <p style="text-align:center;color:var(--ink-light);font-size:0.92rem;margin-bottom:16px;">
-    Drag words to explore. Hover to inspect values. Click <strong>Show Arithmetic</strong> to see the famous equation.
+    Drag words. Hover to inspect embedding dimensions. Click <strong>Show Clusters</strong> to see semantic gravity in action.
   </p>
   <div class="canvas-wrap">
     <div class="controls">
@@ -395,7 +399,6 @@ header .subtitle {
   </div>
 </section>
 
-<!-- How It Works -->
 <section class="reveal">
   <h2 class="section-title">How It Works</h2>
   <div class="tilt-card" style="padding:28px 32px;margin-bottom:20px;">
@@ -405,7 +408,6 @@ header .subtitle {
   </div>
 </section>
 
-<!-- Code Examples -->
 <section class="reveal">
   <h2 class="section-title">Code in Practice</h2>
 
@@ -451,7 +453,6 @@ FROM VECTOR_SEARCH(
   </div>
 </section>
 
-<!-- Interview Corner -->
 <section class="reveal">
   <h2 class="section-title">Interview Corner</h2>
 
@@ -487,44 +488,38 @@ FROM VECTOR_SEARCH(
   </div>
 </section>
 
-<!-- Footer -->
 <footer style="text-align:center;padding:40px 0 20px;color:var(--ink-light);font-size:0.85rem;opacity:0.7;">
   Built for understanding. No frameworks. One file.
 </footer>
 
-</div><!-- /container -->
+</div>
 
-<!-- Tooltip -->
-<div id="tooltip"><div class="tt-word"></div><div class="tt-dim"></div></div>
+<div id="tooltip">
+  <div class="tt-word"></div>
+  <div id="tt-bars"></div>
+</div>
 
 <script>
-/* ─── Text Scramble Effect ─── */
+/* ─── Text Scramble ─── */
 class TextScramble {
-  constructor(el) {
-    this.el = el;
-    this.chars = '!<>-_\\/[]{}—=+*^?#________';
-    this.original = el.textContent;
-  }
+  constructor(el) { this.el = el; this.chars = '!<>-_\\/[]{}—=+*^?#________'; this.original = el.textContent; }
   scramble() {
     const len = this.original.length;
     let iter = 0;
-    const interval = setInterval(() => {
+    const iv = setInterval(() => {
       this.el.textContent = this.original.split('').map((c, i) => {
         if (c === ' ') return ' ';
         if (i < iter) return this.original[i];
         return this.chars[Math.floor(Math.random() * this.chars.length)];
       }).join('');
       iter += 1/2;
-      if (iter >= len) {
-        clearInterval(interval);
-        this.el.textContent = this.original;
-      }
+      if (iter >= len) { clearInterval(iv); this.el.textContent = this.original; }
     }, 30);
   }
 }
 const titleScramble = new TextScramble(document.getElementById('mainTitle'));
 setTimeout(() => titleScramble.scramble(), 300);
-setTimeout(() => { document.getElementById('subTitle').style.opacity='1'; document.getElementById('subTitle').style.transition='opacity 1s ease'; }, 1200);
+setTimeout(() => { const s = document.getElementById('subTitle'); s.style.opacity='1'; s.style.transition='opacity 1s ease'; }, 1200);
 
 /* ─── Scroll Reveal ─── */
 const observer = new IntersectionObserver((entries) => {
@@ -532,21 +527,15 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.12 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-/* ─── 3D Tilt on Cards ─── */
+/* ─── 3D Tilt ─── */
 document.querySelectorAll('.tilt-card').forEach(card => {
   card.addEventListener('mousemove', e => {
     const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const cx = rect.width / 2;
-    const cy = rect.height / 2;
-    const rx = (y - cy) / cy * -6;
-    const ry = (x - cx) / cx * 6;
+    const rx = ((e.clientY - rect.top) / rect.height - 0.5) * -10;
+    const ry = ((e.clientX - rect.left) / rect.width - 0.5) * 10;
     card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`;
   });
-  card.addEventListener('mouseleave', () => {
-    card.style.transform = 'perspective(800px) rotateX(0) rotateY(0)';
-  });
+  card.addEventListener('mouseleave', () => { card.style.transform = 'perspective(800px) rotateX(0) rotateY(0)'; });
 });
 
 /* ─── Copy Buttons ─── */
@@ -554,14 +543,15 @@ document.querySelectorAll('.copy-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const code = document.getElementById('code-' + btn.dataset.code).textContent;
     navigator.clipboard.writeText(code).then(() => {
-      btn.textContent = 'Copied';
-      btn.classList.add('copied');
+      btn.textContent = 'Copied'; btn.classList.add('copied');
       setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
     });
   });
 });
 
-/* ─── Canvas Visualization ─── */
+/* ═══════════════════════════════════════════════════════
+   CANVAS — Rich Interactive Visualization
+   ═══════════════════════════════════════════════════════ */
 const canvas = document.getElementById('embedCanvas');
 const ctx = canvas.getContext('2d');
 const dpr = window.devicePixelRatio || 1;
@@ -569,32 +559,38 @@ let W, H;
 
 function resize() {
   const rect = canvas.getBoundingClientRect();
-  W = rect.width;
-  H = rect.height;
-  canvas.width = W * dpr;
-  canvas.height = H * dpr;
+  W = rect.width; H = rect.height;
+  canvas.width = W * dpr; canvas.height = H * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 resize();
-window.addEventListener('resize', resize);
+window.addEventListener('resize', () => { resize(); toPx(); });
 
-// Word data with mock embeddings (5 dims for display)
-const words = [
-  { text:'king',   group:'royal',  color:'#C9A86C', emb:[0.80,0.20,0.90,0.10,0.30], x:0.35, y:0.30, r:0 },
-  { text:'queen',  group:'royal',  color:'#C9A86C', emb:[0.75,0.25,0.88,0.80,0.32], x:0.55, y:0.28, r:0 },
-  { text:'prince', group:'royal',  color:'#C9A86C', emb:[0.78,0.22,0.85,0.15,0.28], x:0.45, y:0.18, r:0 },
-  { text:'man',    group:'gender', color:'#8FA68E', emb:[0.70,0.30,0.10,0.10,0.20], x:0.32, y:0.55, r:0 },
-  { text:'woman',  group:'gender', color:'#8FA68E', emb:[0.60,0.40,0.10,0.80,0.20], x:0.58, y:0.52, r:0 },
-  { text:'dog',    group:'animal', color:'#A68FA6', emb:[0.20,0.15,0.10,0.05,0.70], x:0.25, y:0.78, r:0 },
-  { text:'cat',    group:'animal', color:'#A68FA6', emb:[0.22,0.18,0.08,0.10,0.68], x:0.40, y:0.82, r:0 },
-  { text:'wolf',   group:'animal', color:'#A68FA6', emb:[0.25,0.12,0.15,0.08,0.72], x:0.15, y:0.70, r:0 },
-  { text:'apple',  group:'fruit',  color:'#8EA6A6', emb:[0.10,0.90,0.05,0.05,0.05], x:0.72, y:0.75, r:0 },
-  { text:'banana', group:'fruit',  color:'#8EA6A6', emb:[0.08,0.85,0.10,0.05,0.08], x:0.85, y:0.70, r:0 },
-  { text:'pear',   group:'fruit',  color:'#8EA6A6', emb:[0.12,0.88,0.06,0.04,0.06], x:0.78, y:0.82, r:0 }
+/* ─── Word Data ─── */
+const rawWords = [
+  { text:'king',   group:'royal',  color:'#C9A86C', emb:[0.80,0.20,0.90,0.10,0.30], x:0.35, y:0.30 },
+  { text:'queen',  group:'royal',  color:'#C9A86C', emb:[0.75,0.25,0.88,0.80,0.32], x:0.55, y:0.28 },
+  { text:'prince', group:'royal',  color:'#C9A86C', emb:[0.78,0.22,0.85,0.15,0.28], x:0.45, y:0.18 },
+  { text:'man',    group:'gender', color:'#8FA68E', emb:[0.70,0.30,0.10,0.10,0.20], x:0.32, y:0.55 },
+  { text:'woman',  group:'gender', color:'#8FA68E', emb:[0.60,0.40,0.10,0.80,0.20], x:0.58, y:0.52 },
+  { text:'dog',    group:'animal', color:'#A68FA6', emb:[0.20,0.15,0.10,0.05,0.70], x:0.25, y:0.78 },
+  { text:'cat',    group:'animal', color:'#A68FA6', emb:[0.22,0.18,0.08,0.10,0.68], x:0.40, y:0.82 },
+  { text:'wolf',   group:'animal', color:'#A68FA6', emb:[0.25,0.12,0.15,0.08,0.72], x:0.15, y:0.70 },
+  { text:'apple',  group:'fruit',  color:'#8EA6A6', emb:[0.10,0.90,0.05,0.05,0.05], x:0.72, y:0.75 },
+  { text:'banana', group:'fruit',  color:'#8EA6A6', emb:[0.08,0.85,0.10,0.05,0.08], x:0.85, y:0.70 },
+  { text:'pear',   group:'fruit',  color:'#8EA6A6', emb:[0.12,0.88,0.06,0.04,0.06], x:0.78, y:0.82 }
 ];
 
-// Initialize positions
-words.forEach(w => { w.px = w.x * W; w.py = w.y * H; w.vx = 0; w.vy = 0; w.targetX = w.px; w.targetY = w.py; });
+const words = rawWords.map((w, i) => ({
+  ...w,
+  id: i,
+  px: w.x * W, py: w.y * H,
+  ox: w.x, oy: w.y,  // original normalized
+  vx: 0, vy: 0,
+  targetX: w.x * W, targetY: w.y * H,
+  phase: Math.random() * Math.PI * 2,
+  pulse: 0
+}));
 
 let dragWord = null;
 let mouseX = 0, mouseY = 0;
@@ -602,64 +598,139 @@ let showArithmetic = false;
 let showClusters = false;
 let arithTime = 0;
 let pulsePos = 0;
+let time = 0;
 
-// Convert normalized to pixels
-function toPx() { words.forEach(w => { w.px = w.x * W; w.py = w.y * H; w.targetX = w.px; w.targetY = w.py; }); }
+function toPx() {
+  words.forEach(w => {
+    w.px = w.x * W; w.py = w.y * H;
+    w.targetX = w.px; w.targetY = w.py;
+  });
+}
 toPx();
 
-// Spring physics for smooth return
-const SPRING = 0.08, DAMP = 0.75;
+/* ─── Physics ─── */
+const SPRING = 0.07, DAMP = 0.78, IDLE_AMP = 0.4, IDLE_FREQ = 0.003;
 
-function springPhysics() {
+function updatePhysics() {
   words.forEach(w => {
     if (w === dragWord) return;
-    const ax = (w.targetX - w.px) * SPRING;
-    const ay = (w.targetY - w.py) * SPRING;
+    let tx = w.targetX, ty = w.targetY;
+
+    // Idle drift
+    if (!showClusters && !showArithmetic) {
+      tx += Math.sin(time * IDLE_FREQ + w.phase) * IDLE_AMP * 20;
+      ty += Math.cos(time * IDLE_FREQ * 0.7 + w.phase) * IDLE_AMP * 15;
+    }
+
+    // Cluster gravity: pull toward group center
+    if (showClusters) {
+      const groupMates = words.filter(m => m.group === w.group && m !== w);
+      let gcX = 0, gcY = 0;
+      groupMates.forEach(m => { gcX += m.px; gcY += m.py; });
+      if (groupMates.length) { gcX /= groupMates.length; gcY /= groupMates.length; }
+      else { gcX = w.targetX; gcY = w.targetY; }
+      tx = tx * 0.3 + gcX * 0.7;
+      ty = ty * 0.3 + gcY * 0.7;
+    }
+
+    const ax = (tx - w.px) * SPRING;
+    const ay = (ty - w.py) * SPRING;
     w.vx += ax; w.vy += ay;
     w.vx *= DAMP; w.vy *= DAMP;
     w.px += w.vx; w.py += w.vy;
+    w.pulse += 0.05;
   });
 }
 
 function dist(a,b) { return Math.hypot(a.px-b.px, a.py-b.py); }
-
-// Find queen result position
-function getQueenResult() {
-  const king = words.find(w=>w.text==='king');
-  const man = words.find(w=>w.text==='man');
-  const woman = words.find(w=>w.text==='woman');
-  const queen = words.find(w=>w.text==='queen');
-  if (!king||!man||!woman||!queen) return null;
-  return {
-    x: king.px - man.px + woman.px,
-    y: king.py - man.py + woman.py
-  };
+function cosineSim(a,b) {
+  let dot=0, na=0, nb=0;
+  for (let i=0;i<a.emb.length;i++) { dot += a.emb[i]*b.emb[i]; na += a.emb[i]**2; nb += b.emb[i]**2; }
+  return dot / (Math.sqrt(na)*Math.sqrt(nb)+1e-9);
 }
 
+function getTopNeighbors(w, n=2) {
+  return words.filter(o => o!==w)
+    .map(o => ({w:o, sim:cosineSim(w,o)}))
+    .sort((a,b)=>b.sim-a.sim).slice(0,n).map(x=>x.w);
+}
+
+/* ─── Drawing ─── */
 function draw() {
   ctx.clearRect(0,0,W,H);
+  time++;
 
-  // Background clusters
+  // ── Cluster backgrounds ──
   if (showClusters) {
     const groups = {};
-    words.forEach(w => {
-      if (!groups[w.group]) groups[w.group] = [];
-      groups[w.group].push(w);
-    });
+    words.forEach(w => { groups[w.group] = groups[w.group]||[]; groups[w.group].push(w); });
     Object.entries(groups).forEach(([grp, arr]) => {
       let cx=0, cy=0;
       arr.forEach(w => { cx += w.px; cy += w.py; });
       cx /= arr.length; cy /= arr.length;
-      const maxd = Math.max(...arr.map(w => Math.hypot(w.px-cx, w.py-cy))) + 60;
-      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxd);
-      grad.addColorStop(0, arr[0].color + '18');
+      const maxd = Math.max(...arr.map(w => Math.hypot(w.px-cx, w.py-cy))) + 50;
+      // Animated ring boundary
+      const ringR = maxd + Math.sin(time*0.03)*6;
+      ctx.strokeStyle = arr[0].color + '40';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 8]);
+      ctx.beginPath(); ctx.arc(cx, cy, ringR, 0, Math.PI*2); ctx.stroke();
+      ctx.setLineDash([]);
+      // Soft fill
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, ringR);
+      grad.addColorStop(0, arr[0].color + '12');
       grad.addColorStop(1, arr[0].color + '00');
       ctx.fillStyle = grad;
-      ctx.beginPath(); ctx.arc(cx, cy, maxd, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, cy, ringR, 0, Math.PI*2); ctx.fill();
+      // Group label
+      ctx.fillStyle = arr[0].color;
+      ctx.font = '700 11px Georgia';
+      ctx.textAlign = 'center';
+      ctx.fillText(grp.toUpperCase(), cx, cy - ringR + 16);
     });
   }
 
-  // Arithmetic path
+  // ── Constellation lines (cluster mode) ──
+  if (showClusters) {
+    words.forEach(w => {
+      const mates = words.filter(m => m.group === w.group && m !== w);
+      mates.forEach(m => {
+        const d = dist(w,m);
+        const alpha = Math.max(0, 1 - d/140) * 0.35;
+        ctx.strokeStyle = w.color + Math.floor(alpha*255).toString(16).padStart(2,'0');
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(w.px, w.py); ctx.lineTo(m.px, m.py); ctx.stroke();
+      });
+    });
+  }
+
+  // ── Semantic neighbor lines on hover ──
+  const hovered = (!dragWord) ? words.find(w => Math.hypot(mouseX-w.px, mouseY-w.py) < 22) : null;
+  if (hovered) {
+    const neighbors = getTopNeighbors(hovered, 2);
+    neighbors.forEach(n => {
+      const midX = (hovered.px + n.px)/2;
+      const midY = (hovered.py + n.py)/2;
+      // Glow line
+      const lg = ctx.createLinearGradient(hovered.px, hovered.py, n.px, n.py);
+      lg.addColorStop(0, hovered.color + 'CC');
+      lg.addColorStop(1, n.color + 'CC');
+      ctx.strokeStyle = lg;
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = hovered.color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath(); ctx.moveTo(hovered.px, hovered.py); ctx.lineTo(n.px, n.py); ctx.stroke();
+      ctx.shadowBlur = 0;
+      // Similarity label
+      const sim = cosineSim(hovered, n);
+      ctx.fillStyle = '#5A4D45';
+      ctx.font = '600 10px Georgia';
+      ctx.textAlign = 'center';
+      ctx.fillText(sim.toFixed(2), midX, midY - 4);
+    });
+  }
+
+  // ── Arithmetic path ──
   if (showArithmetic) {
     const king = words.find(w=>w.text==='king');
     const man = words.find(w=>w.text==='man');
@@ -669,145 +740,157 @@ function draw() {
       const qx = king.px - man.px + woman.px;
       const qy = king.py - man.py + woman.py;
 
+      // Step 1: king -> man (red/subtract)
       ctx.setLineDash([8,6]);
-      ctx.strokeStyle = 'rgba(201,168,108,0.6)';
+      ctx.strokeStyle = 'rgba(200,90,90,0.55)';
       ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.moveTo(king.px, king.py);
-      ctx.lineTo(man.px, man.py);
-      ctx.stroke();
-
-      ctx.strokeStyle = 'rgba(143,166,142,0.6)';
-      ctx.beginPath();
-      ctx.moveTo(man.px, man.py);
-      ctx.lineTo(woman.px, woman.py);
-      ctx.stroke();
-
+      ctx.beginPath(); ctx.moveTo(king.px, king.py); ctx.lineTo(man.px, man.py); ctx.stroke();
+      // Step 2: man -> woman (green/add)
+      ctx.strokeStyle = 'rgba(90,160,90,0.55)';
+      ctx.beginPath(); ctx.moveTo(man.px, man.py); ctx.lineTo(woman.px, woman.py); ctx.stroke();
+      // Step 3: woman -> result (gold)
       ctx.setLineDash([4,4]);
-      ctx.strokeStyle = 'rgba(201,168,108,0.8)';
+      ctx.strokeStyle = 'rgba(201,168,108,0.85)';
       ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(woman.px, woman.py);
-      ctx.lineTo(qx, qy);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(woman.px, woman.py); ctx.lineTo(qx, qy); ctx.stroke();
       ctx.setLineDash([]);
 
-      // Arrowhead at result
+      // Arrowhead
       const angle = Math.atan2(qy - woman.py, qx - woman.px);
       ctx.fillStyle = '#C9A86C';
       ctx.beginPath();
       ctx.moveTo(qx, qy);
-      ctx.lineTo(qx - 12*Math.cos(angle-0.4), qy - 12*Math.sin(angle-0.4));
-      ctx.lineTo(qx - 12*Math.cos(angle+0.4), qy - 12*Math.sin(angle+0.4));
+      ctx.lineTo(qx - 14*Math.cos(angle-0.4), qy - 14*Math.sin(angle-0.4));
+      ctx.lineTo(qx - 14*Math.cos(angle+0.4), qy - 14*Math.sin(angle+0.4));
       ctx.closePath(); ctx.fill();
 
       // Pulsing result ring
-      const pulseR = 18 + Math.sin(arithTime * 0.08) * 6;
-      ctx.strokeStyle = 'rgba(201,168,108,' + (0.4 + Math.sin(arithTime*0.08)*0.2) + ')';
-      ctx.lineWidth = 2;
+      const pulseR = 20 + Math.sin(arithTime * 0.08) * 7;
+      ctx.strokeStyle = `rgba(201,168,108,${0.4 + Math.sin(arithTime*0.08)*0.2})`;
+      ctx.lineWidth = 2.5;
       ctx.beginPath(); ctx.arc(qx, qy, pulseR, 0, Math.PI*2); ctx.stroke();
+      // Inner glow
+      const rGrad = ctx.createRadialGradient(qx, qy, 0, qx, qy, pulseR);
+      rGrad.addColorStop(0, 'rgba(201,168,108,0.2)');
+      rGrad.addColorStop(1, 'rgba(201,168,108,0)');
+      ctx.fillStyle = rGrad;
+      ctx.beginPath(); ctx.arc(qx, qy, pulseR, 0, Math.PI*2); ctx.fill();
 
-      // Signal pulse traveling along the path
-      const totalLen = dist(king,man) + dist(man,woman) + Math.hypot(qx-woman.px, qy-woman.py);
-      pulsePos = (pulsePos + 1.5) % totalLen;
-      let rem = pulsePos;
-      let sx, sy;
-      if (rem < dist(king,man)) {
-        const t = rem / dist(king,man);
-        sx = king.px + (man.px-king.px)*t;
-        sy = king.py + (man.py-king.py)*t;
-      } else if (rem < dist(king,man)+dist(man,woman)) {
-        const t = (rem-dist(king,man)) / dist(man,woman);
-        sx = man.px + (woman.px-man.px)*t;
-        sy = man.py + (woman.py-man.py)*t;
-      } else {
-        const t = (rem-dist(king,man)-dist(man,woman)) / Math.hypot(qx-woman.px,qy-woman.py);
-        sx = woman.px + (qx-woman.px)*t;
-        sy = woman.py + (qy-woman.py)*t;
+      // Traveling signal with particle trail
+      const path = [{x:king.px,y:king.py},{x:man.px,y:man.py},{x:woman.px,y:woman.py},{x:qx,y:qy}];
+      const segLens = [];
+      for (let i=1;i<path.length;i++) segLens.push(Math.hypot(path[i].x-path[i-1].x, path[i].y-path[i-1].y));
+      const totalLen = segLens.reduce((a,b)=>a+b,0);
+      pulsePos = (pulsePos + 1.8) % totalLen;
+      let rem = pulsePos, seg=0;
+      for (let i=0;i<segLens.length;i++) { if (rem < segLens[i]) { seg=i; break; } rem -= segLens[i]; }
+      if (seg >= segLens.length) seg = segLens.length-1;
+      const p0 = path[seg], p1 = path[seg+1];
+      const t = rem / segLens[seg];
+      const sx = p0.x + (p1.x-p0.x)*t;
+      const sy = p0.y + (p1.y-p0.y)*t;
+      // Trail dots
+      for (let i=1;i<=5;i++) {
+        let trailPos = pulsePos - i*6;
+        if (trailPos < 0) trailPos += totalLen;
+        let tr=trailPos, ts=0;
+        for (let j=0;j<segLens.length;j++) { if (tr < segLens[j]) { ts=j; break; } tr -= segLens[j]; }
+        if (ts >= segLens.length) ts = segLens.length-1;
+        const t0 = path[ts], t1 = path[ts+1];
+        const tt = tr / segLens[ts];
+        const tx = t0.x + (t1.x-t0.x)*tt;
+        const ty = t0.y + (t1.y-t0.y)*tt;
+        ctx.fillStyle = `rgba(201,168,108,${0.5 - i*0.08})`;
+        ctx.beginPath(); ctx.arc(tx, ty, 3.5 - i*0.4, 0, Math.PI*2); ctx.fill();
       }
+      // Head
       ctx.fillStyle = '#C9A86C';
       ctx.shadowColor = '#C9A86C';
-      ctx.shadowBlur = 12;
-      ctx.beginPath(); ctx.arc(sx, sy, 5, 0, Math.PI*2); ctx.fill();
+      ctx.shadowBlur = 16;
+      ctx.beginPath(); ctx.arc(sx, sy, 5.5, 0, Math.PI*2); ctx.fill();
       ctx.shadowBlur = 0;
 
-      // Label
+      // Labels
       ctx.fillStyle = '#5A4D45';
-      ctx.font = '600 13px Georgia';
-      ctx.fillText('≈ queen', qx+20, qy-10);
+      ctx.font = '600 12px Georgia';
+      ctx.textAlign = 'center';
+      ctx.fillText('≈ queen', qx+24, qy-14);
     }
   }
 
-  // Draw words
+  // ── Draw words ──
   words.forEach(w => {
-    // Glow
-    const grad = ctx.createRadialGradient(w.px, w.py, 0, w.px, w.py, 28);
-    grad.addColorStop(0, w.color + '30');
-    grad.addColorStop(1, w.color + '00');
-    ctx.fillStyle = grad;
-    ctx.beginPath(); ctx.arc(w.px, w.py, 28, 0, Math.PI*2); ctx.fill();
+    const isHovered = (w === hovered);
+    const radius = isHovered ? 13 : 10;
+    const glowR = radius + 18 + Math.sin(w.pulse)*3;
 
-    // Core
+    // Outer glow
+    const gGrad = ctx.createRadialGradient(w.px, w.py, 0, w.px, w.py, glowR);
+    gGrad.addColorStop(0, w.color + (isHovered?'45':'28'));
+    gGrad.addColorStop(1, w.color + '00');
+    ctx.fillStyle = gGrad;
+    ctx.beginPath(); ctx.arc(w.px, w.py, glowR, 0, Math.PI*2); ctx.fill();
+
+    // Core circle
     ctx.fillStyle = w.color;
-    ctx.beginPath(); ctx.arc(w.px, w.py, 10, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(w.px, w.py, radius, 0, Math.PI*2); ctx.fill();
 
-    // Inner highlight
-    ctx.fillStyle = 'rgba(255,255,255,0.35)';
-    ctx.beginPath(); ctx.arc(w.px-2.5, w.py-2.5, 4, 0, Math.PI*2); ctx.fill();
+    // Highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.beginPath(); ctx.arc(w.px - radius*0.25, w.py - radius*0.25, radius*0.4, 0, Math.PI*2); ctx.fill();
 
-    // Label
+    // Label with slight shadow for readability
     ctx.fillStyle = '#2C2420';
-    ctx.font = '600 14px Georgia';
+    ctx.font = isHovered ? '700 15px Georgia' : '600 14px Georgia';
     ctx.textAlign = 'center';
-    ctx.fillText(w.text, w.px, w.py + 26);
+    ctx.fillText(w.text, w.px, w.py + radius + 18);
 
     // Hover ring
-    const dx = mouseX - w.px;
-    const dy = mouseY - w.py;
-    if (Math.hypot(dx,dy) < 18 && w !== dragWord) {
+    if (isHovered) {
       ctx.strokeStyle = w.color;
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(w.px, w.py, 16, 0, Math.PI*2); ctx.stroke();
+      ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.arc(w.px, w.py, radius + 6, 0, Math.PI*2); ctx.stroke();
     }
   });
 
   arithTime++;
-  springPhysics();
+  updatePhysics();
   requestAnimationFrame(draw);
 }
 draw();
 
-// Drag logic
-function getWordAt(mx,my) {
-  return words.find(w => Math.hypot(mx-w.px, my-w.py) < 22);
-}
+// ── Interaction ──
+function getWordAt(mx,my) { return words.find(w => Math.hypot(mx-w.px, my-w.py) < 24); }
 
 canvas.addEventListener('mousedown', e => {
   const rect = canvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
   const w = getWordAt(mx, my);
   if (w) { dragWord = w; w.vx = 0; w.vy = 0; }
 });
 
 window.addEventListener('mousemove', e => {
   const rect = canvas.getBoundingClientRect();
-  mouseX = e.clientX - rect.left;
-  mouseY = e.clientY - rect.top;
-  if (dragWord) {
-    dragWord.px = mouseX;
-    dragWord.py = mouseY;
-    dragWord.targetX = mouseX;
-    dragWord.targetY = mouseY;
-  }
+  mouseX = e.clientX - rect.left; mouseY = e.clientY - rect.top;
+  if (dragWord) { dragWord.px = mouseX; dragWord.py = mouseY; dragWord.targetX = mouseX; dragWord.targetY = mouseY; }
   // Tooltip
   const tooltip = document.getElementById('tooltip');
   const hovered = getWordAt(mouseX, mouseY);
   if (hovered && hovered !== dragWord) {
-    tooltip.querySelector('.tt-word').textContent = hovered.text;
-    tooltip.querySelector('.tt-dim').textContent = hovered.emb.map(v=>v.toFixed(2)).join(', ');
-    tooltip.style.left = (e.clientX + 16) + 'px';
-    tooltip.style.top = (e.clientY - 10) + 'px';
+    tooltip.querySelector('.tt-word').textContent = hovered.text + '  (' + hovered.group + ')';
+    const barContainer = document.getElementById('tt-bars');
+    barContainer.innerHTML = '';
+    hovered.emb.forEach((v, i) => {
+      const pct = Math.round(v * 100);
+      barContainer.innerHTML += `
+        <div class="dim-bar">
+          <span class="dim-label">d${i}</span>
+          <div class="dim-track"><div class="dim-fill" style="width:${pct}%"></div></div>
+          <span style="font-size:0.7rem;color:#A09084;width:32px;text-align:right;">${v.toFixed(2)}</span>
+        </div>`;
+    });
+    tooltip.style.left = Math.min(e.clientX + 18, window.innerWidth - 280) + 'px';
+    tooltip.style.top = Math.min(e.clientY - 20, window.innerHeight - 220) + 'px';
     tooltip.classList.add('show');
   } else {
     tooltip.classList.remove('show');
@@ -816,21 +899,19 @@ window.addEventListener('mousemove', e => {
 
 window.addEventListener('mouseup', () => {
   if (dragWord) {
-    dragWord.x = dragWord.px / W;
-    dragWord.y = dragWord.py / H;
-    dragWord.targetX = dragWord.px;
-    dragWord.targetY = dragWord.py;
+    dragWord.x = dragWord.px / W; dragWord.y = dragWord.py / H;
+    dragWord.ox = dragWord.x; dragWord.oy = dragWord.y;
+    dragWord.targetX = dragWord.px; dragWord.targetY = dragWord.py;
     dragWord = null;
   }
 });
 
-// Touch support
+// Touch
 canvas.addEventListener('touchstart', e => {
   e.preventDefault();
   const rect = canvas.getBoundingClientRect();
   const t = e.touches[0];
-  const mx = t.clientX - rect.left;
-  const my = t.clientY - rect.top;
+  const mx = t.clientX - rect.left, my = t.clientY - rect.top;
   const w = getWordAt(mx, my);
   if (w) { dragWord = w; w.vx = 0; w.vy = 0; }
 }, {passive:false});
@@ -842,16 +923,14 @@ canvas.addEventListener('touchmove', e => {
   const t = e.touches[0];
   dragWord.px = t.clientX - rect.left;
   dragWord.py = t.clientY - rect.top;
-  dragWord.targetX = dragWord.px;
-  dragWord.targetY = dragWord.py;
+  dragWord.targetX = dragWord.px; dragWord.targetY = dragWord.py;
 }, {passive:false});
 
 canvas.addEventListener('touchend', () => {
   if (dragWord) {
-    dragWord.x = dragWord.px / W;
-    dragWord.y = dragWord.py / H;
-    dragWord.targetX = dragWord.px;
-    dragWord.targetY = dragWord.py;
+    dragWord.x = dragWord.px / W; dragWord.y = dragWord.py / H;
+    dragWord.ox = dragWord.x; dragWord.oy = dragWord.y;
+    dragWord.targetX = dragWord.px; dragWord.targetY = dragWord.py;
     dragWord = null;
   }
 });
@@ -865,30 +944,19 @@ btnReset.addEventListener('click', () => {
   showArithmetic = false; showClusters = false;
   btnArithmetic.classList.remove('active');
   btnClusters.classList.remove('active');
-  words.forEach(w => { w.x = w._origX || w.x; w.y = w._origY || w.y; });
-  words.forEach(w => { if (!w._origX) { w._origX = w.x; w._origY = w.y; } });
-  words[0].x=0.35; words[0].y=0.30;
-  words[1].x=0.55; words[1].y=0.28;
-  words[2].x=0.45; words[2].y=0.18;
-  words[3].x=0.32; words[3].y=0.55;
-  words[4].x=0.58; words[4].y=0.52;
-  words[5].x=0.25; words[5].y=0.78;
-  words[6].x=0.40; words[6].y=0.82;
-  words[7].x=0.15; words[7].y=0.70;
-  words[8].x=0.72; words[8].y=0.75;
-  words[9].x=0.85; words[9].y=0.70;
-  words[10].x=0.78; words[10].y=0.82;
-  toPx();
+  words.forEach(w => { w.x = w.ox; w.y = w.oy; w.targetX = w.x * W; w.targetY = w.y * H; });
 });
 
 btnArithmetic.addEventListener('click', () => {
   showArithmetic = !showArithmetic;
   btnArithmetic.classList.toggle('active', showArithmetic);
+  if (showArithmetic) { showClusters = false; btnClusters.classList.remove('active'); }
 });
 
 btnClusters.addEventListener('click', () => {
   showClusters = !showClusters;
   btnClusters.classList.toggle('active', showClusters);
+  if (showClusters) { showArithmetic = false; btnArithmetic.classList.remove('active'); }
 });
 </script>
 </body>
