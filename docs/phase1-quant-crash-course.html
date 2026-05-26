@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Phase 1 Quant — Crash Course + Formulas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #faf8f5; --paper-2: #f2ede6;
+  --ink: #1a1410; --ink-2: #3d3528;
+  --ink-dim: #8a7e6e; --ink-faint: #b8ad9a;
+  --rule: #dcd0be; --accent: #d94430; --accent2: #c93a26;
+  --green: #409a4e; --blue: #407abb;
+  --yellow: #c09030; --pink: #c0406a;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+[data-theme="dark"] {
+  --paper: #1b1a18; --paper-2: #242220;
+  --ink: #f0ece9; --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430; --accent: #e8704a; --accent2: #d95a3a;
+  --green: #5bbd6b; --blue: #5b8fbd;
+  --yellow: #d4a84b; --pink: #d96a8a;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65;}
+body{background-image:radial-gradient(circle at 15% 10%,rgba(200,180,140,0.12) 0%,transparent 45%),repeating-linear-gradient(0deg,transparent 0,transparent 28px,rgba(120,100,70,0.03) 28px,rgba(120,100,70,0.03) 29px);min-height:100vh;}
+
+.topbar{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule);padding:10px 0;backdrop-filter:blur(8px);}
+.topbar-inner{max-width:1000px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+.brand{font-family:var(--serif);font-size:18px;font-style:italic;letter-spacing:-.01em;}
+.brand .amp{color:var(--accent);}
+.top-actions{display:flex;align-items:center;gap:10px;}
+#pctTop{font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:.08em;font-weight:600;}
+.topbar button{background:none;border:1px solid var(--rule);cursor:pointer;color:var(--ink-dim);padding:4px;display:flex;align-items:center;line-height:1;flex-shrink:0;}
+.topbar button:hover{color:var(--accent);border-color:var(--accent);}
+
+main{max-width:1000px;margin:0 auto;padding:32px 24px 80px;}
+
+.hero{text-align:center;padding:32px 0 24px;margin-bottom:32px;border-bottom:2px solid var(--ink);}
+.hero h1{font-family:var(--serif);font-size:clamp(36px,5vw,64px);font-weight:400;line-height:.95;letter-spacing:-.025em;color:var(--ink);}
+.hero h1 .italic{font-style:italic;color:var(--accent);}
+.hero .sub{font-family:var(--serif);font-size:18px;font-style:italic;color:var(--ink-2);margin-top:6px;}
+
+section{margin-bottom:40px;opacity:0;transform:translateY(16px);transition:opacity .5s,transform .5s;}
+section.in{opacity:1;transform:translateY(0);}
+
+.sec-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:4px;}
+.sec-head input{-webkit-appearance:none;appearance:none;flex-shrink:0;width:18px;height:18px;border:2px solid var(--rule);background:var(--paper);cursor:pointer;margin-top:5px;position:relative;transition:all .2s;}
+.sec-head input:checked{background:var(--green);border-color:var(--green);}
+.sec-head input:checked::after{content:'';position:absolute;width:5px;height:9px;border:solid var(--paper);border-width:0 2px 2px 0;transform:rotate(45deg);top:1px;left:4px;}
+.sec-head input:hover{border-color:var(--ink);}
+.sec-num{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.1em;flex-shrink:0;margin-top:4px;width:20px;text-align:right;}
+.sec-head h2{font-family:var(--serif);font-size:26px;font-weight:400;line-height:1.2;letter-spacing:-.01em;margin:0;}
+.sec-head h2 .underline{text-decoration:underline;text-decoration-style:wavy;text-decoration-color:var(--accent);text-decoration-thickness:1.5px;text-underline-offset:5px;}
+.sec-head+.h2-sub{font-family:var(--serif);font-style:italic;color:var(--ink-dim);font-size:15px;margin:0 0 18px 48px;}
+
+.trick-box{background:var(--paper-2);border:2px solid var(--ink);padding:16px;margin:14px 0;box-shadow:3px 3px 0 var(--ink);}
+.trick-box .label{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+.trick-box h4{font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:8px;}
+.trick-box .steps{font-size:14px;color:var(--ink-2);}
+.trick-box .steps ol{margin-left:18px;margin-top:6px;}
+.trick-box .steps li{margin-bottom:4px;}
+.trick-box .remember{background:var(--paper);border-left:3px solid var(--green);padding:8px 12px;margin-top:10px;font-size:13px;color:var(--ink-2);}
+.trick-box .remember strong{color:var(--green);}
+
+.formula-box{background:var(--paper);border:1px solid var(--rule);padding:12px 16px;margin:10px 0;text-align:center;font-family:var(--serif);font-size:18px;font-style:italic;color:var(--ink);letter-spacing:-.01em;}
+.formula-box .sub{text-align:center;font-size:13px;color:var(--ink-dim);font-family:var(--sans);font-style:normal;margin-top:4px;}
+
+.example-box{background:var(--paper);border:1px solid var(--rule);padding:14px;margin:10px 0;}
+.example-box .ex-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:6px;}
+.example-box .q{font-weight:600;color:var(--ink);margin-bottom:6px;font-size:15px;}
+.example-box .sol{font-size:14px;color:var(--ink-2);}
+.example-box .sol .step{display:block;margin:3px 0;padding-left:12px;border-left:2px solid var(--rule);}
+.example-box .ans{font-family:var(--mono);font-size:13px;color:var(--green);margin-top:8px;font-weight:600;}
+
+.rule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin:14px 0;}
+.rule-card{background:var(--paper);border:1px solid var(--rule);padding:10px 12px;font-size:13px;}
+.rule-card .r-title{font-weight:600;color:var(--ink);font-size:14px;margin-bottom:2px;}
+.rule-card .r-body{color:var(--ink-2);}
+
+.sqr-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;}
+.sqr-table th{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:8px 12px;text-align:center;font-weight:400;}
+.sqr-table td{padding:6px 10px;border-bottom:1px solid var(--rule);text-align:center;font-family:var(--mono);font-size:13px;color:var(--ink-2);}
+.sqr-table tr:last-child td{border-bottom:none;}
+.sqr-table td:nth-child(2){color:var(--accent);font-weight:600;}
+.sqr-table td:nth-child(3){color:var(--blue);font-weight:600;}
+
+.note{padding:12px 16px;margin:10px 0;font-size:14px;color:var(--ink-2);background:var(--paper);border:1px solid var(--green);}
+.note-warn{border-color:var(--yellow);}
+.note-accent{border-color:var(--accent);}
+
+footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);flex-wrap:wrap;gap:10px;}
+footer .pn{color:var(--accent);}
+
+@media(max-width:640px){
+  main{padding:20px 14px 60px;}
+  .sec-head h2{font-size:22px;}
+  .sec-head+.h2-sub{margin-left:0;}
+  .sec-num{display:none;}
+  .rule-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Phase 1 <span class="amp">Quant</span></div>
+    <div class="top-actions">
+      <span id="pctTop">0%</span>
+      <button id="darkToggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<div class="hero">
+  <h1>Quantitative <span class="italic">Aptitude</span></h1>
+  <p class="sub">30 marks. Every formula, shortcut, and trick for speed.</p>
+</div>
+
+<!-- ===== 1. SIMPLIFICATION ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="1">
+    <span class="sec-num">01</span>
+    <h2><span class="underline">Simplification</span> — Free Marks</h2>
+  </div>
+  <div class="h2-sub">5-6 questions. Should take 15 seconds each. BODMAS + fraction tricks.</div>
+
+  <div class="trick-box">
+    <div class="label">BODMAS Reminder</div>
+    <h4>Order of operations — never get it wrong</h4>
+    <div class="steps">
+      <ol>
+        <li><strong>B</strong>rackets (solve innermost first)</li>
+        <li><strong>O</strong>rder (powers, roots)</li>
+        <li><strong>D</strong>ivision and <strong>M</strong>ultiplication (left to right)</li>
+        <li><strong>A</strong>ddition and <strong>S</strong>ubtraction (left to right)</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>SHORTCUT:</strong> In exam questions, brackets and orders are usually straightforward. Most mistakes happen at DM vs AS. Always do division/multiplication BEFORE addition/subtraction.</div>
+  </div>
+
+  <div class="trick-box">
+    <div class="label">Fraction Trick</div>
+    <h4>Convert everything to same denominator or decimals quickly</h4>
+    <div class="steps">
+      <ol>
+        <li>1/2 = 0.5, 1/4 = 0.25, 1/5 = 0.2, 1/8 = 0.125, 1/10 = 0.1</li>
+        <li>1/3 = 0.333, 2/3 = 0.666, 1/6 = 0.166, 1/9 = 0.111</li>
+        <li>If question has 3/4 + 5/8 - 1/2, convert: 0.75 + 0.625 - 0.5 = 0.875</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>MEMORIZE:</strong> 1/2, 1/3, 1/4, 1/5, 1/6, 1/8, 1/9, 1/10 as decimals. Saves 10 seconds per question.</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example</div>
+    <div class="q">35% of 280 + ? = 154</div>
+    <div class="sol">
+      <span class="step">35% of 280 = 0.35 x 280 = 98</span>
+      <span class="step">98 + ? = 154</span>
+      <span class="step">? = 154 - 98 = 56</span>
+    </div>
+    <div class="ans">Answer: 56</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Approximation</div>
+    <div class="q">152.4 x 3.96 + 18.2 = ?</div>
+    <div class="sol">
+      <span class="step">Approximate: 152 x 4 = 608</span>
+      <span class="step">608 + 18 = 626</span>
+      <span class="step">Exact would be slightly less (since 3.96 < 4), but closest option = 626</span>
+    </div>
+    <div class="ans">Answer: ~626 (pick closest option)</div>
+  </div>
+</section>
+
+<!-- ===== 2. SQUARES & CUBES ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="2">
+    <span class="sec-num">02</span>
+    <h2><span class="underline">Squares</span>, Cubes, Roots</h2>
+  </div>
+  <div class="h2-sub">Memorize 1-30 squares and 1-15 cubes. Saves massive time.</div>
+
+  <table class="sqr-table">
+    <tr><th>n</th><th>n²</th><th>n³</th><th>n</th><th>n²</th><th>n³</th></tr>
+    <tr><td>1</td><td>1</td><td>1</td><td>16</td><td>256</td><td>4096</td></tr>
+    <tr><td>2</td><td>4</td><td>8</td><td>17</td><td>289</td><td>4913</td></tr>
+    <tr><td>3</td><td>9</td><td>27</td><td>18</td><td>324</td><td>5832</td></tr>
+    <tr><td>4</td><td>16</td><td>64</td><td>19</td><td>361</td><td>6859</td></tr>
+    <tr><td>5</td><td>25</td><td>125</td><td>20</td><td>400</td><td>8000</td></tr>
+    <tr><td>6</td><td>36</td><td>216</td><td>21</td><td>441</td><td>9261</td></tr>
+    <tr><td>7</td><td>49</td><td>343</td><td>22</td><td>484</td><td>10648</td></tr>
+    <tr><td>8</td><td>64</td><td>512</td><td>23</td><td>529</td><td>12167</td></tr>
+    <tr><td>9</td><td>81</td><td>729</td><td>24</td><td>576</td><td>13824</td></tr>
+    <tr><td>10</td><td>100</td><td>1000</td><td>25</td><td>625</td><td>15625</td></tr>
+    <tr><td>11</td><td>121</td><td>1331</td><td>26</td><td>676</td><td>—</td></tr>
+    <tr><td>12</td><td>144</td><td>1728</td><td>27</td><td>729</td><td>19683</td></tr>
+    <tr><td>13</td><td>169</td><td>2197</td><td>28</td><td>784</td><td>—</td></tr>
+    <tr><td>14</td><td>196</td><td>2744</td><td>29</td><td>841</td><td>—</td></tr>
+    <tr><td>15</td><td>225</td><td>3375</td><td>30</td><td>900</td><td>27000</td></tr>
+  </table>
+
+  <div class="note"><strong>How to find square root quickly:</strong> If number ends in 1 → root ends in 1 or 9. Ends in 4 → root ends in 2 or 8. Ends in 9 → root ends in 3 or 7. Ends in 6 → root ends in 4 or 6. Ends in 5 → root ends in 5. Look at first digits to decide which.</div>
+</section>
+
+<!-- ===== 3. NUMBER SERIES ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="3">
+    <span class="sec-num">03</span>
+    <h2><span class="underline">Number</span> Series</h2>
+  </div>
+  <div class="h2-sub">3-5 questions. 6 pattern types cover 90% of exam questions.</div>
+
+  <div class="rule-grid">
+    <div class="rule-card"><div class="r-title">1. Addition/Subtraction Series</div><div class="r-body">2, 5, 8, 11, 14... (adding 3 each time)<br>20, 17, 14, 11... (subtracting 3)</div></div>
+    <div class="rule-card"><div class="r-title">2. Multiplication/Division Series</div><div class="r-body">2, 6, 18, 54... (x3 each time)<br>96, 48, 24, 12... (/2 each time)</div></div>
+    <div class="rule-card"><div class="r-title">3. Square/Cube Series</div><div class="r-body">1, 4, 9, 16, 25... (1², 2², 3²...)<br>1, 8, 27, 64... (1³, 2³, 3³...)</div></div>
+    <div class="rule-card"><div class="r-title">4. Alternate Series</div><div class="r-body">2, 5, 4, 7, 6, 9... (Two series merged: 2,4,6... and 5,7,9...)</div></div>
+    <div class="rule-card"><div class="r-title">5. Difference of Differences</div><div class="r-body">2, 3, 5, 8, 12...<br>Diff: +1, +2, +3, +4...<br>Next diff = +5, so next = 17</div></div>
+    <div class="rule-card"><div class="r-title">6. Prime Number Series</div><div class="r-body">2, 3, 5, 7, 11, 13, 17... (prime numbers)</div></div>
+  </div>
+
+  <div class="trick-box">
+    <div class="label">The 10-Second Method</div>
+    <h4>How to crack any number series in 10 seconds</h4>
+    <div class="steps">
+      <ol>
+        <li>Step 1: Calculate <strong>first differences</strong> (subtract each from next)</li>
+        <li>Step 2: If differences are same = simple add/subtract</li>
+        <li>Step 3: If differences change by same amount = difference of differences</li>
+        <li>Step 4: If differences are multiplying = multiplication series</li>
+        <li>Step 5: If numbers look familiar = check squares/cubes/primes</li>
+        <li>Step 6: If nothing works = alternate series (split odd and even positions)</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>SHORTCUT:</strong> Always check if numbers are near squares (15²=225, 16²=256) or cubes. If 125 appears → think 5³. If 343 appears → think 7³. Exam series LOVE squares and cubes.</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Difference of Differences</div>
+    <div class="q">3, 8, 17, 30, 47, ?</div>
+    <div class="sol">
+      <span class="step">Differences: 5, 9, 13, 17...</span>
+      <span class="step">Diff of diffs: +4, +4, +4...</span>
+      <span class="step">Next diff = 17 + 4 = 21</span>
+      <span class="step">Next number = 47 + 21 = 68</span>
+    </div>
+    <div class="ans">Answer: 68</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Alternate Series</div>
+    <div class="q">12, 10, 14, 8, 18, 6, ?</div>
+    <div class="sol">
+      <span class="step">Odd positions (1,3,5,7): 12, 14, 18, ? → +2, +4, +6...</span>
+      <span class="step">Even positions (2,4,6): 10, 8, 6 → -2 each</span>
+      <span class="step">7th position = odd → 18 + 6 = 24</span>
+    </div>
+    <div class="ans">Answer: 24</div>
+  </div>
+</section>
+
+<!-- ===== 4. QUADRATIC EQUATIONS ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="4">
+    <span class="sec-num">04</span>
+    <h2><span class="underline">Quadratic</span> Equations — Free Marks</h2>
+  </div>
+  <div class="h2-sub">3-5 questions. Should take 20 seconds each. Two methods.</div>
+
+  <div class="trick-box">
+    <div class="label">Method 1: Factorization</div>
+    <h4>For equations where factors are easy to spot</h4>
+    <div class="steps">
+      <ol>
+        <li>x² + 7x + 12 = 0 → Find two numbers that multiply to 12 and add to 7 → 3 and 4</li>
+        <li>(x + 3)(x + 4) = 0 → x = -3 or -4</li>
+        <li>x² - 5x + 6 = 0 → Numbers: -2 and -3 (multiply to 6, add to -5)</li>
+        <li>(x - 2)(x - 3) = 0 → x = 2 or 3</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>TRICK:</strong> If middle term is + and last term is +, both factors are positive. If middle is - and last is +, both factors are negative. If last is -, factors have opposite signs.</div>
+  </div>
+
+  <div class="formula-box">
+    Method 2: Quadratic Formula<br>
+    x = (-b ± sqrt(b² - 4ac)) / 2a<br>
+    <span class="sub">Use when factorization is not obvious in 5 seconds</span>
+  </div>
+
+  <div class="trick-box">
+    <div class="label">Comparison Questions</div>
+    <h4>Two equations given. Compare x and y.</h4>
+    <div class="steps">
+      <ol>
+        <li>Solve both equations to get x values and y values</li>
+        <li>Compare: If all x > all y → x > y</li>
+        <li>If all x < all y → x < y</li>
+        <li>If x values span across y values → No relation</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>SHORTCUT:</strong> You don't always need exact roots. If equation I gives positive roots and equation II gives negative roots → x > y immediately. Check signs first before calculating.</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example</div>
+    <div class="q">I. x² - 9x + 20 = 0<br>II. y² - 13y + 42 = 0</div>
+    <div class="sol">
+      <span class="step">I: x² - 9x + 20 = 0 → (x - 4)(x - 5) = 0 → x = 4, 5</span>
+      <span class="step">II: y² - 13y + 42 = 0 → (y - 6)(y - 7) = 0 → y = 6, 7</span>
+      <span class="step">Compare: x = 4 or 5, y = 6 or 7. Both x values < both y values.</span>
+    </div>
+    <div class="ans">Answer: x < y</div>
+  </div>
+</section>
+
+<!-- ===== 5. DATA INTERPRETATION ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="5">
+    <span class="sec-num">05</span>
+    <h2><span class="underline">Data</span> Interpretation (DI)</h2>
+  </div>
+  <div class="h2-sub">8-10 questions. The biggest chunk. Master percentage change and ratio.</div>
+
+  <div class="rule-grid">
+    <div class="rule-card"><div class="r-title">% Increase</div><div class="r-body">(New - Old) / Old x 100</div></div>
+    <div class="rule-card"><div class="r-title">% Decrease</div><div class="r-body">(Old - New) / Old x 100</div></div>
+    <div class="rule-card"><div class="r-title">What % is A of B?</div><div class="r-body">A / B x 100</div></div>
+    <div class="rule-card"><div class="r-title">% More than B</div><div class="r-body">(A - B) / B x 100</div></div>
+    <div class="rule-card"><div class="r-title">% Less than B</div><div class="r-body">(B - A) / B x 100</div></div>
+    <div class="rule-card"><div class="r-title">If A is X% more than B</div><div class="r-body">A = B x (100+X) / 100</div></div>
+    <div class="rule-card"><div class="r-title">If A is X% less than B</div><div class="r-body">A = B x (100-X) / 100</div></div>
+    <div class="rule-card"><div class="r-title">Successive % change</div><div class="r-body">a + b + (a x b)/100<br>+20% then -20% = -4%</div></div>
+  </div>
+
+  <div class="trick-box">
+    <div class="label">DI Speed Trick</div>
+    <h4>Never calculate exact when approximate works</h4>
+    <div class="steps">
+      <ol>
+        <li>Bar chart showing 124, 186, 248 → Think in ratios: 124:186:248 ≈ 2:3:4</li>
+        <li>Pie chart percentages: 35% of total → 0.35 x total. If total = 2000, 35% = 700.</li>
+        <li>Average = Total / Number of items. For 5 years, sum all and divide by 5.</li>
+        <li>Ratio questions: A:B = 3:4 means A = 3/7 of total, B = 4/7 of total.</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>SHORTCUT:</strong> If DI asks "Which year had highest growth?", don't calculate all. Visually compare bars/lines first. Often you can eyeball the answer. Calculate only when years are close.</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Bar Chart</div>
+    <div class="q">A company's sales: 2019=200cr, 2020=240cr, 2021=300cr, 2022=270cr. What is % increase from 2019 to 2021?</div>
+    <div class="sol">
+      <span class="step">Increase = 300 - 200 = 100</span>
+      <span class="step">% increase = 100/200 x 100 = 50%</span>
+    </div>
+    <div class="ans">Answer: 50%</div>
+  </div>
+
+  <div class="note-warn"><strong>Common Trap:</strong> "% increase" vs "times increase." If sales went from 100 to 200: % increase = 100%, but "increased by 2 times" means became 3x (100 + 200). Read carefully.</div>
+</section>
+
+<!-- ===== 6. PROFIT & LOSS ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="6">
+    <span class="sec-num">06</span>
+    <h2><span class="underline">Profit</span> & Loss</h2>
+  </div>
+  <div class="h2-sub">2-3 questions. Core formulas. No variation.</div>
+
+  <div class="rule-grid">
+    <div class="rule-card"><div class="r-title">Profit</div><div class="r-body">Profit = Selling Price - Cost Price<br>% Profit = (Profit / CP) x 100</div></div>
+    <div class="rule-card"><div class="r-title">Loss</div><div class="r-body">Loss = Cost Price - Selling Price<br>% Loss = (Loss / CP) x 100</div></div>
+    <div class="rule-card"><div class="r-title">Marked Price & Discount</div><div class="r-body">SP = MP x (100 - Discount%) / 100</div></div>
+    <div class="rule-card"><div class="r-title">Successive Discounts</div><div class="r-body">Equivalent = a + b - (a x b)/100<br>20% + 10% = 28% (not 30%)</div></div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example</div>
+    <div class="q">An article marked at Rs 800 is sold at 2 successive discounts of 20% and 10%. Find selling price.</div>
+    <div class="sol">
+      <span class="step">Method 1: Equivalent discount = 20 + 10 - (20x10)/100 = 30 - 2 = 28%</span>
+      <span class="step">SP = 800 x (100-28)/100 = 800 x 0.72 = 576</span>
+      <span class="step">Method 2: After 20% discount: 800 x 0.8 = 640. After 10% on 640: 640 x 0.9 = 576</span>
+    </div>
+    <div class="ans">Answer: Rs 576</div>
+  </div>
+</section>
+
+<!-- ===== 7. SIMPLE & COMPOUND INTEREST ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="7">
+    <span class="sec-num">07</span>
+    <h2><span class="underline">Simple</span> & Compound Interest</h2>
+  </div>
+  <div class="h2-sub">2-3 questions. Two formulas. Everything derives from them.</div>
+
+  <div class="formula-box">
+    Simple Interest: SI = (P x R x T) / 100<br>
+    <span class="sub">Amount = P + SI = P(1 + RT/100)</span>
+  </div>
+
+  <div class="formula-box">
+    Compound Interest: A = P(1 + R/100)^T<br>
+    <span class="sub">CI = A - P = P[(1 + R/100)^T - 1]</span>
+  </div>
+
+  <div class="trick-box">
+    <div class="label">Shortcut for Compound Interest</div>
+    <h4>When rates are standard percentages, use multiplier method</h4>
+    <div class="steps">
+      <ol>
+        <li>10% for 2 years: multiplier = 1.10 x 1.10 = 1.21. A = P x 1.21. CI = 0.21P</li>
+        <li>20% for 2 years: 1.20 x 1.20 = 1.44. CI = 0.44P = 44%</li>
+        <li>10% for 3 years: 1.10 x 1.10 x 1.10 = 1.331. CI = 33.1%</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>MEMORIZE:</strong> 10% 2yr = 21%, 10% 3yr = 33.1%, 20% 2yr = 44%. These appear repeatedly.</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example</div>
+    <div class="q">Rs 10,000 at 10% CI for 2 years. Find amount.</div>
+    <div class="sol">
+      <span class="step">Multiplier = 1.10 x 1.10 = 1.21</span>
+      <span class="step">Amount = 10,000 x 1.21 = 12,100</span>
+      <span class="step">CI = 12,100 - 10,000 = 2,100</span>
+    </div>
+    <div class="ans">Answer: Amount = Rs 12,100, CI = Rs 2,100</div>
+  </div>
+
+  <div class="note"><strong>Half-yearly CI:</strong> Rate becomes R/2, Time becomes 2T. Quarterly: Rate = R/4, Time = 4T. Formula same: A = P(1 + R/200)^(2T) for half-yearly.</div>
+</section>
+
+<!-- ===== 8. TIME & WORK ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="8">
+    <span class="sec-num">08</span>
+    <h2><span class="underline">Time</span> & Work</h2>
+  </div>
+  <div class="h2-sub">2-3 questions. LCM method is fastest.</div>
+
+  <div class="trick-box">
+    <div class="label">The LCM Method</div>
+    <h4>Never use fractions. Use LCM of days.</h4>
+    <div class="steps">
+      <ol>
+        <li>A can do work in 10 days, B in 15 days. LCM of 10 and 15 = 30.</li>
+        <li>Total work = 30 units.</li>
+        <li>A's 1 day work = 30/10 = 3 units. B's 1 day work = 30/15 = 2 units.</li>
+        <li>Together: 3 + 2 = 5 units/day. Time = 30/5 = 6 days.</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>TRICK:</strong> Take LCM of all given days. That becomes total work. Divide by each person's days to get daily output. Add for combined, subtract for leaving.</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Work Leaves</div>
+    <div class="q">A and B can do a work in 12 and 18 days. A leaves after 4 days. How long will B take to finish?</div>
+    <div class="sol">
+      <span class="step">LCM of 12 and 18 = 36. Total work = 36 units.</span>
+      <span class="step">A's daily = 36/12 = 3 units. B's daily = 36/18 = 2 units.</span>
+      <span class="step">Together for 4 days: (3+2) x 4 = 20 units done.</span>
+      <span class="step">Remaining = 36 - 20 = 16 units. B alone: 16/2 = 8 days.</span>
+    </div>
+    <div class="ans">Answer: 8 days</div>
+  </div>
+
+  <div class="formula-box">
+    Efficiency ratio: If A:B = 2:3, then A's time : B's time = 3:2 (inverse ratio)<br>
+    <span class="sub">More efficient = less time. Efficiency and time are inversely proportional.</span>
+  </div>
+</section>
+
+<!-- ===== 9. TIME & DISTANCE ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="9">
+    <span class="sec-num">09</span>
+    <h2><span class="underline">Time</span>, Speed & Distance</h2>
+  </div>
+  <div class="h2-sub">2-3 questions. One formula: Distance = Speed x Time.</div>
+
+  <div class="rule-grid">
+    <div class="rule-card"><div class="r-title">Basic</div><div class="r-body">D = S x T<br>S = D/T<br>T = D/S</div></div>
+    <div class="rule-card"><div class="r-title">Average Speed</div><div class="r-body">Total Distance / Total Time<br>NOT average of speeds</div></div>
+    <div class="rule-card"><div class="r-title">Same distance, two speeds</div><div class="r-body">Avg Speed = 2ab/(a+b)<br>60 km/h and 40 km/h → avg = 48 km/h</div></div>
+    <div class="rule-card"><div class="r-title">Relative Speed (same direction)</div><div class="r-body">S1 - S2 (faster - slower)</div></div>
+    <div class="rule-card"><div class="r-title">Relative Speed (opposite)</div><div class="r-body">S1 + S2</div></div>
+    <div class="rule-card"><div class="r-title">Boat & Stream</div><div class="r-body">Downstream = B + S<br>Upstream = B - S<br>B = boat speed, S = stream speed</div></div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example</div>
+    <div class="q">A train 200m long crosses a platform 300m long in 25 seconds. Find speed in km/h.</div>
+    <div class="sol">
+      <span class="step">Total distance = train + platform = 200 + 300 = 500m</span>
+      <span class="step">Speed = 500m / 25s = 20 m/s</span>
+      <span class="step">Convert to km/h: 20 x (18/5) = 72 km/h</span>
+    </div>
+    <div class="ans">Answer: 72 km/h</div>
+  </div>
+
+  <div class="note"><strong>m/s to km/h:</strong> Multiply by 18/5. km/h to m/s: Multiply by 5/18. Memorize: 18/5 = 3.6. So 20 m/s = 20 x 3.6 = 72 km/h.</div>
+</section>
+
+<!-- ===== 10. MIXTURE & ALLIGATION ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="10">
+    <span class="sec-num">10</span>
+    <h2><span class="underline">Mixture</span> & Alligation</h2>
+  </div>
+  <div class="h2-sub">1-2 questions. Visual method.</div>
+
+  <div class="formula-box">
+    Alligation Rule:<br>
+    (Cheaper quantity) : (Dearer quantity) = (Dearer price - Mean) : (Mean - Cheaper price)<br>
+    <span class="sub">Mean = the price/percentage of the mixture</span>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example</div>
+    <div class="q">Mix rice at Rs 20/kg with rice at Rs 30/kg to get mixture at Rs 26/kg. Find ratio.</div>
+    <div class="sol">
+      <span class="step">Mean = 26. Cheaper = 20. Dearer = 30.</span>
+      <span class="step">Cheaper quantity : Dearer quantity = (30 - 26) : (26 - 20) = 4 : 6 = 2 : 3</span>
+    </div>
+    <div class="ans">Answer: 2:3</div>
+  </div>
+
+  <div class="note"><strong>Replacement formula:</strong> If a vessel contains X liters of milk, Y liters removed and replaced with water, repeated n times: Milk left = X(1 - Y/X)^n. This is actually CI formula disguised.</div>
+</section>
+
+<footer>
+  <span>Phase 1 Focus</span>
+  <span class="pn">Quant Formulas</span>
+  <span>Day 15 of 29</span>
+</footer>
+
+</main>
+
+<script>
+const dt=document.getElementById('darkToggle');
+dt.addEventListener('click',()=>{const h=document.documentElement;h.dataset.theme=h.dataset.theme==='dark'?'light':'dark';localStorage.setItem('theme',h.dataset.theme);});
+if(localStorage.getItem('theme'))document.documentElement.dataset.theme=localStorage.getItem('theme');
+const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}});},{threshold:0.1});
+document.querySelectorAll('section').forEach(s=>obs.observe(s));
+const cb=document.querySelectorAll('.scb');
+const pt=document.getElementById('pctTop');
+function upPct(){const c=[...cb].filter(x=>x.checked).length;pt.textContent=Math.round((c/cb.length)*100)+'%';}
+cb.forEach(c=>c.addEventListener('change',upPct));
+</script>
+
+</body>
+</html>
