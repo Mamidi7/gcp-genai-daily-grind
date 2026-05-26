@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Phase 1 GA — Banking Awareness Rapid Fire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #faf8f5; --paper-2: #f2ede6;
+  --ink: #1a1410; --ink-2: #3d3528;
+  --ink-dim: #8a7e6e; --ink-faint: #b8ad9a;
+  --rule: #dcd0be; --accent: #d94430; --accent2: #c93a26;
+  --green: #409a4e; --blue: #407abb;
+  --yellow: #c09030; --pink: #c0406a;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+[data-theme="dark"] {
+  --paper: #1b1a18; --paper-2: #242220;
+  --ink: #f0ece9; --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430; --accent: #e8704a; --accent2: #d95a3a;
+  --green: #5bbd6b; --blue: #5b8fbd;
+  --yellow: #d4a84b; --pink: #d96a8a;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65;}
+body{background-image:radial-gradient(circle at 15% 10%,rgba(200,180,140,0.12) 0%,transparent 45%),radial-gradient(circle at 85% 90%,rgba(200,180,140,0.1) 0%,transparent 40%),repeating-linear-gradient(0deg,transparent 0,transparent 28px,rgba(120,100,70,0.03) 28px,rgba(120,100,70,0.03) 29px);min-height:100vh;}
+
+.topbar{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule);padding:10px 0;backdrop-filter:blur(8px);}
+.topbar-inner{max-width:1000px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+.brand{font-family:var(--serif);font-size:18px;font-style:italic;letter-spacing:-.01em;}
+.brand .amp{color:var(--accent);}
+.top-actions{display:flex;align-items:center;gap:10px;}
+#pctTop{font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:.08em;font-weight:600;}
+.topbar button{background:none;border:1px solid var(--rule);cursor:pointer;color:var(--ink-dim);padding:4px;display:flex;align-items:center;line-height:1;flex-shrink:0;}
+.topbar button:hover{color:var(--accent);border-color:var(--accent);}
+
+main{max-width:1000px;margin:0 auto;padding:32px 24px 80px;}
+
+.hero{text-align:center;padding:32px 0 24px;margin-bottom:32px;border-bottom:2px solid var(--ink);}
+.hero h1{font-family:var(--serif);font-size:clamp(36px,5vw,64px);font-weight:400;line-height:.95;letter-spacing:-.025em;color:var(--ink);}
+.hero h1 .italic{font-style:italic;color:var(--accent);}
+.hero .sub{font-family:var(--serif);font-size:18px;font-style:italic;color:var(--ink-2);margin-top:6px;}
+.alert-box{background:var(--accent);color:var(--paper);padding:14px 20px;margin:16px 0;text-align:center;font-family:var(--mono);font-size:12px;letter-spacing:.05em;}
+
+section{margin-bottom:40px;opacity:0;transform:translateY(16px);transition:opacity .5s,transform .5s;}
+section.in{opacity:1;transform:translateY(0);}
+
+.sec-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:4px;}
+.sec-head input{-webkit-appearance:none;appearance:none;flex-shrink:0;width:18px;height:18px;border:2px solid var(--rule);background:var(--paper);cursor:pointer;margin-top:5px;position:relative;transition:all .2s;}
+.sec-head input:checked{background:var(--green);border-color:var(--green);}
+.sec-head input:checked::after{content:'';position:absolute;width:5px;height:9px;border:solid var(--paper);border-width:0 2px 2px 0;transform:rotate(45deg);top:1px;left:4px;}
+.sec-head input:hover{border-color:var(--ink);}
+.sec-num{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.1em;flex-shrink:0;margin-top:4px;width:20px;text-align:right;}
+.sec-head h2{font-family:var(--serif);font-size:26px;font-weight:400;line-height:1.2;letter-spacing:-.01em;margin:0;}
+.sec-head h2 .underline{text-decoration:underline;text-decoration-style:wavy;text-decoration-color:var(--accent);text-decoration-thickness:1.5px;text-underline-offset:5px;}
+.sec-head+.h2-sub{font-family:var(--serif);font-style:italic;color:var(--ink-dim);font-size:15px;margin:0 0 18px 48px;}
+
+h3{font-family:var(--sans);font-size:16px;font-weight:600;letter-spacing:.02em;margin:18px 0 8px;color:var(--ink);}
+
+.mcq-card{background:var(--paper-2);border:1px solid var(--rule);padding:14px 16px;margin:8px 0;}
+.mcq-card .q{font-weight:500;color:var(--ink);font-size:15px;margin-bottom:6px;}
+.mcq-card .ans{font-family:var(--mono);font-size:11px;color:var(--green);letter-spacing:.05em;}
+.mcq-card .ans span{color:var(--ink-dim);text-decoration:line-through;margin-right:8px;}
+.mcq-card .why{font-size:13px;color:var(--ink-2);margin-top:4px;padding-top:4px;border-top:1px dashed var(--rule);}
+
+.flash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px;margin:14px 0;}
+.flash-card{background:var(--paper);border:1px solid var(--rule);padding:10px 12px;font-size:13px;}
+.flash-card .q{font-weight:600;color:var(--ink);font-size:14px;margin-bottom:3px;}
+.flash-card .a{color:var(--ink-2);}
+.flash-card .a strong{color:var(--accent);}
+
+.rate-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;}
+.rate-table th{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:8px 12px;text-align:left;font-weight:400;}
+.rate-table td{padding:8px 12px;border-bottom:1px solid var(--rule);color:var(--ink-2);font-size:14px;}
+.rate-table tr:last-child td{border-bottom:none;}
+.rate-table .rate-name{font-weight:600;color:var(--ink);}
+.rate-table .rate-val{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:600;}
+.rate-table .rate-up{color:var(--green);}
+
+.tag{display:inline-block;font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;margin-right:4px;margin-bottom:3px;border:1px solid var(--ink);color:var(--ink-dim);}
+.tag-red{border-color:var(--accent);color:var(--accent);}
+.tag-green{border-color:var(--green);color:var(--green);}
+.tag-blue{border-color:var(--blue);color:var(--blue);}
+.tag-yellow{border-color:var(--yellow);color:var(--yellow);}
+
+.note{padding:12px 16px;margin:10px 0;font-size:14px;color:var(--ink-2);background:var(--paper);border:1px solid var(--green);}
+.note-warn{border-color:var(--yellow);}
+.note-accent{border-color:var(--accent);}
+
+footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);flex-wrap:wrap;gap:10px;}
+footer .pn{color:var(--accent);}
+
+@media(max-width:640px){
+  main{padding:20px 14px 60px;}
+  .sec-head h2{font-size:22px;}
+  .sec-head+.h2-sub{margin-left:0;}
+  .sec-num{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Phase 1 <span class="amp">GA</span></div>
+    <div class="top-actions">
+      <span id="pctTop">0%</span>
+      <button id="darkToggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<div class="hero">
+  <h1>Banking Awareness <span class="italic">Rapid Fire</span></h1>
+  <p class="sub">80 marks GA section. 100 facts you MUST know. MCQ format.</p>
+</div>
+
+<div class="alert-box">PHASE 1 ONLY — No Phase 2 depth. Just facts that get marks in MCQs.</div>
+
+<!-- ===== RBI POLICY RATES ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="1">
+    <span class="sec-num">01</span>
+    <h2><span class="underline">RBI</span> Policy Rates (May 2026)</h2>
+  </div>
+  <div class="h2-sub">These appear in almost every GA paper. Memorize the numbers.</div>
+
+  <table class="rate-table">
+    <tr><th>Rate/Tool</th><th>Current (May 2026)</th><th>What It Does</th></tr>
+    <tr><td class="rate-name">Repo Rate</td><td class="rate-val">6.00%</td><td>RBI lends to banks (short term)</td></tr>
+    <tr><td class="rate-name">Reverse Repo</td><td class="rate-val">3.35%</td><td>Banks park excess funds with RBI</td></tr>
+    <tr><td class="rate-name">Bank Rate</td><td class="rate-val">6.25%</td><td>Long-term lending rate to banks</td></tr>
+    <tr><td class="rate-name">MSF (Marginal Standing Facility)</td><td class="rate-val">6.25%</td><td>Emergency overnight borrowing</td></tr>
+    <tr><td class="rate-name">SDER (Standing Deposit Facility)</td><td class="rate-val">5.00%</td><td>Replaced reverse repo as floor rate</td></tr>
+    <tr><td class="rate-name">CRR</td><td class="rate-val">4.00%</td><td>Cash banks must hold with RBI</td></tr>
+    <tr><td class="rate-name">SLR</td><td class="rate-val">18.00%</td><td>Statutory liquid assets (bonds, gold, cash)</td></tr>
+  </table>
+
+  <div class="note-warn"><strong>Trap:</strong> Bank Rate and MSF are the SAME (6.25%). Many students confuse them. Bank Rate = long term. MSF = overnight emergency. Different purpose, same number.</div>
+  <div class="note-accent"><strong>Trap:</strong> SDER (5.00%) is the NEW floor rate since April 2022. Reverse repo (3.35%) still exists but SDER is the active floor in monetary policy framework. If asked "floor rate of LAF corridor" — answer is SDER, not reverse repo.</div>
+</section>
+
+<!-- ===== RBI STRUCTURE ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="2">
+    <span class="sec-num">02</span>
+    <h2><span class="underline">RBI</span> Structure — Must Know Facts</h2>
+  </div>
+  <div class="h2-sub">Static GK. Appears directly as MCQs.</div>
+
+  <div class="flash-grid">
+    <div class="flash-card"><div class="q">Established</div><div class="a"><strong>April 1, 1935</strong> (under RBI Act 1934)</div></div>
+    <div class="flash-card"><div class="q">Nationalized</div><div class="a"><strong>January 1, 1949</strong></div></div>
+    <div class="flash-card"><div class="q">Headquarters</div><div class="a"><strong>Mumbai</strong> (originally Kolkata, moved 1937)</div></div>
+    <div class="flash-card"><div class="q">First Governor</div><div class="a"><strong>Sir Osborne Smith</strong> (British, 1935-37)</div></div>
+    <div class="flash-card"><div class="q">First Indian Governor</div><div class="a"><strong>CD Deshmukh</strong> (1943-49)</div></div>
+    <div class="flash-card"><div class="q">Current Governor</div><div class="a"><strong>Sanjay Malhotra</strong> (since Dec 2024)</div></div>
+    <div class="flash-card"><div class="q">Deputy Governors</div><div class="a"><strong>4</strong> (max 4, min 4 as per RBI Act)</div></div>
+    <div class="flash-card"><div class="q">MPC Members</div><div class="a"><strong>6</strong> — 3 RBI + 3 external. Governor chairs. Meets <strong>6 times/year</strong>.</div></div>
+    <div class="flash-card"><div class="q">RBI Act</div><div class="a"><strong>1934</strong> — Section 8 defines functions</div></div>
+    <div class="flash-card"><div class="q">Banking Regulation Act</div><div class="a"><strong>1949</strong> — regulates banking companies</div></div>
+  </div>
+
+  <div class="mcq-card">
+    <div class="q">Q. RBI was originally headquartered in which city before moving to Mumbai in 1937?</div>
+    <div class="ans"><span>A) Delhi</span><span>B) Madras</span><span>C) Bombay</span> <strong>D) Kolkata</strong></div>
+    <div class="why">RBI was established in Kolkata 1935, moved to Mumbai 1937. Common trap: students pick Mumbai because it's current HQ.</div>
+  </div>
+</section>
+
+<!-- ===== BANKING TERMS ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="3">
+    <span class="sec-num">03</span>
+    <h2><span class="underline">Banking</span> Terms — Exam Favorites</h2>
+  </div>
+  <div class="h2-sub">One-line definitions. No depth needed for Phase 1.</div>
+
+  <div class="flash-grid">
+    <div class="flash-card"><div class="q">NPA</div><div class="a">Non-Performing Asset. Loan unpaid for <strong>90 days</strong>. Substandard (90-365d), Doubtful (1-3y), Loss (>3y).</div></div>
+    <div class="flash-card"><div class="q">PCR</div><div class="a">Provision Coverage Ratio. <strong>Minimum 70%</strong> for NPA. Higher = better.</div></div>
+    <div class="flash-card"><div class="q">SARFAESI Act</div><div class="a">Securitization and Reconstruction. Banks can <strong>attach property without court</strong> for NPAs > 20 lakh. Year: <strong>2002</strong>.</div></div>
+    <div class="flash-card"><div class="q">IBC</div><div class="a">Insolvency and Bankruptcy Code. <strong>2016</strong>. Resolution in <strong>330 days</strong>. NCLT handles.</div></div>
+    <div class="flash-card"><div class="q">ARC</div><div class="a">Asset Reconstruction Company. Buys bad loans from banks. Regulated by RBI.</div></div>
+    <div class="flash-card"><div class="q">PCA</div><div class="a">Prompt Corrective Action. RBI imposes on weak banks (3 triggers: capital, asset quality, profitability). Restrictions on lending, branch expansion, dividends.</div></div>
+    <div class="flash-card"><div class="q">CAR / CRAR</div><div class="a">Capital to Risk-weighted Assets Ratio. RBI minimum: <strong>9%</strong>. Basel: 8%.</div></div>
+    <div class="flash-card"><div class="q">CDR</div><div class="a">Corporate Debt Restructuring. For viable units facing temporary problems.</div></div>
+    <div class="flash-card"><div class="q">5/25 Scheme</div><div class="a">Long-term infra loans can be restructured every 5 years, max 25 years. For viable projects.</div></div>
+    <div class="flash-card"><div class="q">S4A</div><div class="a">Scheme for Sustainable Structuring of Stressed Assets. For large projects (>500cr). Viable portion = standard, unviable = NPA.</div></div>
+  </div>
+
+  <div class="mcq-card">
+    <div class="q">Q. Under IBC 2016, what is the maximum time allowed for resolution of a corporate insolvency case?</div>
+    <div class="ans"><span>A) 180 days</span><span>B) 270 days</span> <strong>C) 330 days</strong> <span>D) 365 days</span></div>
+    <div class="why">Initial 180 days + 90 days extension = 330 days total. Common trap: 180 days is initial period only.</div>
+  </div>
+</section>
+
+<!-- ===== GOVERNMENT SCHEMES ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="4">
+    <span class="sec-num">04</span>
+    <h2><span class="underline">Government</span> Schemes — High Yield</h2>
+  </div>
+  <div class="h2-sub">5-10 questions guaranteed. Memorize year, ministry, and key number.</div>
+
+  <div class="flash-grid">
+    <div class="flash-card"><div class="q">PMJDY</div><div class="a"><strong>2014</strong> | Min balance = zero | Accidental insurance = <strong>2 lakh</strong> | Life cover = <strong>30,000</strong> | Overdraft = <strong>10,000</strong></div></div>
+    <div class="flash-card"><div class="q">PMMY (MUDRA)</div><div class="a"><strong>2015</strong> | Loans up to <strong>10 lakh</strong> | Shishu (&lt;50k), Kishore (50k-5L), Tarak (5L-10L)</div></div>
+    <div class="flash-card"><div class="q">Stand Up India</div><div class="a"><strong>2016</strong> | Loans <strong>10 lakh to 1 crore</strong> | SC/ST and Women entrepreneurs | SIDBI</div></div>
+    <div class="flash-card"><div class="q">Startup India</div><div class="a"><strong>2016</strong> | 3-year tax holiday | Self-certification | Fund of Funds = <strong>10,000 crore</strong></div></div>
+    <div class="flash-card"><div class="q">PM-KISAN</div><div class="a"><strong>2019</strong> | <strong>6,000/year</strong> to farmer families | 3 instalments of 2,000 | Direct DBT</div></div>
+    <div class="flash-card"><div class="q">Ayushman Bharat</div><div class="a"><strong>2018</strong> | Health insurance <strong>5 lakh/family</strong> | PMJAY + Health & Wellness Centres | World's largest govt-funded health scheme</div></div>
+    <div class="flash-card"><div class="q">AMRUT</div><div class="a"><strong>2015</strong> | Atal Mission for Rejuvenation and Urban Transformation | Water supply, sewerage, urban transport | <strong>500 cities</strong></div></div>
+    <div class="flash-card"><div class="q">Smart Cities Mission</div><div class="a"><strong>2015</strong> | <strong>100 cities</strong> | 5-year mission | SPV model</div></div>
+    <div class="flash-card"><div class="q">PM Awas Yojana</div><div class="a"><strong>2015</strong> | Housing for All by <strong>2022 (extended to 2024)</strong> | Credit-linked subsidy</div></div>
+    <div class="flash-card"><div class="q">Skill India / NSDC</div><div class="a"><strong>2015</strong> | Target: 40 crore by 2022 | PMKVY scheme</div></div>
+  </div>
+
+  <div class="mcq-card">
+    <div class="q">Q. Under PMJDY, what is the accidental insurance coverage amount?</div>
+    <div class="ans"><span>A) 50,000</span><span>B) 1 lakh</span> <strong>C) 2 lakh</strong> <span>D) 5 lakh</span></div>
+    <div class="why">PMJDY provides accidental insurance of Rs 2 lakh and life cover of Rs 30,000. Don't mix up the two numbers.</div>
+  </div>
+</section>
+
+<!-- ===== FINANCIAL INSTITUTIONS ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="5">
+    <span class="sec-num">05</span>
+    <h2><span class="underline">Financial</span> Institutions</h2>
+  </div>
+  <div class="h2-sub">Static GK. One question guaranteed.</div>
+
+  <div class="flash-grid">
+    <div class="flash-card"><div class="q">NABARD</div><div class="a"><strong>1982</strong> | Agricultural & rural development | HQ: <strong>Mumbai</strong> | Regulates RRBs, cooperative banks</div></div>
+    <div class="flash-card"><div class="q">SIDBI</div><div class="a"><strong>1990</strong> | Small Industries Development | HQ: <strong>Lucknow</strong> | Refinance to banks for MSME</div></div>
+    <div class="flash-card"><div class="q">EXIM Bank</div><div class="a"><strong>1982</strong> | Export-Import financing | HQ: <strong>Mumbai</strong></div></div>
+    <div class="flash-card"><div class="q">NHB</div><div class="a"><strong>1988</strong> | National Housing Bank | HQ: <strong>New Delhi</strong> | Housing finance regulator (now under RBI)</div></div>
+    <div class="flash-card"><div class="q">NaBFID</div><div class="a"><strong>2022</strong> | National Bank for Financing Infra & Development | Replaces IDBI as DFI | HQ: <strong>Mumbai</strong></div></div>
+    <div class="flash-card"><div class="q">SEBI</div><div class="a"><strong>1988</strong> (established), <strong>1992</strong> (statutory) | Securities regulator | HQ: <strong>Mumbai</strong></div></div>
+    <div class="flash-card"><div class="q">IRDAI</div><div class="a"><strong>1999</strong> (IRDA Act) | Insurance regulator | HQ: <strong>Hyderabad</strong></div></div>
+    <div class="flash-card"><div class="q">PFRDA</div><div class="a"><strong>2003</strong> | Pension regulator | HQ: <strong>New Delhi</strong> | NPS, APY</div></div>
+    <div class="flash-card"><div class="q">IBBI</div><div class="a"><strong>2016</strong> | Insolvency & Bankruptcy Board | HQ: <strong>New Delhi</strong></div></div>
+    <div class="flash-card"><div class="q">NCLT</div><div class="a">National Company Law Tribunal | Handles corporate insolvency under IBC | <strong>11 benches</strong></div></div>
+  </div>
+</section>
+
+<!-- ===== PAYMENT SYSTEMS ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="6">
+    <span class="sec-num">06</span>
+    <h2><span class="underline">Payment</span> Systems & Digital</h2>
+  </div>
+  <div class="h2-sub">2-3 questions every year. Very high yield.</div>
+
+  <div class="flash-grid">
+    <div class="flash-card"><div class="q">UPI</div><div class="a">Unified Payments Interface | <strong>NPCI</strong> | 24x7 | Max transfer: <strong>2 lakh</strong> (1 lakh for new users first 24h) | Launched <strong>2016</strong></div></div>
+    <div class="flash-card"><div class="q">NEFT</div><div class="a">National Electronic Funds Transfer | <strong>NPCI</strong> | Now <strong>24x7</strong> (since Dec 2019) | No min/max limit | Batch processing</div></div>
+    <div class="flash-card"><div class="q">RTGS</div><div class="a">Real Time Gross Settlement | <strong>RBI</strong> operated | Min: <strong>2 lakh</strong> | No max | 24x7 since Dec 2020</div></div>
+    <div class="flash-card"><div class="q">IMPS</div><div class="a">Immediate Payment Service | <strong>NPCI</strong> | 24x7 | Max: <strong>5 lakh</strong> per transaction</div></div>
+    <div class="flash-card"><div class="q">BBPS</div><div class="a">Bharat Bill Payment System | <strong>NPCI</strong> | All utility bills | Integrated with UPI</div></div>
+    <div class="flash-card"><div class="q">CBDC / Digital Rupee</div><div class="a">Central Bank Digital Currency | Pilot launched <strong>Nov 2022</strong> | Wholesale + Retail | RBI-issued legal tender</div></div>
+    <div class="flash-card"><div class="q">NPCI</div><div class="a">National Payments Corporation of India | <strong>2008</strong> | HQ: <strong>Mumbai</strong> | UPI, NEFT, IMPS, RuPay, BBPS</div></div>
+    <div class="flash-card"><div class="q">RuPay</div><div class="a">India's domestic card network | <strong>NPCI</strong> | PMJDY cards are RuPay | International acceptance growing</div></div>
+  </div>
+
+  <div class="mcq-card">
+    <div class="q">Q. What is the maximum transaction limit for UPI per transaction?</div>
+    <div class="ans"><span>A) 50,000</span><span>B) 1 lakh</span> <strong>C) 2 lakh</strong> <span>D) 5 lakh</span></div>
+    <div class="why">UPI limit is Rs 2 lakh per transaction. For new users, it's Rs 1 lakh for first 24 hours. IMPS limit is Rs 5 lakh. Don't confuse the two.</div>
+  </div>
+</section>
+
+<!-- ===== PRIORITY SECTOR LENDING ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="7">
+    <span class="sec-num">07</span>
+    <h2><span class="underline">Priority</span> Sector Lending</h2>
+  </div>
+  <div class="h2-sub">Targets, sub-targets, categories. Direct MCQ material.</div>
+
+  <table class="rate-table">
+    <tr><th>Bank Type</th><th>PSL Target</th><th>Key Sub-targets</th></tr>
+    <tr><td class="rate-name">Scheduled Commercial Banks</td><td class="rate-val">40% of ANBC</td><td>Agriculture 18% (of which SF/MF 10%), Micro Enterprises 7.5%, Weaker Sections 12%</td></tr>
+    <tr><td class="rate-name">Foreign Banks (20+ branches)</td><td class="rate-val">40% of ANBC</td><td>Same as above</td></tr>
+    <tr><td class="rate-name">Foreign Banks (&lt;20 branches)</td><td class="rate-val">40% of ANBC</td><td>Export credit + SME + others</td></tr>
+    <tr><td class="rate-name">RRBs</td><td class="rate-val">75% of outstanding</td><td>Primarily agriculture</td></tr>
+    <tr><td class="rate-name">Small Finance Banks</td><td class="rate-val">75% of ANBC</td><td>40% to priority sector</td></tr>
+    <tr><td class="rate-name">Urban Cooperative Banks</td><td class="rate-val">40% of ANBC</td><td>Similar to commercial banks</td></tr>
+  </table>
+
+  <div class="flash-grid">
+    <div class="flash-card"><div class="q">ANBC</div><div class="a">Adjusted Net Bank Credit = Net Bank Credit + investments in non-SLR bonds</div></div>
+    <div class="flash-card"><div class="q">SF/MF</div><div class="a">Small and Marginal Farmers. Sub-target: <strong>10% of ANBC</strong> must go to them.</div></div>
+    <div class="flash-card"><div class="q">Weaker Sections</div><div class="a">Includes SC/ST, minorities, women, disabled. Target: <strong>12% of ANBC</strong>.</div></div>
+    <div class="flash-card"><div class="q">RIDF</div><div class="a">Rural Infrastructure Development Fund. Banks deposit shortfall in PSL with NABARD. NABARD uses for rural infra.</div></div>
+  </div>
+</section>
+
+<!-- ===== RECENT RBI CHANGES ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="8">
+    <span class="sec-num">08</span>
+    <h2><span class="underline">Recent</span> RBI Changes (2024-26)</h2>
+  </div>
+  <div class="h2-sub">Current affairs + banking overlap. Most important for Phase 1.</div>
+
+  <div class="flash-grid">
+    <div class="flash-card"><div class="q">SDER introduced</div><div class="a"><strong>April 2022</strong>. Standing Deposit Facility Rate = 5.00%. New floor for LAF corridor. Reverse repo still exists but SDER is the active policy floor.</div></div>
+    <div class="flash-card"><div class="q">UPI Lite</div><div class="a">Offline UPI payments. No internet needed. Wallet-based. Max balance <strong>2,000</strong>, per transaction <strong>500</strong>.</div></div>
+    <div class="flash-card"><div class="q">UPI 123Pay</div><div class="a">UPI for feature phones. Dial *99# or use voice. No smartphone needed.</div></div>
+    <div class="flash-card"><div class="q">Credit Card linking to UPI</div><div class="a">RBI allowed <strong>RuPay credit cards</strong> on UPI since June 2022. Visa/Mastercard not yet.</div></div>
+    <div class="flash-card"><div class="q">e-RUPI</div><div class="a"><strong>Aug 2021</strong>. Prepaid voucher for specific purpose. Person + purpose specific. No bank account needed for beneficiary.</div></div>
+    <div class="flash-card"><div class="q">Tokenization</div><div class="a">From <strong>Oct 2022</strong>, merchants cannot store actual card numbers. Must use tokens. Enhances security.</div></div>
+    <div class="flash-card"><div class="q">CBDC Retail Pilot</div><div class="a">Launched <strong>Dec 2022</strong>. 15 banks participating. Digital wallet for e-Rupee. Offline capability tested.</div></div>
+    <div class="flash-card"><div class="q">Repo rate cuts</div><div class="a">Feb 2025: 25 bps cut to 6.25%. <strong>April 2025: 25 bps cut to 6.00%</strong>. Current rate = 6.00% as of May 2026.</div></div>
+  </div>
+</section>
+
+<!-- ===== INSURANCE & PENSION ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="9">
+    <span class="sec-num">09</span>
+    <h2><span class="underline">Insurance</span> & Pension</h2>
+  </div>
+  <div class="h2-sub">1-2 questions. Quick recall only.</div>
+
+  <div class="flash-grid">
+    <div class="flash-card"><div class="q">Bima Sugam</div><div class="a">Proposed unified insurance platform. <strong>IRDAI</strong> initiative. One-stop for buying, claims, grievances. Launch expected soon.</div></div>
+    <div class="flash-card"><div class="q">Insurance Penetration (India)</div><div class="a"><strong>~4.2%</strong> (very low). Global avg ~7%. Life insurance dominates. Health growing fast.</div></div>
+    <div class="flash-card"><div class="q">NPS</div><div class="a">National Pension System. <strong>PFRDA</strong> regulates. Mandatory for central govt employees (from 2004). Voluntary for others. Partial withdrawal after 3 years.</div></div>
+    <div class="flash-card"><div class="q">APY</div><div class="a">Atal Pension Yojana. <strong>2015</strong>. Guaranteed pension <strong>1,000-5,000/month</strong> from age 60. Target: unorganized sector. Govt co-contributes 50% or 1,000/year (whichever is lower) for 5 years.</div></div>
+    <div class="flash-card"><div class="q">OPS vs NPS</div><div class="a">OPS = Old Pension Scheme (guaranteed 50% of last drawn salary). NPS = market-linked. Some states reverting to OPS. Central govt still on NPS.</div></div>
+  </div>
+</section>
+
+<!-- ===== STOCK MARKET BASICS ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="10">
+    <span class="sec-num">10</span>
+    <h2><span class="underline">Stock</span> Market Basics</h2>
+  </div>
+  <div class="h2-sub">1-2 questions. Definitions only.</div>
+
+  <div class="flash-grid">
+    <div class="flash-card"><div class="q">Sensex</div><div class="a">BSE index. <strong>30 companies</strong>. Free-float market cap weighted. Base year 1978-79 = 100.</div></div>
+    <div class="flash-card"><div class="q">Nifty 50</div><div class="a">NSE index. <strong>50 companies</strong>. Free-float market cap weighted. Base year 1995 = 1000.</div></div>
+    <div class="flash-card"><div class="q">FII vs FPI</div><div class="a">FII = Foreign Institutional Investor (old term). FPI = Foreign Portfolio Investor (new term, 2014 SEBI norms). Same thing, different name.</div></div>
+    <div class="flash-card"><div class="q">IPO vs FPO</div><div class="a">IPO = First sale by private company going public. FPO = Follow-on Public Offer. Additional shares by already listed company.</div></div>
+    <div class="flash-card"><div class="q">Demat Account</div><div class="a">Holds shares electronically. Depositories: <strong>CDSL</strong> and <strong>NSDL</strong>. SEBI regulates.</div></div>
+    <div class="flash-card"><div class="q">Stock Exchange</div><div class="a">BSE (1875, oldest Asia). NSE (1992, first demutualized). SEBI regulates both.</div></div>
+  </div>
+</section>
+
+<footer>
+  <span>Phase 1 Focus</span>
+  <span class="pn">Banking Awareness</span>
+  <span>Day 13 of 29</span>
+</footer>
+
+</main>
+
+<script>
+const dt=document.getElementById('darkToggle');
+dt.addEventListener('click',()=>{const h=document.documentElement;h.dataset.theme=h.dataset.theme==='dark'?'light':'dark';localStorage.setItem('theme',h.dataset.theme);});
+if(localStorage.getItem('theme'))document.documentElement.dataset.theme=localStorage.getItem('theme');
+const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}});},{threshold:0.1});
+document.querySelectorAll('section').forEach(s=>obs.observe(s));
+const cb=document.querySelectorAll('.scb');
+const pt=document.getElementById('pctTop');
+function upPct(){const c=[...cb].filter(x=>x.checked).length;pt.textContent=Math.round((c/cb.length)*100)+'%';}
+cb.forEach(c=>c.addEventListener('change',upPct));
+</script>
+
+</body>
+</html>
