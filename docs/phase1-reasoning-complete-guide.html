@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Phase 1 Reasoning — Complete Exam Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #faf8f5; --paper-2: #f2ede6;
+  --ink: #1a1410; --ink-2: #3d3528;
+  --ink-dim: #8a7e6e; --ink-faint: #b8ad9a;
+  --rule: #dcd0be; --accent: #d94430; --accent2: #c93a26;
+  --green: #409a4e; --blue: #407abb;
+  --yellow: #c09030; --pink: #c0406a;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+[data-theme="dark"] {
+  --paper: #1b1a18; --paper-2: #242220;
+  --ink: #f0ece9; --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430; --accent: #e8704a; --accent2: #d95a3a;
+  --green: #5bbd6b; --blue: #5b8fbd;
+  --yellow: #d4a84b; --pink: #d96a8a;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65;}
+body{background-image:radial-gradient(circle at 15% 10%,rgba(200,180,140,0.12) 0%,transparent 45%),repeating-linear-gradient(0deg,transparent 0,transparent 28px,rgba(120,100,70,0.03) 28px,rgba(120,100,70,0.03) 29px);min-height:100vh;}
+
+.topbar{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule);padding:10px 0;backdrop-filter:blur(8px);}
+.topbar-inner{max-width:1000px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+.brand{font-family:var(--serif);font-size:18px;font-style:italic;letter-spacing:-.01em;}
+.brand .amp{color:var(--accent);}
+.top-actions{display:flex;align-items:center;gap:10px;}
+#pctTop{font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:.08em;font-weight:600;}
+.topbar button{background:none;border:1px solid var(--rule);cursor:pointer;color:var(--ink-dim);padding:4px;display:flex;align-items:center;line-height:1;flex-shrink:0;}
+.topbar button:hover{color:var(--accent);border-color:var(--accent);}
+
+main{max-width:1000px;margin:0 auto;padding:32px 24px 80px;}
+
+.hero{text-align:center;padding:32px 0 24px;margin-bottom:32px;border-bottom:2px solid var(--ink);}
+.hero h1{font-family:var(--serif);font-size:clamp(36px,5vw,64px);font-weight:400;line-height:.95;letter-spacing:-.025em;color:var(--ink);}
+.hero h1 .italic{font-style:italic;color:var(--accent);}
+.hero .sub{font-family:var(--serif);font-size:18px;font-style:italic;color:var(--ink-2);margin-top:6px;}
+
+section{margin-bottom:40px;opacity:0;transform:translateY(16px);transition:opacity .5s,transform .5s;}
+section.in{opacity:1;transform:translateY(0);}
+
+.sec-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:4px;}
+.sec-head input{-webkit-appearance:none;appearance:none;flex-shrink:0;width:18px;height:18px;border:2px solid var(--rule);background:var(--paper);cursor:pointer;margin-top:5px;position:relative;transition:all .2s;}
+.sec-head input:checked{background:var(--green);border-color:var(--green);}
+.sec-head input:checked::after{content:'';position:absolute;width:5px;height:9px;border:solid var(--paper);border-width:0 2px 2px 0;transform:rotate(45deg);top:1px;left:4px;}
+.sec-head input:hover{border-color:var(--ink);}
+.sec-num{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.1em;flex-shrink:0;margin-top:4px;width:20px;text-align:right;}
+.sec-head h2{font-family:var(--serif);font-size:26px;font-weight:400;line-height:1.2;letter-spacing:-.01em;margin:0;}
+.sec-head h2 .underline{text-decoration:underline;text-decoration-style:wavy;text-decoration-color:var(--accent);text-decoration-thickness:1.5px;text-underline-offset:5px;}
+.sec-head+.h2-sub{font-family:var(--serif);font-style:italic;color:var(--ink-dim);font-size:15px;margin:0 0 18px 48px;}
+
+.trick-box{background:var(--paper-2);border:2px solid var(--ink);padding:16px;margin:14px 0;box-shadow:3px 3px 0 var(--ink);}
+.trick-box .label{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+.trick-box h4{font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:8px;}
+.trick-box .steps{font-size:14px;color:var(--ink-2);}
+.trick-box .steps ol{margin-left:18px;margin-top:6px;}
+.trick-box .steps li{margin-bottom:4px;}
+.trick-box .remember{background:var(--paper);border-left:3px solid var(--green);padding:8px 12px;margin-top:10px;font-size:13px;color:var(--ink-2);}
+.trick-box .remember strong{color:var(--green);}
+
+.example-box{background:var(--paper);border:1px solid var(--rule);padding:14px;margin:10px 0;}
+.example-box .ex-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:6px;}
+.example-box .q{font-weight:600;color:var(--ink);margin-bottom:6px;font-size:15px;}
+.example-box .sol{font-size:14px;color:var(--ink-2);}
+.example-box .sol .step{display:block;margin:3px 0;padding-left:12px;border-left:2px solid var(--rule);}
+.example-box .ans{font-family:var(--mono);font-size:13px;color:var(--green);margin-top:8px;font-weight:600;}
+
+.rule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;margin:14px 0;}
+.rule-card{background:var(--paper);border:1px solid var(--rule);padding:10px 12px;font-size:13px;}
+.rule-card .r-title{font-weight:600;color:var(--ink);font-size:14px;margin-bottom:2px;}
+.rule-card .r-body{color:var(--ink-2);}
+
+.note{padding:12px 16px;margin:10px 0;font-size:14px;color:var(--ink-2);background:var(--paper);border:1px solid var(--green);}
+.note-warn{border-color:var(--yellow);}
+.note-accent{border-color:var(--accent);}
+
+.exp-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;}
+.exp-table th{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:8px 12px;text-align:left;font-weight:400;}
+.exp-table td{padding:8px 12px;border-bottom:1px solid var(--rule);color:var(--ink-2);font-size:14px;}
+.exp-table tr:last-child td{border-bottom:none;}
+.exp-table .topic{font-weight:600;color:var(--ink);}
+.exp-table .qs{font-family:var(--mono);color:var(--accent);font-weight:600;}
+
+footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);flex-wrap:wrap;gap:10px;}
+footer .pn{color:var(--accent);}
+
+@media(max-width:640px){
+  main{padding:20px 14px 60px;}
+  .sec-head h2{font-size:22px;}
+  .sec-head+.h2-sub{margin-left:0;}
+  .sec-num{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Phase 1 <span class="amp">Reasoning</span></div>
+    <div class="top-actions">
+      <span id="pctTop">0%</span>
+      <button id="darkToggle" title="Toggle dark mode"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<div class="hero">
+  <h1>Reasoning <span class="italic">Complete Guide</span></h1>
+  <p class="sub">60 marks. Every topic that appears in RBI Grade B Phase 1. Exam-style questions + tricks.</p>
+</div>
+
+<!-- SYLLABUS TABLE -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="0">
+    <span class="sec-num">00</span>
+    <h2><span class="underline">What</span> Actually Comes</h2>
+  </div>
+  <div class="h2-sub">Based on 2022, 2023, 2024, 2025 RBI Grade B Phase 1 papers.</div>
+
+  <table class="exp-table">
+    <tr><th>Topic</th><th>Expected Qs</th><th>Priority</th><th>Time per Q</th></tr>
+    <tr><td class="topic">Puzzles & Seating Arrangement</td><td class="qs">15-20</td><td>HIGHEST</td><td>2-3 min</td></tr>
+    <tr><td class="topic">Syllogism</td><td class="qs">5-8</td><td>HIGH</td><td>20 sec</td></tr>
+    <tr><td class="topic">Inequality (Direct + Coded)</td><td class="qs">3-5</td><td>HIGH</td><td>15 sec</td></tr>
+    <tr><td class="topic">Data Sufficiency</td><td class="qs">3-5</td><td>MEDIUM</td><td>45 sec</td></tr>
+    <tr><td class="topic">Input-Output</td><td class="qs">2-3</td><td>MEDIUM</td><td>1 min</td></tr>
+    <tr><td class="topic">Coding-Decoding</td><td class="qs">3-5</td><td>MEDIUM</td><td>30 sec</td></tr>
+    <tr><td class="topic">Blood Relations</td><td class="qs">2-3</td><td>MEDIUM</td><td>30 sec</td></tr>
+    <tr><td class="topic">Direction & Distance</td><td class="qs">2-3</td><td>LOW</td><td>20 sec</td></tr>
+    <tr><td class="topic">Order & Ranking</td><td class="qs">2-3</td><td>LOW</td><td>20 sec</td></tr>
+    <tr><td class="topic">Statement-Assumption/Conclusion</td><td class="qs">2-3</td><td>LOW</td><td>30 sec</td></tr>
+    <tr><td class="topic">Alpha-Numeric Series</td><td class="qs">1-2</td><td>LOW</td><td>15 sec</td></tr>
+  </table>
+
+  <div class="note-accent"><strong>Exam Strategy:</strong> Start with Syllogism + Inequality (quick wins). Then Coding + Blood Relations + Direction (medium). Then attack Puzzles. Data Sufficiency and Input-Output last. If a puzzle takes >3 min, SKIP and mark for review.</div>
+</section>
+
+<!-- ===== 1. SYLLOGISM ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="1">
+    <span class="sec-num">01</span>
+    <h2><span class="underline">Syllogism</span> — 5 Rules = 5-8 Marks</h2>
+  </div>
+  <div class="h2-sub">The easiest high-weight topic. Memorize 5 rules. Never draw Venn diagrams in exam.</div>
+
+  <div class="trick-box">
+    <div class="label">The 5 Rules (Memorize These)</div>
+    <h4>Every syllogism question uses one of these 5 patterns</h4>
+    <div class="steps">
+      <ol>
+        <li><strong>All + All = All</strong> — All A are B + All B are C = All A are C</li>
+        <li><strong>All + Some = No Conclusion</strong> — All A are B + Some B are C = Cannot say anything definite</li>
+        <li><strong>Some + Some = No Conclusion</strong> — Some A are B + Some B are C = Cannot say anything definite</li>
+        <li><strong>All + No = No</strong> — All A are B + No B are C = No A are C</li>
+        <li><strong>Some + No = Some Not</strong> — Some A are B + No B are C = Some A are not C</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>REMEMBER:</strong> "All + Some" and "Some + Some" NEVER give a definite conclusion. If options have definite statements (All/Some/No), they are WRONG. Only "possibility" answers work for these combinations.</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example 1 — Definite (All+All)</div>
+    <div class="q">Statements: All pens are books. All books are copies.<br>Conclusions: I. All pens are copies. II. Some copies are pens.</div>
+    <div class="sol">
+      <span class="step">Pattern: All + All = All</span>
+      <span class="step">I. All pens are copies → TRUE (direct from rule)</span>
+      <span class="step">II. Some copies are pens → TRUE ("All" includes "Some")</span>
+    </div>
+    <div class="ans">Answer: Both I and II follow</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example 2 — No Conclusion (All+Some)</div>
+    <div class="q">Statements: All dogs are cats. Some cats are rats.<br>Conclusions: I. All dogs are rats. II. Some dogs are rats.</div>
+    <div class="sol">
+      <span class="step">Pattern: All + Some = No Conclusion</span>
+      <span class="step">I. All dogs are rats → CANNOT SAY (no conclusion possible)</span>
+      <span class="step">II. Some dogs are rats → CANNOT SAY</span>
+    </div>
+    <div class="ans">Answer: Neither I nor II follows</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example 3 — Some+No</div>
+    <div class="q">Statements: Some teachers are doctors. No doctor is a lawyer.<br>Conclusion: Some teachers are not lawyers.</div>
+    <div class="sol">
+      <span class="step">Pattern: Some + No = Some Not</span>
+      <span class="step">Some teachers are doctors + No doctor is lawyer = Some teachers are not lawyers</span>
+    </div>
+    <div class="ans">Answer: Conclusion follows</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example 4 — Possibility Question (Common in RBI)</div>
+    <div class="q">Statements: Some A are B. All B are C.<br>Conclusions: I. All A being C is a possibility. II. Some C are A.</div>
+    <div class="sol">
+      <span class="step">Pattern: Some + All = Some (Some A are C)</span>
+      <span class="step">I. "All A being C" — Since Some A are C, it IS possible that ALL are C. TRUE.</span>
+      <span class="step">II. Some C are A — Since Some A are C, reverse is also true. TRUE.</span>
+    </div>
+    <div class="ans">Answer: Both follow</div>
+  </div>
+
+  <div class="note-warn"><strong>Common Trap:</strong> If conclusion says "Some A are B" and you know "All A are B" — the conclusion is TRUE because "All" includes "Some." But reverse is FALSE. "Some A are B" does NOT mean "All A are B."</div>
+</section>
+
+<!-- ===== 2. INEQUALITY ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="2">
+    <span class="sec-num">02</span>
+    <h2><span class="underline">Inequality</span> — Coded & Direct</h2>
+  </div>
+  <div class="h2-sub">3-5 questions. 15 seconds each with the direction rule.</div>
+
+  <div class="trick-box">
+    <div class="label">The Direction Rule</div>
+    <h4>Same direction = definite. Opposite direction = no conclusion.</h4>
+    <div class="steps">
+      <ol>
+        <li><strong>A > B > C</strong> → A > C (same direction, definite)</li>
+        <li><strong>A > B < C</strong> → A vs C = No relation (opposite direction)</li>
+        <li><strong>A >= B >= C</strong> → A >= C (same direction)</li>
+        <li><strong>A > B >= C > D</strong> → A > D (chain: >, >=, > — all same-ish direction)</li>
+        <li><strong>A = B > C</strong> → A > C (= passes through, then >)</li>
+        <li><strong>A > B = C < D</strong> → A vs D: opposite at B > ... < D. No relation.</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>SHORTCUT:</strong> Look for the "pivot" where direction changes. If all symbols between two variables point the same way → definite relation. If any symbol points opposite → no relation. "=" is neutral.</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Complex Chain</div>
+    <div class="q">Statements: P >= Q = R > S < T = U</div>
+    <div class="sol">
+      <span class="step">P >= Q = R > S → P > S (all same direction from P to S)</span>
+      <span class="step">P vs T: P > S < T → opposite at S < T. No relation.</span>
+      <span class="step">R vs U: R > S < T = U → opposite at S < T. No relation.</span>
+      <span class="step">Q vs S: Q = R > S → Q > S (definite)</span>
+    </div>
+    <div class="ans">P > S is TRUE. P vs T = No relation. R vs U = No relation. Q > S is TRUE.</div>
+  </div>
+
+  <div class="trick-box">
+    <div class="label">Coded Inequality</div>
+    <h4>They give symbols like $, @, # — decode first, then apply same rules</h4>
+    <div class="steps">
+      <ol>
+        <li>Write down the decoding: A $ B means A > B, A @ B means A < B, etc.</li>
+        <li>Replace symbols with actual inequality signs in the statement</li>
+        <li>Apply the direction rule exactly as above</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>TRICK:</strong> Write the decoded version ABOVE the coded version. Don't try to solve in your head. One line of writing saves 30 seconds of confusion.</div>
+  </div>
+</section>
+
+<!-- ===== 3. DATA SUFFICIENCY ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="3">
+    <span class="sec-num">03</span>
+    <h2><span class="underline">Data</span> Sufficiency</h2>
+  </div>
+  <div class="h2-sub">3-5 questions. RBI loves these. Check if question can be answered, not what the answer is.</div>
+
+  <div class="trick-box">
+    <div class="label">The 5 Answer Options</div>
+    <h4>Memorize the standard option pattern</h4>
+    <div class="steps">
+      <ol>
+        <li><strong>Statement I alone is sufficient</strong> — but Statement II alone is not</li>
+        <li><strong>Statement II alone is sufficient</strong> — but Statement I alone is not</li>
+        <li><strong>Either Statement I or II alone is sufficient</strong> — each independently gives answer</li>
+        <li><strong>Both I and II together are sufficient</strong> — but neither alone is enough</li>
+        <li><strong>Both I and II together are NOT sufficient</strong> — even combined, answer cannot be found</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>TRICK:</strong> Ask "Can I answer the question with this statement ALONE?" Don't solve fully. Just check if unique answer is possible. If Statement I gives a definite value → mark I sufficient. If II also gives definite value → answer is "Either."</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Ordering</div>
+    <div class="q">Question: Who is tallest among A, B, C?<br>I. A is taller than B. II. C is taller than A.</div>
+    <div class="sol">
+      <span class="step">I alone: A > B. Don't know about C. Not sufficient.</span>
+      <span class="step">II alone: C > A. Don't know about B. Not sufficient.</span>
+      <span class="step">Both: C > A > B. C is tallest. Sufficient together.</span>
+    </div>
+    <div class="ans">Answer: Both I and II together are sufficient (Option 4)</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Either Case</div>
+    <div class="q">What is the code for 'book'?<br>I. 'read a book' is coded as 'li si da'<br>II. 'book is good' is coded as 'da ro pa'</div>
+    <div class="sol">
+      <span class="step">I alone: 'book' could be 'li', 'si', or 'da'. Not sufficient alone.</span>
+      <span class="step">Wait — actually need to compare. I gives possibilities. II gives 'da' for 'book' (common word? No, need to check).</span>
+      <span class="step">Actually with only I: 3 possibilities. With only II: 3 possibilities. Neither alone.</span>
+      <span class="step">Both: 'book' is common between phrases. In I: 'li si da'. In II: 'da ro pa'. Common code = 'da'. So 'book' = 'da'.</span>
+    </div>
+    <div class="ans">Answer: Both together (Option 4). Wait — if 'book' was uniquely identifiable in I alone, answer would be different. Here we need both.</div>
+  </div>
+</section>
+
+<!-- ===== 4. CODING-DECODING ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="4">
+    <span class="sec-num">04</span>
+    <h2><span class="underline">Coding</span>-Decoding — All Variations</h2>
+  </div>
+  <div class="h2-sub">3-5 questions. Pattern types repeat. Know all 6.</div>
+
+  <div class="rule-grid">
+    <div class="rule-card"><div class="r-title">1. Letter Shift</div><div class="r-body">Each letter +1 or +2 or +3<br>CAT → DBU (+1 each)</div></div>
+    <div class="rule-card"><div class="r-title">2. Reverse then Shift</div><div class="r-body">Word reversed first, then shifted<br>CAT → TAC → UBD (+1)</div></div>
+    <div class="rule-card"><div class="r-title">3. Position Swap</div><div class="r-body">First ↔ last, second ↔ second-last<br>HELLO → OELHL</div></div>
+    <div class="rule-card"><div class="r-title">4. Number Coding</div><div class="r-body">Code uses numbers. A=1, B=2...<br>or reverse: Z=1, Y=2...</div></div>
+    <div class="rule-card"><div class="r-title">5. Word-to-Word</div><div class="r-body">'Happy coding' = 'ro fi'<br>Common word analysis</div></div>
+    <div class="rule-card"><div class="r-title">6. Mixed Pattern</div><div class="r-body">Vowels +2, Consonants -1<br>Or alternate shifts</div></div>
+  </div>
+
+  <div class="trick-box">
+    <div class="label">The 3-Step Method</div>
+    <h4>Works for 90% of coding questions</h4>
+    <div class="steps">
+      <ol>
+        <li><strong>Step 1:</strong> Check if letters are simply shifted. Count difference between first letters.</li>
+        <li><strong>Step 2:</strong> If shift doesn't work, check if word is reversed first.</li>
+        <li><strong>Step 3:</strong> If still no pattern, check position-based (A=1, B=2...) or mixed rules.</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>TRICK:</strong> Always test the SIMPLEST pattern first. 80% of RBI coding questions are simple letter shifts (+1, +2, -1, -2). Don't overthink.</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Word-to-Word (RBI Favorite)</div>
+    <div class="q">'good morning' is coded as 'la pa'<br>'morning walk' is coded as 'pa fi'<br>What is code for 'good'?</div>
+    <div class="sol">
+      <span class="step">Common word: 'morning' appears in both</span>
+      <span class="step">Common code: 'pa' appears in both</span>
+      <span class="step">So 'morning' = 'pa'</span>
+      <span class="step">In first: 'good morning' = 'la pa' → 'good' = 'la'</span>
+    </div>
+    <div class="ans">Answer: 'la'</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Position Swap</div>
+    <div class="q">In a code, FRIEND is written as DNEIRF. How is GARDEN written?</div>
+    <div class="sol">
+      <span class="step">FRIEND reversed = DNEIRF</span>
+      <span class="step">Pattern: Reverse the word</span>
+      <span class="step">GARDEN reversed = NEDRAG</span>
+    </div>
+    <div class="ans">Answer: NEDRAG</div>
+  </div>
+</section>
+
+<!-- ===== 5. BLOOD RELATIONS ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="5">
+    <span class="sec-num">05</span>
+    <h2><span class="underline">Blood</span> Relations + Family Tree</h2>
+  </div>
+  <div class="h2-sub">2-3 questions. Shorthand method saves 60% time.</div>
+
+  <div class="rule-grid">
+    <div class="rule-card"><div class="r-title">Father's father</div><div class="r-body">Grandfather (male, 2 levels up)</div></div>
+    <div class="rule-card"><div class="r-title">Father's mother</div><div class="r-body">Grandmother (female, 2 levels up)</div></div>
+    <div class="rule-card"><div class="r-title">Sister's son</div><div class="r-body">Nephew (male, 1 level down)</div></div>
+    <div class="rule-card"><div class="r-title">Brother's daughter</div><div class="r-body">Niece (female, 1 level down)</div></div>
+    <div class="rule-card"><div class="r-title">Mother's brother</div><div class="r-body">Maternal Uncle</div></div>
+    <div class="rule-card"><div class="r-title">Father's sister</div><div class="r-body">Paternal Aunt</div></div>
+    <div class="rule-card"><div class="r-title">Wife's father</div><div class="r-body">Father-in-law</div></div>
+    <div class="rule-card"><div class="r-title">Husband's mother</div><div class="r-body">Mother-in-law</div></div>
+  </div>
+
+  <div class="trick-box">
+    <div class="label">The Shorthand Method</div>
+    <h4>Write relationships, don't draw full tree</h4>
+    <div class="steps">
+      <ol>
+        <li>Use ↑ for parent (father/mother), ↓ for child (son/daughter)</li>
+        <li>Use = for spouse (wife/husband)</li>
+        <li>Use ↔ for sibling (brother/sister)</li>
+        <li>Track gender with M/F subscripts</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>SHORTCUT:</strong> When they say "pointing to X, Y said..." — the person Y is talking ABOUT is X. Y's statement describes X's relationship to someone. Start from the known person.</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Complex Statement</div>
+    <div class="q">Pointing to a man, a woman said, "His mother is the only daughter of my mother." How is the woman related to the man?</div>
+    <div class="sol">
+      <span class="step">"Only daughter of my mother" = the woman herself (she's the only daughter)</span>
+      <span class="step">So "His mother" = the woman</span>
+      <span class="step">The woman is the man's mother</span>
+    </div>
+    <div class="ans">Answer: Mother</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Maternal/Paternal</div>
+    <div class="q">A is B's sister. C is B's mother. D is C's father. E is D's mother. How is A related to D?</div>
+    <div class="sol">
+      <span class="step">D is C's father, C is B's mother → D is B's grandfather</span>
+      <span class="step">A is B's sister → A is also D's granddaughter</span>
+    </div>
+    <div class="ans">Answer: Granddaughter</div>
+  </div>
+</section>
+
+<!-- ===== 6. DIRECTION & DISTANCE ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="6">
+    <span class="sec-num">06</span>
+    <h2><span class="underline">Direction</span> & Distance</h2>
+  </div>
+  <div class="h2-sub">2-3 questions. Coordinate method + turn logic.</div>
+
+  <div class="trick-box">
+    <div class="label">The Coordinate Method</div>
+    <h4>Start at (0,0). North = +Y, East = +X.</h4>
+    <div class="steps">
+      <ol>
+        <li>10 m North → (0, +10)</li>
+        <li>5 m East → (+5, +10)</li>
+        <li>10 m South → (+5, 0)</li>
+        <li>5 m West → (0, 0) → Back to start!</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>SHORTCUT:</strong> Opposite directions CANCEL. N+S cancel. E+W cancel. Only NET movement matters. Distance from start = sqrt(X² + Y²).</div>
+  </div>
+
+  <div class="trick-box">
+    <div class="label">Turn Directions</div>
+    <h4>Clock face method for turns</h4>
+    <div class="steps">
+      <ol>
+        <li>Imagine a clock: 12=North, 3=East, 6=South, 9=West</li>
+        <li>Turning LEFT = moving counter-clockwise</li>
+        <li>Turning RIGHT = moving clockwise</li>
+        <li>Facing North, turn left → West. Turn right → East.</li>
+        <li>Turn 180° = opposite direction</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>SHORTCUT:</strong> After LEFT turn: N→W, W→S, S→E, E→N. After RIGHT turn: N→E, E→S, S→W, W→N. Just memorize one direction, the rest follow.</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — With Turns</div>
+    <div class="q">A man walks 10 km North, turns left and walks 5 km, turns left and walks 10 km, turns left and walks 5 km. Where is he?</div>
+    <div class="sol">
+      <span class="step">Start: (0,0), facing North</span>
+      <span class="step">Walk 10 km N → (0, 10), turn left (now facing West)</span>
+      <span class="step">Walk 5 km W → (-5, 10), turn left (now facing South)</span>
+      <span class="step">Walk 10 km S → (-5, 0), turn left (now facing East)</span>
+      <span class="step">Walk 5 km E → (0, 0)</span>
+    </div>
+    <div class="ans">Answer: Back at starting point</div>
+  </div>
+</section>
+
+<!-- ===== 7. ORDER & RANKING ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="7">
+    <span class="sec-num">07</span>
+    <h2><span class="underline">Order</span> & Ranking</h2>
+  </div>
+  <div class="h2-sub">2-3 questions. 3 formulas cover all cases.</div>
+
+  <div class="trick-box">
+    <div class="label">The 3 Formulas</div>
+    <h4>Total, Position from one side, Position from other side</h4>
+    <div class="steps">
+      <ol>
+        <li><strong>Total = (Position from left) + (Position from right) - 1</strong></li>
+        <li><strong>Position from right = Total - Position from left + 1</strong></li>
+        <li><strong>People between A and B = (Total) - (Pos A + Pos B)</strong> when counted from same side</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>TRICK:</strong> Draw a line with positions. Mark left and right. If A is 5th from left and B is 8th from left, people between them = 8 - 5 - 1 = 2. Subtract 1 because you don't count either A or B.</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — From Both Sides</div>
+    <div class="q">In a row of 40 students, A is 15th from left and B is 20th from right. How many students are between A and B?</div>
+    <div class="sol">
+      <span class="step">B's position from left = 40 - 20 + 1 = 21st from left</span>
+      <span class="step">A is 15th from left, B is 21st from left</span>
+      <span class="step">Between them = 21 - 15 - 1 = 5 students</span>
+    </div>
+    <div class="ans">Answer: 5 students</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Interchanged Positions</div>
+    <div class="q">In a row, Ram is 15th from left. When he interchanges position with Shyam, Ram becomes 20th from left. What was Shyam's original position from left?</div>
+    <div class="sol">
+      <span class="step">Ram moved from 15th to 20th → moved 5 positions right</span>
+      <span class="step">Shyam must have been at 20th originally (they swapped)</span>
+      <span class="step">So Shyam was 20th from left originally</span>
+    </div>
+    <div class="ans">Answer: 20th from left</div>
+  </div>
+</section>
+
+<!-- ===== 8. STATEMENT-ASSUMPTION/CONCLUSION ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="8">
+    <span class="sec-num">08</span>
+    <h2><span class="underline">Statement</span> — Assumption & Conclusion</h2>
+  </div>
+  <div class="h2-sub">2-3 questions. Logical reasoning, not verbal.</div>
+
+  <div class="trick-box">
+    <div class="label">Assumption vs Conclusion</div>
+    <h4>Assumption = unstated premise. Conclusion = stated deduction.</h4>
+    <div class="steps">
+      <ol>
+        <li><strong>Assumption:</strong> What MUST be true for the statement to make sense? Something NOT stated but implied.</li>
+        <li><strong>Conclusion:</strong> What DEFINITELY follows from the statement? A logical deduction.</li>
+        <li><strong>Rule for Assumption:</strong> If statement is "X is announced", assumption = "X was not already known" or "X will be implemented."</li>
+        <li><strong>Rule for Conclusion:</strong> Only what is DIRECTLY implied. Don't bring outside knowledge.</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>SHORTCUT:</strong> For assumptions, ask "Would the statement still make sense if this assumption were FALSE?" If NO, then it's a valid assumption.</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Assumption</div>
+    <div class="q">Statement: "Please close the door."<br>Assumptions: I. The door is open. II. The speaker wants privacy.</div>
+    <div class="sol">
+      <span class="step">I. The door is open → MUST be true (otherwise why ask to close?). VALID.</span>
+      <span class="step">II. The speaker wants privacy → Not necessarily. Could be for temperature, noise, etc. NOT VALID.</span>
+    </div>
+    <div class="ans">Answer: Only I is implicit</div>
+  </div>
+</section>
+
+<!-- ===== 9. ALPHA-NUMERIC SERIES ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="9">
+    <span class="sec-num">09</span>
+    <h2><span class="underline">Alpha</span>-Numeric Series</h2>
+  </div>
+  <div class="h2-sub">1-2 questions. Letter position values + pattern recognition.</div>
+
+  <div class="trick-box">
+    <div class="label">Letter Position Values</div>
+    <h4>Memorize A=1 to E=5, J=10, O=15, T=20, Z=26. Rest you can count.</h4>
+    <div class="steps">
+      <ol>
+        <li>A=1, B=2, C=3, D=4, E=5</li>
+        <li>F=6, G=7, H=8, I=9, J=10</li>
+        <li>K=11, L=12, M=13, N=14, O=15</li>
+        <li>P=16, Q=17, R=18, S=19, T=20</li>
+        <li>U=21, V=22, W=23, X=24, Y=25, Z=26</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>SHORTCUT:</strong> Reverse positions: A=26 (from Z), B=25, C=24... If question uses reverse alphabetical order, subtract from 27. (A=1 from start = 26 from end = 27-1).</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Letter Series</div>
+    <div class="q">Find the next letter: B, E, H, K, ?</div>
+    <div class="sol">
+      <span class="step">B(2), E(5), H(8), K(11)</span>
+      <span class="step">Differences: +3, +3, +3, +3</span>
+      <span class="step">Next = 11 + 3 = 14 = N</span>
+    </div>
+    <div class="ans">Answer: N</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Number-Letter Mixed</div>
+    <div class="q">Find the missing term: 2B, 4D, 8F, 16H, ?</div>
+    <div class="sol">
+      <span class="step">Numbers: 2, 4, 8, 16 → doubling. Next = 32.</span>
+      <span class="step">Letters: B(2), D(4), F(6), H(8) → +2 each. Next = J(10).</span>
+    </div>
+    <div class="ans">Answer: 32J</div>
+  </div>
+</section>
+
+<!-- ===== 10. PUZZLES & SEATING ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="10">
+    <span class="sec-num">10</span>
+    <h2><span class="underline">Puzzles</span> & Seating Arrangement</h2>
+  </div>
+  <div class="h2-sub">15-20 questions. The biggest section. All variations covered.</div>
+
+  <div class="rule-grid">
+    <div class="rule-card"><div class="r-title">Linear (Single Row)</div><div class="r-body">People in a line. Some face North, some South. Draw boxes _ _ _ _ _. Place fixed positions first.</div></div>
+    <div class="rule-card"><div class="r-title">Linear (Double Row)</div><div class="r-body">Two parallel rows facing each other. Row 1 faces South, Row 2 faces North. Track who faces whom.</div></div>
+    <div class="rule-card"><div class="r-title">Circular</div><div class="r-body">Round table. All face center OR all face outward. "Immediate left" depends on facing direction.</div></div>
+    <div class="rule-card"><div class="r-title">Rectangular</div><div class="r-body">People at corners + middle of sides. 8 people typically. Corner people have 2 neighbors.</div></div>
+    <div class="rule-card"><div class="r-title">Floor-Based</div><div class="r-body">People on different floors of a building. Usually with flats (1-2 flats per floor).</div></div>
+    <div class="rule-card"><div class="r-title">Day/Month Based</div><div class="r-body">People + dates + months. Create a grid: People x (Date/Month/Other attribute).</div></div>
+    <div class="rule-card"><div class="r-title">Comparison</div><div class="r-body">A is taller than B but shorter than C. Rank order puzzles. Draw vertical ranking.</div></div>
+    <div class="rule-card"><div class="r-title">Box/Stack</div><div class="r-body">Boxes stacked one above another. Color/number/item in each box.</div></div>
+  </div>
+
+  <div class="trick-box">
+    <div class="label">The Universal Puzzle Method</div>
+    <h4>Works for ALL puzzle types</h4>
+    <div class="steps">
+      <ol>
+        <li><strong>Read ALL clues first.</strong> Don't solve as you read.</li>
+        <li><strong>Find the "fixed position" clue.</strong> "A sits at an extreme end." "B lives on top floor."</li>
+        <li><strong>Place the most constrained person/thing first.</strong> The one mentioned in most clues.</li>
+        <li><strong>Use elimination.</strong> If A is NOT on floor 1, and NOT on floor 5, and floors 2,3 are taken → A is on floor 4.</li>
+        <li><strong>Mark possibilities.</strong> If unsure between two positions, write both lightly and eliminate as you go.</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>GOLDEN RULE:</strong> If a puzzle takes >3 minutes, MARK it and move on. Come back only if time permits. 1 puzzle = 5 questions. Losing 5 marks AND 5 minutes is worse than skipping.</div>
+  </div>
+
+  <div class="trick-box">
+    <div class="label">Circular Seating — Direction Trick</div>
+    <h4>"Immediate left" changes based on facing direction</h4>
+    <div class="steps">
+      <ol>
+        <li>If ALL face CENTER: "Immediate left" = clockwise. "Immediate right" = counter-clockwise.</li>
+        <li>If ALL face OUTWARD: "Immediate left" = counter-clockwise. "Immediate right" = clockwise.</li>
+        <li>Remember: When you face center, your left hand points clockwise.</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>TRICK:</strong> Imagine yourself sitting at the table. If facing center, left = clockwise. If facing wall (outward), left = counter-clockwise. Don't memorize, imagine.</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Floor-Based Puzzle</div>
+    <div class="q">7 people A,B,C,D,E,F,G live on 7 floors (1-7, 1=ground). A lives on floor 4. B lives immediately above C. D lives immediately below E. F lives on top floor. G does not live on floor 1 or 7. B does not live on floor 2. Where does G live?</div>
+    <div class="sol">
+      <span class="step">Fixed: A=4, F=7</span>
+      <span class="step">B immediately above C: possible pairs (2,1), (3,2), (5,4)-no A=4, (6,5), (7,6)-no F=7. So (2,1), (3,2), (6,5).</span>
+      <span class="step">B not on 2 → eliminate (2,1). So B,C = (3,2) or (6,5).</span>
+      <span class="step">D immediately below E: pairs (1,2), (2,3), (5,6), (6,7)-no F=7. </span>
+      <span class="step">If B,C = (3,2): then D,E = (5,6). Floors used: 1,2,3,4,5,6,7. G=1. But G not on 1. Contradiction!</span>
+      <span class="step">If B,C = (6,5): then D,E = (1,2) or (2,3). G must be on 3 or 2 (whichever not used). G not 1 or 7. Works.</span>
+      <span class="step">If D,E=(1,2): floors used 1,2,4,5,6,7. G=3.</span>
+      <span class="step">If D,E=(2,3): floors used 2,3,4,5,6,7. G=1. But G not on 1. So D,E=(1,2), G=3.</span>
+    </div>
+    <div class="ans">Answer: G lives on floor 3</div>
+  </div>
+</section>
+
+<!-- ===== 11. INPUT-OUTPUT ===== -->
+<section>
+  <div class="sec-head">
+    <input type="checkbox" class="scb" data-sec="11">
+    <span class="sec-num">11</span>
+    <h2><span class="underline">Input</span>-Output</h2>
+  </div>
+  <div class="h2-sub">2-3 questions. Machine rearrangement. Pattern recognition.</div>
+
+  <div class="trick-box">
+    <div class="label">Common Patterns</div>
+    <h4>6 patterns cover 90% of input-output questions</h4>
+    <div class="steps">
+      <ol>
+        <li><strong>Ascending order:</strong> Arrange words alphabetically OR numbers increasingly. One element per step.</li>
+        <li><strong>Descending order:</strong> Reverse alphabetical or decreasing numbers.</li>
+        <li><strong>Alternating:</strong> Step 1: smallest number. Step 2: first alphabet word. Step 3: next number. Step 4: next word...</li>
+        <li><strong>Vowel-Consonant:</strong> Words starting with vowels first, then consonants.</li>
+        <li><strong>Odd-Even:</strong> Odd numbers first (ascending), then even numbers (ascending).</li>
+        <li><strong>Interchange:</strong> First and last interchange, then second and second-last, etc.</li>
+      </ol>
+    </div>
+    <div class="remember"><strong>TRICK:</strong> Compare Input → Step 1. What changed? If only ONE element moved = single element per step. If MULTIPLE changed = batch rearrangement. Most RBI questions are single element per step.</div>
+  </div>
+
+  <div class="example-box">
+    <div class="ex-label">Example — Alternating Pattern</div>
+    <div class="q">Input: 24 boy 11 63 girl 42 apple 75<br>Step 1: 11 24 boy 63 girl 42 apple 75<br>Step 2: 11 apple 24 boy 63 girl 42 75<br>Step 3: 11 apple 24 42 boy 63 girl 75<br>Find Step 5.</div>
+    <div class="sol">
+      <span class="step">Step 1: smallest number (11) moved to first</span>
+      <span class="step">Step 2: first alphabet word (apple) moved to second</span>
+      <span class="step">Step 3: next smallest number (24→42? No, 24 was already in place. Next smallest is 42) → wait, 24 was at position 2. Next number after 11 is 24... already there. Then 42.</span>
+      <span class="step">Actually pattern: Number (ascending), Word (alphabetical), Number, Word...</span>
+      <span class="step">Step 4: Next word alphabetically = boy → 11 apple 24 boy 42 63 girl 75</span>
+      <span class="step">Step 5: Next number = 63 → 11 apple 24 boy 42 63 girl 75</span>
+    </div>
+    <div class="ans">Answer: Step 5 = 11 apple 24 boy 42 63 girl 75</div>
+  </div>
+</section>
+
+<footer>
+  <span>Phase 1 Focus</span>
+  <span class="pn">Reasoning Complete</span>
+  <span>60 Marks Covered</span>
+</footer>
+
+</main>
+
+<script>
+const dt=document.getElementById('darkToggle');
+dt.addEventListener('click',()=>{const h=document.documentElement;h.dataset.theme=h.dataset.theme==='dark'?'light':'dark';localStorage.setItem('theme',h.dataset.theme);});
+if(localStorage.getItem('theme'))document.documentElement.dataset.theme=localStorage.getItem('theme');
+const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}});},{threshold:0.1});
+document.querySelectorAll('section').forEach(s=>obs.observe(s));
+const cb=document.querySelectorAll('.scb');
+const pt=document.getElementById('pctTop');
+function upPct(){const c=[...cb].filter(x=>x.checked).length;pt.textContent=Math.round((c/cb.length)*100)+'%';}
+cb.forEach(c=>c.addEventListener('change',upPct));
+</script>
+
+</body>
+</html>
