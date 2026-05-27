@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snowflake Data Engineering — Fast Track</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f3eee4;  --paper-2: #ebe4d4;
+  --ink: #1a1612;     --ink-2: #3d3528;
+  --ink-dim: #6b5d49; --ink-faint: #a89a83;
+  --rule: #c8b99e;
+  --accent: #c0392b;  --accent2: #a93226;
+  --green: #2d7d46;   --blue: #2b6cb0;
+  --gold: #b8860b;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --radius: 8px;
+}
+[data-theme="dark"] {
+  --paper: #1b1917;  --paper-2: #242220;
+  --ink: #f0ece9;    --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430;
+  --accent: #e8704a;  --accent2: #d95a3a;
+  --green: #5bbd6b;   --blue: #5b8fbd;
+  --gold: #d4a84b;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--sans); line-height: 1.7;
+  padding: 0; min-height: 100vh;
+  background-image: radial-gradient(circle at 25% 15%, rgba(200,180,140,.15) 0%, transparent 40%);
+}
+.topbar {
+  position: sticky; top:0; z-index:100;
+  background: var(--paper); border-bottom: 2px solid var(--rule);
+  padding: 12px 24px; display: flex; align-items: center; justify-content: space-between;
+}
+.topbar h1 { font-family: var(--serif); font-size: 1.1rem; color: var(--accent); }
+.topbar .badge { font-size: .7rem; background: var(--accent); color: #fff; padding: 2px 10px; border-radius: 999px; }
+#darkToggle {
+  background: var(--paper-2); border: 1px solid var(--rule); color: var(--ink);
+  padding: 6px 14px; border-radius: var(--radius); cursor: pointer;
+  font-size: .8rem; font-family: var(--sans);
+}
+.container { max-width: 960px; margin: 0 auto; padding: 32px 24px 80px; }
+.hero {
+  text-align: center; padding: 40px 0 32px;
+  border-bottom: 2px solid var(--rule); margin-bottom: 40px;
+}
+.hero h2 { font-family: var(--serif); font-size: 2rem; margin-bottom: 8px; }
+.hero p { color: var(--ink-dim); font-size: .95rem; max-width: 600px; margin: 0 auto; }
+.hero .chip-group { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+.hero .chip { font-size: .75rem; background: var(--paper-2); border: 1px solid var(--rule); padding: 4px 12px; border-radius: 999px; }
+
+.section-title {
+  font-family: var(--serif); font-size: 1.4rem;
+  border-bottom: 2px solid var(--accent); padding-bottom: 6px;
+  margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+}
+.section-title .num { font-size: .8rem; background: var(--accent); color: #fff; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+
+.card {
+  background: var(--paper-2); border: 1px solid var(--ink);
+  padding: 20px 24px; box-shadow: 3px 3px 0 var(--ink);
+  margin-bottom: 20px; border-radius: 2px;
+  animation: fadeUp .4s ease-out both;
+}
+.card p, .card li { font-size: .92rem; color: var(--ink-2); }
+.card strong { color: var(--ink); }
+.telugu-card {
+  background: var(--paper-2);
+  border-left: 4px solid var(--gold);
+  padding: 16px 20px; margin-bottom: 20px;
+  border-radius: 2px; font-style: italic;
+}
+.telugu-card .tel { font-size: 1rem; color: var(--ink); }
+.telugu-card .en { font-size: .85rem; color: var(--ink-dim); margin-top: 4px; }
+
+pre {
+  background: #2d2a24; color: #e8e0d4;
+  padding: 16px 20px; border-radius: 4px;
+  font-family: var(--mono); font-size: .82rem;
+  overflow-x: auto; line-height: 1.6; position: relative;
+  margin-bottom: 16px;
+}
+pre .copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  padding: 3px 10px; font-size: .7rem; cursor: pointer;
+  background: rgba(255,255,255,.1); color: #ccc;
+  border: 1px solid rgba(255,255,255,.15); border-radius: 4px;
+  font-family: var(--sans); opacity: 0; transition: opacity .2s;
+}
+pre:hover .copy-btn { opacity: 1; }
+pre .copy-btn:hover { background: rgba(255,255,255,.2); }
+
+code { font-family: var(--mono); font-size: .85em; background: var(--paper-2); padding: 2px 6px; border-radius: 3px; }
+
+/* Tabs */
+.tabs { display: flex; gap: 0; border-bottom: 2px solid var(--rule); margin-bottom: 16px; }
+.tab {
+  padding: 8px 18px; font-size: .85rem; font-weight: 500;
+  color: var(--ink-dim); cursor: pointer; border: none; background: transparent;
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+  transition: all .15s; font-family: var(--sans);
+}
+.tab:hover { color: var(--ink); }
+.tab.active { color: var(--ink); border-bottom-color: var(--accent); }
+.tab-panel { display: none; padding: 8px 0; }
+.tab-panel.active { display: block; }
+
+/* Compare table */
+.comp-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: .85rem; }
+.comp-table th {
+  text-align: left; padding: 10px 14px;
+  background: var(--paper-2); border-bottom: 2px solid var(--rule);
+  font-weight: 600; font-size: .8rem;
+}
+.comp-table td { padding: 10px 14px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.comp-table tr:hover td { background: rgba(0,0,0,.03); }
+
+/* Quiz */
+.quiz-wrap { margin-top: 24px; }
+.quiz-q { font-weight: 600; margin-bottom: 12px; font-size: .95rem; }
+.quiz-opt {
+  display: block; width: 100%; text-align: left;
+  padding: 10px 16px; margin-bottom: 8px;
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  background: var(--paper-2); cursor: pointer;
+  font-size: .88rem; font-family: var(--sans); color: var(--ink);
+  transition: all .15s;
+}
+.quiz-opt:hover { background: var(--paper); border-color: var(--ink-dim); }
+.quiz-opt.correct { border-color: var(--green); background: rgba(45,125,70,.1); }
+.quiz-opt.wrong { border-color: var(--accent); background: rgba(192,57,43,.08); }
+.quiz-explain { font-size: .82rem; color: var(--ink-dim); padding: 8px 0 12px; display: none; }
+.quiz-explain.show { display: block; }
+
+/* Animated pipeline */
+.pipeline-wrap {
+  background: var(--paper-2); border: 1px solid var(--rule);
+  padding: 24px; border-radius: 2px; margin-bottom: 24px;
+  overflow-x: auto;
+}
+.pipeline-svg { width: 100%; max-width: 800px; height: auto; display: block; margin: 0 auto; }
+
+/* Badge */
+.badge { display: inline-block; font-size: .7rem; padding: 2px 10px; border-radius: 999px; font-weight: 500; }
+.badge-green { background: var(--green); color: #fff; }
+.badge-blue { background: var(--blue); color: #fff; }
+.badge-gold { background: var(--gold); color: #fff; }
+
+/* Legend */
+.legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; font-size: .8rem; }
+.legend span { display: flex; align-items: center; gap: 6px; }
+.legend .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.card:nth-child(1) { animation-delay: .05s; }
+.card:nth-child(2) { animation-delay: .1s; }
+.card:nth-child(3) { animation-delay: .15s; }
+
+hr { border: none; border-top: 1px solid var(--rule); margin: 32px 0; }
+
+@media (max-width: 640px) {
+  .container { padding: 16px; }
+  .hero h2 { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <h1>Snowflake DE</h1>
+    <span class="badge" style="background:var(--accent);color:#fff;">Fast Track</span>
+  </div>
+  <button id="darkToggle">☽ Dark</button>
+</div>
+
+<div class="container">
+
+<!-- HERO -->
+<div class="hero">
+  <h2>Snowflake Data Engineering</h2>
+  <p>End-to-end: Source → S3 → Snowflake → dbt → BI. The patterns you need to deliver.</p>
+  <div class="chip-group">
+    <span class="chip">Snowflake SQL</span>
+    <span class="chip">Data Modeling</span>
+    <span class="chip">dbt</span>
+    <span class="chip">CDC</span>
+    <span class="chip">Performance</span>
+    <span class="chip">AWS</span>
+  </div>
+</div>
+
+<!-- SECTION 1: BIG PICTURE -->
+<h2 class="section-title"><span class="num">1</span> Big Picture — Pipeline Architecture</h2>
+
+<div class="telugu-card">
+  <div class="tel">పైప్ లైన్ అంటే — ముడి సరుకు (raw data) దగ్గర్నుంచి, తయారు చేసిన డిష్ (dashboard) వరకు ప్రవాహం.</div>
+  <div class="en">Pipeline = flow from raw ingredients (source data) to the final dish (dashboard). Each stage transforms the data.</div>
+</div>
+
+<div class="pipeline-wrap">
+<svg class="pipeline-svg" viewBox="0 0 800 140" style="background:transparent;">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="var(--ink-dim)"/>
+    </marker>
+  </defs>
+  <!-- Boxes -->
+  <rect x="10" y="50" width="100" height="40" rx="6" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="1.5"/>
+  <text x="60" y="75" style="font-size:11px;text-anchor:middle;fill:var(--ink);font-family:var(--sans);">Source</text>
+  <text x="60" y="87" style="font-size:8px;text-anchor:middle;fill:var(--ink-dim);font-family:var(--sans);">API / DB</text>
+
+  <rect x="150" y="50" width="100" height="40" rx="6" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="1.5"/>
+  <text x="200" y="71" style="font-size:11px;text-anchor:middle;fill:var(--ink);font-family:var(--sans);">S3 Bronze</text>
+  <text x="200" y="83" style="font-size:8px;text-anchor:middle;fill:var(--ink-dim);font-family:var(--sans);">Raw landing</text>
+
+  <rect x="290" y="50" width="100" height="40" rx="6" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="1.5"/>
+  <text x="340" y="71" style="font-size:11px;text-anchor:middle;fill:var(--ink);font-family:var(--sans);">Snowflake</text>
+  <text x="340" y="83" style="font-size:8px;text-anchor:middle;fill:var(--ink-dim);font-family:var(--sans);">Raw + staging</text>
+
+  <rect x="430" y="50" width="100" height="40" rx="6" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="1.5"/>
+  <text x="480" y="71" style="font-size:11px;text-anchor:middle;fill:var(--ink);font-family:var(--sans);">dbt</text>
+  <text x="480" y="83" style="font-size:8px;text-anchor:middle;fill:var(--ink-dim);font-family:var(--sans);">Transform</text>
+
+  <rect x="570" y="50" width="100" height="40" rx="6" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="1.5"/>
+  <text x="620" y="71" style="font-size:11px;text-anchor:middle;fill:var(--ink);font-family:var(--sans);">Marts</text>
+  <text x="620" y="83" style="font-size:8px;text-anchor:middle;fill:var(--ink-dim);font-family:var(--sans);">dim + fact</text>
+
+  <rect x="710" y="50" width="80" height="40" rx="6" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="1.5"/>
+  <text x="750" y="71" style="font-size:11px;text-anchor:middle;fill:var(--ink);font-family:var(--sans);">BI</text>
+  <text x="750" y="83" style="font-size:8px;text-anchor:middle;fill:var(--ink-dim);font-family:var(--sans);">Tableau</text>
+
+  <!-- Arrows -->
+  <line x1="110" y1="70" x2="150" y2="70" stroke="var(--ink-dim)" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="250" y1="70" x2="290" y2="70" stroke="var(--ink-dim)" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="390" y1="70" x2="430" y2="70" stroke="var(--ink-dim)" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="530" y1="70" x2="570" y2="70" stroke="var(--ink-dim)" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="670" y1="70" x2="710" y2="70" stroke="var(--ink-dim)" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Animated packets -->
+  <circle r="5" fill="var(--accent)" opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.8;1" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="120;135;150" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="70;70;70" dur="6s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="5" fill="var(--accent)" opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.8;1" dur="6s" begin="1.2s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="260;275;290" dur="6s" begin="1.2s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="70;70;70" dur="6s" begin="1.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="5" fill="var(--accent)" opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.8;1" dur="6s" begin="2.4s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="400;415;430" dur="6s" begin="2.4s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="70;70;70" dur="6s" begin="2.4s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="5" fill="var(--accent)" opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.8;1" dur="6s" begin="3.6s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="540;555;570" dur="6s" begin="3.6s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="70;70;70" dur="6s" begin="3.6s" repeatCount="indefinite"/>
+  </circle>
+  <circle r="5" fill="var(--accent)" opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.8;1" dur="6s" begin="4.8s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="680;695;710" dur="6s" begin="4.8s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="70;70;70" dur="6s" begin="4.8s" repeatCount="indefinite"/>
+  </circle>
+</svg>
+</div>
+
+<p style="font-size:.85rem;color:var(--ink-dim);margin-bottom:24px;text-align:center;">
+  This is the end-to-end flow. Every project you build will fit into this picture. <strong>Know which box you're working in.</strong>
+</p>
+
+<!-- SECTION 2: SNOWFLAKE CORE -->
+<h2 class="section-title"><span class="num">2</span> Snowflake Core Concepts</h2>
+
+<div class="telugu-card">
+  <div class="tel">Snowflake = ఒక పెద్ద గోడౌన్, కానీ కంప్యూట్ మరియు స్టోరేజ్ వేరు. నీకు కావల్సినప్పుడు మాత్రమే కంప్యూట్ కి డబ్బు.</div>
+  <div class="en">Snowflake = a massive warehouse where storage and compute are separate. You pay for storage always, compute only when running queries.</div>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">Storage vs Compute Separation</h3>
+  <table class="comp-table">
+    <tr><th>Layer</th><th>What it is</th><th>Pays</th></tr>
+    <tr><td><strong>Storage</strong></td><td>Compressed, columnar, encrypted data on S3. Micro-partitions automatically optimized. Data is always there — even when no queries run.</td><td>Per TB per month</td></tr>
+    <tr><td><strong>Compute</strong></td><td>Virtual warehouses = clusters of VMs that run SQL. Can start/stop/resize independently. Multiple warehouses can query the same data simultaneously.</td><td>Per second while running</td></tr>
+    <tr><td><strong>Services</strong></td><td>Cloud services layer — authentication, metadata, query parsing, optimization. Always on, always free.</td><td>Free (included)</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">Virtual Warehouses — The Engine</h3>
+  <p><strong>What they are:</strong> Clusters of compute resources (CPU, memory, local storage) that execute SQL queries.</p>
+  <p><strong>Types:</strong> X-Small → 2X-Large → 6X-Large (each step = 2x the resources)</p>
+  <p><strong>Key behaviors:</strong></p>
+  <ul style="padding-left:20px;margin-top:8px;">
+    <li><strong>Multi-cluster</strong>: For concurrency. Auto-scales from 1 to N clusters when queue builds up.</li>
+    <li><strong>Auto-suspend</strong>: After N minutes of idle, warehouse stops. No cost when not running.</li>
+    <li><strong>Auto-resume</strong>: Query comes in → warehouse starts automatically (3-5 sec delay).</li>
+    <li><strong>Cache</strong>: Each warehouse has its own result cache. Same query from same warehouse ≈ instant.</li>
+  </ul>
+  <div class="legend" style="margin-top:12px;">
+    <span><span class="dot" style="background:var(--green);"></span> Scale Up = larger warehouse = faster single query</span>
+    <span><span class="dot" style="background:var(--blue);"></span> Scale Out = more clusters = handle more concurrent users</span>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">Micro-Partitions & Clustering</h3>
+  <p><strong>Micro-partitions:</strong> Snowflake automatically splits your table data into tiny, compressed columnar chunks (50-500 MB each). No manual partitioning needed — it's automatic on insert.</p>
+  <p><strong>Clustering keys:</strong> Optional. Tell Snowflake which column to sort micro-partitions by. Helps queries that filter by that column scan fewer partitions.</p>
+  <pre>-- Create a clustering key on a large table
+ALTER TABLE orders CLUSTER BY (order_date);
+
+-- Check clustering depth
+SELECT SYSTEM$CLUSTERING_DEPTH('orders');
+-- Lower depth = better clustering = fewer partitions scanned</pre>
+  <p style="font-size:.82rem;color:var(--ink-dim);">Use clustering keys only on tables > 1 TB with frequent filtering on a specific column. Not needed for small tables.</p>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">Caching Layers (Know These)</h3>
+  <table class="comp-table">
+    <tr><th>Cache</th><th>Scope</th><th>Life</th><th>Use</th></tr>
+    <tr><td><strong>Result Cache</strong></td><td>Per warehouse</td><td>24 hours (or until data changes)</td><td>Same query run again = instant. Dashboard refreshes benefit hugely.</td></tr>
+    <tr><td><strong>Metadata Cache</strong></td><td>Global (all warehouses)</td><td>Always fresh</td><td>COUNT(*), MIN, MAX on metadata — instant without scanning data.</td></tr>
+    <tr><td><strong>Data Cache</strong></td><td>Per warehouse (local SSD)</td><td>As long as warehouse runs</td><td>Cached data pages from recent queries. Evicted on warehouse suspend.</td></tr>
+  </table>
+</div>
+
+<!-- SECTION 3: DATA MODELING -->
+<h2 class="section-title"><span class="num">3</span> Data Modeling — Star Schema</h2>
+
+<div class="telugu-card">
+  <div class="tel">స్టార్ స్కీమా = మధ్యలో ఒక ఫ్యాక్ట్ టేబుల్ (అమ్మకాలు), చుట్టూ డైమెన్షన్ టేబుల్స్ (తేదీ, కస్టమర్, ప్రొడక్ట్). నక్షత్రం లాగా.</div>
+  <div class="en">Star schema = one fact table in the center (measurements), dimension tables around it (context). Looks like a star.</div>
+</div>
+
+<div style="text-align:center;margin-bottom:20px;">
+<svg viewBox="0 0 500 340" style="width:100%;max-width:500px;height:auto;">
+  <defs>
+    <marker id="sarr" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="var(--ink-dim)"/>
+    </marker>
+  </defs>
+  <!-- Center - Fact -->
+  <rect x="180" y="130" width="140" height="50" rx="6" fill="var(--paper-2)" stroke="var(--accent)" stroke-width="2"/>
+  <text x="250" y="150" style="font-size:12px;text-anchor:middle;fill:var(--ink);font-family:var(--sans);font-weight:600;">fact_sales</text>
+  <text x="250" y="165" style="font-size:8px;text-anchor:middle;fill:var(--ink-dim);font-family:var(--sans);">amount, qty, discount</text>
+  <!-- Dims -->
+  <rect x="10" y="20" width="110" height="40" rx="6" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="1.5"/>
+  <text x="65" y="45" style="font-size:11px;text-anchor:middle;fill:var(--ink);font-family:var(--sans);">dim_date</text>
+  <rect x="10" y="280" width="110" height="40" rx="6" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="1.5"/>
+  <text x="65" y="305" style="font-size:11px;text-anchor:middle;fill:var(--ink);font-family:var(--sans);">dim_customer</text>
+  <rect x="380" y="20" width="110" height="40" rx="6" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="1.5"/>
+  <text x="435" y="45" style="font-size:11px;text-anchor:middle;fill:var(--ink);font-family:var(--sans);">dim_product</text>
+  <rect x="380" y="280" width="110" height="40" rx="6" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="1.5"/>
+  <text x="435" y="305" style="font-size:11px;text-anchor:middle;fill:var(--ink);font-family:var(--sans);">dim_store</text>
+  <!-- Lines -->
+  <line x1="120" y1="40" x2="180" y2="140" stroke="var(--ink-dim)" stroke-width="1" marker-end="url(#sarr)"/>
+  <line x1="120" y1="300" x2="180" y2="170" stroke="var(--ink-dim)" stroke-width="1" marker-end="url(#sarr)"/>
+  <line x1="320" y1="140" x2="380" y2="40" stroke="var(--ink-dim)" stroke-width="1" marker-end="url(#sarr)"/>
+  <line x1="320" y1="170" x2="380" y2="300" stroke="var(--ink-dim)" stroke-width="1" marker-end="url(#sarr)"/>
+</svg>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">Fact Table — The "What Happened"</h3>
+  <table class="comp-table">
+    <tr><th>Type</th><th>Use</th><th>Grain</th><th>Example</th></tr>
+    <tr><td><strong>Transaction Fact</strong></td><td>Each event = one row</td><td>One row per transaction</td><td>sales — one row per item purchased</td></tr>
+    <tr><td><strong>Periodic Snapshot</strong></td><td>Regular summary</td><td>One row per period</td><td>daily_account_balance — end-of-day snapshot</td></tr>
+    <tr><td><strong>Accumulating Snapshot</strong></td><td>Track a process</td><td>One row per entity over its lifecycle</td><td>order_fulfillment — ordered→shipped→delivered dates</td></tr>
+    <tr><td><strong>Factless Fact</strong></td><td>Events with no measure</td><td>One row per occurrence</td><td>student_attendance — present/absent, no numeric value</td></tr>
+  </table>
+  <p style="margin-top:8px;"><strong>Golden rule:</strong> Always define the grain before designing a fact table. "One row = one booking transaction." If you don't define grain, the table has no discipline.</p>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">Dimension Table — The "Context"</h3>
+  <p>Dimensions describe <em>who, what, where, when</em>. They are the labels and filters for your fact measurements.</p>
+  <p><strong>Conformed dimensions</strong> — dimensions that are identical across multiple fact tables. Example: <code>dim_date</code> is the same for sales facts, inventory facts, and HR facts. This lets you combine data from different processes on the same date dimension.</p>
+  <pre>-- Conformed dimension example
+CREATE TABLE dim_date (
+    date_key       INT PRIMARY KEY,  -- e.g., 20260527
+    date           DATE,
+    year           INT,
+    quarter        INT,
+    month          INT,
+    month_name     VARCHAR(10),
+    day_of_week    VARCHAR(10),
+    is_weekend     BOOLEAN
+);
+
+-- Used identically by EVERY fact table in the warehouse
+SELECT d.month, SUM(f.amount)
+FROM fact_sales f
+JOIN dim_date d ON f.date_key = d.date_key
+GROUP BY d.month;</pre>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">Slowly Changing Dimensions (SCD)</h3>
+  <p>When a dimension attribute changes — a customer moves, a product gets renamed — how do you handle it?</p>
+  <table class="comp-table">
+    <tr><th>Type</th><th>Behavior</th><th>Analogy</th><th>When</th></tr>
+    <tr><td><strong>Type 0</strong></td><td>No change. Keep original.</td><td>"First version is forever."</td><td>Date dimensions, immutable identifiers</td></tr>
+    <tr><td><strong>Type 1</strong></td><td>Overwrite. Old value is gone.</td><td>"White-out on paper."</td><td>Fix typos, current phone number (no need to track history)</td></tr>
+    <tr><td><strong>Type 2</strong></td><td>Add new row with date range. Track history.</td><td>"Employee changed departments — keep both old and new with dates."</td><td>Customer address, employee department, vendor status — <strong>most common</strong></td></tr>
+    <tr><td><strong>Type 3</strong></td><td>Add a previous-value column.</td><td>"Original value + current value side by side."</td><td>Limited history (e.g., "previous territory" alongside "current territory")</td></tr>
+  </table>
+  <pre>-- SCD Type 2: dim_customer
+-- When customer moves, INSERT a NEW row with valid_from/valid_to
+-- Old rows get valid_to = current_date, is_current = FALSE
+
+SELECT customer_key, address, valid_from, valid_to, is_current
+FROM dim_customer
+WHERE customer_business_key = 'CUST123'
+ORDER BY valid_from DESC;
+-- Returns: current row + all historical rows</pre>
+</div>
+
+<!-- SECTION 4: INGESTION -->
+<h2 class="section-title"><span class="num">4</span> Data Ingestion — Getting Data Into Snowflake</h2>
+
+<div class="telugu-card">
+  <div class="tel">డేటా లోడ్ = సరుకు ట్రక్కు నుండి గోడౌన్ లోకి ఎక్కించడం. బ్యాచ్ (పెద్ద మొత్తం ఒకేసారి) లేదా స్ట్రీమింగ్ (కొద్ది కొద్దిగా వస్తూనే).</div>
+  <div class="en">Data loading = moving goods from truck into warehouse. Batch (large loads at once) or streaming (continuous drip).</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab(this,'tab-bulk')">COPY INTO (Batch)</button>
+  <button class="tab" onclick="switchTab(this,'tab-pipe')">Snowpipe (Near-Real-Time)</button>
+  <button class="tab" onclick="switchTab(this,'tab-stream')">Streams (CDC)</button>
+</div>
+
+<div class="tab-panel active" id="tab-bulk">
+  <div class="card">
+    <pre>-- Step 1: Create stage (pointer to S3 location)
+CREATE OR REPLACE STAGE my_s3_stage
+  URL = 's3://my-bucket/landing/orders/'
+  STORAGE_INTEGRATION = my_s3_int;
+
+-- Step 2: Define file format
+CREATE OR REPLACE FILE FORMAT csv_format
+  TYPE = CSV
+  SKIP_HEADER = 1
+  FIELD_OPTIONALLY_ENCLOSED_BY = '"';
+
+-- Step 3: COPY INTO
+COPY INTO raw_orders
+FROM @my_s3_stage
+FILE_FORMAT = csv_format
+PATTERN = '.*orders_.*\.csv'
+ON_ERROR = 'CONTINUE';  -- skip bad rows, continue loading</pre>
+    <p><strong>Key points:</strong></p>
+    <ul style="padding-left:20px;">
+      <li><code>ON_ERROR = 'CONTINUE'</code> — don't let one bad file kill the whole load</li>
+      <li><code>PURGE = TRUE</code> — delete source file after successful load (optional)</li>
+      <li><code>VALIDATION_MODE = RETURN_ERRORS</code> — preview errors before actually loading</li>
+      <li>Snowflake tracks which files have been loaded — <code>COPY INTO</code> is idempotent by default</li>
+    </ul>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-pipe">
+  <div class="card">
+    <p>Snowpipe = event-driven ingestion. When a file lands in S3, an SQS notification triggers Snowpipe, which loads it automatically.</p>
+    <pre>-- Create pipe
+CREATE OR REPLACE PIPE my_pipe
+  AUTO_INGEST = TRUE
+  AS
+    COPY INTO raw_orders
+    FROM @my_s3_stage
+    FILE_FORMAT = csv_format;
+
+-- Check pipe status
+SELECT SYSTEM$PIPE_STATUS('my_pipe');
+-- Returns: running, pending file count, last error</pre>
+    <p><strong>Cost tradeoff:</strong> Snowpipe is priced per MB loaded, not per warehouse credit. If you have continuous small files, Snowpipe is cheaper than running a warehouse 24/7.</p>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-stream">
+  <div class="card">
+    <p>Snowflake Streams = CDC (Change Data Capture) without external tools. A stream tracks inserts, updates, deletes on a table since the last read.</p>
+    <pre>-- Create a stream on the source table
+CREATE OR REPLACE STREAM orders_stream ON TABLE raw_orders;
+
+-- Read changes (this advances the offset)
+SELECT *
+FROM orders_stream
+WHERE METADATA$ACTION = 'INSERT';  -- or 'DELETE' or 'UPDATE'
+
+-- Use with a TASK to automate
+CREATE OR REPLACE TASK process_orders
+  WAREHOUSE = my_wh
+  SCHEDULE = '5 MINUTE'
+  AS
+    MERGE INTO dim_orders t
+    USING orders_stream s ON t.order_id = s.order_id
+    WHEN MATCHED AND s.METADATA$ACTION = 'DELETE' THEN DELETE
+    WHEN MATCHED THEN UPDATE SET ...
+    WHEN NOT MATCHED THEN INSERT (...);</pre>
+    <p><strong>Dynamic Tables</strong> (newer alternative): Declarative — define the SQL you want, Snowflake maintains the result incrementally. Less control, less boilerplate.</p>
+  </div>
+</div>
+
+<!-- SECTION 5: SQL PATTERNS -->
+<h2 class="section-title"><span class="num">5</span> SQL You'll Actually Write</h2>
+
+<div class="telugu-card">
+  <div class="tel">ఇక్కడ SQL నీ ప్రాణం. 80% పని = SQL. కింది ప్యాటర్న్స్ తప్పకుండా పట్టు.</div>
+  <div class="en">SQL is your lifeblood here. 80% of the job is writing SQL. Master these patterns.</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab(this,'tab-win')">Window Functions</button>
+  <button class="tab" onclick="switchTab(this,'tab-merge')">MERGE / CDC</button>
+  <button class="tab" onclick="switchTab(this,'tab-cte')">CTEs</button>
+  <button class="tab" onclick="switchTab(this,'tab-opt')">Optimization</button>
+</div>
+
+<div class="tab-panel active" id="tab-win">
+  <div class="card">
+    <pre>-- ROW_NUMBER: Get latest record per entity (CDC pattern)
+SELECT *
+FROM (
+  SELECT *, ROW_NUMBER() OVER (
+    PARTITION BY order_id ORDER BY updated_ts DESC
+  ) AS rn
+  FROM raw_orders
+) WHERE rn = 1;  -- only the most recent version
+
+-- LAG: Compare current row to previous
+SELECT order_date, amount,
+  LAG(amount) OVER (ORDER BY order_date) AS prev_day_amount,
+  amount - LAG(amount) OVER (ORDER BY order_date) AS day_over_day_change
+FROM daily_sales;
+
+-- SUM OVER: Running total
+SELECT order_date, amount,
+  SUM(amount) OVER (ORDER BY order_date) AS running_total
+FROM daily_sales;
+
+-- RANK / DENSE_RANK: Top-N per group
+SELECT product_id, revenue,
+  DENSE_RANK() OVER (PARTITION BY category ORDER BY revenue DESC) AS rank_in_cat
+FROM product_sales;</pre>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-merge">
+  <div class="card">
+    <pre>-- MERGE: UPSERT pattern (core of CDC processing)
+MERGE INTO dim_customer t
+USING stg_customer_updates s ON t.customer_id = s.customer_id
+WHEN MATCHED AND t.address != s.address THEN
+  -- Close current record, insert new (SCD Type 2)
+  UPDATE SET t.valid_to = CURRENT_DATE, t.is_current = FALSE
+WHEN NOT MATCHED THEN
+  INSERT (customer_id, name, address, valid_from, valid_to, is_current)
+  VALUES (s.customer_id, s.name, s.address, CURRENT_DATE, NULL, TRUE);
+
+-- Alternative: Simple upsert with overwrite
+MERGE INTO fact_sales t
+USING stg_sales s ON t.sale_id = s.sale_id
+WHEN MATCHED THEN UPDATE SET
+  t.amount = s.amount, t.qty = s.qty, t.updated_ts = CURRENT_TIMESTAMP
+WHEN NOT MATCHED THEN INSERT (sale_id, amount, qty, created_ts)
+  VALUES (s.sale_id, s.amount, s.qty, CURRENT_TIMESTAMP);</pre>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-cte">
+  <div class="card">
+    <pre>-- CTE: Clean, readable, debuggable
+WITH
+staged AS (
+  SELECT *, ROW_NUMBER() OVER (
+    PARTITION BY order_id ORDER BY loaded_ts DESC
+  ) AS rn
+  FROM raw_orders
+),
+deduped AS (
+  SELECT * FROM staged WHERE rn = 1
+),
+enriched AS (
+  SELECT d.*, c.segment, p.category
+  FROM deduped d
+  LEFT JOIN dim_customer c ON d.customer_id = c.customer_id
+  LEFT JOIN dim_product p ON d.product_id = p.product_id
+)
+SELECT segment, COUNT(*) AS orders, SUM(amount) AS revenue
+FROM enriched
+GROUP BY segment;
+
+-- CTE vs temp table: CTE = in-memory, temp table = materialized
+-- CTE: Fast to write, good for 1-2 levels of logic
+-- Temp table: Better when downstream consumers query intermediate results</pre>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-opt">
+  <div class="card">
+    <pre>-- ❌ AVOID: Scanning more data than needed
+SELECT * FROM fact_sales WHERE YEAR(order_date) = 2026;
+-- ✅ PREFER: Filter on the clustering key directly
+SELECT * FROM fact_sales WHERE order_date >= '2026-01-01' AND order_date < '2027-01-01';
+
+-- ❌ AVOID: DISTINCT when GROUP BY is clearer
+SELECT DISTINCT customer_id, COUNT(*) ...  -- wrong
+-- ✅ PREFER
+SELECT customer_id, COUNT(*) FROM ... GROUP BY customer_id;
+
+-- ❌ AVOID: Cartesian join
+SELECT * FROM big_table, another_big_table WHERE ...  -- missing JOIN condition
+-- ✅ ALWAYS use explicit JOIN with ON condition
+
+-- ❌ AVOID: Aggregating then joining
+SELECT ... FROM (SELECT id, SUM(x) FROM big GROUP BY id) a JOIN dim b ON ...
+-- ✅ PREFER: Filter/aggregate BEFORE join when possible
+WITH small AS (SELECT id FROM dim WHERE active = TRUE)
+SELECT ... FROM small s JOIN big b ON s.id = b.id ...</pre>
+    <p><strong>Quick checklist:</strong></p>
+    <ul style="padding-left:20px;">
+      <li>✅ Filter early (WHERE before JOIN)</li>
+      <li>✅ Aggregate before join</li>
+      <li>✅ Use <code>EXISTS</code> instead of <code>IN</code> for subqueries on large tables</li>
+      <li>✅ Use <code>QUALIFY ROW_NUMBER()</code> — Snowflake supports this directly</li>
+      <li>❌ Don't use <code>SELECT *</code> in production — name columns</li>
+    </ul>
+  </div>
+</div>
+
+<!-- SECTION 6: dBT BASICS -->
+<h2 class="section-title"><span class="num">6</span> dbt — The Transformation Layer</h2>
+
+<div class="telugu-card">
+  <div class="tel">dbt = నీ SQL transformations ని వెర్షన్ కంట్రోల్ లో పెట్టడం. ఇక్కడ నీకు మోడల్స్, రెఫ్స్, ఇంక్రిమెంటల్ బిల్డ్ — ఇవే ప్రధానం.</div>
+  <div class="en">dbt = version control for your SQL transformations. Models, refs, incremental builds — these are the core concepts.</div>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">dbt Model Structure</h3>
+  <pre>-- models/staging/stg_orders.sql
+-- Stage 1: Raw → Clean
+WITH source AS (
+  SELECT * FROM {{ source('ecommerce', 'raw_orders') }}
+),
+renamed AS (
+  SELECT
+    id AS order_id,
+    customer_id,
+    order_date::DATE AS order_date,
+    amount::DECIMAL(10,2) AS amount,
+    status
+  FROM source
+  WHERE status IS NOT NULL  -- data quality filter
+)
+SELECT * FROM renamed;
+
+-- models/marts/dim_customer.sql
+-- Stage 2: Clean → Dimension
+{{ config(materialized='table', unique_key='customer_key') }}
+
+SELECT
+  customer_id,
+  name,
+  address,
+  '2026-01-01'::DATE AS valid_from,
+  NULL::DATE AS valid_to,
+  TRUE AS is_current
+FROM {{ ref('stg_customers') }};
+
+-- models/marts/fact_orders.sql
+-- Stage 3: Dimension + Fact
+{{ config(materialized='incremental', unique_key='order_id') }}
+
+SELECT
+  o.order_id,
+  d.date_key,
+  c.customer_key,
+  o.amount,
+  o.status
+FROM {{ ref('stg_orders') }} o
+LEFT JOIN {{ ref('dim_date') }} d ON o.order_date = d.date
+LEFT JOIN {{ ref('dim_customer') }} c ON o.customer_id = c.customer_id
+
+{% if is_incremental() %}
+  WHERE o.order_date > (SELECT MAX(order_date) FROM {{ this }})
+{% endif %}</pre>
+  <p><strong>Key dbt commands you'll use daily:</strong></p>
+  <pre>dbt run        -- build all models (dbt resolves dependencies automatically)
+dbt run -m stg_orders  -- build one model
+dbt test       -- run schema tests (not_null, unique, accepted_values)
+dbt docs generate && dbt docs serve  -- view lineage docs</pre>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">Materializations — When to Use What</h3>
+  <table class="comp-table">
+    <tr><th>Type</th><th>Storage</th><th>Build Time</th><th>Query Speed</th><th>Best For</th></tr>
+    <tr><td><strong>view</strong></td><td>None (query only)</td><td>Instant</td><td>Slow (runs each time)</td><td>Staging, lightweight transforms</td></tr>
+    <tr><td><strong>table</strong></td><td>Full table</td><td>Full rebuild</td><td>Fast</td><td>Small dimensions, reference tables</td></tr>
+    <tr><td><strong>incremental</strong></td><td>Table + new rows</td><td>Only new/changed</td><td>Fast</td><td><strong>Large fact tables</strong> — most critical option</td></tr>
+    <tr><td><strong>ephemeral</strong></td><td>None (CTE inlined)</td><td>None</td><td>Depends</td><td>Utility CTEs, intermediate logic you don't want to materialize</td></tr>
+  </table>
+</div>
+
+<!-- SECTION 7: AWS BASICS -->
+<h2 class="section-title"><span class="num">7</span> AWS You Need To Know</h2>
+
+<div class="telugu-card">
+  <div class="tel">AWS = Snowflake కింద ఉన్న మౌలిక సదుపాయం. నీకు S3 (స్టోరేజ్), IAM (పర్మిషన్స్), Glue/Lambda (ETL) తెలిస్తే చాలు.</div>
+  <div class="en">AWS is the infrastructure under Snowflake. You need S3 (storage), IAM (permissions), and Glue/Lambda (ETL orchestration).</div>
+</div>
+
+<div class="card">
+  <table class="comp-table">
+    <tr><th>Service</th><th>Your Use</th><th>Key Concept</th></tr>
+    <tr><td><strong>S3</strong></td><td>Landing zone for raw data. Bronze/Silver/Gold bucket structure.</td><td>Lifecycle policies (move old data to cheaper storage), bucket policies (who can access)</td></tr>
+    <tr><td><strong>IAM</strong></td><td>Create roles that Snowflake can assume to read S3.</td><td>Trust policy (Snowflake → IAM Role → S3). Storage Integration in Snowflake wraps this.</td></tr>
+    <tr><td><strong>Glue</strong></td><td>PySpark ETL jobs when transformations are too complex for SQL.</td><td>Glue Crawler (infer schema), Glue Job (Spark script), Data Catalog (schema registry)</td></tr>
+    <tr><td><strong>Lambda</strong></td><td>Lightweight orchestration — trigger Snowpipe, move files between S3 buckets.</td><td>Event-driven: S3 put event → Lambda → do something</td></tr>
+    <tr><td><strong>Step Functions</strong></td><td>Orchestrate multi-step pipelines with retries and error handling.</td><td>State machine: Glue job → wait → Snowflake query → success/failure notification</td></tr>
+    <tr><td><strong>Athena</strong></td><td>Query S3 data directly without loading into Snowflake. Good for ad-hoc exploration.</td><td>Serverless Presto. Pay per query. Slower than Snowflake but no load cost.</td></tr>
+  </table>
+</div>
+
+<!-- SECTION 8: PERFORMANCE TUNING -->
+<h2 class="section-title"><span class="num">8</span> Performance Tuning Quick Reference</h2>
+
+<div class="card">
+  <table class="comp-table">
+    <tr><th>Symptom</th><th>Diagnosis</th><th>Fix</th></tr>
+    <tr>
+      <td>Query is slow<br><span style="font-size:.75rem;color:var(--ink-dim);">"taking forever"</span></td>
+      <td>Check <code>QUERY_PROFILE</code> → look for:<br>
+        • High % in "Scanning" → not pruning partitions<br>
+        • High % in "Join" → no join key or skew<br>
+        • Spilling to disk → warehouse too small
+      </td>
+      <td>• Scale up warehouse (XS → S → M)<br>
+        • Add clustering key if scanning > 50%<br>
+        • Filter early (WHERE before JOIN)
+      </td>
+    </tr>
+    <tr>
+      <td>Dashboard is slow<br><span style="font-size:.75rem;color:var(--ink-dim);">"100 users all hitting refresh"</span></td>
+      <td>Single warehouse + many concurrent queries = queue buildup</td>
+      <td><strong>Scale out</strong>: Multi-cluster warehouse (min 1, max 5). Each user group gets its own cluster.</td>
+    </tr>
+    <tr>
+      <td>ETL is slow<br><span style="font-size:.75rem;color:var(--ink-dim);">"data load taking hours"</span></td>
+      <td>COPY INTO or dbt build using a small warehouse</td>
+      <td><strong>Scale up</strong>: Use a larger warehouse for the load (XL → 2XL). Suspend after done.</td>
+    </tr>
+    <tr>
+      <td>Same query keeps scanning same data<br><span style="font-size:.75rem;color:var(--ink-dim);">"no caching"</span></td>
+      <td>Warehouse is suspending between runs, losing data cache</td>
+      <td>Increase auto-suspend time. Or use result cache — same query within 24h is instant.</td>
+    </tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">Snowflake Query Profile — How to Read</h3>
+  <pre>-- Get the query ID of a slow query
+SELECT query_id, query_text, start_time, total_elapsed_time/1000 AS seconds
+FROM TABLE(INFORMATION_SCHEMA.QUERY_HISTORY())
+WHERE query_text LIKE '%your_table%'
+ORDER BY start_time DESC
+LIMIT 5;
+
+-- Then inspect the profile
+SELECT SYSTEM$EXPLAIN_QUERY_JSON('&lt;query_id&gt;');
+-- Or in Snowsight: Query History → click query → Profile tab
+
+-- What to look for in the profile:
+-- • Bytes scanned (high = not enough partition pruning)
+-- • Percentage spilled to local/remote (spilling = warehouse too small)
+-- • Join type (PROBE JOIN vs HASH JOIN vs CARTESIAN — cartesian is bad)</pre>
+</div>
+
+<!-- SECTION 9: QUIZ -->
+<h2 class="section-title"><span class="num">9</span> Quick Check</h2>
+
+<div class="quiz-wrap">
+  <div class="quiz-q" id="qq1">1. What's the difference between scaling up and scaling out a Snowflake warehouse?</div>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq1','a')">A) Scale up = bigger warehouse (faster single query). Scale out = more clusters (more concurrency).</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq1','b')">B) Scale up = more clusters. Scale out = bigger warehouse.</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq1','c')">C) They're the same thing.</button>
+  <div class="quiz-explain" id="ex-qq1">✅ Correct! Scale up = bigger compute per query (good for ETL). Scale out = more parallel clusters (good for BI dashboards with many users).</div>
+</div>
+
+<div class="quiz-wrap">
+  <div class="quiz-q" id="qq2">2. What grain should a fact_sales table have?</div>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq2','a')">A) One row per customer</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq2','b')">B) One row per day</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq2','c')">C) One row per individual sale line item</button>
+  <div class="quiz-explain" id="ex-qq2">✅ Correct! Grain must be the most atomic level. If each "sale" has multiple items, grain = one row per sale_line_item. The grain defines what "one row" represents.</div>
+</div>
+
+<div class="quiz-wrap">
+  <div class="quiz-q" id="qq3">3. When a customer changes their address and you need to track the history, which SCD type do you use?</div>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq3','a')">A) Type 1 — overwrite the address</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq3','b')">B) Type 2 — add a new row with valid_from/valid_to</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq3','c')">C) Type 3 — ignore the change</button>
+  <div class="quiz-explain" id="ex-qq3">✅ Correct! Type 2 keeps full history. The old address is preserved in a previous row with valid_to set, and a new row with valid_from = today is added.</div>
+</div>
+
+<div class="quiz-wrap">
+  <div class="quiz-q" id="qq4">4. You have 50 analysts running dashboards. The warehouse is queuing queries. What's the fix?</div>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq4','a')">A) Scale up — use a 2X-Large warehouse</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq4','b')">B) Scale out — enable multi-cluster (min 1, max 5)</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq4','c')">C) Switch to a different cloud provider</button>
+  <div class="quiz-explain" id="ex-qq4">✅ Correct! Queuing = concurrency problem = scale out (multi-cluster). Each cluster processes one query at a time, so 5 clusters handle 5 concurrent queries.</div>
+</div>
+
+<div class="quiz-wrap">
+  <div class="quiz-q" id="qq5">5. In dbt, which materialization should you use for a large fact table that gets new data daily?</div>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq5','a')">A) view — always fresh</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq5','b')">B) table — full rebuild every run</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq5','c')">C) incremental — only process new/changed data</button>
+  <div class="quiz-explain" id="ex-qq5">✅ Correct! Incremental = only build what changed. For a 5B row fact table, full rebuild every day is insane. Incremental with unique_key and is_incremental() filter is the way.</div>
+</div>
+
+<hr>
+
+<div class="telugu-card" style="border-left-color:var(--green);">
+  <div class="tel">సారాంశం: Snowflake DE = SQL + Data Modeling + ETL patterns. ఇవి మూడూ పట్టేస్తే, నీకు ఏ project అయినా చేయొచ్చు.</div>
+  <div class="en"><strong>Bottom line:</strong> Snowflake DE = SQL + Data Modeling + ETL patterns. Master these three and you can handle any project thrown at you.</div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// Dark toggle
+document.getElementById('darkToggle').addEventListener('click', function(){
+  var d = document.documentElement;
+  if(d.getAttribute('data-theme') === 'dark'){
+    d.removeAttribute('data-theme');
+    this.textContent = '☽ Dark';
+  } else {
+    d.setAttribute('data-theme', 'dark');
+    this.textContent = '☀ Light';
+  }
+});
+
+// Tabs
+function switchTab(btn, id){
+  var parent = btn.parentElement;
+  parent.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  btn.classList.add('active');
+  var container = parent.parentElement;
+  container.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+
+// Quiz
+var quizLocked = {};
+function checkQuiz(btn, qId, correct) {
+  if (quizLocked[qId]) return;
+  quizLocked[qId] = true;
+  var opts = btn.parentElement.querySelectorAll('.quiz-opt');
+  opts.forEach(function(o) {
+    o.disabled = true; o.style.cursor = 'default';
+  });
+  var val = btn.textContent.trim().charAt(0);
+  if (val === correct) {
+    btn.classList.add('correct');
+  } else {
+    btn.classList.add('wrong');
+    opts.forEach(function(o) {
+      if (o.textContent.trim().charAt(0) === correct) o.classList.add('correct');
+    });
+  }
+  document.getElementById('ex-' + qId).classList.add('show');
+}
+
+// Copy buttons for code blocks
+document.querySelectorAll('pre').forEach(function(pre) {
+  var btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'Copy';
+  btn.onclick = function() {
+    var code = pre.querySelector('code') || pre;
+    var text = code.textContent || code.innerText;
+    navigator.clipboard.writeText(text).then(function() {
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = 'Copy'; }, 1500);
+    });
+  };
+  pre.appendChild(btn);
+});
+</script>
+</body>
+</html>

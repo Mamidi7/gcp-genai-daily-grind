@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL for Data Engineering — Pattern Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f3eee4;  --paper-2: #ebe4d4;
+  --ink: #1a1612;     --ink-2: #3d3528;
+  --ink-dim: #6b5d49; --ink-faint: #a89a83;
+  --rule: #c8b99e;
+  --accent: #c0392b;  --accent2: #a93226;
+  --green: #2d7d46;   --blue: #2b6cb0;
+  --gold: #b8860b;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --radius: 8px;
+}
+[data-theme="dark"] {
+  --paper: #1b1917;  --paper-2: #242220;
+  --ink: #f0ece9;    --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430;
+  --accent: #e8704a;  --accent2: #d95a3a;
+  --green: #5bbd6b;   --blue: #5b8fbd;
+  --gold: #d4a84b;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--sans); line-height: 1.7;
+  min-height: 100vh;
+  background-image: radial-gradient(circle at 25% 15%, rgba(200,180,140,.15) 0%, transparent 40%);
+}
+.topbar {
+  position: sticky; top:0; z-index:100;
+  background: var(--paper); border-bottom: 2px solid var(--rule);
+  padding: 12px 24px; display: flex; align-items: center; justify-content: space-between;
+}
+.topbar h1 { font-family: var(--serif); font-size: 1.1rem; color: var(--blue); }
+.topbar .badge { font-size: .7rem; background: var(--blue); color: #fff; padding: 2px 10px; border-radius: 999px; }
+#darkToggle {
+  background: var(--paper-2); border: 1px solid var(--rule); color: var(--ink);
+  padding: 6px 14px; border-radius: var(--radius); cursor: pointer;
+  font-size: .8rem; font-family: var(--sans);
+}
+.container { max-width: 960px; margin: 0 auto; padding: 32px 24px 80px; }
+
+.hero { text-align: center; padding: 32px 0 24px; border-bottom: 2px solid var(--rule); margin-bottom: 32px; }
+.hero h2 { font-family: var(--serif); font-size: 1.8rem; margin-bottom: 6px; }
+.hero p { color: var(--ink-dim); font-size: .9rem; max-width: 550px; margin: 0 auto; }
+.hero .chip-group { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+.hero .chip { font-size: .7rem; background: var(--paper-2); border: 1px solid var(--rule); padding: 4px 12px; border-radius: 999px; }
+
+.section-title {
+  font-family: var(--serif); font-size: 1.3rem;
+  border-bottom: 2px solid var(--accent); padding-bottom: 6px;
+  margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+}
+.section-title .num { font-size: .75rem; background: var(--accent); color: #fff; width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+
+.card {
+  background: var(--paper-2); border: 1px solid var(--ink);
+  padding: 18px 22px; box-shadow: 3px 3px 0 var(--ink);
+  margin-bottom: 18px; border-radius: 2px;
+  animation: fadeUp .4s ease-out both;
+}
+.card p, .card li { font-size: .9rem; color: var(--ink-2); }
+.card strong { color: var(--ink); }
+
+.telugu-card {
+  background: var(--paper-2);
+  border-left: 4px solid var(--gold);
+  padding: 14px 18px; margin-bottom: 18px;
+  border-radius: 2px; font-style: italic;
+}
+.telugu-card .tel { font-size: .95rem; color: var(--ink); }
+.telugu-card .en { font-size: .82rem; color: var(--ink-dim); margin-top: 4px; }
+
+pre {
+  background: #2d2a24; color: #e8e0d4;
+  padding: 14px 18px; border-radius: 4px;
+  font-family: var(--mono); font-size: .8rem;
+  overflow-x: auto; line-height: 1.5; position: relative;
+  margin-bottom: 14px;
+}
+pre .copy-btn {
+  position: absolute; top: 6px; right: 6px;
+  padding: 3px 10px; font-size: .65rem; cursor: pointer;
+  background: rgba(255,255,255,.1); color: #ccc;
+  border: 1px solid rgba(255,255,255,.15); border-radius: 4px;
+  font-family: var(--sans); opacity: 0; transition: opacity .2s;
+}
+pre:hover .copy-btn { opacity: 1; }
+pre .copy-btn:hover { background: rgba(255,255,255,.2); }
+
+code { font-family: var(--mono); font-size: .85em; background: var(--paper-2); padding: 2px 6px; border-radius: 3px; }
+
+.tabs { display: flex; gap: 0; border-bottom: 2px solid var(--rule); margin-bottom: 14px; flex-wrap: wrap; }
+.tab {
+  padding: 7px 16px; font-size: .82rem; font-weight: 500;
+  color: var(--ink-dim); cursor: pointer; border: none; background: transparent;
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+  transition: all .15s; font-family: var(--sans);
+}
+.tab:hover { color: var(--ink); }
+.tab.active { color: var(--ink); border-bottom-color: var(--accent); }
+.tab-panel { display: none; padding: 6px 0; }
+.tab-panel.active { display: block; }
+
+.comp-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: .83rem; }
+.comp-table th {
+  text-align: left; padding: 8px 12px;
+  background: var(--paper-2); border-bottom: 2px solid var(--rule);
+  font-weight: 600; font-size: .78rem;
+}
+.comp-table td { padding: 8px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.comp-table tr:hover td { background: rgba(0,0,0,.03); }
+
+.badge { display: inline-block; font-size: .65rem; padding: 2px 10px; border-radius: 999px; font-weight: 500; }
+.badge-red { background: var(--accent); color: #fff; }
+.badge-green { background: var(--green); color: #fff; }
+.badge-blue { background: var(--blue); color: #fff; }
+.badge-gold { background: var(--gold); color: #fff; }
+.badge-dim { background: var(--ink-faint); color: #fff; }
+
+.compare-row { display: flex; gap: 16px; margin-bottom: 16px; }
+.compare-col { flex: 1; }
+.compare-col .label { font-size: .75rem; font-weight: 600; margin-bottom: 6px; padding: 4px 10px; border-radius: 4px; display: inline-block; }
+.label-wrong { background: rgba(192,57,43,.12); color: var(--accent); }
+.label-right { background: rgba(45,125,70,.12); color: var(--green); }
+
+.quiz-wrap { margin-top: 20px; }
+.quiz-q { font-weight: 600; margin-bottom: 10px; font-size: .92rem; }
+.quiz-opt {
+  display: block; width: 100%; text-align: left;
+  padding: 9px 14px; margin-bottom: 6px;
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  background: var(--paper-2); cursor: pointer;
+  font-size: .85rem; font-family: var(--sans); color: var(--ink);
+  transition: all .15s;
+}
+.quiz-opt:hover { background: var(--paper); border-color: var(--ink-dim); }
+.quiz-opt.correct { border-color: var(--green); background: rgba(45,125,70,.1); }
+.quiz-opt.wrong { border-color: var(--accent); background: rgba(192,57,43,.08); }
+.quiz-explain { font-size: .8rem; color: var(--ink-dim); padding: 6px 0 10px; display: none; }
+.quiz-explain.show { display: block; }
+
+.hint-box {
+  background: rgba(43,108,176,.08); border-left: 3px solid var(--blue);
+  padding: 12px 16px; margin-bottom: 14px; border-radius: 2px;
+  font-size: .82rem;
+}
+.hint-box strong { color: var(--blue); }
+
+.tip-box {
+  background: rgba(45,125,70,.08); border-left: 3px solid var(--green);
+  padding: 12px 16px; margin-bottom: 14px; border-radius: 2px;
+  font-size: .82rem;
+}
+.tip-box strong { color: var(--green); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+hr { border: none; border-top: 1px solid var(--rule); margin: 28px 0; }
+
+@media (max-width: 640px) {
+  .container { padding: 16px; }
+  .hero h2 { font-size: 1.3rem; }
+  .compare-row { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <h1>SQL for DE</h1>
+    <span class="badge">Pattern Reference</span>
+  </div>
+  <button id="darkToggle">☽ Dark</button>
+</div>
+
+<div class="container">
+
+<div class="hero">
+  <h2>SQL for Data Engineering</h2>
+  <p>Not beginner SQL. This is the SQL you actually write in Snowflake/dbt — CDC, window functions, MERGE, incremental logic.</p>
+  <div class="chip-group">
+    <span class="chip">Window Functions</span>
+    <span class="chip">MERGE / UPSERT</span>
+    <span class="chip">CTEs</span>
+    <span class="chip">CDC Patterns</span>
+    <span class="chip">Optimization</span>
+  </div>
+</div>
+
+<!-- SECTION 1: WINDOW FUNCTIONS -->
+<h2 class="section-title"><span class="num">1</span> Window Functions — The DE Superpower</h2>
+
+<div class="telugu-card">
+  <div class="tel">Window function = ప్రతి అడ్డు వరుసకి, దాని "పొరుగు" అడ్డు వరుసల సందర్భం చూపించడం. GROUP BY లాగా కాదు — అక్కడ వరుసలు కలిసిపోతాయి. ఇక్కడ అలా కాదు.</div>
+  <div class="en">Window function = for each row, show context from its "neighbouring" rows WITHOUT collapsing them. Unlike GROUP BY which merges rows, window functions keep every row intact and just add a computed column.</div>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">The Big 5 Window Functions</h3>
+  <table class="comp-table">
+    <tr><th>Function</th><th>What it does</th><th>DE Use Case</th></tr>
+    <tr>
+      <td><strong>ROW_NUMBER()</strong></td>
+      <td>Assigns unique number 1,2,3... per partition</td>
+      <td><strong>De-duplication</strong> — get latest record per entity. <br><span style="font-size:.75rem;color:var(--ink-dim);">Most-used pattern in all of DE.</span></td>
+    </tr>
+    <tr>
+      <td><strong>LAG() / LEAD()</strong></td>
+      <td>Access previous/next row's value</td>
+      <td><strong>Change detection</strong> — compare current value to previous. <br><span style="font-size:.75rem;color:var(--ink-dim);">CDC: "did the address change?"</span></td>
+    </tr>
+    <tr>
+      <td><strong>SUM() OVER</strong></td>
+      <td>Running total</td>
+      <td><strong>Aggregation without collapse</strong> — running totals, rolling windows</td>
+    </tr>
+    <tr>
+      <td><strong>RANK() / DENSE_RANK()</strong></td>
+      <td>Rank rows with possible ties</td>
+      <td><strong>Top-N per group</strong> — best-selling products per category</td>
+    </tr>
+    <tr>
+      <td><strong>COUNT() OVER</strong></td>
+      <td>Count rows in a window</td>
+      <td><strong>Group size without GROUP BY</strong> — total orders per customer on each row</td>
+    </tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">Pattern 1: De-duplication (Daily Use)</h3>
+  <div class="hint-box"><strong>🔑 This is THE most common SQL pattern in Snowflake DE.</strong> You will write this every single week.</div>
+  <pre>-- Scenario: raw_orders has duplicates (same order_id loaded multiple times)
+-- Goal: get the latest version of each order
+
+WITH dedup AS (
+  SELECT *,
+    ROW_NUMBER() OVER (
+      PARTITION BY order_id           -- group by business key
+      ORDER BY loaded_ts DESC         -- keep the latest
+    ) AS rn
+  FROM raw_orders
+)
+SELECT * FROM dedup WHERE rn = 1;
+
+-- Snowflake shortcut (QUALIFY clause — use this):
+SELECT *
+FROM raw_orders
+QUALIFY ROW_NUMBER() OVER (
+  PARTITION BY order_id
+  ORDER BY loaded_ts DESC
+) = 1;
+
+-- QUALIFY = WHERE for window functions. Only Snowflake/BigQuery support it.
+-- If your SQL tool doesn't support QUALIFY, use the CTE version.</pre>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">Pattern 2: Change Detection (CDC)</h3>
+  <pre>-- Scenario: Detect which customers changed address
+-- Compare current address to previous address
+
+SELECT customer_id, address, effective_date,
+  LAG(address) OVER (
+    PARTITION BY customer_id
+    ORDER BY effective_date
+  ) AS prev_address,
+  CASE
+    WHEN address IS DISTINCT FROM LAG(address) OVER (
+      PARTITION BY customer_id ORDER BY effective_date
+    ) THEN 'CHANGED'
+    ELSE 'SAME'
+  END AS status
+FROM customer_history;
+
+-- Only rows where status = 'CHANGED' need SCD Type 2 processing
+-- This directly feeds your MERGE statement</pre>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">Pattern 3: Running Aggregations</h3>
+  <pre>-- Running total (revenue accumulating over time)
+SELECT order_date, daily_revenue,
+  SUM(daily_revenue) OVER (
+    ORDER BY order_date
+    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+  ) AS running_total
+FROM daily_sales;
+
+-- Moving average (7-day rolling)
+SELECT order_date, daily_revenue,
+  AVG(daily_revenue) OVER (
+    ORDER BY order_date
+    ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+  ) AS rolling_7day_avg
+FROM daily_sales;
+
+-- Partitioned: running total per customer
+SELECT customer_id, order_date, amount,
+  SUM(amount) OVER (
+    PARTITION BY customer_id
+    ORDER BY order_date
+  ) AS customer_running_total
+FROM orders;</pre>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">Pattern 4: Top-N Per Group</h3>
+  <pre>-- Top 3 products by revenue per category
+WITH ranked AS (
+  SELECT category, product_id, revenue,
+    DENSE_RANK() OVER (
+      PARTITION BY category
+      ORDER BY revenue DESC
+    ) AS rank
+  FROM product_sales
+)
+SELECT * FROM ranked WHERE rank <= 3;
+
+-- DENSE_RANK vs RANK:
+-- DENSE_RANK: 1,2,2,3  (no gaps after ties)
+-- RANK:       1,2,2,4  (skips 3 — gaps after ties)
+-- Use DENSE_RANK for Top-N (you want 1,2,3 not 1,2,4)</pre>
+</div>
+
+<!-- SECTION 2: MERGE / CDC -->
+<h2 class="section-title"><span class="num">2</span> MERGE — The UPSERT Pattern</h2>
+
+<div class="telugu-card">
+  <div class="tel">MERGE = "ఉంటే అప్‌డేట్ చేయ్, లేకపోతే ఇన్సర్ట్ చేయ్". CDC పైప్ లైన్స్ లో ఇదే ప్రాణం.</div>
+  <div class="en">MERGE = "If exists, UPDATE. If not, INSERT." This is the heartbeat of CDC pipelines.</div>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">Basic MERGE — Type 1 (Overwrite)</h3>
+  <pre>MERGE INTO dim_customer t           -- target table
+USING stg_customer_updates s         -- source (new data)
+  ON t.customer_id = s.customer_id   -- match condition
+
+WHEN MATCHED THEN UPDATE SET         -- exists → update
+  t.name = s.name,
+  t.address = s.address,
+  t.updated_ts = CURRENT_TIMESTAMP
+
+WHEN NOT MATCHED THEN INSERT         -- new → insert
+  (customer_id, name, address, created_ts, updated_ts)
+  VALUES (s.customer_id, s.name, s.address, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);</pre>
+  <div class="tip-box"><strong>✅ Key insight:</strong> MERGE is atomic — it's a single transaction. Either all changes apply, or none do. This is why it's used for CDC instead of separate INSERT/UPDATE statements.</div>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">MERGE — SCD Type 2 (History Tracking)</h3>
+  <pre>-- More complex: close old record, insert new one
+MERGE INTO dim_customer t
+USING stg_customer_updates s
+  ON t.customer_id = s.customer_id
+  AND t.is_current = TRUE             -- only match current records
+
+WHEN MATCHED AND (
+  t.address IS DISTINCT FROM s.address  -- did address change?
+  OR t.phone IS DISTINCT FROM s.phone
+) THEN UPDATE SET
+  t.valid_to = CURRENT_DATE,          -- close old record
+  t.is_current = FALSE                -- mark as history
+
+OUTPUT s.customer_id, s.name, s.address, s.phone,
+  CURRENT_DATE AS valid_from, NULL AS valid_to, TRUE AS is_current
+  INTO dim_customer;                  -- insert new record
+
+-- Snowflake doesn't support MERGE ... OUTPUT INTO directly.
+-- Alternative: Use INSERT after MERGE with the changed keys.
+-- Or use Snowflake Streams + Tasks for CDC.</pre>
+  <p><strong>For Snowflake specifically — use Streams + Tasks instead of complex MERGE:</strong></p>
+  <pre>-- Simpler approach with Streams
+CREATE STREAM customer_changes ON TABLE stg_customer;
+
+CREATE TASK scd_type2_task
+  WAREHOUSE = my_wh
+  SCHEDULE = '5 MINUTE'
+  WHEN SYSTEM$STREAM_HAS_DATA('customer_changes')
+  AS
+    -- Close current records for changed customers
+    UPDATE dim_customer
+    SET valid_to = CURRENT_DATE, is_current = FALSE
+    WHERE customer_id IN (
+      SELECT customer_id FROM customer_changes
+      WHERE METADATA$ACTION = 'INSERT'  -- new data = change
+    )
+    AND is_current = TRUE;
+
+    -- Insert new records
+    INSERT INTO dim_customer (customer_id, name, address, valid_from, is_current)
+    SELECT customer_id, name, address, CURRENT_DATE, TRUE
+    FROM customer_changes
+    WHERE METADATA$ACTION = 'INSERT';</pre>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">MERGE with Delete Handling</h3>
+  <pre>MERGE INTO fact_sales t
+USING stg_sales_updates s
+  ON t.sale_id = s.sale_id
+
+WHEN MATCHED AND s.operation = 'DELETE' THEN DELETE
+
+WHEN MATCHED THEN UPDATE SET
+  t.amount = s.amount,
+  t.qty = s.qty
+
+WHEN NOT MATCHED THEN INSERT
+  (sale_id, amount, qty)
+  VALUES (s.sale_id, s.amount, s.qty);</pre>
+  <div class="tip-box"><strong>✅ Remember:</strong> You can have <strong>up to 3 WHEN clauses</strong> in a MERGE: MATCHED UPDATE, MATCHED DELETE, NOT MATCHED. The order matters — evaluate top to bottom.</div>
+</div>
+
+<!-- SECTION 3: CTEs -->
+<h2 class="section-title"><span class="num">3</span> CTEs — Clean Pipeline Logic</h2>
+
+<div class="telugu-card">
+  <div class="tel">CTE = చిన్న చిన్న బ్లాక్స్ గా SQL ని రాయడం. ప్రతి బ్లాక్ ఒక దశ (stage). చివర్లో SELECT వేసి అన్నీ కలిపేయడం.</div>
+  <div class="en">CTE = writing SQL as small, named blocks. Each block is one stage of the pipeline. Final SELECT assembles everything.</div>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">CTE Pipeline — dbt-Style</h3>
+  <p style="margin-bottom:8px;">This is how dbt models are structured internally. Think of it as: <strong>source → stage → intermediate → final</strong></p>
+  <pre>WITH
+-- Stage 1: Raw data quality filter
+source AS (
+  SELECT * FROM raw_orders
+  WHERE status IS NOT NULL
+    AND amount > 0
+),
+
+-- Stage 2: Deduplicate (CDC pattern)
+deduped AS (
+  SELECT * FROM source
+  QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY order_id ORDER BY loaded_ts DESC
+  ) = 1
+),
+
+-- Stage 3: Enrich with dimensions
+enriched AS (
+  SELECT
+    d.date_key,
+    c.customer_key,
+    p.product_key,
+    o.amount,
+    o.qty,
+    o.status
+  FROM deduped o
+  LEFT JOIN dim_date d ON o.order_date = d.date
+  LEFT JOIN dim_customer c ON o.customer_id = c.customer_key
+  LEFT JOIN dim_product p ON o.product_id = p.product_key
+),
+
+-- Stage 4: Aggregate for reporting
+aggregated AS (
+  SELECT
+    date_key,
+    customer_key,
+    COUNT(*) AS order_count,
+    SUM(amount) AS total_revenue,
+    SUM(qty) AS total_units
+  FROM enriched
+  GROUP BY date_key, customer_key
+)
+
+SELECT * FROM aggregated;</pre>
+  <div class="hint-box"><strong>📌 CTE vs Temp Table vs Subquery:</strong><br>
+• <strong>CTE</strong> — readable, refactorable, good for 2-4 stages. Snowflake materializes CTEs only when needed.<br>
+• <strong>Temp table</strong> — materialized on disk. Use when downstream needs the same intermediate data.<br>
+• <strong>Subquery</strong> — hard to read, hard to debug. Avoid for multi-stage logic.</div>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">Recursive CTE — Employee Hierarchy</h3>
+  <pre>-- Snowflake supports recursive CTEs (not commonly needed, but useful for org charts)
+WITH RECURSIVE org_tree AS (
+  -- Anchor: top-level managers
+  SELECT employee_id, employee_name, manager_id, 1 AS level
+  FROM employees
+  WHERE manager_id IS NULL
+
+  UNION ALL
+
+  -- Recursive: direct reports
+  SELECT e.employee_id, e.employee_name, e.manager_id, t.level + 1
+  FROM employees e
+  JOIN org_tree t ON e.manager_id = t.employee_id
+)
+SELECT * FROM org_tree ORDER BY level, employee_name;</pre>
+</div>
+
+<!-- SECTION 4: CDC Patterns -->
+<h2 class="section-title"><span class="num">4</span> CDC Pattern Language</h2>
+
+<div class="telugu-card">
+  <div class="tel">CDC = డేటాలో మార్పులని ట్రాక్ చేసే పద్ధతి. "ఏమి మారింది, ఎప్పుడు మారింది, ఎలా మారింది" అనే మూడు ప్రశ్నలకి సమాధానం.</div>
+  <div class="en">CDC = Change Data Capture. Tracks what changed, when, and how. The three questions every CDC system answers.</div>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">CDC Pattern 1: Watermark-Based</h3>
+  <pre>-- Source table has a last_updated timestamp
+-- Extract only rows that changed since last run
+
+SET last_run = '2026-05-26 12:00:00';
+
+INSERT INTO stg_orders
+SELECT *
+FROM source_orders
+WHERE updated_ts > $last_run;
+
+-- Deduplicate (in case same row was updated multiple times)
+SELECT *
+FROM stg_orders
+QUALIFY ROW_NUMBER() OVER (
+  PARTITION BY order_id
+  ORDER BY updated_ts DESC
+) = 1;</pre>
+  <p><strong>Pros:</strong> Simple, works everywhere. <strong>Cons:</strong> Deleted rows are invisible (unless soft-delete). Requires <code>updated_ts</code> column on source.</p>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">CDC Pattern 2: Snowflake Streams</h3>
+  <pre>-- Stream = CDC log on a Snowflake table
+-- Tracks INSERT, UPDATE, DELETE with BEFORE/AFTER values
+
+CREATE OR REPLACE STREAM orders_stream ON TABLE raw_orders;
+
+-- Read the changes (this also advances the stream offset)
+SELECT *,
+  METADATA$ACTION AS action,       -- 'INSERT', 'DELETE', 'UPDATE'
+  METADATA$ISUPDATE AS is_update,  -- TRUE if this is an UPDATE
+  METADATA$ROW_ID                  -- unique row identifier
+FROM orders_stream;
+
+-- Automate with a TASK
+CREATE OR REPLACE TASK process_orders_cdc
+  WAREHOUSE = my_wh
+  SCHEDULE = '1 MINUTE'
+  WHEN SYSTEM$STREAM_HAS_DATA('orders_stream')
+  AS
+    MERGE INTO dim_orders t
+    USING orders_stream s
+      ON t.order_id = s.order_id
+
+    WHEN MATCHED AND s.METADATA$ACTION = 'DELETE' THEN DELETE
+
+    WHEN MATCHED AND s.METADATA$ISUPDATE = TRUE THEN UPDATE SET
+      t.status = s.status,
+      t.amount = s.amount,
+      t.updated_ts = CURRENT_TIMESTAMP
+
+    WHEN NOT MATCHED THEN INSERT
+      (order_id, customer_id, amount, status, created_ts, updated_ts)
+      VALUES (s.order_id, s.customer_id, s.amount, s.status,
+              CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);</pre>
+  <div class="tip-box"><strong>✅ Key:</strong> Streams show changes since the <strong>last read</strong>. Multiple consumers? Multiple streams. Each stream maintains its own offset.</div>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">CDC Pattern 3: Dynamic Tables (Simpler Alternative)</h3>
+  <pre>-- Dynamic Table = declare the SQL you want, Snowflake maintains it
+-- No streams, no tasks, no MERGE — just SQL
+
+CREATE OR REPLACE DYNAMIC TABLE dim_orders
+  TARGET_LAG = '5 minutes'
+  WAREHOUSE = my_wh
+AS
+  SELECT
+    o.order_id,
+    d.date_key,
+    c.customer_key,
+    o.amount,
+    o.status,
+    o.updated_ts
+  FROM raw_orders o
+  LEFT JOIN dim_date d ON o.order_date = d.date
+  LEFT JOIN dim_customer c ON o.customer_id = c.customer_id;
+
+-- Snowflake automatically:
+-- 1. Detects changes in raw_orders
+-- 2. Incrementally updates dim_orders
+-- 3. Keeps it within 5 minutes of real-time
+-- No MERGE, no Task, no Stream boilerplate.</pre>
+  <p><strong>When to use:</strong> Dynamic Tables = less control, less code. Streams + Tasks = full control, more code. Start with Dynamic Tables for simple transformations. Use Streams + Tasks when you need SCD logic or complex MERGE behavior.</p>
+</div>
+
+<!-- SECTION 5: QUERY OPTIMIZATION -->
+<h2 class="section-title"><span class="num">5</span> Query Optimization — Write Fast SQL</h2>
+
+<div class="telugu-card">
+  <div class="tel">Slow query = డబ్బు నష్టం. Snowflake pay-per-query. పనికి ముందు ఒకసారి ఆలోచించు — ఎంత డేటా స్కాన్ అవుతుంది? ఎలా తగ్గించాలి?</div>
+  <div class="en">Slow query = money lost. Snowflake charges per query executed. Think before you write — how much data will this scan? How do I reduce it?</div>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">The "Avoid vs Prefer" Table</h3>
+  <div class="compare-row">
+    <div class="compare-col">
+      <span class="label label-wrong">❌ Avoid</span>
+      <pre style="font-size:.75rem;">SELECT * FROM big_table
+WHERE YEAR(date) = 2026
+AND MONTH(date) = 5
+
+SELECT DISTINCT col
+FROM table
+
+SELECT *
+FROM a, b
+WHERE a.id = b.id
+
+SELECT *
+FROM big_table
+ORDER BY date
+
+-- Subquery in WHERE
+SELECT * FROM t
+WHERE id IN (
+  SELECT id FROM huge_table
+)</pre>
+    </div>
+    <div class="compare-col">
+      <span class="label label-right">✅ Prefer</span>
+      <pre style="font-size:.75rem;">SELECT col1, col2 FROM big_table
+WHERE date >= '2026-05-01'
+  AND date < '2026-06-01'
+-- WHY: YEAR() wraps filter — no partition pruning
+
+SELECT col, COUNT(*) FROM table
+GROUP BY col
+-- WHY: DISTINCT + scan no aggregation vs GROUP BY
+
+SELECT * FROM a
+JOIN b ON a.id = b.id
+-- WHY: Explicit JOIN, no accidental cartesian
+
+SELECT * FROM big_table
+WHERE date >= '2026-01-01'
+ORDER BY date
+-- WHY: WHERE first reduces rows before sort
+
+SELECT * FROM t
+WHERE EXISTS (
+  SELECT 1 FROM huge_table h
+  WHERE h.id = t.id
+)
+-- WHY: EXISTS stops at first match, IN scans all</pre>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">The ORDER of Operations (Mental Model)</h3>
+  <p>SQL doesn't execute in the order you write it. Internally, the engine does:</p>
+  <pre>1. FROM / JOIN      → which tables, how to join
+2. WHERE            → filter rows (EARLY = good)
+3. GROUP BY         → collapse groups
+4. HAVING           → filter groups
+5. WINDOW functions → compute windowed columns
+6. QUALIFY          → filter window results
+7. SELECT           → pick columns
+8. DISTINCT         → deduplicate
+9. ORDER BY         → sort (LAST — expensive)
+10. LIMIT           → take N rows</pre>
+  <div class="hint-box"><strong>📌 Strategy:</strong> WHERE filters rows BEFORE GROUP BY. So filter as early as possible. A <code>WHERE date >= '2026-01-01'</code> means GROUP BY works on fewer rows, which is faster and cheaper.</div>
+</div>
+
+<div class="card">
+  <h3 style="font-family:var(--serif);margin-bottom:8px;">Snowflake-Specific Optimization Tips</h3>
+  <table class="comp-table">
+    <tr><th>Tip</th><th>Why</th></tr>
+    <tr><td>Filter on clustered columns</td><td>Snowflake can skip entire micro-partitions when WHERE uses the clustering key. Without it, scans every partition.</td></tr>
+    <tr><td>Avoid <code>SELECT *</code> in prod</td><td>Snowflake stores data columnar. Selecting 3 columns vs 30 = 10x less data scanned = 10x cheaper.</td></tr>
+    <tr><td>Use <code>LIMIT</code> during development</td><td>Before running the full query, test with <code>LIMIT 1000</code>. Costs pennies instead of dollars.</td></tr>
+    <tr><td>Materialize intermediate results</td><td>If a CTE is used by multiple downstream queries, make it a temp table. CTE runs once per reference.</td></tr>
+    <tr><td>Check <code>BYTES_SCANNED</code> in query history</td><td>This is your cost metric. Each TB scanned ≈ $X. Reduce bytes scanned = reduce cost.</td></tr>
+    <tr><td>Use <code>LIKE</code> wisely</td><td><code>LIKE '%text'</code> can't use partitioning (leading wildcard). <code>LIKE 'text%'</code> can.</td></tr>
+  </table>
+  <pre>-- Check your query's bytes scanned
+SELECT query_id, query_text,
+  bytes_scanned, bytes_scanned / 1e12 AS terabytes_scanned,
+  total_elapsed_time / 1000 AS seconds
+FROM TABLE(INFORMATION_SCHEMA.QUERY_HISTORY())
+WHERE query_id = '&lt;your-query-id&gt;';
+
+-- Target: bytes_scanned should be close to the size of data you actually need
+-- If bytes_scanned >> expected, partition pruning isn't working</pre>
+</div>
+
+<!-- SECTION 6: QUIZ -->
+<h2 class="section-title"><span class="num">6</span> SQL Check</h2>
+
+<div class="quiz-wrap">
+  <div class="quiz-q" id="qq1">1. You have a table with duplicate order_ids (same order loaded multiple times with different timestamps). Which SQL pattern gets only the latest version of each order?</div>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq1','a')">A) SELECT DISTINCT order_id FROM orders</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq1','b')">B) SELECT * FROM orders QUALIFY ROW_NUMBER() OVER (PARTITION BY order_id ORDER BY loaded_ts DESC) = 1</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq1','c')">C) SELECT * FROM orders GROUP BY order_id</button>
+  <div class="quiz-explain" id="ex-qq1">✅ Correct! ROW_NUMBER() with PARTITION BY order_id and ORDER BY loaded_ts DESC assigns 1 to the newest row. QUALIFY filters to keep only that row. DISTINCT and GROUP BY can't pick the "latest" version — they just collapse duplicates arbitrarily.</div>
+</div>
+
+<div class="quiz-wrap">
+  <div class="quiz-q" id="qq2">2. A customer changes their address. You need to keep historical addresses in dim_customer. What's the right SQL pattern?</div>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq2','a')">A) UPDATE dim_customer SET address = new_address WHERE customer_id = X</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq2','b')">B) MERGE with SCD Type 2 logic — close old record, insert new one with valid_from/valid_to</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq2','c')">C) DELETE old row, INSERT new row</button>
+  <div class="quiz-explain" id="ex-qq2">✅ Correct! SCD Type 2 = close the current record (set valid_to, is_current=FALSE), insert a new record with valid_from=today. This preserves the history for reporting on "what was the address at the time of the order."</div>
+</div>
+
+<div class="quiz-wrap">
+  <div class="quiz-q" id="qq3">3. Which query will scan LESS data in Snowflake?</div>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq3','a')">A) SELECT * FROM orders WHERE YEAR(order_date) = 2026</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq3','b')">B) SELECT * FROM orders WHERE order_date >= '2026-01-01' AND order_date < '2027-01-01'</button>
+  <div class="quiz-explain" id="ex-qq3">✅ Correct! Query B uses a range filter directly on the column, which allows Snowflake to do partition pruning. Query A wraps the column in YEAR() — Snowflake can't use the clustering key, so it scans EVERY partition, applies YEAR() to every row, THEN filters.</div>
+</div>
+
+<div class="quiz-wrap">
+  <div class="quiz-q" id="qq4">4. In Snowflake, what's the difference between a Stream and a Dynamic Table?</div>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq4','a')">A) They're the same thing</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq4','b')">B) Stream = CDC log showing changes. Dynamic Table = declarative SQL that Snowflake maintains incrementally (no manual CDC logic needed)</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq4','c')">C) Stream is for batch, Dynamic Table is for streaming</button>
+  <div class="quiz-explain" id="ex-qq4">✅ Correct! Stream = raw CDC data (you write the MERGE logic). Dynamic Table = you write the final SQL, Snowflake handles the incremental maintenance. Streams give more control but need more code. Dynamic Tables are simpler but less flexible.</div>
+</div>
+
+<div class="quiz-wrap">
+  <div class="quiz-q" id="qq5">5. You notice a query is scanning 10x more data than expected. What's the first thing to check?</div>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq5','a')">A) Buy a bigger warehouse</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq5','b')">B) Check the query profile — look at bytes scanned vs partitions pruned. The WHERE clause probably wraps a column in a function, preventing partition pruning.</button>
+  <button class="quiz-opt" onclick="checkQuiz(this,'qq5','c')">C) Rewrite everything as a CTE</button>
+  <div class="quiz-explain" id="ex-qq5">✅ Correct! First check query profile → bytes scanned vs partitions scanned. If partitions scanned = total partitions, your WHERE isn't pruning. Look for YEAR(date), MONTH(date), or other function-wrapped columns. Fix: use range filter directly on the column instead.</div>
+</div>
+
+<hr>
+
+<div class="telugu-card" style="border-left-color:var(--green);">
+  <div class="tel">SQL is the job. Window functions + MERGE + CTEs + optimization = 80% of what you'll write. Practice these four patterns until they're muscle memory.</div>
+  <div class="en"><strong>Remember:</strong> SQL <em>is</em> the job. Window functions + MERGE + CTEs + optimization = 80% of your daily SQL. Practice these four until they're automatic.</div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+document.getElementById('darkToggle').addEventListener('click', function(){
+  var d = document.documentElement;
+  if(d.getAttribute('data-theme') === 'dark'){
+    d.removeAttribute('data-theme');
+    this.textContent = '☽ Dark';
+  } else {
+    d.setAttribute('data-theme', 'dark');
+    this.textContent = '☀ Light';
+  }
+});
+
+function switchTab(btn, id){
+  var parent = btn.parentElement;
+  parent.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  btn.classList.add('active');
+  var container = parent.parentElement;
+  container.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+
+var quizLocked = {};
+function checkQuiz(btn, qId, correct) {
+  if (quizLocked[qId]) return;
+  quizLocked[qId] = true;
+  var opts = btn.parentElement.querySelectorAll('.quiz-opt');
+  opts.forEach(function(o) { o.disabled = true; o.style.cursor = 'default'; });
+  var val = btn.textContent.trim().charAt(0);
+  if (val === correct) {
+    btn.classList.add('correct');
+  } else {
+    btn.classList.add('wrong');
+    opts.forEach(function(o) {
+      if (o.textContent.trim().charAt(0) === correct) o.classList.add('correct');
+    });
+  }
+  document.getElementById('ex-' + qId).classList.add('show');
+}
+
+document.querySelectorAll('pre').forEach(function(pre) {
+  var btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.textContent = 'Copy';
+  btn.onclick = function() {
+    var code = pre.querySelector('code') || pre;
+    var text = code.textContent || code.innerText;
+    navigator.clipboard.writeText(text).then(function() {
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = 'Copy'; }, 1500);
+    });
+  };
+  pre.appendChild(btn);
+});
+</script>
+</body>
+</html>
