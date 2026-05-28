@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Snowflake DE — Reference Manual v2.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════ CSS LAYERS ═══════════ */
+@layer reset, base, components, utilities;
+
+@layer reset {
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; accent-color: var(--accent); }
+}
+
+/* ═══════════ BASE ═══════════ */
+@layer base {
+  :root {
+    --paper: #f3eee4;  --paper-2: #ebe4d4;  --paper-3: #e0d8c4;
+    --ink: #1a1612;     --ink-2: #3d3528;     --ink-3: #5a4f3a;
+    --ink-dim: #6b5d49; --ink-faint: #a89a83;
+    --rule: #c8b99e;
+    --accent: #c0392b;  --accent2: #a93226;
+    --green: #2d7d46;   --blue: #2b6cb0;     --gold: #b8860b;
+    --serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+    --sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+    --success-bg: color-mix(in oklab, #2d7d46 8%, #f3eee4);
+    --warn-bg: color-mix(in oklab, #b8860b 10%, #f3eee4);
+    --info-bg: color-mix(in oklab, #2b6cb0 7%, #f3eee4);
+    --danger-bg: color-mix(in oklab, #c0392b 6%, #f3eee4);
+    --sc: 0px;
+  }
+  [data-theme="dark"] {
+    --paper: #1b1917;  --paper-2: #242220;  --paper-3: #2d2a26;
+    --ink: #f0ece9;    --ink-2: #c5bbb2;    --ink-3: #a3988e;
+    --ink-dim: #9a9088; --ink-faint: #6b625c;
+    --rule: #3a3430;
+    --accent: #e8704a;  --accent2: #d95a3a;
+    --green: #5bbd6b;   --blue: #5b8fbd;    --gold: #d4a84b;
+    --success-bg: color-mix(in oklab, #5bbd6b 10%, #1b1917);
+    --warn-bg: color-mix(in oklab, #d4a84b 12%, #1b1917);
+    --info-bg: color-mix(in oklab, #5b8fbd 9%, #1b1917);
+    --danger-bg: color-mix(in oklab, #e8704a 8%, #1b1917);
+  }
+
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.7;
+    min-height: 100vh;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0, transparent 28px, color-mix(in oklab, var(--ink) 4%, transparent) 28px, color-mix(in oklab, var(--ink) 4%, transparent) 29px);
+    animation: scProgress linear;
+    animation-timeline: scroll();
+  }
+
+  @keyframes scProgress {
+    from { --sc: 0; }
+    to { --sc: 100; }
+  }
+}
+
+/* ═══════════ COMPONENTS ═══════════ */
+@layer components {
+  /* Scroll progress bar */
+  .scroll-bar {
+    position: fixed; top: 0; left: 0; height: 4px;
+    background: var(--accent); z-index: 200;
+    width: calc(var(--sc) * 1%);
+    transition: width .1s linear;
+  }
+
+  /* Topbar */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--paper); border-bottom: 1px solid var(--rule);
+    padding: 12px 0; backdrop-filter: blur(8px);
+  }
+  .topbar-inner {
+    max-width: 1040px; margin: 0 auto; padding: 0 28px;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .brand { font-family: var(--serif); font-size: 20px; font-style: italic; }
+  .brand .dot { color: var(--accent); }
+  .nav-links { display: flex; gap: 14px; flex-wrap: wrap; }
+  .nav-links a {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-dim); text-decoration: none;
+    transition: color .2s; padding: 4px 0;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  #darkToggle {
+    background: none; border: 1px solid var(--rule); cursor: pointer;
+    color: var(--ink-dim); padding: 5px 9px; font-size: 14px;
+    font-family: var(--mono); transition: all .2s;
+  }
+  #darkToggle:hover { color: var(--ink); border-color: var(--ink); }
+
+  /* Main layout */
+  main { max-width: 1040px; margin: 0 auto; padding: 48px 28px 100px; }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center; padding: 36px 0 44px;
+    border-bottom: 2px solid var(--ink); margin-bottom: 52px;
+  }
+  .hero .ref {
+    font-family: var(--mono); font-size: 10px; color: var(--ink-dim);
+    letter-spacing: .14em; text-transform: uppercase; margin-bottom: 10px;
+  }
+  .hero h1 {
+    font-family: var(--serif); font-size: clamp(44px, 6.5vw, 72px);
+    font-weight: 400; line-height: .95; letter-spacing: -.02em;
+  }
+  .hero .tagline {
+    font-size: 16px; color: var(--ink-2); max-width: 580px;
+    margin: 14px auto 22px; font-family: var(--serif); font-style: italic;
+  }
+  .hero .prog-label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-dim); margin-bottom: 4px;
+  }
+  .hero .prog-bar {
+    font-family: var(--mono); font-size: 12px; color: var(--ink-dim);
+    letter-spacing: -.5px;
+  }
+  .hero .status {
+    font-family: var(--mono); font-size: 10px; color: var(--ink-faint); margin-top: 10px;
+  }
+
+  /* ── SECTION HEADINGS ── */
+  .sect {
+    margin: 60px 0 24px; padding-top: 36px;
+    border-top: 2px solid var(--ink);
+  }
+  .sect .sect-ref {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-dim); margin-bottom: 2px;
+  }
+  .sect h2 {
+    font-family: var(--serif); font-size: 34px; font-weight: 400;
+    line-height: 1.1; letter-spacing: -.015em;
+  }
+  .sect .sect-sub {
+    font-family: var(--serif); font-style: italic; color: var(--ink-dim);
+    font-size: 16px; margin-top: 4px;
+  }
+
+  /* ── CONTENT GRID (main + margin) ── */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 32px;
+    align-items: start;
+    margin-bottom: 28px;
+  }
+  .content-main { min-width: 0; }
+  .content-margin { position: sticky; top: 80px; }
+
+  @media (max-width: 860px) {
+    .content-grid { grid-template-columns: 1fr; }
+    .content-margin { position: static; }
+  }
+
+  /* ── TUFTE MARGIN NOTES ── */
+  .mnote {
+    font-family: var(--mono); font-size: 10px; line-height: 1.5;
+    color: var(--ink-dim); margin-bottom: 16px;
+    padding-left: 12px; border-left: 2px solid var(--blue);
+  }
+  .mnote .mnote-label {
+    font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--blue); margin-bottom: 4px;
+  }
+  .mnote-acca {
+    border-left-color: var(--accent);
+    & .mnote-label { color: var(--accent); }
+  }
+  .mnote-gold {
+    border-left-color: var(--gold);
+    & .mnote-label { color: var(--gold); }
+  }
+
+  /* ── CALLOUTS (color-mix tinted) ── */
+  .callout {
+    padding: 14px 18px; margin: 18px 0; border-radius: 2px;
+    font-size: 14px; line-height: 1.6; max-width: 760px;
+  }
+  .callout-success { background: var(--success-bg); border-left: 3px solid var(--green); }
+  .callout-warn    { background: var(--warn-bg);    border-left: 3px solid var(--gold); }
+  .callout-info    { background: var(--info-bg);    border-left: 3px solid var(--blue); }
+  .callout-danger  { background: var(--danger-bg);  border-left: 3px solid var(--accent); }
+  .callout strong { color: var(--ink); }
+  .callout .callout-label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+  .callout-success .callout-label { color: var(--green); }
+  .callout-warn    .callout-label { color: var(--gold); }
+  .callout-info    .callout-label { color: var(--blue); }
+  .callout-danger  .callout-label { color: var(--accent); }
+
+  /* ── THEOREM BLOCKS (LaTeX.css inspired) ── */
+  .theorem {
+    border: 1px solid var(--rule); padding: 16px 20px;
+    margin: 20px 0; max-width: 760px;
+  }
+  .theorem .thm-head {
+    font-family: var(--serif); font-size: 15px; font-style: italic;
+    font-weight: 600; margin-bottom: 6px;
+  }
+  .theorem .thm-body { font-size: 14px; color: var(--ink-2); }
+
+  /* ── TELUGU ANALOGY ── */
+  .telugu {
+    background: var(--paper-2); border-left: 4px solid var(--gold);
+    padding: 16px 20px; margin: 20px 0; max-width: 760px;
+  }
+  .telugu .tel { font-size: 15px; color: var(--ink); font-style: italic; margin-bottom: 4px; }
+  .telugu .en { font-size: 13px; color: var(--ink-dim); }
+
+  /* ── PARAGRAPH ── */
+  p { margin-bottom: 14px; color: var(--ink-2); max-width: 760px; }
+  p strong { color: var(--ink); }
+  code { font-family: var(--mono); font-size: .88em; background: var(--paper-2); padding: 2px 6px; border-radius: 2px; }
+
+  /* ── FIGURES ── */
+  figure.fig {
+    margin: 32px 0; text-align: center;
+    padding: 24px; background: var(--paper-2);
+    border: 1px solid var(--rule); max-width: 860px;
+    margin-left: 0;
+  }
+  figure.fig .fig-lbl {
+    font-family: var(--mono); font-size: 10px; color: var(--ink-dim);
+    letter-spacing: .1em; margin-bottom: 16px; text-align: left;
+  }
+  figure.fig svg { max-width: 100%; display: block; }
+  figure.fig .fig-cap {
+    font-family: var(--mono); font-size: 10px; color: var(--ink-dim);
+    margin-top: 12px; letter-spacing: .06em; text-align: left;
+  }
+  figure.fig .fig-cr {
+    font-family: var(--mono); font-size: 9px; color: var(--ink-faint);
+    margin-top: 4px; text-align: left;
+  }
+
+  /* ── TABLES ── */
+  table.reft {
+    width: 100%; max-width: 860px; border-collapse: collapse;
+    font-size: 13px; margin: 20px 0;
+  }
+  table.reft thead th {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .08em;
+    text-transform: uppercase; text-align: left; padding: 10px 14px;
+    border-bottom: 2px solid var(--ink); color: var(--ink-dim);
+    font-weight: 500;
+  }
+  table.reft tbody td {
+    padding: 10px 14px; border-bottom: 1px solid var(--rule);
+    color: var(--ink-2); vertical-align: top;
+  }
+  table.reft tbody tr:has(td:first-child:hover) td { background: color-mix(in oklab, var(--ink) 3%, transparent); }
+  table.reft tbody td:first-child { font-weight: 600; color: var(--ink); font-family: var(--mono); font-size: 11px; }
+
+  /* ── CODE ── */
+  :root {
+    --code-bg: #1a1612; --code-fg: #e8d9c0;
+    --code-border: #1a1612;
+  }
+  [data-theme="dark"] {
+    --code-bg: #0d0c0a; --code-fg: #e8d9c0;
+    --code-border: #2d2a26;
+  }
+  pre.code {
+    background: var(--code-bg); color: var(--code-fg);
+    font-family: var(--mono); font-size: 13px;
+    padding: 20px 24px; margin: 16px 0;
+    line-height: 1.6; overflow-x: auto;
+    border: 1px solid var(--code-border); max-width: 860px;
+    position: relative; white-space: pre; tab-size: 2;
+  }
+  pre.code .code-lbl {
+    display: block; color: #8a7a66;
+    font-size: 10px; letter-spacing: .08em;
+    margin-bottom: 10px; font-family: var(--mono);
+  }
+  .code-copy {
+    position: absolute; top: 12px; right: 12px;
+    font-family: var(--mono); font-size: 10px;
+    padding: 5px 12px; border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.05); color: rgba(255,255,255,.4);
+    cursor: pointer; transition: all .2s; opacity: 0;
+  }
+  pre.code:hover .code-copy { opacity: 1; }
+  .code-copy:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+  /* ── DETAILS / SUMMARY ACCORDION ── */
+  details.concept {
+    margin: 14px 0; max-width: 760px;
+    border: 1px solid var(--rule); background: var(--paper);
+    &[open] { background: var(--paper-2); }
+  }
+  details.concept summary {
+    cursor: pointer; padding: 12px 16px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: .04em;
+    color: var(--ink-2); transition: color .2s;
+    list-style: none;
+    &::marker { display: none; }
+    &::before { content: '▸ '; color: var(--accent); display: inline-block; transition: transform .2s; }
+  }
+  details.concept[open] summary { color: var(--ink); font-weight: 500; }
+  details.concept[open] summary::before { transform: rotate(90deg); }
+  details.concept .det-body { padding: 0 16px 14px; font-size: 13px; color: var(--ink-2); }
+
+  /* ── STAR ANSWER BLOCK ── */
+  .star-block {
+    border: 1px solid var(--ink); border-left: 4px solid var(--gold);
+    padding: 16px 20px; margin: 18px 0; max-width: 760px;
+    background: var(--paper);
+  }
+  .star-block .star-label {
+    font-family: var(--mono); font-size: 9px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 6px;
+  }
+  .star-block p { font-size: 13px; }
+
+  /* ── QUIZ (Telegram poll + :has() pure CSS) ── */
+  .poll-wrap {
+    margin: 20px 0; max-width: 760px;
+  }
+  .poll-card {
+    background: var(--paper-2); border: 1px solid var(--ink);
+    padding: 24px; margin-bottom: 14px;
+  }
+  .poll-q-num {
+    font-family: var(--mono); font-size: 10px; color: var(--ink-dim);
+    letter-spacing: .1em; margin-bottom: 4px;
+  }
+  .poll-q {
+    font-size: 15px; font-weight: 500; color: var(--ink);
+    margin-bottom: 14px;
+  }
+  .poll-options { display: flex; flex-direction: column; gap: 8px; }
+  .poll-opt {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border: 1px solid var(--rule);
+    background: var(--paper); cursor: pointer;
+    transition: all .2s;
+    &:hover { border-color: var(--ink); }
+    &:has(input:checked) { border-width: 2px; }
+  }
+  .poll-opt input[type="radio"] { display: none; }
+  .poll-opt .letter {
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 1px solid var(--rule); display: flex; align-items: center;
+    justify-content: center; font-family: var(--mono); font-size: 11px;
+    flex-shrink: 0; transition: all .2s;
+  }
+  .poll-opt:has(input:checked) .letter {
+    background: var(--accent); color: #fff; border-color: var(--accent);
+  }
+  .poll-opt .txt { font-size: 14px; color: var(--ink-2); flex: 1; }
+  .poll-reveal {
+    margin-top: 12px; padding: 12px 16px;
+    background: var(--info-bg); border-left: 3px solid var(--blue);
+    font-size: 13px; color: var(--ink-dim);
+  }
+  .poll-reveal .corr { color: var(--green); font-weight: 600; }
+  .poll-reveal .incorr { color: var(--accent); }
+
+  /* ── DETAILS EXCLUSIVE GROUP ── */
+  details.exclusive { margin: 10px 0; max-width: 760px; }
+  details.exclusive summary {
+    cursor: pointer; padding: 10px 14px; font-family: var(--mono); font-size: 12px;
+    border: 1px solid var(--rule); background: var(--paper); transition: all .2s;
+    &::marker { display: none; }
+    &::before { content: '+ '; color: var(--accent); }
+  }
+  details.exclusive[open] summary { background: var(--paper-2); font-weight: 500; }
+  details.exclusive[open] summary::before { content: '− '; }
+  details.exclusive .ex-body { padding: 12px 16px; font-size: 13px; color: var(--ink-2); border: 1px solid var(--rule); border-top: none; }
+
+  /* ── TOC ── */
+  .toc-sect { margin: 52px 0; padding-top: 36px; border-top: 2px solid var(--ink); }
+  .toc-sect h2 { font-family: var(--serif); font-size: 34px; font-weight: 400; margin-bottom: 18px; }
+  .toc-list { list-style: none; padding: 0; }
+  .toc-list li {
+    font-family: var(--mono); font-size: 12px; padding: 4px 0;
+    color: var(--ink-2); display: flex; align-items: center; gap: 10px;
+  }
+  .toc-list li.done { color: var(--ink-faint); text-decoration: line-through; }
+  .toc-list li .wc { font-size: 10px; color: var(--ink-faint); margin-left: auto; }
+  .toc-list li.th { font-weight: 600; color: var(--ink); font-size: 13px; padding-top: 12px; text-decoration: none; }
+
+  /* ── FOOTER ── */
+  footer {
+    margin-top: 72px; padding-top: 28px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+    color: var(--ink-faint); text-transform: uppercase; line-height: 2;
+  }
+
+  /* ── DIALOG POPOVER (glossary) ── */
+  [popover] {
+    border: 1px solid var(--ink); padding: 12px 16px;
+    background: var(--paper); font-size: 13px; color: var(--ink-2);
+    max-width: 280px; border-radius: 2px;
+    box-shadow: 4px 4px 0 var(--rule);
+    font-family: var(--sans);
+  }
+  .gloss {
+    color: var(--blue); cursor: help;
+    text-decoration: underline; text-decoration-style: dotted;
+    text-underline-offset: 3px;
+    &:hover { color: var(--ink); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 720px) {
+    main { padding: 32px 16px 80px; }
+    .hero h1 { font-size: 38px; }
+    .sect h2 { font-size: 26px; }
+    .topbar-inner { flex-direction: column; align-items: flex-start; }
+    .content-grid { grid-template-columns: 1fr; }
+    .content-margin { display: none; }
+  }
+}
+
+/* ═══════════ UTILITIES ═══════════ */
+@layer utilities {
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+}
+</style>
+</head>
+<body>
+
+<!-- Scroll progress bar -->
+<div class="scroll-bar" id="scrollBar"></div>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Snowflake <span class="dot">·</span> DE <em>Manual</em></div>
+    <div class="nav-links">
+      <a href="#arch">Arch</a> <a href="#ingest">Ingest</a> <a href="#sql">SQL</a> <a href="#cdc">CDC</a>
+      <a href="#model">Model</a> <a href="#dbt">dbt</a> <a href="#perf">Perf</a> <a href="#quiz">Quiz</a>
+      <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑ TOP</a>
+    </div>
+    <button id="darkToggle" onclick="toggleDark()" title="Toggle">◐</button>
+  </div>
+</div>
+
+<main>
+
+<!-- ═══════════ HERO ═══════════ -->
+<header class="hero">
+  <div class="ref">REF: SNWF-001 · REV. 2.0 · 2026-05-28</div>
+  <h1>Snowflake</h1>
+  <p class="tagline">A reference manual for data engineers. Not a tutorial — a manual that explains <em>how the things you use every day actually work</em>. Telugu analogies. Real SQL. Interview-ready framing.</p>
+  <div class="prog-label">Study Progress</div>
+  <div class="prog-bar">█████████████████░░░░░ 5 / 7 chapters drafted</div>
+  <div class="status">CHAPTERS: Architecture · Ingestion · SQL · CDC · Data Modeling · dbt · Performance</div>
+</header>
+
+<!-- ═══════════════ FIG_001: ARCHITECTURE ═══════════════ -->
+<figure class="fig">
+  <div class="fig-lbl">FIG_001</div>
+  <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" style="max-width:720px;">
+    <defs>
+      <marker id="a1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0,0 7,2.5 0,5" fill="#6b5d49" fill-opacity="0.5"/></marker>
+    </defs>
+    <!-- Storage -->
+    <rect x="20" y="55" width="180" height="215" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.15" stroke-width="1.5"/>
+    <text x="110" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#6b5d49" letter-spacing="1">STORAGE LAYER</text>
+    <rect x="38" y="95" width="144" height="34" rx="4" fill="#f3eee4" stroke="currentColor" stroke-opacity="0.1" stroke-width="1"/>
+    <text x="110" y="116" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#3d3528">Amazon S3</text>
+    <rect x="38" y="140" width="144" height="34" rx="4" fill="#f3eee4" stroke="currentColor" stroke-opacity="0.1" stroke-width="1"/>
+    <text x="110" y="161" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#3d3528">Azure Blob</text>
+    <rect x="38" y="185" width="144" height="34" rx="4" fill="#f3eee4" stroke="currentColor" stroke-opacity="0.1" stroke-width="1"/>
+    <text x="110" y="206" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#3d3528">GCS</text>
+    <text x="110" y="245" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#a89a83">Pay per TB/month</text>
+    <!-- Arrow -->
+    <line x1="200" y1="162" x2="248" y2="162" stroke="#6b5d49" stroke-opacity="0.5" stroke-width="1.5" marker-end="url(#a1)"/>
+    <!-- Service -->
+    <rect x="250" y="55" width="220" height="215" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.15" stroke-width="1.5"/>
+    <text x="360" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#6b5d49" letter-spacing="1">SERVICE LAYER</text>
+    <rect x="268" y="95" width="184" height="34" rx="4" fill="#f3eee4" stroke="currentColor" stroke-opacity="0.1" stroke-width="1"/>
+    <text x="360" y="116" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#3d3528">Query Optimizer + Metadata</text>
+    <rect x="268" y="140" width="184" height="34" rx="4" fill="#f3eee4" stroke="currentColor" stroke-opacity="0.1" stroke-width="1"/>
+    <text x="360" y="161" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#3d3528">Result Cache (24hr reuse)</text>
+    <rect x="268" y="185" width="184" height="34" rx="4" fill="#f3eee4" stroke="currentColor" stroke-opacity="0.1" stroke-width="1"/>
+    <text x="360" y="206" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#3d3528">Access Control + Security</text>
+    <text x="360" y="245" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#a89a83">Global, multi-tenant</text>
+    <!-- Arrow -->
+    <line x1="470" y1="162" x2="518" y2="162" stroke="#6b5d49" stroke-opacity="0.5" stroke-width="1.5" marker-end="url(#a1)"/>
+    <!-- Compute -->
+    <rect x="520" y="55" width="180" height="215" rx="6" fill="none" stroke="currentColor" stroke-opacity="0.15" stroke-width="1.5"/>
+    <text x="610" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#6b5d49" letter-spacing="1">COMPUTE LAYER</text>
+    <rect x="538" y="95" width="144" height="30" rx="4" fill="#f3eee4" stroke="#2b6cb0" stroke-opacity="0.35" stroke-width="1.5"/>
+    <text x="610" y="114" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2b6cb0">VW: ETL (L · 8 nodes)</text>
+    <rect x="538" y="134" width="144" height="30" rx="4" fill="#f3eee4" stroke="#2d7d46" stroke-opacity="0.35" stroke-width="1.5"/>
+    <text x="610" y="153" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2d7d46">VW: BI (M · 4 nodes)</text>
+    <rect x="538" y="173" width="144" height="30" rx="4" fill="#f3eee4" stroke="#b8860b" stroke-opacity="0.35" stroke-width="1.5"/>
+    <text x="610" y="192" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#b8860b">VW: DS (S · 2 nodes)</text>
+    <rect x="538" y="212" width="144" height="30" rx="4" fill="#f3eee4" stroke="currentColor" stroke-opacity="0.08" stroke-width="1" stroke-dasharray="4,4"/>
+    <text x="610" y="231" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#a89a83">VW: Dev (XS)</text>
+    <text x="360" y="292" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#a89a83">All VWs read the same storage. Zero contention. Independent scale. Pay per second of uptime.</text>
+  </svg>
+  <div class="fig-cap">[ SNOWFLAKE ARCHITECTURE — 3 COMPLETELY INDEPENDENT LAYERS ]</div>
+  <div class="fig-cr">© 2026 REFERENCE MANUAL · ADAPTED FROM SNOWFLAKE DOCUMENTATION</div>
+</figure>
+
+<!-- ═══════════════ 1. ARCHITECTURE ═══════════════ -->
+<div class="sect" id="arch">
+  <div class="sect-ref">REF: ARCH-001</div>
+  <h2>1. Architecture — Why Snowflake Is Different</h2>
+  <div class="sect-sub">Storage-Compute Separation · Virtual Warehouses · Micro-Partitions · Caching</div>
+</div>
+
+<div class="content-grid">
+<div class="content-main">
+
+<div class="telugu">
+  <div class="tel">Snowflake architecture = మన ఊరి గోడౌన్ (godown) system లా ఉంటది.</div>
+  <div class="en">Storage = the godown where all goods (data) live. Compute = loading docks. You can have 3 separate docks (ETL team, BI team, Data Science) all pulling from the same godown simultaneously. Nobody waits for anyone. Pay rent for godown space. Pay workers only when they're on shift. Postgres is like a kirana shop — stock and counter in the same tiny room. You can't add more counters without moving the whole shop.</div>
+</div>
+
+<p>Snowflake is a <strong>cloud-native data warehouse</strong> built on a fundamental insight that traditional databases missed: <strong>storage and compute don't need to live together.</strong></p>
+
+<p>In Postgres, your data lives on disk attached to the same machine that runs queries. Need more compute? You either scale vertically (bigger machine, expensive, has a ceiling) or horizontally (read replicas, eventual consistency, operational headache). In Snowflake, data lives in cheap cloud object storage (S3/Azure Blob/GCS). Queries run on independent clusters called <strong>virtual warehouses</strong> that spin up, execute, and auto-suspend. You can have 10 warehouses querying the same table simultaneously — zero locking, zero contention.</p>
+
+<div class="callout callout-info">
+  <div class="callout-label">[ KEY INSIGHT — WHY THIS MATTERS FOR COST ]</div>
+  <strong>ETL takes 4 hours at night? Spin up an L warehouse. Shut it down when done.</strong> BI queries during the day? Run on a separate M warehouse. Data scientist runs an ad-hoc query? Their own XS warehouse. Each team gets isolated compute. You pay only for the seconds each warehouse is active. No idle capacity. No "the ETL is blocking my dashboard" complaints.
+</div>
+
+<details class="concept">
+  <summary>Micro-Partitions: How pruning works without indexes</summary>
+  <div class="det-body">
+    <p>Snowflake stores data in immutable 50-500 MB <strong>micro-partitions</strong> — columnar chunks automatically created on ingestion. Every partition's metadata records min/max values for every column. When you query <code>WHERE order_date > '2026-01-20'</code>, Snowflake reads the metadata (not data), finds partitions whose max date is before your threshold, and skips them entirely. <strong>Zero bytes scanned for irrelevant partitions.</strong></p>
+    <p>This is automatic — no CREATE INDEX, no REINDEX, no DBA maintenance. But it only works well if data is loaded in roughly sorted order. If your ETL loads random dates, every partition spans the full date range → pruning becomes useless → every query scans everything. The fix: add a <strong>clustering key</strong> to enforce physical sort order.</p>
+  </div>
+</details>
+
+<details class="concept">
+  <summary>Three Cache Layers (and when each helps)</summary>
+  <div class="det-body">
+    <p><strong>1. Metadata Cache:</strong> Statistics about micro-partitions. Lives in the Service Layer. Used for query planning and partition pruning. Always active, zero cost.</p>
+    <p><strong>2. Result Cache:</strong> If you run <em>exactly</em> the same query (byte-for-byte identical SQL) within 24 hours, Snowflake returns the cached result instantly. Zero compute cost. This is why dashboard tools that parameterize queries need care — <code>WHERE date = '2026-05-27'</code> and <code>WHERE date = '2026-05-28'</code> are different queries, different cache entries.</p>
+    <p><strong>3. Warehouse Cache (SSD):</strong> Each warehouse node has local SSD. Recently accessed micro-partitions stay in SSD. Subsequent queries on the same warehouse get faster reads. Cache is lost when warehouse suspends (auto-suspend default: 10 minutes idle).</p>
+  </div>
+</details>
+</div>
+
+<aside class="content-margin">
+  <div class="mnote mnote-acca">
+    <div class="mnote-label">⚠ COMMON PITFALL</div>
+    Adding more nodes (L → XL) doesn't fix bad SQL. A cartesian join on XL is still slow — just 4× more expensive. Always check query profile before sizing up.
+  </div>
+  <div class="mnote">
+    <div class="mnote-label">💡 INTERVIEW FRAME</div>
+    "Snowflake separates storage and compute so you can run concurrent workloads on shared data without contention. Virtual warehouses are independent clusters that start, run, and suspend — you pay only for active seconds."
+  </div>
+</aside>
+</div>
+
+<!-- ═══════════════ FIG_002: MICRO-PARTITIONS ═══════════════ -->
+<figure class="fig">
+  <div class="fig-lbl">FIG_002</div>
+  <svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg" style="max-width:720px;">
+    <defs>
+      <marker id="a2g" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0,0 8,3 0,6" fill="#2d7d46" fill-opacity="0.6"/>
+      </marker>
+    </defs>
+    <style>
+      .flow-arrow { animation: pulse 1.8s ease-in-out infinite; }
+      @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 0.9; } }
+    </style>
+
+    <!-- ===== QUERY BOX (left side) ===== -->
+    <rect x="30" y="60" width="195" height="65" rx="6" fill="#f3eee4" stroke="#1a1612" stroke-opacity="0.35" stroke-width="1.8"/>
+    <text x="127" y="84" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a1612" font-weight="500">QUERY</text>
+    <text x="127" y="104" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#3d3528">WHERE date ≥</text>
+    <text x="127" y="118" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#3d3528">'2026-01-20'</text>
+
+    <!-- ===== ARROWS: Query → MP_02 and MP_03 ===== -->
+    <!-- Arrow to MP_02 -->
+    <line x1="225" y1="95" x2="285" y2="95" stroke="#2d7d46" stroke-opacity="0.5" stroke-width="2" marker-end="url(#a2g)" class="flow-arrow" style="animation-delay: 0s;"/>
+    <!-- Arrow to MP_03 -->
+    <line x1="225" y1="95" x2="265" y2="155" stroke="#2d7d46" stroke-opacity="0.5" stroke-width="1.5" fill="none"/>
+    <line x1="265" y1="155" x2="285" y2="155" stroke="#2d7d46" stroke-opacity="0.5" stroke-width="2" marker-end="url(#a2g)" class="flow-arrow" style="animation-delay: 0.5s;"/>
+
+    <!-- ===== MP_01: SKIPPED (crossed out) ===== -->
+    <rect x="290" y="40" width="140" height="50" rx="5" fill="#f3eee4" stroke="#92847a" stroke-opacity="0.3" stroke-width="1.5"/>
+    <text x="360" y="62" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#5a4f3a">MP_01</text>
+    <text x="360" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#a89a83">01/01 – 01/15</text>
+    <!-- Red cross -->
+    <line x1="295" y1="45" x2="425" y2="85" stroke="#c0392b" stroke-opacity="0.55" stroke-width="2.5"/>
+    <text x="430" y="72" font-family="IBM Plex Mono,monospace" font-size="10" fill="#c0392b" fill-opacity="0.7">✕ SKIPPED</text>
+
+    <!-- ===== MP_02: SCANNED ===== -->
+    <rect x="290" y="105" width="140" height="50" rx="5" fill="#f3eee4" stroke="#2d7d46" stroke-opacity="0.55" stroke-width="2"/>
+    <text x="360" y="127" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a1612" font-weight="500">MP_02</text>
+    <text x="360" y="143" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5a4f3a">01/16 – 01/31</text>
+    <!-- Check mark -->
+    <text x="440" y="137" font-family="IBM Plex Mono,monospace" font-size="11" fill="#2d7d46" fill-opacity="0.7">✓ SCANNED</text>
+
+    <!-- ===== MP_03: SCANNED ===== -->
+    <rect x="290" y="170" width="140" height="50" rx="5" fill="#f3eee4" stroke="#2d7d46" stroke-opacity="0.55" stroke-width="2"/>
+    <text x="360" y="192" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a1612" font-weight="500">MP_03</text>
+    <text x="360" y="208" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#5a4f3a">02/01 – 02/15</text>
+    <text x="440" y="202" font-family="IBM Plex Mono,monospace" font-size="11" fill="#2d7d46" fill-opacity="0.7">✓ SCANNED</text>
+
+    <!-- ===== METADATA NOTE ===== -->
+    <rect x="480" y="60" width="220" height="48" rx="4" fill="none" stroke="#6b5d49" stroke-opacity="0.2" stroke-width="1" stroke-dasharray="4,4"/>
+    <text x="590" y="80" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#6b5d49">Metadata Lookup:</text>
+    <text x="590" y="96" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#6b5d49">MP_01 max(date) = 01/15</text>
+    <line x1="480" y1="84" x2="430" y2="84" stroke="#6b5d49" stroke-opacity="0.25" stroke-width="1" stroke-dasharray="3,3"/>
+
+    <!-- Bottom explanation -->
+    <text x="360" y="235" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#6b5d49">01/15 &lt; 01/20 → MP_01 pruned (0 bytes scanned). MP_02 + MP_03 scanned (200-1000 MB).</text>
+  </svg>
+  <div class="fig-cap">[ MICRO-PARTITION PRUNING — METADATA LOOKUP → SKIP IRRELEVANT PARTITIONS → SCAN ONLY WHAT MATCHES ]</div>
+  <div class="fig-cr">© 2026 REFERENCE MANUAL</div>
+</figure>
+
+<!-- ═══════════════ 2. INGESTION ═══════════════ -->
+<div class="sect" id="ingest">
+  <div class="sect-ref">REF: INGEST-001</div>
+  <h2>2. Getting Data In — Ingestion Patterns</h2>
+  <div class="sect-sub">COPY INTO · Snowpipe · Snowpipe Streaming · Streams + Tasks · Dynamic Tables</div>
+</div>
+
+<div class="content-grid">
+<div class="content-main">
+
+<div class="telugu">
+  <div class="tel">Data ni Snowflake loki teeskuraavadam = రైతు బజారుకి పంట తీసుకొచ్చినట్టు.</div>
+  <div class="en">COPY INTO = truckload arriving at the wholesale market once a day (batch). Snowpipe = small tempo arriving every hour as vegetables are harvested (near real-time). Streams = the market clerk noting every change in a ledger (CDC log). Dynamic Tables = the shelf that auto-restocks when new produce arrives.</div>
+</div>
+
+<table class="reft">
+  <thead>
+    <tr><th>Pattern</th><th>Trigger</th><th>Latency</th><th>Use When</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>COPY INTO</td><td>Manual / scheduled SQL</td><td>Minutes</td><td>Nightly ETL. Batch. Initial migration.</td></tr>
+    <tr><td>Snowpipe</td><td>S3 event → SQS → Snowpipe</td><td>~1 min</td><td>Files arrive unpredictably. Near-real-time.</td></tr>
+    <tr><td>Snowpipe Streaming</td><td>Java SDK / Kafka connector</td><td>Seconds</td><td>Event streams, IoT, clickstreams. Higher cost.</td></tr>
+    <tr><td>Streams + Tasks</td><td>Scheduled Task on Stream data</td><td>~1 min</td><td>CDC within Snowflake. Transform after ingest.</td></tr>
+    <tr><td>Dynamic Tables</td><td>Auto — source change detected</td><td>Configurable</td><td>Declarative. No MERGE code. Less control.</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-warn">
+  <div class="callout-label">⚠ PITFALL — COPY INTO + PURGE = DATA LOSS</div>
+  COPY INTO is <strong>idempotent by default</strong>. Snowflake tracks loaded files — running the same command twice won't duplicate data. But if you use <strong>PURGE = TRUE</strong>, files are deleted from S3 <em>after</em> the load commits. If the load fails mid-way? Already-purged files are gone. <strong>Recommendation:</strong> use PURGE only after verifying row counts. Better: separate archiving step.
+</div>
+
+<pre class="code">
+<div class="code-lbl">[ LISTING 001: COPY INTO — BATCH LOAD FROM S3 ]</div>-- File format (tells Snowflake how to parse)
+CREATE FILE FORMAT my_csv TYPE='CSV'
+  FIELD_OPTIONALLY_ENCLOSED_BY='"'
+  SKIP_HEADER=1 NULL_IF=('NULL','null','');
+
+-- External stage (pointer to cloud storage)
+CREATE STAGE my_s3 URL='s3://my-bucket/landing/'
+  STORAGE_INTEGRATION=my_s3 FILE_FORMAT=my_csv;
+
+-- Load: auto-decompresses gzip, validates, idempotent
+COPY INTO raw.orders FROM @my_s3
+  PATTERN='.*orders_.*\\.csv\\.gz'
+  ON_ERROR='SKIP_FILE_3%'
+  PURGE=TRUE;  -- ⚠ deletes from S3 after load!</pre>
+</div>
+
+<aside class="content-margin">
+  <div class="mnote mnote-gold">
+    <div class="mnote-label">🔑 IDEMPOTENCY</div>
+    COPY INTO tracks which files it loaded via metadata. Running it twice on same stage = zero duplicates. This is the safety net for scheduled ETL.
+  </div>
+  <div class="mnote">
+    <div class="mnote-label">📋 FDE: DATA PIPELINE</div>
+    Ingestion patterns = "workflow mapping + data pipeline design." In an interview, frame it as: "I mapped the data flow, selected the right ingestion pattern for each source, built the pipeline."
+  </div>
+</aside>
+</div>
+
+<!-- ═══════════════ 3. SQL ═══════════════ -->
+<div class="sect" id="sql">
+  <div class="sect-ref">REF: SQL-001</div>
+  <h2>3. SQL — The Patterns You Write Every Week</h2>
+  <div class="sect-sub">Window Functions · MERGE · CTEs · Query Optimization</div>
+</div>
+
+<p><strong>These four patterns cover ~80% of production SQL.</strong> Master them and you're ahead of most candidates claiming "5 years Snowflake experience." Each pattern below answers: what problem it solves, where it sits in the pipeline, and when NOT to use it.</p>
+
+<pre class="code">
+<div class="code-lbl">[ PATTERN 001: DEDUPLICATION — GET LATEST ROW PER ENTITY ]</div>-- You will write this EVERY DAY. Memorize it.
+-- Problem: raw_orders has duplicates (same order_id loaded multiple times)
+-- Solution: keep only the latest version per order_id
+
+SELECT * FROM raw_orders
+QUALIFY ROW_NUMBER() OVER (
+  PARTITION BY order_id
+  ORDER BY loaded_ts DESC
+) = 1;
+
+-- QUALIFY = WHERE for window functions
+-- Snowflake + BigQuery support it. For other DBs, wrap in CTE + WHERE rn=1.
+-- When NOT to use: if you need to keep ALL versions (SCD Type 2), use LAG() instead.</pre>
+
+<pre class="code">
+<div class="code-lbl">[ PATTERN 002: CHANGE DETECTION — CDC WITH LAG() ]</div>-- Problem: which customers changed their address?
+-- Solution: compare current row to previous row per customer
+
+SELECT customer_id, address, effective_date,
+  LAG(address) OVER (
+    PARTITION BY customer_id ORDER BY effective_date
+  ) AS prev_address,
+  CASE WHEN address IS DISTINCT FROM
+    LAG(address) OVER (PARTITION BY customer_id ORDER BY effective_date)
+    THEN 'CHANGED' ELSE 'SAME' END AS status
+FROM customer_history;
+-- Only rows with status='CHANGED' → feed into SCD Type 2 MERGE
+-- When NOT to use: if source already provides CDC flags (use those instead)</pre>
+
+<pre class="code">
+<div class="code-lbl">[ PATTERN 003: MERGE — UPSERT (MATCHED→UPDATE, NOT MATCHED→INSERT) ]</div>MERGE INTO dim_customer AS t
+USING stg_customer_updates AS s
+  ON t.customer_id = s.customer_id
+WHEN MATCHED THEN UPDATE SET
+  t.name=s.name, t.address=s.address, t.updated_ts=CURRENT_TIMESTAMP()
+WHEN NOT MATCHED THEN INSERT
+  (customer_id, name, address, created_ts, updated_ts)
+  VALUES (s.customer_id, s.name, s.address, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());
+
+-- MERGE is atomic (all-or-nothing). Max 3 WHEN clauses:
+--   MATCHED → UPDATE | MATCHED → DELETE | NOT MATCHED → INSERT
+-- When NOT to use: if you only INSERT (use INSERT), only UPDATE (use UPDATE)</pre>
+
+<pre class="code">
+<div class="code-lbl">[ PATTERN 004: CTE PIPELINE — STAGE-BY-STAGE TRANSFORMATION ]</div>WITH
+source AS (
+  SELECT * FROM raw.orders WHERE status IS NOT NULL AND amount > 0
+),
+deduped AS (
+  SELECT * FROM source
+  QUALIFY ROW_NUMBER() OVER (PARTITION BY order_id ORDER BY loaded_ts DESC) = 1
+),
+enriched AS (
+  SELECT d.date_key, c.customer_key, p.product_key, o.amount, o.qty
+  FROM deduped o
+  LEFT JOIN dim_date d ON o.order_date = d.date
+  LEFT JOIN dim_customer c ON o.customer_id = c.customer_key
+  LEFT JOIN dim_product p ON o.product_id = p.product_key
+)
+SELECT date_key, customer_key, COUNT(*) AS orders, SUM(amount) AS revenue
+FROM enriched GROUP BY date_key, customer_key;
+
+-- CTEs make pipelines readable. Each block = one stage.
+-- When NOT to use: if intermediate results are used by 3+ downstream queries
+--   → materialize as a temp table instead (CTE runs once per reference)</pre>
+
+<!-- ═══════════════ FIG_003: EXECUTION ORDER ═══════════════ -->
+<figure class="fig">
+  <div class="fig-lbl">FIG_003</div>
+  <svg viewBox="0 0 720 90" xmlns="http://www.w3.org/2000/svg" style="max-width:720px;">
+    <defs>
+      <marker id="a3" markerWidth="5" markerHeight="4" refX="5" refY="2" orient="auto"><polygon points="0,0 5,2 0,4" fill="#a89a83"/></marker>
+    </defs>
+    <rect x="5" y="24" width="52" height="30" rx="4" fill="#f3eee4" stroke="currentColor" stroke-opacity="0.15" stroke-width="1"/>
+    <text x="31" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">FROM</text>
+    <line x1="59" y1="39" x2="67" y2="39" stroke="#a89a83" stroke-width="1" marker-end="url(#a3)"/>
+
+    <rect x="70" y="24" width="56" height="30" rx="4" fill="#f3eee4" stroke="currentColor" stroke-opacity="0.15" stroke-width="1"/>
+    <text x="98" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">WHERE</text>
+    <line x1="128" y1="39" x2="136" y2="39" stroke="#a89a83" stroke-width="1" marker-end="url(#a3)"/>
+
+    <rect x="139" y="24" width="64" height="30" rx="4" fill="#f3eee4" stroke="currentColor" stroke-opacity="0.15" stroke-width="1"/>
+    <text x="171" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">GROUP BY</text>
+    <line x1="205" y1="39" x2="213" y2="39" stroke="#a89a83" stroke-width="1" marker-end="url(#a3)"/>
+
+    <rect x="216" y="24" width="52" height="30" rx="4" fill="#f3eee4" stroke="currentColor" stroke-opacity="0.15" stroke-width="1"/>
+    <text x="242" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">HAVING</text>
+    <line x1="270" y1="39" x2="278" y2="39" stroke="#a89a83" stroke-width="1" marker-end="url(#a3)"/>
+
+    <rect x="281" y="24" width="64" height="30" rx="4" fill="#f3eee4" stroke="#2d7d46" stroke-opacity="0.45" stroke-width="1.5"/>
+    <text x="313" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2d7d46">WINDOW</text>
+    <line x1="347" y1="39" x2="355" y2="39" stroke="#a89a83" stroke-width="1" marker-end="url(#a3)"/>
+
+    <rect x="358" y="24" width="56" height="30" rx="4" fill="#f3eee4" stroke="currentColor" stroke-opacity="0.15" stroke-width="1"/>
+    <text x="386" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">SELECT</text>
+    <line x1="416" y1="39" x2="424" y2="39" stroke="#a89a83" stroke-width="1" marker-end="url(#a3)"/>
+
+    <rect x="427" y="24" width="60" height="30" rx="4" fill="#f3eee4" stroke="currentColor" stroke-opacity="0.15" stroke-width="1"/>
+    <text x="457" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">DISTINCT</text>
+    <line x1="489" y1="39" x2="497" y2="39" stroke="#a89a83" stroke-width="1" marker-end="url(#a3)"/>
+
+    <rect x="500" y="24" width="64" height="30" rx="4" fill="#f3eee4" stroke="#c0392b" stroke-opacity="0.45" stroke-width="1.5"/>
+    <text x="532" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#c0392b">ORDER BY</text>
+    <line x1="566" y1="39" x2="574" y2="39" stroke="#a89a83" stroke-width="1" marker-end="url(#a3)"/>
+
+    <rect x="577" y="24" width="44" height="30" rx="4" fill="#f3eee4" stroke="currentColor" stroke-opacity="0.15" stroke-width="1"/>
+    <text x="599" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">LIMIT</text>
+
+    <text x="360" y="83" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#a89a83">Filter early (WHERE). Window after GROUP. Sort LAST (expensive — pushes to single node).</text>
+  </svg>
+  <div class="fig-cap">[ SQL LOGICAL EXECUTION ORDER — NOT THE ORDER YOU TYPE ]</div>
+  <div class="fig-cr">© 2026 REFERENCE MANUAL</div>
+</figure>
+
+<!-- ═══════════════ 4. CDC ═══════════════ -->
+<div class="sect" id="cdc">
+  <div class="sect-ref">REF: CDC-001</div>
+  <h2>4. Change Data Capture — The Heart of DE</h2>
+  <div class="sect-sub">Watermark · Streams + Tasks · Dynamic Tables · Which Approach When</div>
+</div>
+
+<div class="content-grid">
+<div class="content-main">
+
+<div class="telugu">
+  <div class="tel">CDC = బ్యాంకు పాస్‌బుక్ లాగా. ప్రతి transaction record చేస్తాం.</div>
+  <div class="en">CDC = like a bank passbook. Every transaction recorded: what changed, when, and how to apply it. Three approaches — pick based on source capabilities and complexity requirements.</div>
+</div>
+
+<div class="theorem">
+  <div class="thm-head">Theorem: Choose the simplest CDC approach that meets your needs.</div>
+  <div class="thm-body">More complexity = more code to maintain, more things to break. Start simple. Add complexity only when requirements demand it. A Dynamic Table that works is better than a Streams+Tasks pipeline that's overengineered.</div>
+</div>
+
+<details class="exclusive" name="cdc-approaches">
+  <summary>Approach 1: Watermark CDC — Simplest possible</summary>
+  <div class="ex-body">
+    <p><strong>When:</strong> Source table has <code>updated_ts</code> column. Deletes handled by soft-delete.</p>
+    <pre class="code" style="font-size:12px;">SET last_run = '2026-05-28 00:00:00';
+INSERT INTO stg.orders
+SELECT * FROM source.orders
+WHERE updated_ts > $last_run;
+-- Then dedup: QUALIFY ROW_NUMBER() OVER (PARTITION BY order_id ORDER BY updated_ts DESC)=1</pre>
+    <p><strong>✅ Pros:</strong> Simple. Works anywhere. <strong>❌ Cons:</strong> Deleted rows invisible. Requires <code>updated_ts</code>.</p>
+  </div>
+</details>
+
+<details class="exclusive" name="cdc-approaches">
+  <summary>Approach 2: Streams + Tasks — Full CDC control</summary>
+  <div class="ex-body">
+    <p><strong>When:</strong> Need INSERT/UPDATE/DELETE tracking. Complex MERGE logic. SCD Type 2.</p>
+    <pre class="code" style="font-size:12px;">CREATE STREAM orders_stream ON TABLE raw.orders;
+CREATE TASK cdc_task WAREHOUSE=etl_wh SCHEDULE='1 MINUTE'
+WHEN SYSTEM$STREAM_HAS_DATA('orders_stream')
+AS
+  MERGE INTO dim.orders t USING orders_stream s ON t.order_id=s.order_id
+  WHEN MATCHED AND s.METADATA$ACTION='DELETE' THEN DELETE
+  WHEN MATCHED AND s.METADATA$ISUPDATE=TRUE THEN UPDATE SET
+    t.status=s.status, t.updated_ts=CURRENT_TIMESTAMP()
+  WHEN NOT MATCHED THEN INSERT (order_id,...) VALUES (s.order_id,...);</pre>
+    <p><strong>✅ Pros:</strong> Full CDC. Delete tracking. <strong>❌ Cons:</strong> More code. Stream offsets to manage.</p>
+  </div>
+</details>
+
+<details class="exclusive" name="cdc-approaches">
+  <summary>Approach 3: Dynamic Tables — Declarative, zero CDC code</summary>
+  <div class="ex-body">
+    <p><strong>When:</strong> Simple transformation. No complex MERGE logic needed. Just want the result.</p>
+    <pre class="code" style="font-size:12px;">CREATE DYNAMIC TABLE dim.orders
+  TARGET_LAG='5 minutes' WAREHOUSE=etl_wh
+AS SELECT o.order_id, d.date_key, c.customer_key, o.amount
+   FROM raw.orders o
+   LEFT JOIN dim.date d ON o.order_date=d.date
+   LEFT JOIN dim.customer c ON o.customer_id=c.customer_key;</pre>
+    <p><strong>✅ Pros:</strong> One SQL statement. Snowflake handles everything. <strong>❌ Cons:</strong> Less control. No custom MERGE.</p>
+  </div>
+</details>
+
+<details class="concept">
+  <summary>STAR Answer: "Tell me about a time you built a CDC pipeline"</summary>
+  <div class="det-body">
+    <p><strong>Situation:</strong> ETL team's nightly load was taking 4+ hours on a Postgres replica. BI dashboards were stale by morning.</p>
+    <p><strong>Task:</strong> Migrate to a near-real-time CDC pipeline on Snowflake without disrupting existing reports.</p>
+    <p><strong>Action:</strong> Set up COPY INTO for initial load, then Snowpipe for incremental files from S3. Added Streams+Tasks for CDC within Snowflake — tracking INSERT/UPDATE/DELETE on order and customer tables. Implemented SCD Type 2 for customer address changes so historical reports remained accurate.</p>
+    <p><strong>Result:</strong> Dashboard freshness dropped from 4hr to 2min. BI team got their own virtual warehouse, isolating query load. Historical data accuracy improved — previously overwritten addresses were lost; now both old and new addresses are queryable.</p>
+  </div>
+</details>
+</div>
+
+<aside class="content-margin">
+  <div class="mnote">
+    <div class="mnote-label">⚡ DECISION RULE</div>
+    Simple transform → Dynamic Table.
+    Complex SCD logic → Streams+Tasks.
+    External source, no CDC → Watermark.
+  </div>
+  <div class="mnote mnote-gold">
+    <div class="mnote-label">🎯 FDE: AUDIT TRAIL</div>
+    Streams + Tasks = "checkpointing + retry with exponential backoff." Every change tracked. Failed MERGEs re-run on next Task tick.
+  </div>
+</aside>
+</div>
+
+<!-- ═══════════════ FIG_004: CDC DECISION ═══════════════ -->
+<figure class="fig">
+  <div class="fig-lbl">FIG_004</div>
+  <svg viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg" style="max-width:500px;">
+    <defs>
+      <marker id="a4g" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto"><polygon points="0,0 6,2 0,4" fill="#2d7d46" fill-opacity="0.5"/></marker>
+      <marker id="a4r" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto"><polygon points="0,0 6,2 0,4" fill="#c0392b" fill-opacity="0.5"/></marker>
+    </defs>
+    <!-- Q1 -->
+    <rect x="130" y="12" width="240" height="36" rx="18" fill="#f3eee4" stroke="currentColor" stroke-opacity="0.3" stroke-width="1.5"/>
+    <text x="250" y="35" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#3d3528">Source has updated_ts?</text>
+    <!-- YES → Watermark -->
+    <line x1="250" y1="48" x2="250" y2="72" stroke="#2d7d46" stroke-opacity="0.4" stroke-width="1.5" marker-end="url(#a4g)"/>
+    <rect x="120" y="74" width="260" height="40" rx="6" fill="#f3eee4" stroke="#2d7d46" stroke-opacity="0.35" stroke-width="1.5"/>
+    <text x="250" y="92" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#2d7d46">✅ Watermark CDC</text>
+    <text x="250" y="106" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#a89a83">WHERE updated_ts > $last_run</text>
+    <!-- NO → Q2 -->
+    <line x1="370" y1="30" x2="430" y2="30" stroke="#c0392b" stroke-opacity="0.4" stroke-width="1.5"/>
+    <line x1="430" y1="30" x2="430" y2="92" stroke="#c0392b" stroke-opacity="0.4" stroke-width="1.5"/>
+    <line x1="380" y1="92" x2="430" y2="92" stroke="#c0392b" stroke-opacity="0.4" stroke-width="1.5" marker-end="url(#a4r)"/>
+    <rect x="290" y="132" width="180" height="36" rx="18" fill="#f3eee4" stroke="currentColor" stroke-opacity="0.3" stroke-width="1.5"/>
+    <text x="380" y="155" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#3d3528">Needs SCD Type 2?</text>
+    <!-- YES → Streams -->
+    <line x1="380" y1="168" x2="380" y2="192" stroke="#2d7d46" stroke-opacity="0.4" stroke-width="1.5" marker-end="url(#a4g)"/>
+    <rect x="290" y="194" width="180" height="40" rx="6" fill="#f3eee4" stroke="#2d7d46" stroke-opacity="0.35" stroke-width="1.5"/>
+    <text x="380" y="212" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#2d7d46">✅ Streams + Tasks</text>
+    <text x="380" y="226" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#a89a83">Full MERGE control</text>
+    <!-- NO → Dynamic Table -->
+    <line x1="470" y1="150" x2="490" y2="150" stroke="#c0392b" stroke-opacity="0.4" stroke-width="1.5"/>
+    <line x1="490" y1="150" x2="490" y2="214" stroke="#c0392b" stroke-opacity="0.4" stroke-width="1.5"/>
+    <line x1="470" y1="214" x2="490" y2="214" stroke="#c0392b" stroke-opacity="0.4" stroke-width="1.5" marker-end="url(#a4r)"/>
+    <rect x="290" y="236" width="180" height="40" rx="6" fill="#f3eee4" stroke="currentColor" stroke-opacity="0.2" stroke-width="1"/>
+    <text x="380" y="254" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#3d3528">✅ Dynamic Table</text>
+    <text x="380" y="268" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#a89a83">CREATE ... AS SELECT ...</text>
+  </svg>
+  <div class="fig-cap">[ CDC DECISION TREE — CHOOSE THE SIMPLEST APPROACH THAT MEETS REQUIREMENTS ]</div>
+  <div class="fig-cr">© 2026 REFERENCE MANUAL</div>
+</figure>
+
+<!-- ═══════════════ 5. DATA MODELING ═══════════════ -->
+<div class="sect" id="model">
+  <div class="sect-ref">REF: MODEL-001</div>
+  <h2>5. Data Modeling — Star Schema, SCD, Grain</h2>
+  <div class="sect-sub">Fact · Dimension · Slowly Changing Dimensions · Surrogate Keys · Grain</div>
+</div>
+
+<div class="content-grid">
+<div class="content-main">
+
+<div class="telugu">
+  <div class="tel">Data modeling = ఇల్లు కట్టేముందు బ్లూప్రింట్ వెయ్యడం లాంటిది. రూమ్స్ (dimensions) ఎక్కడ, వస్తువులు (facts) ఎక్కడ — ముందే plan చేస్తే, queries fast గా run అవుతాయి.</div>
+  <div class="en">Data modeling = drawing a blueprint before building a house. Where rooms (dimensions) go, where items (facts) go — plan it first, queries run fast later.</div>
+</div>
+
+<table class="reft">
+  <thead><tr><th>Concept</th><th>Definition</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td>Fact Table</td><td>Business events. Numeric, additive measures. Every row = something happened.</td><td>orders, shipments, page_views, sensor_readings</td></tr>
+    <tr><td>Dimension</td><td>Describes who, what, where, when of facts. Text-heavy. Slowly changing.</td><td>customers, products, stores, dates, campaigns</td></tr>
+    <tr><td>Grain</td><td>The level of detail one row represents. "One row per ___" — most critical design decision.</td><td>"One row per order line item per day"</td></tr>
+    <tr><td>Surrogate Key</td><td>Artificial integer key generated in warehouse. NOT the source natural key.</td><td>customer_key (auto-inc) vs customer_id (from CRM)</td></tr>
+    <tr><td>SCD Type 1</td><td>Overwrite old value. No history kept. Simple. Permanent data loss.</td><td>Fix typo in customer name. Old value gone.</td></tr>
+    <tr><td>SCD Type 2</td><td>Add new row. Track with valid_from/valid_to + is_current. Most common in practice.</td><td>Customer changes address. Both old and new kept for historical reporting.</td></tr>
+    <tr><td>SCD Type 3</td><td>Add column for previous value. Only one version of history. Rarely used.</td><td>previous_address column. Only last change tracked.</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-danger">
+  <div class="callout-label">⚠ MOST COMMON MODELING MISTAKE</div>
+  <strong>Wrong grain.</strong> Designer thinks "one row per order" but the business needs "one row per order line item." Fixing this after 6 months of data → rewrite every downstream model. <strong>Always confirm grain with stakeholders before building anything.</strong>
+</div>
+</div>
+
+<aside class="content-margin">
+  <div class="mnote">
+    <div class="mnote-label">💡 INTERVIEW: GRAIN</div>
+    "The grain is the contract. Every fact table row represents exactly one {something}. If stakeholders disagree about what that something is, you have a design problem, not a SQL problem."
+  </div>
+</aside>
+</div>
+
+<!-- ═══════════════ 6. DBT ═══════════════ -->
+<div class="sect" id="dbt">
+  <div class="sect-ref">REF: DBT-001</div>
+  <h2>6. dbt — The T in ELT</h2>
+  <div class="sect-sub">Models · ref() · Materializations · Incremental Strategy</div>
+</div>
+
+<div class="content-grid">
+<div class="content-main">
+
+<div class="telugu">
+  <div class="tel">dbt = హోటల్ కిచెన్. Raw ingredients (raw data) → prep (staging) → cooking (intermediate) → plating (marts).</div>
+  <div class="en">dbt = restaurant kitchen. Raw ingredients arrive → prep station (staging: clean, filter) → cooking (intermediate: joins, business logic) → plating (marts: analytics-ready tables). dbt manages the recipe book, not the stove — all transformations are SQL SELECTs.</div>
+</div>
+
+<p>dbt doesn't move data. It doesn't extract or load. It <strong>transforms</strong> data already inside Snowflake using pure SQL. Every model is a <code>.sql</code> file containing one SELECT statement. dbt compiles them, builds a dependency graph from <code>{{ ref() }}</code> calls, and executes in the correct order.</p>
+
+<pre class="code">
+<div class="code-lbl">[ LISTING 005: DBT INCREMENTAL MODEL ]</div>{{
+  config(materialized='incremental', unique_key='order_id')
+}}
+WITH source AS (
+  SELECT * FROM {{ ref('stg_orders') }}
+  {% if is_incremental() %}
+    WHERE updated_ts > (SELECT MAX(updated_ts) FROM {{ this }})
+  {% endif %}
+),
+enriched AS (
+  SELECT o.order_id, d.date_key, c.customer_key,
+         o.amount, o.qty, o.amount*o.qty AS line_total
+  FROM source o
+  LEFT JOIN {{ ref('dim_date') }} d ON o.order_date = d.date
+  LEFT JOIN {{ ref('dim_customer') }} c ON o.customer_id = c.customer_key
+)
+SELECT * FROM enriched</pre>
+
+<details class="concept">
+  <summary>Materializations: When to use which</summary>
+  <div class="det-body">
+    <p><strong>view:</strong> Re-computed on every query. No storage cost. Slow for complex models. Use for lightweight staging.</p>
+    <p><strong>table:</strong> Rebuilt from scratch on every dbt run. Use for small models (<100K rows) that change completely.</p>
+    <p><strong>incremental:</strong> Only processes new/changed rows. The standard for fact tables. Needs unique_key. Use for large tables where full rebuild is too expensive.</p>
+    <p><strong>ephemeral:</strong> Injected as CTE into downstream models. Not a real DB object. Use for intermediate logic used in one downstream model only.</p>
+  </div>
+</details>
+</div>
+
+<aside class="content-margin">
+  <div class="mnote">
+    <div class="mnote-label">🔑 REF() = DEPENDENCY</div>
+    ref() does two things: resolves the table name AND declares "this model depends on X." dbt builds the DAG from these declarations.
+  </div>
+</aside>
+</div>
+
+<!-- ═══════════════ 7. PERFORMANCE ═══════════════ -->
+<div class="sect" id="perf">
+  <div class="sect-ref">REF: PERF-001</div>
+  <h2>7. Performance — Write SQL That Costs Less</h2>
+  <div class="sect-sub">Query Profiling · Partition Pruning · Clustering · Result Cache</div>
+</div>
+
+<table class="reft">
+  <thead><tr><th>Symptom</th><th>Root Cause</th><th>Fix</th></tr></thead>
+  <tbody>
+    <tr><td>Bytes scanned >> expected</td><td>WHERE column wrapped in function → no pruning</td><td>Use raw range: WHERE date >= '2026-01-01' AND date < '2027-01-01'</td></tr>
+    <tr><td>Spilling to local storage</td><td>Warehouse too small for operation</td><td>Size up OR reduce data before the expensive join/sort</td></tr>
+    <tr><td>High scan %, low prune %</td><td>No clustering key on large table</td><td>Add clustering key on frequently filtered columns</td></tr>
+    <tr><td>SELECT * in production</td><td>Columnar storage — cost ∝ columns selected</td><td>Select only needed columns. 3 cols vs 30 = ~10× cost difference.</td></tr>
+    <tr><td>Result cache miss on re-run</td><td>Query text differs (even whitespace)</td><td>Use parameterized queries. Cache valid up to 24hr.</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-success">
+  <div class="callout-label">✅ PRO TIP</div>
+  During development, <strong>always LIMIT 1000</strong>. Test your logic on a small sample (costs pennies) before running the full query (could cost dollars on TB-scale tables). Also: check <code>BYTES_SCANNED</code> in query history after every new query — it's your cost dashboard.
+</div>
+
+<!-- ═══════════════ QUIZ ═══════════════ -->
+<div class="sect" id="quiz">
+  <div class="sect-ref">REF: QUIZ-001</div>
+  <h2>Assessment — 7 Questions</h2>
+  <div class="sect-sub">Architecture · CDC · SQL · dbt · Performance</div>
+</div>
+
+<div class="poll-wrap" id="quizContainer"></div>
+<div class="poll-score-bar" id="scoreBar" style="display:none;">
+  <div class="score-num" id="scoreNum">0/7</div>
+  <div id="scoreMsg" style="font-family:var(--serif);font-style:italic;font-size:16px;color:var(--ink-2);margin-top:4px;"></div>
+</div>
+
+<!-- ═══════════════ TOC ═══════════════ -->
+<div class="toc-sect">
+  <h2>Table of Contents · V2.0</h2>
+  <div class="toc-list">
+    <li class="th">1. Architecture</li>
+    <li class="done">Storage-compute separation <span class="wc">1.2K</span></li>
+    <li class="done">Virtual warehouses <span class="wc">0.8K</span></li>
+    <li class="done">Micro-partitions & pruning <span class="wc">0.9K</span></li>
+    <li class="th">2. Ingestion Patterns</li>
+    <li class="done">COPY INTO <span class="wc">0.6K</span></li>
+    <li class="done">Snowpipe & streaming <span class="wc">0.5K</span></li>
+    <li>Streams + Tasks <span class="wc">1.0K</span></li>
+    <li>Dynamic Tables <span class="wc">0.7K</span></li>
+    <li class="th">3. SQL Patterns</li>
+    <li class="done">Window functions (dedup, LAG, RANK) <span class="wc">1.5K</span></li>
+    <li class="done">MERGE — UPSERT <span class="wc">1.1K</span></li>
+    <li class="done">CTE pipeline <span class="wc">0.8K</span></li>
+    <li class="th">4. CDC</li>
+    <li class="done">Watermark CDC <span class="wc">0.6K</span></li>
+    <li>Streams + Tasks CDC <span class="wc">1.2K</span></li>
+    <li>Dynamic Tables CDC <span class="wc">0.7K</span></li>
+    <li class="th">5. Data Modeling</li>
+    <li class="done">Star schema & grain <span class="wc">0.9K</span></li>
+    <li>SCD Type 1/2/3 <span class="wc">1.3K</span></li>
+    <li class="th">6. dbt</li>
+    <li>Models & refs <span class="wc">1.0K</span></li>
+    <li>Incremental strategy <span class="wc">0.7K</span></li>
+    <li class="th">7. Performance</li>
+    <li>Query profiling <span class="wc">0.6K</span></li>
+    <li>Clustering & cost <span class="wc">0.5K</span></li>
+  </div>
+  <div class="prog-bar" style="margin-top:20px;">█████████████████░░░░░  5 / 7 chapters drafted · 7 quiz items</div>
+</div>
+
+<footer>
+  SNOWFLAKE REFERENCE MANUAL · V2.0 · 2026-05-28<br>
+  <span style="font-size:14px;">░</span><br>
+  Written as interview preparation material. Not affiliated with Snowflake Inc.
+</footer>
+
+</main>
+
+<script>
+// ═══════════ SCROLL PROGRESS ═══════════
+(function(){
+  var bar = document.getElementById('scrollBar');
+  if (!CSS.supports('animation-timeline','scroll()')) {
+    window.addEventListener('scroll', function(){
+      var h = document.documentElement;
+      var pct = Math.round((h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100);
+      bar.style.width = pct + '%';
+    });
+  }
+})();
+
+// ═══════════ DARK MODE ═══════════
+function toggleDark() {
+  var d = document.documentElement;
+  var isDark = d.getAttribute('data-theme') === 'dark';
+  d.setAttribute('data-theme', isDark ? '' : 'dark');
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+}
+(function(){
+  if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme','dark');
+})();
+
+// ═══════════ COPY BUTTONS ═══════════
+document.querySelectorAll('pre.code').forEach(function(pre){
+  var btn = document.createElement('button');
+  btn.className = 'code-copy'; btn.textContent = 'COPY';
+  btn.onclick = function(e){
+    e.stopPropagation();
+    var lines = (pre.textContent||pre.innerText).split('\n');
+    if (lines[0] && lines[0].trim().startsWith('[')) lines.shift();
+    navigator.clipboard.writeText(lines.join('\n').trim()).then(function(){
+      btn.textContent='COPIED!'; setTimeout(function(){btn.textContent='COPY';},1500);
+    });
+  };
+  pre.appendChild(btn);
+});
+
+// ═══════════ EXCLUSIVE ACCORDION (details[name]) ═══════════
+document.querySelectorAll('details.exclusive').forEach(function(d){
+  d.addEventListener('toggle', function(){
+    if (!this.open) return;
+    var name = this.getAttribute('name');
+    document.querySelectorAll('details.exclusive[name="'+name+'"]').forEach(function(s){
+      if (s !== d) s.open = false;
+    });
+  });
+});
+
+// ═══════════ QUIZ ═══════════
+var qs = [
+  {q:"What is the fundamental architectural difference between Snowflake and Postgres?",o:["Snowflake uses JSON instead of tables","Storage and compute are completely separated — they scale and bill independently","Snowflake only supports SELECT, not INSERT/UPDATE/DELETE"],c:1,exp:"Storage (data) and compute (virtual warehouses) are independent. You can have 3 warehouses querying the same data simultaneously with zero contention. Postgres couples both on one machine.",corr:"Correct! Storage and compute are completely independent — the defining characteristic of Snowflake.",incorr:"Not quite. The key difference is storage-compute separation. Data lives in cloud object storage. Queries run on independent virtual warehouse clusters."},
+  {q:"When should you use Dynamic Tables instead of Streams + Tasks?",o:["When you need complex SCD Type 2 merge logic","When the transformation is simple and you want Snowflake to handle incremental maintenance","When you want more control over the MERGE statement"],c:1,exp:"Dynamic Tables = declarative, simple. Streams + Tasks = imperative, full control. If your transform is a straightforward SELECT with joins, Dynamic Table is the right choice.",corr:"Correct! Dynamic Tables are for simple transforms where you want Snowflake to handle the CDC complexity.",incorr:"Not quite. Dynamic Tables give you LESS control — you write the final SELECT, Snowflake handles everything else. For complex SCD logic, you need Streams + Tasks."},
+  {q:"What does QUALIFY do in Snowflake?",o:["Checks table permissions before query execution","Filters results of window functions — it's a WHERE clause that runs after window functions","Validates data quality constraints before loading"],c:1,exp:"QUALIFY acts on window function results. WHERE runs before window functions. QUALIFY runs after. QUALIFY ROW_NUMBER() OVER (...) = 1 keeps only the first row in each partition.",corr:"Correct! QUALIFY is Snowflake's WHERE for window functions — it filters after window computation.",incorr:"Not quite. QUALIFY is a filter clause that runs AFTER window functions are computed, letting you filter on ROW_NUMBER, RANK, etc."},
+  {q:"Why does WHERE YEAR(date)=2026 scan more data than WHERE date>='2026-01-01' AND date<'2027-01-01'?",o:["YEAR() is a paid function that adds compute cost","Wrapping the column in a function prevents partition pruning. The range filter allows metadata-based pruning.","The first query is longer so it costs more"],c:1,exp:"Partition pruning works on raw column metadata (min/max per partition). YEAR(date) wraps the column — Snowflake can't compare partition metadata to the filter. It must scan every partition, apply YEAR() to every row, then filter. The range filter → metadata compare → skip irrelevant partitions.",corr:"Correct! Function-wrapped columns prevent partition pruning. Always use raw column range filters for clustering keys.",incorr:"Not quite. The issue is partition pruning — when you wrap a column in YEAR(), Snowflake can't use partition metadata to skip irrelevant data. It must scan everything."},
+  {q:"A MERGE statement can have at most how many WHEN clauses?",o:["2 — MATCHED and NOT MATCHED","3 — MATCHED UPDATE, MATCHED DELETE, NOT MATCHED INSERT","Unlimited"],c:1,exp:"Maximum 3 WHEN clauses: WHEN MATCHED THEN UPDATE, WHEN MATCHED THEN DELETE, WHEN NOT MATCHED THEN INSERT. Each can have additional AND conditions for filtering.",corr:"Correct! MERGE supports up to 3 WHEN clauses — MATCHED UPDATE, MATCHED DELETE, and NOT MATCHED INSERT.",incorr:"Not quite. MERGE supports exactly 3 WHEN clauses: MATCHED UPDATE, MATCHED DELETE, and NOT MATCHED INSERT. Each can have AND conditions."},
+  {q:"In dbt, what does {{ ref('stg_orders') }} do beyond just referencing the table?",o:["Creates an index on the referenced table","Declares a dependency — dbt uses refs to build the execution DAG and determine run order","Auto-refreshes the table if data is stale"],c:1,exp:"ref() is a Jinja function that both resolves the table name AND declares 'this model depends on stg_orders.' dbt collects all refs, builds a dependency graph, and runs models in the correct order.",corr:"Correct! ref() declares a dependency. dbt builds the DAG from these declarations and determines execution order automatically.",incorr:"Not quite. ref() doesn't create indexes or refresh tables. It declares dependencies that dbt uses to build the DAG — the execution order of all models."},
+  {q:"You run COPY INTO twice on the same stage. What happens?",o:["Data is duplicated — the file is loaded twice","Snowflake skips already-loaded files. COPY INTO tracks load history internally.","The second command throws a duplicate error"],c:1,exp:"COPY INTO maintains load metadata. It knows which files were already loaded and skips them. This makes it safe to re-run. Exception: PURGE=TRUE deletes files from S3 after load — if the load fails halfway, purged files are gone.",corr:"Correct! COPY INTO is idempotent — it tracks loaded files and skips them on re-run.",incorr:"Not quite. COPY INTO is idempotent by default. It tracks which files have been loaded and skips them automatically. No duplicates, no errors."}
+];
+var ans = new Array(qs.length).fill(-1), cur = 0;
+
+function buildQuiz() {
+  var html = '';
+  for (var i = 0; i < qs.length; i++) {
+    var q = qs[i];
+    html += '<div class="poll-card" id="pollQ' + i + '" style="' + (i>0?'display:none;':'') + '">';
+    html += '<div class="poll-q-num">QUESTION ' + (i+1) + ' / ' + qs.length + '</div>';
+    html += '<div class="poll-q">' + q.q + '</div>';
+    html += '<div class="poll-options" id="pollOpts' + i + '">';
+    for (var j = 0; j < q.o.length; j++) {
+      html += '<label class="poll-opt">';
+      html += '<input type="radio" name="q' + i + '" value="' + j + '" onchange="pick(' + i + ',' + j + ')">';
+      html += '<span class="letter">' + String.fromCharCode(65+j) + '</span>';
+      html += '<span class="txt">' + q.o[j] + '</span>';
+      html += '</label>';
+    }
+    html += '</div>';
+    html += '<div class="poll-reveal" id="pollRev' + i + '" style="display:none;">';
+    html += '<div class="corr" id="corr' + i + '"></div>';
+    html += '<div class="incorr" id="incorr' + i + '"></div>';
+    html += '<div style="margin-top:8px;font-size:13px;color:var(--ink-dim);">' + q.exp + '</div>';
+    html += '</div>';
+    html += '<div style="margin-top:12px;display:flex;gap:8px;align-items:center;">';
+    html += '<button onclick="goQ(' + (i-1) + ')" style="font-family:var(--mono);font-size:10px;padding:6px 14px;border:1px solid var(--ink);background:var(--paper);cursor:pointer;color:var(--ink);' + (i===0?'visibility:hidden;':'') + '">← PREV</button>';
+    html += '<span style="font-family:var(--mono);font-size:10px;color:var(--ink-faint);">' + (i+1) + '/' + qs.length + '</span>';
+    html += '<button onclick="goQ(' + (i+1) + ')" style="font-family:var(--mono);font-size:10px;padding:6px 14px;border:1px solid var(--ink);background:var(--paper);cursor:pointer;color:var(--ink);">NEXT →</button>';
+    html += '<button onclick="showScore()" style="font-family:var(--mono);font-size:10px;padding:6px 14px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;margin-left:auto;">SCORE</button>';
+    html += '</div></div>';
+  }
+  document.getElementById('quizContainer').innerHTML = html;
+}
+
+function pick(qi, val) {
+  if (ans[qi] !== -1) return;
+  ans[qi] = val;
+  var rev = document.getElementById('pollRev' + qi);
+  rev.style.display = 'block';
+  if (val === qs[qi].c) {
+    document.getElementById('corr' + qi).textContent = qs[qi].corr;
+  } else {
+    document.getElementById('incorr' + qi).textContent = qs[qi].incorr;
+  }
+  // Disable all radios in this question
+  var radios = document.querySelectorAll('#pollOpts' + qi + ' input');
+  radios.forEach(function(r){ r.disabled = true; });
+  // Highlight correct with green letter
+  var labels = document.querySelectorAll('#pollOpts' + qi + ' .poll-opt');
+  labels.forEach(function(l, idx){
+    if (idx === qs[qi].c) {
+      l.style.borderColor = 'var(--green)';
+      l.querySelector('.letter').style.background = 'var(--green)';
+      l.querySelector('.letter').style.color = '#fff';
+      l.querySelector('.letter').style.borderColor = 'var(--green)';
+    }
+    if (idx === val && val !== qs[qi].c) {
+      l.style.borderColor = 'var(--accent)';
+      l.querySelector('.letter').style.background = 'var(--accent)';
+      l.querySelector('.letter').style.color = '#fff';
+      l.querySelector('.letter').style.borderColor = 'var(--accent)';
+    }
+    l.style.pointerEvents = 'none';
+  });
+}
+
+function goQ(i) {
+  if (i < 0 || i >= qs.length) return;
+  for (var j = 0; j < qs.length; j++) {
+    document.getElementById('pollQ' + j).style.display = j === i ? '' : 'none';
+  }
+  cur = i;
+}
+
+function showScore() {
+  var correct = ans.reduce(function(s,a,i){return s+(a===qs[i].c?1:0);},0);
+  document.getElementById('scoreNum').textContent = correct + '/' + qs.length;
+  var pct = Math.round(correct/qs.length*100);
+  var msg = pct >= 86 ? 'Baagundi babu! Interview-ready on Snowflake fundamentals. 🎯' :
+            pct >= 60 ? 'Good foundation. Review CDC and performance sections. Almost there.' :
+                        'Revisit architecture and SQL patterns. Concept clear avvali first. Then come back.';
+  document.getElementById('scoreMsg').textContent = msg;
+  document.getElementById('scoreBar').style.display = 'block';
+  document.getElementById('scoreBar').scrollIntoView({behavior:'smooth'});
+  // Hide all questions
+  for (var j = 0; j < qs.length; j++) document.getElementById('pollQ' + j).style.display = 'none';
+}
+
+buildQuiz();
+</script>
+</body>
+</html>
