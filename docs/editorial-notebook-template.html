@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document Title — Subtitle</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   EDITORIAL-NOTEBOOK — HTML5 UP Editorial × Notebook Aesthetic
+   Reskinned template. Free for personal/commercial use (CCA 3.0)
+   ============================================================ */
+
+/* --- CSS Variables (Notebook Light) --- */
+:root {
+  --paper: #f3eee4;  --paper-2: #ebe4d4;
+  --ink: #1a1612;     --ink-2: #3d3528;
+  --ink-dim: #6b5d49; --ink-faint: #a89a83;
+  --rule: #c8b99e;
+  --accent: #c0392b;  --accent2: #a93226;
+  --green: #2d7d46;   --blue: #2b6cb0;
+  --gold: #b8860b;    --purple: #7b4d8c;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --sidebar-w: 300px;
+  --top-h: 60px;
+}
+
+[data-theme="dark"] {
+  --paper: #1b1917;  --paper-2: #242220;
+  --ink: #f0ece9;    --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430;
+  --accent: #e8704a;  --accent2: #d95a3a;
+  --green: #5bbd6b;   --blue: #5b8fbd;
+  --gold: #d4a84b;    --purple: #b47bc4;
+}
+
+/* --- Reset --- */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.65;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 25% 15%, rgba(200,180,140,.12) 0%, transparent 40%),
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(200,180,140,.08) 27px, rgba(200,180,140,.08) 28px);
+}
+
+/* ==================== LAYOUT ==================== */
+
+#wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* --- Sidebar --- */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--paper-2);
+  border-right: 1px solid var(--rule);
+  overflow-y: auto;
+  z-index: 40;
+  transition: transform .35s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.sb-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.sb-brand {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--ink);
+  text-decoration: none;
+  display: block;
+}
+
+.sb-brand em { color: var(--accent); font-style: italic; }
+
+.sb-search {
+  margin: 12px 0 4px;
+}
+
+.sb-search input {
+  width: 100%;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  padding: 8px 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color .2s;
+}
+
+.sb-search input:focus { border-color: var(--accent); }
+
+.sb-search input::placeholder { color: var(--ink-faint); }
+
+.sb-nav { padding: 10px 0; flex: 1; }
+
+.sb-nav a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 20px;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink-dim);
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: all .2s;
+}
+
+.sb-nav a:hover {
+  background: var(--paper);
+  color: var(--ink);
+  border-left-color: var(--accent);
+}
+
+.sb-nav a.active {
+  color: var(--ink);
+  border-left-color: var(--accent);
+  background: var(--paper);
+}
+
+.sb-nav .sb-section-label {
+  padding: 14px 20px 4px;
+  font-family: var(--mono);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: .2em;
+  color: var(--ink-faint);
+}
+
+.sb-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-faint);
+}
+
+/* --- Main --- */
+#main {
+  flex: 1;
+  margin-left: var(--sidebar-w);
+  min-height: 100vh;
+}
+
+.main-inner {
+  max-width: 940px;
+  margin: 0 auto;
+  padding: 32px 36px 100px;
+}
+
+/* --- Top Bar --- */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0 16px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 32px;
+}
+
+.topbar-path {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+}
+
+.topbar-path a { color: var(--ink); text-decoration: none; }
+.topbar-path a:hover { color: var(--accent); }
+
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+#darkToggle {
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 6px 12px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: var(--mono);
+  line-height: 1;
+  color: var(--ink);
+}
+
+#darkToggle:hover { transform: scale(1.05); }
+
+/* ==================== TYPOGRAPHY ==================== */
+
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 400;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+
+h1 .italic { font-style: italic; color: var(--accent); }
+
+h1 + .subtitle {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--ink-dim);
+  font-size: 17px;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-family: var(--serif);
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 400;
+  line-height: 1.15;
+  margin-top: 48px;
+  margin-bottom: 6px;
+}
+
+h2 .underline {
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 4px;
+}
+
+h2 + .h2-sub {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--ink-dim);
+  font-size: 16px;
+  margin-bottom: 22px;
+}
+
+h3 {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+  margin-top: 28px;
+  margin-bottom: 8px;
+}
+
+h4 {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .15em;
+  color: var(--ink-dim);
+  margin-top: 18px;
+  margin-bottom: 6px;
+}
+
+p { margin-bottom: 12px; }
+
+a { color: var(--blue); text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: var(--accent); }
+
+strong { font-weight: 600; }
+em { font-style: italic; }
+
+code {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--paper-2);
+  padding: 2px 5px;
+  border: 1px solid var(--rule);
+}
+
+ul, ol { margin: 8px 0 12px 20px; }
+li { margin-bottom: 4px; }
+
+/* ==================== COMPONENTS ==================== */
+
+/* --- Eyebrow / Pills --- */
+.eyebrow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+
+.pill {
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 3px 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  display: inline-block;
+}
+
+.pill.accent { border-color: var(--accent); color: var(--accent); }
+.pill.green { border-color: var(--green); color: var(--green); }
+.pill.blue { border-color: var(--blue); color: var(--blue); }
+.pill.gold { border-color: var(--gold); color: var(--gold); }
+
+/* --- Cards --- */
+.card {
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 18px 22px;
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: all .3s;
+  margin-bottom: 16px;
+}
+
+.card:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.card-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .2em;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.card.blue { border-color: var(--blue); }
+.card.gold { border-color: var(--gold); }
+.card.green { border-color: var(--green); }
+.card.purple { border-color: var(--purple); }
+
+/* --- Key-Value Grid --- */
+.key-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.key-item {
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 14px;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.key-item .kt {
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .15em;
+  color: var(--ink-dim);
+  margin-bottom: 4px;
+}
+
+.key-item .kv { font-size: 14px; font-weight: 500; }
+
+/* --- Code Blocks --- */
+.code-wrap { position: relative; margin: 8px 0 16px; }
+
+.code-block {
+  background: #1a1612;
+  color: #e8d9c0;
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 18px 22px;
+  overflow-x: auto;
+  line-height: 1.6;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.code-block .kw { color: #f0c674; }
+.code-block .fn { color: #81a2be; }
+.code-block .str { color: #b5bd68; }
+.code-block .cm { color: #6b5d49; font-style: italic; }
+.code-block .hl { color: #cc6666; }
+.code-block .num { color: #de935f; }
+.code-block .op { color: #8abeb7; }
+
+.copy-ghost {
+  position: absolute;
+  top: 6px; right: 6px;
+  background: transparent;
+  border: none;
+  color: #a89a83;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px 5px;
+  z-index: 2;
+  opacity: 0.5;
+  transition: opacity .2s, color .2s;
+}
+
+.copy-ghost:hover { opacity: 1; color: #e8d9c0; }
+
+.code-annotation {
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  padding: 12px 16px;
+  margin: -8px 0 14px;
+  font-size: 12px;
+  color: var(--ink-dim);
+  border-left: 3px solid var(--accent);
+}
+
+/* --- Tables --- */
+.table-wrap { overflow-x: auto; margin: 12px 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 12px 0;
+}
+
+thead th {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  background: var(--paper-2);
+  padding: 10px 10px;
+  border: 1px solid var(--rule);
+  text-align: left;
+}
+
+tbody td {
+  padding: 8px 10px;
+  border: 1px solid var(--rule);
+  vertical-align: top;
+}
+
+tbody tr:hover { background: rgba(200,180,140,.1); }
+
+/* --- SVG Diagrams --- */
+.svg-wrap {
+  margin: 20px 0;
+  text-align: center;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  padding: 16px;
+  position: relative;
+}
+
+.svg-wrap svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.svg-caption {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 12px;
+  color: var(--ink-dim);
+  margin-top: 6px;
+}
+
+/* --- Pipeline Flow --- */
+.pipeline-flow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.pipe-node {
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 10px 18px;
+  font-family: var(--mono);
+  font-size: 12px;
+  box-shadow: 2px 2px 0 var(--ink);
+  text-align: center;
+  min-width: 70px;
+}
+
+.pipe-node.accent { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.pipe-node.green { background: var(--green); color: var(--paper); border-color: var(--green); }
+.pipe-node.blue { background: var(--blue); color: var(--paper); border-color: var(--blue); }
+.pipe-node.gold { background: var(--gold); color: var(--paper); border-color: var(--gold); }
+
+.pipe-arrow { font-family: var(--mono); font-size: 18px; color: var(--ink-dim); }
+
+/* --- Step Lists --- */
+.step-list { counter-reset: step; margin: 16px 0; list-style: none; }
+
+.step-item {
+  counter-increment: step;
+  padding: 12px 14px 12px 50px;
+  position: relative;
+  border-left: 2px solid var(--rule);
+  margin-bottom: 8px;
+}
+
+.step-item:last-child { border-left-color: var(--accent); }
+
+.step-item::before {
+  content: counter(step);
+  position: absolute;
+  left: -12px;
+  top: 12px;
+  width: 24px;
+  height: 24px;
+  background: var(--accent);
+  color: var(--paper);
+  font-family: var(--mono);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-item .title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.step-item .desc { font-size: 13px; color: var(--ink-dim); line-height: 1.5; }
+
+/* --- Highlight Boxes --- */
+.highlight-box {
+  background: #f0e0cc;
+  padding: 14px 18px;
+  border-left: 3px solid var(--accent);
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+[data-theme="dark"] .highlight-box { background: #3d3530; }
+
+.highlight-box .label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.highlight-box.green { border-left-color: var(--green); }
+.highlight-box.blue { border-left-color: var(--blue); }
+.highlight-box.gold { border-left-color: var(--gold); }
+
+/* --- Strategy / Detail Cards --- */
+.strategy-card {
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.strategy-card .snum {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .2em;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.strategy-card .stitle { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+.strategy-card .sdesc { font-size: 13px; color: var(--ink-2); line-height: 1.6; margin-bottom: 12px; }
+
+.strategy-card .smeta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.strategy-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 9px;
+  text-transform: uppercase;
+  border: 1px solid var(--ink);
+  font-family: var(--mono);
+}
+
+.strategy-tag.green { border-color: var(--green); color: var(--green); }
+.strategy-tag.gold { border-color: var(--gold); color: var(--gold); }
+.strategy-tag.blue { border-color: var(--blue); color: var(--blue); }
+.strategy-tag.accent { border-color: var(--accent); color: var(--accent); }
+
+/* --- Pros/Cons --- */
+.pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+
+.pros-cons .pro {
+  padding: 8px 12px;
+  border-left: 3px solid var(--green);
+  font-size: 12px;
+}
+
+.pros-cons .con {
+  padding: 8px 12px;
+  border-left: 3px solid var(--accent);
+  font-size: 12px;
+}
+
+/* --- Buttons --- */
+.btn {
+  display: inline-block;
+  padding: 8px 18px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  border: 1px solid var(--ink);
+  background: var(--paper-2);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all .2s;
+  text-decoration: none;
+}
+
+.btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.btn-sm { padding: 5px 12px; font-size: 9px; }
+.btn-accent { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.btn-green { background: var(--green); color: var(--paper); border-color: var(--green); }
+.btn-blue { background: var(--blue); color: var(--paper); border-color: var(--blue); }
+.btn-ghost { background: transparent; border-color: var(--rule); }
+
+/* --- Feature Grid (2-col) --- */
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 16px 0;
+}
+
+.feature-card {
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 16px 18px;
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: all .2s;
+}
+
+.feature-card:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--ink); }
+
+.feature-card .fc-icon {
+  font-size: 24px;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.feature-card h3 { font-size: 16px; margin: 0 0 4px; }
+.feature-card p { font-size: 12px; color: var(--ink-dim); margin: 0; }
+
+/* --- Post Cards (3-col grid) --- */
+.post-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.post-card {
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 16px;
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: all .2s;
+}
+
+.post-card:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--ink); }
+
+.post-card h3 { font-size: 16px; margin: 0 0 6px; }
+.post-card p { font-size: 12px; color: var(--ink-dim); margin: 0 0 8px; line-height: 1.5; }
+
+/* --- Quiz --- */
+@keyframes slideInQ { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+@keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 var(--green); } 70% { box-shadow: 0 0 0 8px rgba(45,125,70,0); } 100% { box-shadow: 0 0 0 0 rgba(45,125,70,0); } }
+
+.q-card {
+  animation: slideInQ .35s ease-out forwards;
+  opacity: 0;
+  margin-bottom: 14px;
+  border: 1px solid var(--ink);
+  background: var(--paper-2);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.q-card:nth-child(1) { animation-delay: 0s; }
+.q-card:nth-child(2) { animation-delay: .04s; }
+.q-card:nth-child(3) { animation-delay: .08s; }
+.q-card:nth-child(4) { animation-delay: .12s; }
+
+.q-header { display: flex; gap: 8px; align-items: center; padding: 12px 16px 4px; }
+.q-num { font-family: var(--mono); font-size: 10px; color: var(--ink-dim); }
+.cat-badge { font-family: var(--mono); font-size: 8px; padding: 2px 8px; border: 1px solid var(--rule); text-transform: uppercase; }
+.cat-arch { border-color: var(--purple); color: var(--purple); }
+.cat-python { border-color: var(--green); color: var(--green); }
+.cat-gcp { border-color: var(--blue); color: var(--blue); }
+.cat-concept { border-color: var(--gold); color: var(--gold); }
+
+.q-text { padding: 4px 16px 10px; font-size: 14px; font-weight: 500; }
+
+.opts-grid { padding: 0 16px 10px; }
+
+.opt-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all .2s;
+}
+
+.opt-row:hover { background: var(--paper); border-color: var(--rule); transform: translateX(3px); }
+.opt-row:active { transform: scale(.98); }
+.opt-row.correct { animation: pulseGlow .6s ease; }
+.opt-row.wrong { animation: shake .4s ease; }
+
+.opt-letter {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 9px;
+  flex-shrink: 0;
+  background: var(--paper);
+}
+
+.opt-row input[type="radio"]:checked + .opt-letter {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: var(--paper);
+}
+
+.opt-row.correct .opt-letter { background: var(--green); color: var(--paper); border-color: var(--green); }
+.opt-row.correct .opt-text { color: var(--green); font-weight: 500; }
+.opt-row.wrong .opt-letter { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.opt-row.wrong .opt-text { color: var(--accent); }
+.opt-row.disabled { pointer-events: none; opacity: .7; }
+
+.q-footer { padding: 8px 16px 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.result { font-size: 12px; }
+
+.score-bar {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 14px 18px;
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.score-stat { font-family: var(--mono); font-size: 10px; color: var(--ink-dim); }
+.score-stat strong { color: var(--ink); font-size: 13px; }
+
+.progress-bar-wrap { height: 18px; background: var(--paper); border: 1px solid var(--ink); flex: 1; min-width: 100px; }
+.progress-bar-fill { height: 100%; background: var(--green); transition: width .3s; }
+
+.filter-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+
+.filter-row select {
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 6px 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* --- Scroll Animations --- */
+.section-anim {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+
+.section-anim.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- Sidebar Toggle (mobile) --- */
+#sidebarToggle {
+  display: none;
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 6px 10px;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  color: var(--ink);
+}
+
+/* --- Utility --- */
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 16px; }
+.mb-3 { margin-bottom: 24px; }
+.text-dim { color: var(--ink-dim); }
+.text-sm { font-size: 12px; }
+.flex { display: flex; }
+.flex-wrap { flex-wrap: wrap; }
+.gap-sm { gap: 8px; }
+.gap-md { gap: 16px; }
+.align-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  #sidebar {
+    transform: translateX(-100%);
+  }
+
+  #sidebar.open {
+    transform: translateX(0);
+  }
+
+  #main {
+    margin-left: 0;
+  }
+
+  .main-inner { padding: 24px 18px 80px; }
+
+  #sidebarToggle {
+    display: inline-flex;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pros-cons {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  body { background: white; color: black; }
+  #sidebar { display: none; }
+  #main { margin-left: 0; }
+  .code-block { background: #f5f5f5; color: #333; }
+  .section-anim { opacity: 1 !important; transform: none !important; }
+  #darkToggle, #sidebarToggle { display: none; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR TOGGLE (mobile) ===== -->
+<div id="sidebarToggle" onclick="toggleSidebar()">&#x2630;</div>
+
+<!-- ===== SIDEBAR ===== -->
+<aside id="sidebar">
+  <div class="sb-header">
+    <a href="#" class="sb-brand">GCP Prep <em>Notes</em></a>
+    <div class="sb-search">
+      <input type="text" id="sbSearchInput" placeholder="Filter nav..." oninput="filterNav()">
+    </div>
+  </div>
+  <nav class="sb-nav" id="sbNav">
+    <div class="sb-section-label">Overview</div>
+    <a href="#intro" class="active">Introduction</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#implementation">Implementation</a>
+
+    <div class="sb-section-label">Deep Dive</div>
+    <a href="#comparison">Comparison</a>
+    <a href="#code">Code Walkthrough</a>
+    <a href="#quiz">Knowledge Check</a>
+  </nav>
+  <div class="sb-footer">
+    &#x2192; Reskinned from Editorial by HTML5 UP
+  </div>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<div id="main">
+<div class="main-inner">
+
+  <!-- ===== TOP BAR ===== -->
+  <div class="topbar">
+    <div class="topbar-path">
+      <a href="#">Home</a> / <a href="#">GCP</a> / <span>Document</span>
+    </div>
+    <div class="topbar-actions">
+      <button id="darkToggle" onclick="toggleDark()" title="Toggle theme">&#x263E;</button>
+    </div>
+  </div>
+
+  <!-- ===== HERO / INTRO ===== -->
+  <section id="intro" class="section-anim">
+    <div class="eyebrow">
+      <span class="pill accent">GCP</span>
+      <span class="pill blue">BigQuery</span>
+      <span class="pill green">Cloud Run</span>
+    </div>
+    <h1>GCP Concept: <span class="italic">Title Goes Here</span></h1>
+    <p class="subtitle">A concise explanation of the concept — one line that tells you what this doc covers.</p>
+
+    <div class="card blue">
+      <div class="card-label">Quick Summary</div>
+      <p>Replace this card with your topic summary. This card uses the <code>.card.blue</code> class. Also available: <code>.green</code>, <code>.gold</code>, <code>.purple</code>.</p>
+    </div>
+
+    <div class="key-grid">
+      <div class="key-item"><div class="kt">Service</div><div class="kv">BigQuery / Cloud Run</div></div>
+      <div class="key-item"><div class="kt">Use Case</div><div class="kv">What problem this solves</div></div>
+      <div class="key-item"><div class="kt">Cost</div><div class="kv">Free tier / pay per use</div></div>
+    </div>
+  </section>
+
+  <!-- ===== ARCHITECTURE ===== -->
+  <section id="architecture" class="section-anim">
+    <h2>System <span class="underline">Architecture</span></h2>
+    <div class="h2-sub">How the pieces fit together — data flow from source to destination</div>
+
+    <p>Describe the architecture here. Use the pipeline-flow component for simple step-by-step:</p>
+
+    <div class="pipeline-flow">
+      <div class="pipe-node blue">Source</div>
+      <span class="pipe-arrow">&#x2192;</span>
+      <div class="pipe-node">Process</div>
+      <span class="pipe-arrow">&#x2192;</span>
+      <div class="pipe-node green">Output</div>
+    </div>
+
+    <p>For more complex diagrams, use inline SVG:</p>
+
+    <div class="svg-wrap">
+      <svg viewBox="0 0 500 140">
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="var(--ink-dim)"/>
+          </marker>
+        </defs>
+
+        <!-- BQ -->
+        <rect x="20" y="30" width="140" height="50" rx="6" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="1.5"/>
+        <text x="90" y="50" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="var(--ink-2)" font-weight="600">BigQuery</text>
+        <text x="90" y="65" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--ink-dim)">Source data</text>
+
+        <line x1="160" y1="55" x2="200" y2="55" stroke="var(--rule)" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Cloud Run -->
+        <rect x="200" y="30" width="140" height="50" rx="6" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5"/>
+        <text x="270" y="50" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="white" font-weight="600">Cloud Run</text>
+        <text x="270" y="65" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="rgba(255,255,255,.8)">Process &amp; transform</text>
+
+        <line x1="340" y1="55" x2="380" y2="55" stroke="var(--rule)" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Output -->
+        <rect x="380" y="30" width="100" height="50" rx="6" fill="var(--green)" stroke="var(--green)" stroke-width="1.5"/>
+        <text x="430" y="50" text-anchor="middle" font-family="var(--mono)" font-size="10" fill="white" font-weight="600">Output</text>
+        <text x="430" y="65" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="rgba(255,255,255,.8)">CSV / API</text>
+      </svg>
+      <div class="svg-caption">Figure 1: BigQuery &#x2192; Cloud Run &#x2192; Output pipeline</div>
+    </div>
+  </section>
+
+  <!-- ===== IMPLEMENTATION ===== -->
+  <section id="implementation" class="section-anim">
+    <h2><span class="underline">Implementation</span> Steps</h2>
+    <div class="h2-sub">Step-by-step walkthrough with code</div>
+
+    <div class="step-list">
+      <div class="step-item">
+        <div class="title">Set up the environment</div>
+        <div class="desc">Install dependencies, configure GCP project, enable APIs.</div>
+      </div>
+      <div class="step-item">
+        <div class="title">Write the processing script</div>
+        <div class="desc">Python/FastAPI logic with proper error handling and retries.</div>
+      </div>
+      <div class="step-item">
+        <div class="title">Deploy to Cloud Run</div>
+        <div class="desc">Containerize, push to Artifact Registry, deploy with gcloud.</div>
+      </div>
+    </div>
+
+    <div class="highlight-box green">
+      <div class="label">Key Decision</div>
+      <p>Always set <code>min-instances=0</code> for cost savings unless cold start latency is critical.</p>
+    </div>
+
+    <h3>Code Example</h3>
+    <div class="code-wrap">
+      <button class="copy-ghost" onclick="copyCode(this)">&#x2398;</button>
+      <div class="code-block"><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
+<span class="kw">import</span> os, logging
+
+app <span class="op">=</span> FastAPI()
+
+<span class="fn">@app.get</span>(<span class="str">"/health"</span>)
+<span class="kw">async def</span> <span class="fn">health</span>():
+    <span class="kw">return</span> {<span class="str">"status"</span>: <span class="str">"ok"</span>}
+
+<span class="kw">if</span> __name__ <span class="op">==</span> <span class="str">"__main__"</span>:
+    port <span class="op">=</span> <span class="fn">int</span>(os.<span class="fn">getenv</span>(<span class="str">"PORT"</span>, <span class="str">"8080"</span>))
+    <span class="fn">uvicorn.run</span>(<span class="str">"main:app"</span>, host<span class="op">=</span><span class="str">"0.0.0.0"</span>, port<span class="op">=</span>port)</div>
+    </div>
+    <div class="code-annotation">Use <code>os.getenv("PORT", "8080")</code> — Cloud Run injects PORT automatically.</div>
+  </section>
+
+  <!-- ===== COMPARISON ===== -->
+  <section id="comparison" class="section-anim">
+    <h2>Approach <span class="underline">Comparison</span></h2>
+    <div class="h2-sub">Tradeoffs between different strategies</div>
+
+    <div class="strategy-card">
+      <div class="snum">APPROACH A</div>
+      <div class="stitle">Storage API Streaming</div>
+      <div class="sdesc">Stream rows directly from BigQuery Storage API to the external server. Best for real-time or near-real-time exports.</div>
+      <div class="smeta">
+        <span class="strategy-tag green">Low Latency</span>
+        <span class="strategy-tag accent">Complex Setup</span>
+        <span class="strategy-tag blue">Streaming</span>
+      </div>
+    </div>
+
+    <div class="strategy-card">
+      <div class="snum">APPROACH B</div>
+      <div class="stitle">Export + Merge</div>
+      <div class="sdesc">Export individual partitions to GCS, merge into single CSV, transfer to server. Best for nightly batch jobs.</div>
+      <div class="smeta">
+        <span class="strategy-tag gold">Batch Only</span>
+        <span class="strategy-tag green">Simple</span>
+        <span class="strategy-tag green">Reliable</span>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Feature</th><th>Approach A</th><th>Approach B</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Latency</strong></td><td>Seconds</td><td>Hours (nightly)</td></tr>
+        <tr><td><strong>Complexity</strong></td><td>High</td><td>Medium</td></tr>
+        <tr><td><strong>Cost</strong></td><td>Higher (streaming)</td><td>Lower (batch)</td></tr>
+        <tr><td><strong>Reliability</strong></td><td>Good with retries</td><td>Very good (checkpoints)</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="pros-cons">
+      <div class="pro">&#x2713; Streaming approach gives near real-time data</div>
+      <div class="con">&#x2717; Higher complexity and cost</div>
+      <div class="pro">&#x2713; Batch approach is simpler and cheaper</div>
+      <div class="con">&#x2717; Adds hours of latency</div>
+    </div>
+  </section>
+
+  <!-- ===== CODE DEEP DIVE ===== -->
+  <section id="code" class="section-anim">
+    <h2>Code <span class="underline">Deep Dive</span></h2>
+    <div class="h2-sub">Key functions explained block by block</div>
+
+    <h3>1. Configuration</h3>
+    <div class="code-wrap">
+      <button class="copy-ghost" onclick="copyCode(this)">&#x2398;</button>
+      <div class="code-block"><span class="kw">import</span> os
+<span class="kw">from</span> google.cloud <span class="kw">import</span> bigquery
+<span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+
+load_dotenv()
+
+PROJECT <span class="op">=</span> os.<span class="fn">getenv</span>(<span class="str">"GOOGLE_CLOUD_PROJECT"</span>)
+DATASET <span class="op">=</span> os.<span class="fn">getenv</span>(<span class="str">"BQ_DATASET"</span>)
+
+<span class="kw">if not</span> PROJECT <span class="kw">or not</span> DATASET:
+    <span class="kw">raise</span> <span class="hl">ValueError</span>(<span class="str">"GOOGLE_CLOUD_PROJECT and BQ_DATASET required"</span>)</div>
+    </div>
+
+    <h3>2. Core Export Logic</h3>
+    <div class="code-wrap">
+      <button class="copy-ghost" onclick="copyCode(this)">&#x2398;</button>
+      <div class="code-block"><span class="kw">def</span> <span class="fn">export_partition</span>(table_id, partition_dt):
+    client <span class="op">=</span> bigquery.Client()
+
+    sql <span class="op">=</span> <span class="str">f"""
+        SELECT * FROM `{PROJECT}.{DATASET}.{table_id}`
+        WHERE _PARTITIONDATE = @partition_dt
+    """</span>
+
+    job_config <span class="op">=</span> bigquery.QueryJobConfig(
+        query_parameters=[
+            bigquery.ScalarQueryParameter(
+                <span class="str">"partition_dt"</span>, <span class="str">"DATE"</span>, partition_dt
+            )
+        ]
+    )
+
+    job <span class="op">=</span> client.<span class="fn">query</span>(sql, job_config<span class="op">=</span>job_config)
+    df <span class="op">=</span> job.<span class="fn">result</span>().<span class="fn">to_dataframe</span>()
+    <span class="kw">return</span> df</div>
+    </div>
+    <div class="code-annotation">Always use <code>@partition_dt</code> parameterized — prevents SQL injection and enables cache reuse.</div>
+  </section>
+
+  <!-- ===== QUIZ ===== -->
+  <section id="quiz" class="section-anim">
+    <h2>Knowledge <span class="underline">Check</span></h2>
+    <div class="h2-sub">Test your understanding</div>
+
+    <div class="score-bar" id="scoreBar">
+      <div class="score-stat">Score: <strong id="scoreNum">0</strong>/<strong id="scoreTotal">0</strong></div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+      <button class="btn btn-sm btn-ghost" onclick="resetQuiz()">Reset</button>
+    </div>
+
+    <div id="quizContainer">
+      <div class="q-card" data-answer="B" data-qid="0">
+        <div class="q-header">
+          <span class="q-num">Q1</span>
+          <span class="cat-badge cat-gcp">BigQuery</span>
+        </div>
+        <div class="q-text">What is the maximum size of a single CSV export from BigQuery?</div>
+        <div class="opts-grid">
+          <div class="opt-row" onclick="selectOption(this, 'A', 0)">
+            <input type="radio" name="q0" id="q0a" hidden><span class="opt-letter">A</span><span class="opt-text">100 MB</span>
+          </div>
+          <div class="opt-row" onclick="selectOption(this, 'B', 0)">
+            <input type="radio" name="q0" id="q0b" hidden><span class="opt-letter">B</span><span class="opt-text">~1 GB (compressed)</span>
+          </div>
+          <div class="opt-row" onclick="selectOption(this, 'C', 0)">
+            <input type="radio" name="q0" id="q0c" hidden><span class="opt-letter">C</span><span class="opt-text">10 GB</span>
+          </div>
+          <div class="opt-row" onclick="selectOption(this, 'D', 0)">
+            <input type="radio" name="q0" id="q0d" hidden><span class="opt-letter">D</span><span class="opt-text">Unlimited</span>
+          </div>
+        </div>
+        <div class="q-footer"><span class="result"></span></div>
+      </div>
+
+      <div class="q-card" data-answer="C" data-qid="1">
+        <div class="q-header">
+          <span class="q-num">Q2</span>
+          <span class="cat-badge cat-concept">Concept</span>
+        </div>
+        <div class="q-text">What does Cloud Run's scale-to-zero mean?</div>
+        <div class="opts-grid">
+          <div class="opt-row" onclick="selectOption(this, 'A', 1)">
+            <input type="radio" name="q1" id="q1a" hidden><span class="opt-letter">A</span><span class="opt-text">Zero downtime</span>
+          </div>
+          <div class="opt-row" onclick="selectOption(this, 'B', 1)">
+            <input type="radio" name="q1" id="q1b" hidden><span class="opt-letter">B</span><span class="opt-text">Zero configuration</span>
+          </div>
+          <div class="opt-row" onclick="selectOption(this, 'C', 1)">
+            <input type="radio" name="q1" id="q1c" hidden><span class="opt-letter">C</span><span class="opt-text">No running instances when idle (no cost)</span>
+          </div>
+          <div class="opt-row" onclick="selectOption(this, 'D', 1)">
+            <input type="radio" name="q1" id="q1d" hidden><span class="opt-letter">D</span><span class="opt-text">Zero cold start latency</span>
+          </div>
+        </div>
+        <div class="q-footer"><span class="result"></span></div>
+      </div>
+
+      <div class="q-card" data-answer="B" data-qid="2">
+        <div class="q-header">
+          <span class="q-num">Q3</span>
+          <span class="cat-badge cat-arch">Architecture</span>
+        </div>
+        <div class="q-text">Which approach is BEST for nightly batch exports of large partitioned tables?</div>
+        <div class="opts-grid">
+          <div class="opt-row" onclick="selectOption(this, 'A', 2)">
+            <input type="radio" name="q2" id="q2a" hidden><span class="opt-letter">A</span><span class="opt-text">Storage API streaming</span>
+          </div>
+          <div class="opt-row" onclick="selectOption(this, 'B', 2)">
+            <input type="radio" name="q2" id="q2b" hidden><span class="opt-letter">B</span><span class="opt-text">Export to GCS + merge + transfer</span>
+          </div>
+          <div class="opt-row" onclick="selectOption(this, 'C', 2)">
+            <input type="radio" name="q2" id="q2c" hidden><span class="opt-letter">C</span><span class="opt-text">Direct CSV export to local disk</span>
+          </div>
+          <div class="opt-row" onclick="selectOption(this, 'D', 2)">
+            <input type="radio" name="q2" id="q2d" hidden><span class="opt-letter">D</span><span class="opt-text">Pub/Sub streaming to Dataflow</span>
+          </div>
+        </div>
+        <div class="q-footer"><span class="result"></span></div>
+      </div>
+    </div>
+  </section>
+
+</div> <!-- /main-inner -->
+</div> <!-- /main -->
+
+<script>
+/* ============================================================
+   EDITORIAL-NOTEBOOK — JavaScript
+   ============================================================ */
+
+/* --- Dark Mode --- */
+function toggleDark() {
+  var html = document.documentElement;
+  if (html.getAttribute('data-theme') === 'dark') {
+    html.removeAttribute('data-theme');
+    localStorage.setItem('theme', 'light');
+  } else {
+    html.setAttribute('data-theme', 'dark');
+    localStorage.setItem('theme', 'dark');
+  }
+}
+
+// Restore saved theme
+(function() {
+  if (localStorage.getItem('theme') === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+})();
+
+/* --- Sidebar Toggle (mobile) --- */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// Close sidebar on link click (mobile)
+document.querySelectorAll('#sidebar a').forEach(function(a) {
+  a.addEventListener('click', function() {
+    document.getElementById('sidebar').classList.remove('open');
+  });
+});
+
+/* --- Nav Filter --- */
+function filterNav() {
+  var q = document.getElementById('sbSearchInput').value.toLowerCase();
+  document.querySelectorAll('#sbNav a').forEach(function(a) {
+    if (a.textContent.toLowerCase().includes(q)) {
+      a.style.display = 'flex';
+    } else {
+      a.style.display = 'none';
+    }
+  });
+}
+
+/* --- Active Nav Highlight on Scroll --- */
+(function() {
+  var sections = document.querySelectorAll('.section-anim[id]');
+  var navLinks = document.querySelectorAll('#sbNav a[href^="#"]');
+
+  function highlightNav() {
+    var scrollY = window.scrollY + 120;
+    var current = '';
+
+    sections.forEach(function(s) {
+      if (s.offsetTop <= scrollY && s.offsetTop + s.offsetHeight > scrollY) {
+        current = s.getAttribute('id');
+      }
+    });
+
+    navLinks.forEach(function(a) {
+      a.classList.remove('active');
+      if (a.getAttribute('href') === '#' + current) {
+        a.classList.add('active');
+      }
+    });
+  }
+
+  window.addEventListener('scroll', highlightNav, { passive: true });
+})();
+
+/* --- Intersection Observer Animations --- */
+(function() {
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.section-anim').forEach(function(el) {
+    observer.observe(el);
+  });
+})();
+
+/* --- Copy Code --- */
+function copyCode(btn) {
+  var block = btn.nextElementSibling;
+  // Get only the text content (strip HTML)
+  var text = block.textContent;
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() {
+      var orig = btn.textContent;
+      btn.textContent = '\u2713';
+      btn.style.color = '#b5bd68';
+      setTimeout(function() {
+        btn.textContent = orig;
+        btn.style.color = '';
+      }, 1500);
+    });
+  }
+}
+
+/* --- Quiz --- */
+var quizState = {
+  answered: 0,
+  correct: 0,
+  total: document.querySelectorAll('.q-card').length,
+  locked: false
+};
+
+function selectOption(row, selected, qid) {
+  if (quizState.locked) return;
+
+  var card = row.closest('.q-card');
+  var answer = card.dataset.answer;
+  var opts = card.querySelectorAll('.opt-row');
+  var resultEl = card.querySelector('.result');
+
+  // If this question was already answered, skip
+  if (card.dataset.answered === 'true') return;
+
+  // Disable all options
+  opts.forEach(function(o) { o.classList.add('disabled'); });
+  card.dataset.answered = 'true';
+
+  // Show correct/incorrect
+  var isCorrect = (selected === answer);
+  if (isCorrect) {
+    row.classList.add('correct');
+    resultEl.textContent = '\u2713 Correct!';
+    resultEl.style.color = 'var(--green)';
+    quizState.correct++;
+  } else {
+    row.classList.add('wrong');
+    // Show the correct answer
+    opts.forEach(function(o) {
+      var letter = o.querySelector('.opt-text').textContent.charAt(0);
+      if (o.querySelector('.opt-letter').textContent === answer) {
+        o.classList.add('correct');
+      }
+    });
+    resultEl.textContent = '\u2717 Incorrect. Answer: ' + answer;
+    resultEl.style.color = 'var(--accent)';
+  }
+
+  // Mark correct option
+  opts.forEach(function(o) {
+    if (o.querySelector('.opt-letter').textContent === answer && !isCorrect) {
+      o.classList.add('correct');
+    }
+  });
+
+  quizState.answered++;
+  updateScore();
+}
+
+function updateScore() {
+  document.getElementById('scoreNum').textContent = quizState.correct;
+  document.getElementById('scoreTotal').textContent = quizState.answered;
+  var pct = quizState.answered > 0 ? (quizState.correct / quizState.answered) * 100 : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  if (quizState.answered === quizState.total) {
+    quizState.locked = true;
+  }
+}
+
+function resetQuiz() {
+  quizState.answered = 0;
+  quizState.correct = 0;
+  quizState.locked = false;
+
+  document.querySelectorAll('.q-card').forEach(function(card) {
+    card.dataset.answered = 'false';
+    card.querySelectorAll('.opt-row').forEach(function(o) {
+      o.classList.remove('correct', 'wrong', 'disabled');
+    });
+    card.querySelector('.result').textContent = '';
+  });
+
+  document.getElementById('scoreNum').textContent = '0';
+  document.getElementById('scoreTotal').textContent = '0';
+  document.getElementById('progressFill').style.width = '0%';
+}
+</script>
+
+</body>
+</html>

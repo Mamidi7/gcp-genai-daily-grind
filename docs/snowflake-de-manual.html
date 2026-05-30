@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snowflake DE — Reference Manual</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   EDITORIAL-NOTEBOOK × SNOWFLAKE DE MANUAL
+   ============================================================ */
+
+:root {
+  --paper: #f3eee4;  --paper-2: #ebe4d4;
+  --ink: #1a1612;     --ink-2: #3d3528;
+  --ink-dim: #6b5d49; --ink-faint: #a89a83;
+  --rule: #c8b99e;
+  --accent: #c0392b;  --accent2: #a93226;
+  --green: #2d7d46;   --blue: #2b6cb0;
+  --gold: #b8860b;    --purple: #7b4d8c;
+  --teal: #1a7a7a;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --sidebar-w: 280px;
+}
+
+[data-theme="dark"] {
+  --paper: #1b1917;  --paper-2: #242220;
+  --ink: #f0ece9;    --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430;
+  --accent: #e8704a;  --accent2: #d95a3a;
+  --green: #5bbd6b;   --blue: #5b8fbd;
+  --gold: #d4a84b;    --purple: #b47bc4;
+  --teal: #4bc4c4;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.65;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 25% 15%, rgba(200,180,140,.12) 0%, transparent 40%),
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(200,180,140,.08) 27px, rgba(200,180,140,.08) 28px);
+}
+
+/* ==================== LAYOUT ==================== */
+#wrapper { display: flex; min-height: 100vh; }
+
+/* --- Sidebar --- */
+#sidebar {
+  position: fixed; top: 0; left: 0;
+  width: var(--sidebar-w); height: 100vh;
+  background: var(--paper-2); border-right: 1px solid var(--rule);
+  overflow-y: auto; z-index: 40;
+  transition: transform .35s ease;
+  display: flex; flex-direction: column;
+}
+
+.sb-header { padding: 18px 20px; border-bottom: 1px solid var(--rule); }
+
+.sb-brand {
+  font-family: var(--serif); font-size: 18px; font-weight: 400;
+  color: var(--ink); text-decoration: none; display: block;
+}
+.sb-brand em { color: var(--accent); font-style: italic; }
+
+.sb-search { margin: 12px 0 4px; }
+
+.sb-search input {
+  width: 100%; background: var(--paper); border: 1px solid var(--rule);
+  padding: 8px 10px; font-family: var(--mono); font-size: 10px;
+  color: var(--ink); outline: none; transition: border-color .2s;
+}
+.sb-search input:focus { border-color: var(--accent); }
+.sb-search input::placeholder { color: var(--ink-faint); }
+
+.sb-nav { padding: 10px 0; flex: 1; }
+
+.sb-nav a {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 20px; font-family: var(--mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--ink-dim); text-decoration: none;
+  border-left: 3px solid transparent; transition: all .2s;
+}
+.sb-nav a:hover { background: var(--paper); color: var(--ink); border-left-color: var(--accent); }
+.sb-nav a.active { color: var(--ink); border-left-color: var(--accent); background: var(--paper); }
+
+.sb-nav .sb-section-label {
+  padding: 14px 20px 4px;
+  font-family: var(--mono); font-size: 8px;
+  text-transform: uppercase; letter-spacing: .2em; color: var(--ink-faint);
+}
+
+.sb-footer { padding: 12px 20px; border-top: 1px solid var(--rule); font-family: var(--mono); font-size: 9px; color: var(--ink-faint); }
+
+/* --- Main --- */
+#main { flex: 1; margin-left: var(--sidebar-w); min-height: 100vh; }
+.main-inner { max-width: 940px; margin: 0 auto; padding: 32px 36px 100px; }
+
+/* --- Top Bar --- */
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0 16px; border-bottom: 1px solid var(--rule); margin-bottom: 32px;
+  position: sticky; top: 0; z-index: 30;
+  background: var(--paper);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  margin-left: calc(-1 * 36px);
+  margin-right: calc(-1 * 36px);
+  padding-left: 36px;
+  padding-right: 36px;
+}
+
+@media (max-width: 768px) {
+  .topbar {
+    margin-left: calc(-1 * 18px);
+    margin-right: calc(-1 * 18px);
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+}
+
+.topbar-path { font-family: var(--mono); font-size: 9px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: .1em; }
+.topbar-path a { color: var(--ink); text-decoration: none; }
+.topbar-path a:hover { color: var(--accent); }
+
+.topbar-actions { display: flex; gap: 8px; align-items: center; }
+
+#darkToggle {
+  background: var(--paper-2); border: 1px solid var(--ink);
+  padding: 6px 12px; font-size: 16px; cursor: pointer;
+  transition: all .2s; font-family: var(--mono); line-height: 1; color: var(--ink);
+}
+#darkToggle:hover { transform: scale(1.05); }
+
+.btn-font {
+  background: var(--paper-2); border: 1px solid var(--rule);
+  padding: 5px 8px; font-size: 12px; cursor: pointer; font-family: var(--mono);
+  line-height: 1; color: var(--ink-dim); transition: all .2s; font-weight: 600;
+}
+.btn-font:hover { color: var(--ink); border-color: var(--ink); }
+
+/* --- Sidebar Toggle --- */
+#sidebarToggle {
+  display: none; background: var(--paper-2); border: 1px solid var(--ink);
+  padding: 6px 10px; font-size: 18px; cursor: pointer; line-height: 1; color: var(--ink);
+  position: fixed; top: 12px; left: 12px; z-index: 50;
+}
+
+
+
+/* ==================== TYPOGRAPHY ==================== */
+h1 { font-family: var(--serif); font-size: clamp(32px, 4vw, 48px); font-weight: 400; line-height: 1.1; margin-bottom: 4px; }
+h1 .italic { font-style: italic; color: var(--accent); }
+h1 + .subtitle { font-family: var(--serif); font-style: italic; color: var(--ink-dim); font-size: 17px; margin-bottom: 20px; }
+
+h2 { font-family: var(--serif); font-size: clamp(24px, 3vw, 34px); font-weight: 400; line-height: 1.15; margin-top: 48px; margin-bottom: 6px; }
+h2 .underline { text-decoration: underline; text-decoration-style: wavy; text-decoration-color: var(--accent); text-underline-offset: 4px; }
+h2 + .h2-sub { font-family: var(--serif); font-style: italic; color: var(--ink-dim); font-size: 16px; margin-bottom: 22px; }
+
+h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; margin-top: 28px; margin-bottom: 8px; }
+
+h4 { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .15em; color: var(--ink-dim); margin-top: 18px; margin-bottom: 6px; }
+
+p { margin-bottom: 12px; color: var(--ink-2); max-width: 760px; }
+p strong { color: var(--ink); }
+a { color: var(--blue); text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: var(--accent); }
+
+code { font-family: var(--mono); font-size: .88em; background: var(--paper-2); padding: 2px 5px; border: 1px solid var(--rule); border-radius: 2px; }
+
+ul, ol { margin: 8px 0 12px 20px; }
+li { margin-bottom: 4px; }
+
+/* ==================== COMPONENTS ==================== */
+
+/* --- Eyebrow / Pills --- */
+.eyebrow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.pill { background: var(--paper-2); border: 1px solid var(--ink); padding: 3px 10px; font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; display: inline-block; }
+.pill.accent { border-color: var(--accent); color: var(--accent); }
+.pill.green { border-color: var(--green); color: var(--green); }
+.pill.blue { border-color: var(--blue); color: var(--blue); }
+.pill.gold { border-color: var(--gold); color: var(--gold); }
+.pill.purple { border-color: var(--purple); color: var(--purple); }
+.pill.teal { border-color: var(--teal); color: var(--teal); }
+
+/* --- Cards --- */
+.card { background: var(--paper-2); border: 1px solid var(--ink); padding: 18px 22px; box-shadow: 3px 3px 0 var(--ink); transition: all .3s; margin-bottom: 16px; }
+.card:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+.card-label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .2em; color: var(--accent); margin-bottom: 6px; }
+.card.blue { border-color: var(--blue); }
+.card.gold { border-color: var(--gold); }
+.card.green { border-color: var(--green); }
+.card.purple { border-color: var(--purple); }
+
+/* --- Key-Value Grid --- */
+.key-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.key-item { background: var(--paper-2); border: 1px solid var(--ink); padding: 14px; box-shadow: 2px 2px 0 var(--ink); }
+.key-item .kt { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .15em; color: var(--ink-dim); margin-bottom: 4px; }
+.key-item .kv { font-size: 14px; font-weight: 500; }
+
+/* --- Telugu Analogy --- */
+.telugu {
+  background: var(--paper-2); border-left: 4px solid var(--gold);
+  padding: 16px 20px; margin: 20px 0; max-width: 760px;
+}
+.telugu .tel { font-size: 15px; color: var(--ink); font-style: italic; margin-bottom: 4px; }
+.telugu .en { font-size: 13px; color: var(--ink-dim); }
+
+/* --- Callouts --- */
+:root {
+  --success-bg: color-mix(in oklab, #2d7d46 8%, #f3eee4);
+  --warn-bg: color-mix(in oklab, #b8860b 10%, #f3eee4);
+  --info-bg: color-mix(in oklab, #2b6cb0 7%, #f3eee4);
+  --danger-bg: color-mix(in oklab, #c0392b 6%, #f3eee4);
+}
+[data-theme="dark"] {
+  --success-bg: color-mix(in oklab, #5bbd6b 10%, #1b1917);
+  --warn-bg: color-mix(in oklab, #d4a84b 12%, #1b1917);
+  --info-bg: color-mix(in oklab, #5b8fbd 9%, #1b1917);
+  --danger-bg: color-mix(in oklab, #e8704a 8%, #1b1917);
+}
+
+.callout {
+  padding: 14px 18px; margin: 18px 0; max-width: 760px; font-size: 14px; line-height: 1.6;
+}
+.callout-success { background: var(--success-bg); border-left: 3px solid var(--green); }
+.callout-warn { background: var(--warn-bg); border-left: 3px solid var(--gold); }
+.callout-info { background: var(--info-bg); border-left: 3px solid var(--blue); }
+.callout-danger { background: var(--danger-bg); border-left: 3px solid var(--accent); }
+.callout .callout-label { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; }
+.callout-success .callout-label { color: var(--green); }
+.callout-warn .callout-label { color: var(--gold); }
+.callout-info .callout-label { color: var(--blue); }
+.callout-danger .callout-label { color: var(--accent); }
+
+/* --- Margin Note Style --- */
+.mnote {
+  font-family: var(--mono); font-size: 10px; line-height: 1.5;
+  color: var(--ink-dim); margin-bottom: 16px;
+  padding-left: 12px; border-left: 2px solid var(--blue);
+}
+.mnote .mnote-label { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--blue); margin-bottom: 4px; }
+.mnote-acca { border-left-color: var(--accent); }
+.mnote-acca .mnote-label { color: var(--accent); }
+.mnote-gold { border-left-color: var(--gold); }
+.mnote-gold .mnote-label { color: var(--gold); }
+
+/* --- Content Grid (main + margin) --- */
+.content-grid { display: grid; grid-template-columns: 1fr 200px; gap: 28px; align-items: start; margin-bottom: 28px; }
+.content-main { min-width: 0; }
+.content-margin { position: sticky; top: 32px; }
+
+@media (max-width: 860px) {
+  .content-grid { grid-template-columns: 1fr; }
+  .content-margin { position: static; display: none; }
+}
+
+/* --- Code Blocks --- */
+:root {
+  --code-bg: #1a1612; --code-fg: #e8d9c0;
+}
+[data-theme="dark"] {
+  --code-bg: #0d0c0a; --code-fg: #e8d9c0;
+}
+
+.code-wrap { position: relative; margin: 8px 0 16px; }
+
+.code-block {
+  background: var(--code-bg); color: var(--code-fg);
+  font-family: var(--mono); font-size: 13px;
+  padding: 18px 22px; overflow-x: auto; line-height: 1.6;
+  white-space: pre; tab-size: 2; border: 1px solid var(--code-bg);
+}
+
+.code-block .kw { color: #f0c674; }
+.code-block .fn { color: #81a2be; }
+.code-block .str { color: #b5bd68; }
+.code-block .cm { color: #6b5d49; font-style: italic; }
+.code-block .hl { color: #cc6666; }
+.code-block .num { color: #de935f; }
+.code-block .op { color: #8abeb7; }
+.code-block .sn { color: #8abeb7; } /* snowflake keywords */
+
+.code-block .code-lbl {
+  display: block; color: #8a7a66;
+  font-size: 10px; letter-spacing: .08em;
+  margin-bottom: 8px; font-family: var(--mono);
+}
+
+.copy-ghost {
+  position: absolute; top: 6px; right: 6px;
+  background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.4); cursor: pointer; font-size: 10px;
+  padding: 5px 12px; z-index: 2; opacity: 0;
+  transition: all .2s; font-family: var(--mono);
+}
+.code-wrap:hover .copy-ghost { opacity: 1; }
+.copy-ghost:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+.code-annotation {
+  background: var(--paper-2); border: 1px solid var(--rule);
+  padding: 12px 16px; margin: -8px 0 14px; font-size: 12px;
+  color: var(--ink-dim); border-left: 3px solid var(--accent);
+}
+
+/* --- Figures / SVG --- */
+figure.fig { margin: 32px 0; text-align: center; padding: 24px; background: var(--paper-2); border: 1px solid var(--rule); max-width: 860px; }
+figure.fig .fig-lbl { font-family: var(--mono); font-size: 10px; color: var(--ink-dim); letter-spacing: .1em; margin-bottom: 16px; text-align: left; }
+figure.fig svg { max-width: 100%; display: block; }
+figure.fig .fig-cap { font-family: var(--mono); font-size: 10px; color: var(--ink-dim); margin-top: 12px; letter-spacing: .06em; text-align: left; }
+figure.fig .fig-cr { font-family: var(--mono); font-size: 9px; color: var(--ink-faint); margin-top: 4px; text-align: left; }
+
+/* --- SVG Animations (Slowed down) --- */
+.svg-pulse { animation: svgPulse 2.5s ease-in-out infinite; }
+@keyframes svgPulse { 0% { opacity: 0.3; } 30% { opacity: 0.9; } 60% { opacity: 0.3; } 100% { opacity: 0.3; } }
+.svg-flow { animation: svgFlow 2s ease-in-out infinite; }
+@keyframes svgFlow { 0% { opacity: 0.4; stroke-dashoffset: 20; } 50% { opacity: 0.9; stroke-dashoffset: 10; } 100% { opacity: 0.4; stroke-dashoffset: 20; } }
+.svg-flow-arrow { animation: svgFlowArrow 2s ease-in-out infinite; }
+@keyframes svgFlowArrow { 0% { opacity: 0.35; } 50% { opacity: 0.9; } 100% { opacity: 0.35; } }
+.svg-fade-in { animation: svgFadeIn .8s ease-out forwards; opacity: 0; }
+@keyframes svgFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.svg-scale-in { animation: svgScaleIn .6s ease-out forwards; transform-origin: center; }
+@keyframes svgScaleIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* --- Tables --- */
+.table-wrap { overflow-x: auto; margin: 12px 0; }
+table.reft { width: 100%; max-width: 860px; border-collapse: collapse; font-size: 13px; margin: 20px 0; }
+table.reft thead th { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; text-align: left; padding: 10px 14px; border-bottom: 2px solid var(--ink); color: var(--ink-dim); font-weight: 500; }
+table.reft tbody td { padding: 10px 14px; border-bottom: 1px solid var(--rule); color: var(--ink-2); vertical-align: top; }
+table.reft tbody tr:hover td { background: color-mix(in oklab, var(--ink) 3%, transparent); }
+table.reft tbody td:first-child { font-weight: 600; color: var(--ink); font-family: var(--mono); font-size: 11px; }
+
+/* --- Step List --- */
+.step-list { counter-reset: step; margin: 16px 0; list-style: none; }
+.step-item { counter-increment: step; padding: 12px 14px 12px 50px; position: relative; border-left: 2px solid var(--rule); margin-bottom: 8px; }
+.step-item:last-child { border-left-color: var(--accent); }
+.step-item::before { content: counter(step); position: absolute; left: -12px; top: 12px; width: 24px; height: 24px; background: var(--accent); color: var(--paper); font-family: var(--mono); font-size: 11px; display: flex; align-items: center; justify-content: center; }
+.step-item .title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.step-item .desc { font-size: 13px; color: var(--ink-dim); line-height: 1.5; }
+
+/* --- Pipeline Flow --- */
+.pipeline-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; padding: 20px 0; }
+.pipe-node { background: var(--paper-2); border: 1px solid var(--ink); padding: 10px 18px; font-family: var(--mono); font-size: 12px; box-shadow: 2px 2px 0 var(--ink); text-align: center; min-width: 70px; }
+.pipe-node.accent { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.pipe-node.green { background: var(--green); color: var(--paper); border-color: var(--green); }
+.pipe-node.blue { background: var(--blue); color: var(--paper); border-color: var(--blue); }
+.pipe-node.gold { background: var(--gold); color: var(--paper); border-color: var(--gold); }
+.pipe-node.teal { background: var(--teal); color: var(--paper); border-color: var(--teal); }
+.pipe-arrow { font-family: var(--mono); font-size: 18px; color: var(--ink-dim); }
+
+/* --- Highlight Box --- */
+.highlight-box { background: #f0e0cc; padding: 14px 18px; border-left: 3px solid var(--accent); margin: 16px 0; font-size: 14px; max-width: 760px; }
+[data-theme="dark"] .highlight-box { background: #3d3530; }
+.highlight-box .label { font-family: var(--mono); font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+
+/* --- Accordion (details/summary) --- */
+details.concept { margin: 12px 0; max-width: 760px; border: 1px solid var(--rule); background: var(--paper); border-radius: 2px; }
+details.concept[open] { background: var(--paper-2); }
+details.concept summary { cursor: pointer; padding: 10px 14px; font-family: var(--mono); font-size: 11px; letter-spacing: .04em; color: var(--ink-2); transition: all .2s; list-style: none; border-bottom: 1px solid transparent; }
+details.concept[open] summary { color: var(--ink); font-weight: 500; border-bottom-color: var(--rule); background: var(--paper); }
+details.concept .det-body { padding: 14px 16px; font-size: 13px; color: var(--ink-2); line-height: 1.6; }
+
+/* --- Buttons --- */
+.btn { display: inline-block; padding: 8px 18px; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; border: 1px solid var(--ink); background: var(--paper-2); color: var(--ink); cursor: pointer; transition: all .2s; text-decoration: none; }
+.btn:hover { transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--ink); }
+.btn-sm { padding: 5px 12px; font-size: 9px; }
+.btn-ghost { background: transparent; border-color: var(--rule); }
+
+/* --- Pros/Cons --- */
+.pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; max-width: 760px; }
+.pros-cons .pro { padding: 8px 12px; border-left: 3px solid var(--green); font-size: 12px; }
+.pros-cons .con { padding: 8px 12px; border-left: 3px solid var(--accent); font-size: 12px; }
+
+/* --- Quiz --- */
+@keyframes slideInQ { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+@keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 var(--green); } 70% { box-shadow: 0 0 0 8px rgba(45,125,70,0); } 100% { box-shadow: 0 0 0 0 rgba(45,125,70,0); } }
+
+.poll-wrap { margin: 20px 0; max-width: 760px; }
+.poll-card { background: var(--paper-2); border: 1px solid var(--ink); padding: 24px; margin-bottom: 14px; animation: slideInQ .35s ease-out forwards; opacity: 0; }
+.poll-card:nth-child(1) { animation-delay: 0s; }
+.poll-card:nth-child(2) { animation-delay: .08s; }
+.poll-card:nth-child(3) { animation-delay: .16s; }
+
+.poll-q-num { font-family: var(--mono); font-size: 10px; color: var(--ink-dim); letter-spacing: .1em; margin-bottom: 4px; }
+.poll-q { font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 14px; }
+.poll-options { display: flex; flex-direction: column; gap: 8px; }
+.poll-opt { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid var(--rule); background: var(--paper); cursor: pointer; transition: all .2s; }
+.poll-opt:hover { border-color: var(--ink); }
+.poll-opt .letter { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; flex-shrink: 0; transition: all .2s; }
+.poll-opt .txt { font-size: 14px; color: var(--ink-2); flex: 1; }
+.poll-reveal { margin-top: 12px; padding: 12px 16px; background: var(--info-bg); border-left: 3px solid var(--blue); font-size: 13px; color: var(--ink-dim); display: none; }
+.poll-reveal.show { display: block; }
+.poll-reveal .corr { color: var(--green); font-weight: 600; }
+
+/* --- Scroll Animations --- */
+.section-anim { opacity: 0; transform: translateY(20px); transition: opacity .5s ease, transform .5s ease; }
+.section-anim.in { opacity: 1; transform: translateY(0); }
+
+/* --- Utility --- */
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 16px; }
+.mb-3 { margin-bottom: 24px; }
+.text-dim { color: var(--ink-dim); }
+.text-sm { font-size: 12px; }
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-100%); }
+  #sidebar.open { transform: translateX(0); }
+  #main { margin-left: 0; }
+  #sidebarToggle { display: block; }
+  .main-inner { padding: 24px 18px 80px; }
+  .pros-cons { grid-template-columns: 1fr; }
+}
+@media print {
+  body { background: white; color: black; }
+  #sidebar { display: none; }
+  #main { margin-left: 0; }
+  .code-block { background: #f5f5f5; color: #333; }
+  .section-anim { opacity: 1 !important; transform: none !important; }
+  #darkToggle, #sidebarToggle { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="sidebarToggle" onclick="toggleSidebar()">&#x2630;</div>
+
+<div id="wrapper">
+
+<!-- ===== SIDEBAR ===== -->
+<aside id="sidebar">
+  <div class="sb-header">
+    <a href="#" class="sb-brand">Snowflake <em>DE</em></a>
+    <div class="sb-search">
+      <input type="text" id="sbSearchInput" placeholder="Filter nav..." oninput="filterNav()">
+    </div>
+  </div>
+  <nav class="sb-nav" id="sbNav">
+    <div class="sb-section-label">Foundations</div>
+    <a href="#arch" class="active">Architecture</a>
+    <a href="#ingest">Ingestion</a>
+
+    <div class="sb-section-label">Core Skills</div>
+    <a href="#sql">SQL Patterns</a>
+    <a href="#model">Data Modeling</a>
+
+    <div class="sb-section-label">Production</div>
+    <a href="#perf">Performance</a>
+
+    <div class="sb-section-label">Verify</div>
+    <a href="#quiz">Knowledge Check</a>
+  </nav>
+  <div class="sb-footer">
+    Reference Manual v3.0 &middot; Snowflake DE
+  </div>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<div id="main">
+<div class="main-inner">
+
+  <!-- ===== TOP BAR ===== -->
+  <div class="topbar">
+    <div class="topbar-path">
+      <a href="#">Home</a> / <a href="#">Data Engineering</a> / <span>Snowflake</span>
+    </div>
+    <div class="topbar-actions">
+      <button id="darkToggle" onclick="toggleDark()" title="Toggle theme">&#x263E;</button>
+      <button class="btn-font" onclick="changeFontSize(1)" title="Increase font size">A+</button>
+      <button class="btn-font" onclick="changeFontSize(-1)" title="Decrease font size">A-</button>
+    </div>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- HERO -->
+  <!-- ================================================================ -->
+  <section id="hero" class="section-anim">
+    <div class="eyebrow">
+      <span class="pill accent">Snowflake</span>
+      <span class="pill blue">Data Engineering</span>
+      <span class="pill green">Reference</span>
+    </div>
+    <h1>Snowflake <span class="italic">DE Manual</span></h1>
+    <p class="subtitle">A reference manual for data engineers. Not a tutorial — a manual that explains <em>how the things you use every day actually work</em>. Telugu analogies. Real SQL. Interview-ready framing.</p>
+
+    <div class="key-grid">
+      <div class="key-item"><div class="kt">Version</div><div class="kv">3.0 &middot; May 2026</div></div>
+      <div class="key-item"><div class="kt">Coverage</div><div class="kv">Architecture &middot; Ingestion &middot; SQL &middot; Modeling &middot; Perf</div></div>
+      <div class="key-item"><div class="kt">Prerequisites</div><div class="kv">Basic SQL, data warehouse concepts</div></div>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- 1. ARCHITECTURE -->
+  <!-- ================================================================ -->
+  <section id="arch" class="section-anim">
+    <h2>1. Architecture — <span class="underline">Why Snowflake Is Different</span></h2>
+    <div class="h2-sub">Storage-Compute Separation &middot; Virtual Warehouses &middot; Micro-Partitions &middot; Caching</div>
+
+    <div class="telugu">
+      <div class="tel">Snowflake architecture = మన ఊరి గోడౌన్ (godown) system లా ఉంటది.</div>
+      <div class="en">Storage = the godown where all goods (data) live. Compute = loading docks. You can have 3 separate docks (ETL team, BI team, Data Science) all pulling from the same godown simultaneously. Nobody waits for anyone. Pay rent for godown space. Pay workers only when they're on shift. Postgres is like a kirana shop — stock and counter in the same tiny room. You can't add more counters without moving the whole shop.</div>
+    </div>
+
+    <div class="content-grid">
+    <div class="content-main">
+
+    <p>Snowflake is a <strong>cloud-native data warehouse</strong> built on a fundamental insight: <strong>storage and compute don't need to live together.</strong></p>
+
+    <p>In Postgres, your data lives on disk attached to the same machine that runs queries. Need more compute? Scale vertically (bigger machine, expensive, ceiling) or horizontally (read replicas, operational headache). In Snowflake, data lives in cheap cloud object storage (S3/Azure Blob/GCS). Queries run on independent <strong>virtual warehouses</strong> that spin up, execute, and auto-suspend. Ten warehouses can query the same table simultaneously — zero locking, zero contention.</p>
+
+    </div>
+    <aside class="content-margin">
+      <div class="mnote mnote-acca">
+        <div class="mnote-label">&#x26A0; COMMON PITFALL</div>
+        Adding more nodes doesn't fix bad SQL. A cartesian join on XL is still slow — just 4x more expensive.
+      </div>
+      <div class="mnote">
+        <div class="mnote-label">&#x1F4A1; INTERVIEW FRAME</div>
+        "Snowflake separates storage and compute so you can run concurrent workloads on shared data without contention. Virtual warehouses are independent clusters that start, run, and suspend — you pay only for active seconds."
+      </div>
+    </aside>
+    </div>
+
+    <!-- FIG_001: Architecture SVG -->
+    <figure class="fig">
+      <div class="fig-lbl">FIG_001</div>
+      <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" style="max-width:720px;">
+        <defs>
+          <marker id="a1" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0,0 7,2.5 0,5" fill="#6b5d49"/></marker>
+        </defs>
+
+        <!-- Storage Layer -->
+        <rect x="20" y="55" width="180" height="215" rx="6" fill="none" stroke="#1a1612" stroke-opacity="0.12" stroke-width="1.5"/>
+        <text x="110" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#6b5d49" letter-spacing="1">STORAGE LAYER</text>
+        <rect x="38" y="95" width="144" height="34" rx="4" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.1" stroke-width="1"/>
+        <text x="110" y="116" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#3d3528">Amazon S3</text>
+        <rect x="38" y="140" width="144" height="34" rx="4" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.1" stroke-width="1"/>
+        <text x="110" y="161" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#3d3528">Azure Blob</text>
+        <rect x="38" y="185" width="144" height="34" rx="4" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.1" stroke-width="1"/>
+        <text x="110" y="206" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#3d3528">GCS</text>
+        <text x="110" y="245" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#a89a83">Pay per TB/month</text>
+
+        <!-- Arrow Storage -> Service -->
+        <line x1="200" y1="162" x2="248" y2="162" stroke="#6b5d49" stroke-opacity="0.5" stroke-width="1.5" marker-end="url(#a1)" class="svg-flow"/>
+
+        <!-- Service Layer -->
+        <rect x="250" y="55" width="220" height="215" rx="6" fill="none" stroke="#1a1612" stroke-opacity="0.12" stroke-width="1.5"/>
+        <text x="360" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#6b5d49" letter-spacing="1">SERVICE LAYER</text>
+        <rect x="268" y="95" width="184" height="34" rx="4" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.1" stroke-width="1"/>
+        <text x="360" y="116" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#3d3528">Query Optimizer + Metadata</text>
+        <rect x="268" y="140" width="184" height="34" rx="4" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.1" stroke-width="1"/>
+        <text x="360" y="161" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#3d3528">Result Cache (24hr reuse)</text>
+        <rect x="268" y="185" width="184" height="34" rx="4" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.1" stroke-width="1"/>
+        <text x="360" y="206" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#3d3528">Access Control + Security</text>
+        <text x="360" y="245" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#a89a83">Global, multi-tenant</text>
+
+        <!-- Arrow Service -> Compute -->
+        <line x1="470" y1="162" x2="518" y2="162" stroke="#6b5d49" stroke-opacity="0.5" stroke-width="1.5" marker-end="url(#a1)" class="svg-flow"/>
+
+        <!-- Compute Layer -->
+        <rect x="520" y="55" width="180" height="215" rx="6" fill="none" stroke="#1a1612" stroke-opacity="0.12" stroke-width="1.5"/>
+        <text x="610" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#6b5d49" letter-spacing="1">COMPUTE LAYER</text>
+
+        <!-- Virtual Warehouses -->
+        <rect x="538" y="95" width="144" height="30" rx="4" fill="#f3eee4" stroke="#2b6cb0" stroke-opacity="0.5" stroke-width="1.5"/>
+        <text x="610" y="114" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2b6cb0">VW: ETL (L &middot; 8 nodes)</text>
+
+        <rect x="538" y="134" width="144" height="30" rx="4" fill="#f3eee4" stroke="#2d7d46" stroke-opacity="0.5" stroke-width="1.5"/>
+        <text x="610" y="153" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#2d7d46">VW: BI (M &middot; 4 nodes)</text>
+
+        <rect x="538" y="173" width="144" height="30" rx="4" fill="#f3eee4" stroke="#b8860b" stroke-opacity="0.5" stroke-width="1.5"/>
+        <text x="610" y="192" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#b8860b">VW: DS (S &middot; 2 nodes)</text>
+
+        <rect x="538" y="212" width="144" height="30" rx="4" fill="#f3eee4" stroke="#1a1612" stroke-opacity="0.08" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="610" y="231" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#a89a83">VW: Dev (XS)</text>
+
+        <text x="360" y="292" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#a89a83">All VWs read the same storage. Zero contention. Independent scale. Pay per second of uptime.</text>
+      </svg>
+      <div class="fig-cap">[ SNOWFLAKE ARCHITECTURE — 3 COMPLETELY INDEPENDENT LAYERS ]</div>
+    </figure>
+
+    <div class="callout callout-info">
+      <div class="callout-label">[ KEY INSIGHT — WHY THIS MATTERS FOR COST ]</div>
+      <strong>ETL takes 4 hours at night? Spin up an L warehouse. Shut it down when done.</strong> BI queries during the day? Run on a separate M warehouse. Data scientist runs an ad-hoc query? Their own XS warehouse. Each team gets isolated compute. You pay only for the seconds each warehouse is active. No idle capacity. No "the ETL is blocking my dashboard" complaints.
+    </div>
+
+    <details class="concept">
+      <summary>Micro-Partitions: How pruning works without indexes</summary>
+      <div class="det-body">
+        <p>Snowflake stores data in immutable <strong>50-500 MB micro-partitions</strong> — columnar chunks automatically created on ingestion. Every partition's metadata records min/max values for every column. When you query <code>WHERE order_date > '2026-01-20'</code>, Snowflake reads the metadata (not data), finds partitions whose max date is before your threshold, and skips them entirely. <strong>Zero bytes scanned for irrelevant partitions.</strong></p>
+        <p>This is automatic — no CREATE INDEX, no REINDEX, no DBA maintenance. But it only works well if data is loaded in roughly sorted order. Random date loads span the full range &rArr; pruning useless &rArr; every query scans everything. The fix: add a <strong>clustering key</strong>.</p>
+      </div>
+    </details>
+
+    <details class="concept">
+      <summary>Three Cache Layers (and when each helps)</summary>
+      <div class="det-body">
+        <p><strong>1. Metadata Cache:</strong> Micro-partition statistics. Service Layer. Always active, zero cost.</p>
+        <p><strong>2. Result Cache:</strong> Same query (byte-for-byte) within 24h returns cached result. Zero compute cost. <code>WHERE date = '2026-05-27'</code> and <code>WHERE date = '2026-05-28'</code> are different cache entries.</p>
+        <p><strong>3. Warehouse Cache (SSD):</strong> Recently accessed micro-partitions stay on local SSD. Lost when warehouse suspends (default: 10 min idle).</p>
+      </div>
+    </details>
+
+    <div class="callout callout-warn">
+      <div class="callout-label">⚠ YEPPUDU CONFUSE AITAV — MICRO-PARTITIONS vs CLUSTERING KEYS</div>
+      <strong>Same thing kaadu.</strong> Micro-partitions are automatic immutable storage chunks (typically 50-500 MB) created for every table load. Clustering is an optional physical re-ordering strategy you choose for very large tables with selective filters. <strong>Rule:</strong> every table has micro-partitions; only some tables should have clustering keys.
+    </div>
+
+    <div class="mnote mnote-gold">
+      <div class="mnote-label">🧠 MEMORY AID</div>
+      <strong>3 Cache Layers = MRC:</strong> <strong>M</strong>etadata (free, always on), <strong>R</strong>esult (24h exact-query reuse), <strong>C</strong>ompute/SSD (fast but lost on suspend). Interview lo one-liner: “M is global brain, R is replay, C is local scratchpad.”
+    </div>
+
+    <div class="highlight-box">
+      <div class="label">[ 30s INTERVIEW FRAME + REAL NUMBERS ]</div>
+      “In my last Snowflake workloads, a 12 TB fact table with date filters scanned ~9.8 TB before clustering and ~1.4 TB after clustering on <code>order_date, region</code> (~85% reduction). I first rely on automatic micro-partition pruning, then add clustering only for high-selectivity tables because reclustering itself consumes credits.”
+    </div>
+  </section>
+
+  <!-- FIG_002: Micro-Partition Pruning SVG -->
+  <section class="section-anim">
+  <figure class="fig">
+    <div class="fig-lbl">FIG_002</div>
+    <svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg" style="max-width:720px;">
+      <defs>
+        <marker id="a2g" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0,0 8,3 0,6" fill="#2d7d46"/>
+        </marker>
+      </defs>
+
+      <!-- QUERY BOX -->
+      <rect x="30" y="60" width="195" height="65" rx="6" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.3" stroke-width="1.8"/>
+      <text x="127" y="84" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a1612" font-weight="500">QUERY</text>
+      <text x="127" y="104" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#3d3528">WHERE date &ge;</text>
+      <text x="127" y="118" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#3d3528">'2026-01-20'</text>
+
+      <!-- Animated arrows -->
+      <line x1="225" y1="95" x2="285" y2="95" stroke="#2d7d46" stroke-opacity="0.6" stroke-width="2" marker-end="url(#a2g)" class="svg-pulse" style="animation-delay: 0s;"/>
+      <line x1="225" y1="95" x2="265" y2="155" stroke="#2d7d46" stroke-opacity="0.35" stroke-width="1.5" fill="none"/>
+      <line x1="265" y1="155" x2="285" y2="155" stroke="#2d7d46" stroke-opacity="0.6" stroke-width="2" marker-end="url(#a2g)" class="svg-pulse" style="animation-delay: 0.5s;"/>
+
+      <!-- MP_01: SKIPPED -->
+      <rect x="290" y="40" width="140" height="50" rx="5" fill="#ebe4d4" stroke="#6b5d49" stroke-opacity="0.25" stroke-width="1.5"/>
+      <text x="360" y="62" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#3d3528">MP_01</text>
+      <text x="360" y="78" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#a89a83">01/01 &ndash; 01/15</text>
+      <line x1="295" y1="45" x2="425" y2="85" stroke="#c0392b" stroke-opacity="0.5" stroke-width="2.5"/>
+      <text x="430" y="72" font-family="IBM Plex Mono,monospace" font-size="10" fill="#c0392b" fill-opacity="0.8">&cross; SKIPPED</text>
+
+      <!-- MP_02: SCANNED -->
+      <rect x="290" y="105" width="140" height="50" rx="5" fill="#e8f0e8" stroke="#2d7d46" stroke-opacity="0.6" stroke-width="2"/>
+      <text x="360" y="127" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a1612" font-weight="500">MP_02</text>
+      <text x="360" y="143" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">01/16 &ndash; 01/31</text>
+      <text x="440" y="137" font-family="IBM Plex Mono,monospace" font-size="11" fill="#2d7d46" fill-opacity="0.85">&#x2713; SCANNED</text>
+
+      <!-- MP_03: SCANNED -->
+      <rect x="290" y="170" width="140" height="50" rx="5" fill="#e8f0e8" stroke="#2d7d46" stroke-opacity="0.6" stroke-width="2"/>
+      <text x="360" y="192" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="#1a1612" font-weight="500">MP_03</text>
+      <text x="360" y="208" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">02/01 &ndash; 02/15</text>
+      <text x="440" y="202" font-family="IBM Plex Mono,monospace" font-size="11" fill="#2d7d46" fill-opacity="0.85">&#x2713; SCANNED</text>
+
+      <!-- Metadata note -->
+      <rect x="480" y="60" width="220" height="48" rx="4" fill="none" stroke="#6b5d49" stroke-opacity="0.15" stroke-width="1" stroke-dasharray="4,4"/>
+      <text x="590" y="80" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#6b5d49">Metadata Lookup:</text>
+      <text x="590" y="96" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#6b5d49">MP_01 max(date) = 01/15</text>
+      <line x1="480" y1="84" x2="430" y2="84" stroke="#6b5d49" stroke-opacity="0.2" stroke-width="1" stroke-dasharray="3,3"/>
+
+      <text x="360" y="235" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#6b5d49">01/15 &lt; 01/20 &rArr; MP_01 pruned (0 bytes scanned). MP_02 + MP_03 scanned (200-1000 MB).</text>
+    </svg>
+    <div class="fig-cap">[ MICRO-PARTITION PRUNING — METADATA LOOKUP &rArr; SKIP IRRELEVANT PARTITIONS &rArr; SCAN ONLY MATCHES ]</div>
+  </figure>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- 2. INGESTION -->
+  <!-- ================================================================ -->
+  <section id="ingest" class="section-anim">
+    <h2>2. Getting Data In — <span class="underline">Ingestion Patterns</span></h2>
+    <div class="h2-sub">COPY INTO &middot; Snowpipe &middot; Streams + Tasks &middot; Dynamic Tables</div>
+
+    <div class="telugu">
+      <div class="tel">Data ni Snowflake loki teeskuravadam = రైతు బజారుకి పంట తీసుకొచ్చినట్టు.</div>
+      <div class="en">COPY INTO = truckload arriving at the wholesale market once a day (batch). Snowpipe = small tempo arriving every hour as vegetables are harvested (near real-time). Streams = the market clerk noting every change in a ledger (CDC log). Dynamic Tables = the shelf that auto-restocks when new produce arrives.</div>
+    </div>
+
+    <div class="table-wrap">
+    <table class="reft">
+      <thead>
+        <tr><th>Pattern</th><th>Trigger</th><th>Latency</th><th>Use When</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>COPY INTO</td><td>Manual / scheduled SQL</td><td>Minutes</td><td>Nightly ETL. Batch. Initial migration.</td></tr>
+        <tr><td>Snowpipe</td><td>S3 event &rArr; SQS &rArr; Snowpipe</td><td>~1 min</td><td>Files arrive unpredictably. Near-real-time.</td></tr>
+        <tr><td>Streams + Tasks</td><td>Scheduled Task on Stream data</td><td>~1 min</td><td>CDC within Snowflake. Transform after ingest.</td></tr>
+        <tr><td>Dynamic Tables</td><td>Auto — source change detected</td><td>Configurable</td><td>Declarative. No MERGE code. Less control.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="content-grid">
+    <div class="content-main">
+
+    <div class="callout callout-warn">
+      <div class="callout-label">&#x26A0; PITFALL — COPY INTO + PURGE = DATA LOSS</div>
+      COPY INTO is <strong>idempotent by default</strong>. Snowflake tracks loaded files — running the same command twice won't duplicate data. But if you use <strong>PURGE = TRUE</strong>, files are deleted from S3 <em>after</em> the load commits. If the load fails mid-way? Already-purged files are gone. Recommendation: use PURGE only after verifying row counts. Better: separate archiving step.
+    </div>
+
+    <div class="callout callout-danger">
+      <div class="callout-label">⚠ YEPPUDU CONFUSE AITAV — SNOWPIPE vs SNOWPIPE STREAMING</div>
+      <strong>Snowpipe</strong> = file-based ingestion (S3 event → load). <strong>Snowpipe Streaming</strong> = row-based ingestion via SDK for low-latency events. Wrong choice hurts: file trickle into Snowpipe Streaming can overpay; row-by-row events in classic Snowpipe can under-deliver latency SLAs.
+    </div>
+
+    <div class="table-wrap">
+      <table class="reft">
+        <thead>
+          <tr><th>Pattern</th><th>When NOT to use</th><th>Practical example</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>COPY INTO</td><td>Not for sub-minute fraud detection feeds.</td><td>Good for nightly 220 GB batch at 1:00 AM; bad for 5-second SLA.</td></tr>
+          <tr><td>Snowpipe</td><td>Not for strict per-row ordering or &lt;5 sec latency.</td><td>If 20,000 files/day arrive randomly, use Snowpipe; if 8,000 events/sec, use streaming.</td></tr>
+          <tr><td>Streams + Tasks</td><td>Not when many consumers need the same stream offset independently.</td><td>One stream + one merge task every 5 min for 3.2M change rows/day; create separate streams per consumer.</td></tr>
+          <tr><td>Dynamic Tables</td><td>Not when you need complex procedural branching or strict deterministic backfills.</td><td>Great for declarative bronze→silver refresh in 10-min target lag; not for custom retry workflows.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mnote">
+      <div class="mnote-label">🧠 MEMORY AID</div>
+      <strong>Ingestion mnemonic: BERS</strong> — <strong>B</strong>atch (COPY), <strong>E</strong>vent-file (Snowpipe), <strong>R</strong>ow-stream (Snowpipe Streaming), <strong>S</strong>tate-change (Streams+Tasks).
+    </div>
+
+    <div class="highlight-box">
+      <div class="label">[ 30s INTERVIEW FRAME ]</div>
+      “I choose ingestion by latency and payload shape: COPY INTO for predictable batch (100-500 GB/night), Snowpipe for event-driven files (~1 min), Snowpipe Streaming for row-level low latency, Streams+Tasks for CDC transforms, and Dynamic Tables when team wants declarative refresh over handwritten MERGE logic.”
+    </div>
+
+    <div class="code-wrap">
+      <button class="copy-ghost" onclick="copyCode(this)">Copy</button>
+      <div class="code-block"><span class="code-lbl">[ LISTING 001: COPY INTO — BATCH LOAD FROM S3 ]</span><span class="cm">-- File format (tells Snowflake how to parse)</span>
+<span class="sn">CREATE FILE FORMAT</span> my_csv TYPE=<span class="str">'CSV'</span>
+  FIELD_OPTIONALLY_ENCLOSED_BY=<span class="str">'"'</span>
+  SKIP_HEADER=<span class="num">1</span> NULL_IF=(<span class="str">'NULL'</span>,<span class="str">'null'</span>,<span class="str">''</span>);
+
+<span class="cm">-- External stage (pointer to cloud storage)</span>
+<span class="sn">CREATE STAGE</span> my_s3 URL=<span class="str">'s3://my-bucket/landing/'</span>
+  STORAGE_INTEGRATION=my_s3 FILE_FORMAT=my_csv;
+
+<span class="cm">-- Load: auto-decompresses gzip, validates, idempotent</span>
+<span class="sn">COPY INTO</span> raw.orders <span class="kw">FROM</span> @my_s3
+  PATTERN=<span class="str">'.*orders_.*\\.csv\\.gz'</span>
+  ON_ERROR=<span class="str">'SKIP_FILE_3%'</span>
+  PURGE=TRUE;  <span class="cm">-- &#x26A0; deletes from S3 after load!</span></div>
+    </div>
+
+    <h3>Streams + Tasks: CDC Within Snowflake</h3>
+    <p>A <strong>Stream</strong> is a lightweight CDC log over a table. Every DML (INSERT/UPDATE/DELETE) is recorded with metadata columns: <code>METADATA$ACTION</code>, <code>$ROW_ID</code>, <code>$IS_UPDATE</code>. A <strong>Task</strong> is a scheduled SQL executor that consumes the stream.</p>
+
+    <div class="code-wrap">
+      <button class="copy-ghost" onclick="copyCode(this)">Copy</button>
+      <div class="code-block"><span class="code-lbl">[ LISTING 002: STREAM + TASK — INCREMENTAL CDC ]</span><span class="cm">-- Create a stream over the source table</span>
+<span class="sn">CREATE STREAM</span> orders_stream ON TABLE raw.orders;
+
+<span class="cm">-- Create a task that runs every 5 minutes</span>
+<span class="sn">CREATE TASK</span> process_orders
+  WAREHOUSE = etl_wh
+  SCHEDULE = <span class="str">'5 minute'</span>
+<span class="kw">WHEN</span>
+  SYSTEM$STREAM_HAS_DATA(<span class="str">'orders_stream'</span>)
+<span class="kw">AS</span>
+  <span class="sn">MERGE INTO</span> dw.fact_orders t
+  <span class="kw">USING</span> (
+    <span class="sn">SELECT</span> order_id, customer_id, amount, <span class="sn">METADATA$ACTION</span> <span class="kw">AS</span> action
+    <span class="kw">FROM</span> orders_stream
+  ) s <span class="kw">ON</span> t.order_id = s.order_id
+  <span class="kw">WHEN MATCHED AND</span> s.action = <span class="str">'DELETE'</span> <span class="kw">THEN DELETE</span>
+  <span class="kw">WHEN MATCHED THEN UPDATE</span> SET t.amount = s.amount
+  <span class="kw">WHEN NOT MATCHED THEN INSERT</span> (order_id, customer_id, amount)
+    <span class="sn">VALUES</span> (s.order_id, s.customer_id, s.amount);</div>
+    </div>
+
+    </div>
+    <aside class="content-margin">
+      <div class="mnote mnote-gold">
+        <div class="mnote-label">&#x1F511; IDEMPOTENCY</div>
+        COPY INTO tracks which files it loaded via metadata. Running it twice on same stage = zero duplicates. Safety net for scheduled ETL.
+      </div>
+      <div class="mnote mnote-acca">
+        <div class="mnote-label">&#x26A0; STREAM PITFALL</div>
+        Streams are <em>offset-based</em>. Once consumed by a DML statement, the offset advances. Two tasks reading the same stream = second task sees empty stream. Use separate streams for separate consumers.
+      </div>
+    </aside>
+    </div>
+  </section>
+
+  <!-- FIG_003: Ingestion Flow SVG -->
+  <section class="section-anim">
+  <figure class="fig">
+    <div class="fig-lbl">FIG_003</div>
+    <svg viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg" style="max-width:700px;">
+      <defs>
+        <marker id="a3" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto"><polygon points="0,0 6,2 0,4" fill="#6b5d49"/></marker>
+        <marker id="a3g" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto"><polygon points="0,0 6,2 0,4" fill="#2d7d46"/></marker>
+      </defs>
+
+      <!-- Source -->
+      <rect x="20" y="105" width="90" height="50" rx="6" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.25" stroke-width="1.5"/>
+      <text x="65" y="125" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">S3 / GCS</text>
+      <text x="65" y="143" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#a89a83">Raw files</text>
+
+      <!-- Branch arrows -->
+      <line x1="110" y1="120" x2="148" y2="120" stroke="#6b5d49" stroke-opacity="0.4" stroke-width="1.5" marker-end="url(#a3)"/>
+      <line x1="110" y1="140" x2="148" y2="200" stroke="#6b5d49" stroke-opacity="0.3" stroke-width="1" fill="none"/>
+      <line x1="148" y1="200" x2="168" y2="200" stroke="#6b5d49" stroke-opacity="0.3" stroke-width="1" marker-end="url(#a3)"/>
+
+      <!-- COPY INTO -->
+      <rect x="150" y="100" width="140" height="40" rx="4" fill="#2b6cb0" stroke="#2b6cb0" stroke-width="1.5"/>
+      <text x="220" y="117" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#ffffff" font-weight="500">COPY INTO</text>
+      <text x="220" y="133" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="rgba(255,255,255,.7)">Batch (manual/scheduled)</text>
+
+      <line x1="290" y1="120" x2="328" y2="120" stroke="#6b5d49" stroke-opacity="0.4" stroke-width="1.5" marker-end="url(#a3)"/>
+
+      <!-- Snowpipe -->
+      <rect x="150" y="180" width="140" height="40" rx="4" fill="#2d7d46" stroke="#2d7d46" stroke-width="1.5"/>
+      <text x="220" y="197" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#ffffff" font-weight="500">Snowpipe</text>
+      <text x="220" y="213" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="rgba(255,255,255,.7)">Event-driven (~1 min)</text>
+
+      <line x1="290" y1="200" x2="328" y2="200" stroke="#6b5d49" stroke-opacity="0.4" stroke-width="1.5" marker-end="url(#a3)"/>
+
+      <!-- Target Tables -->
+      <rect x="330" y="100" width="140" height="40" rx="6" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.25" stroke-width="1.5"/>
+      <text x="400" y="117" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#3d3528">raw.orders</text>
+      <text x="400" y="133" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#a89a83">Base table</text>
+
+      <!-- Stream -->
+      <rect x="330" y="180" width="140" height="40" rx="6" fill="#b8860b" stroke="#b8860b" stroke-opacity="0.7" stroke-width="1.5"/>
+      <text x="400" y="197" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#ffffff" font-weight="500">Stream</text>
+      <text x="400" y="213" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="rgba(255,255,255,.8)">CDC log</text>
+
+      <line x1="470" y1="120" x2="510" y2="120" stroke="#6b5d49" stroke-opacity="0.4" stroke-width="1.5" marker-end="url(#a3)"/>
+      <line x1="470" y1="200" x2="510" y2="200" stroke="#6b5d49" stroke-opacity="0.4" stroke-width="1.5" marker-end="url(#a3)"/>
+
+      <!-- Destination -->
+      <rect x="512" y="85" width="160" height="130" rx="6" fill="none" stroke="#1a1612" stroke-opacity="0.08" stroke-width="1.5"/>
+      <text x="592" y="105" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="#6b5d49" letter-spacing="0.5">DW TABLES</text>
+
+      <rect x="525" y="115" width="134" height="28" rx="3" fill="#ebe4d4" stroke="#2d7d46" stroke-opacity="0.35" stroke-width="1"/>
+      <text x="592" y="133" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2d7d46">dw.fact_orders</text>
+
+      <rect x="525" y="150" width="134" height="28" rx="3" fill="#ebe4d4" stroke="#2b6cb0" stroke-opacity="0.35" stroke-width="1"/>
+      <text x="592" y="168" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2b6cb0">dw.dim_customer</text>
+
+      <rect x="525" y="185" width="134" height="28" rx="3" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.08" stroke-width="1"/>
+      <text x="592" y="203" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#a89a83">dw.dim_product</text>
+
+      <text x="360" y="255" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#6b5d49">COPY INTO: batch load &rarr; raw table. Snowpipe: event-driven &rarr; stream logs changes &rarr; task merges into DW.</text>
+    </svg>
+    <div class="fig-cap">[ INGESTION ARCHITECTURE — TWO PATHS FROM SOURCE TO DATA WAREHOUSE ]</div>
+  </figure>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- 3. SQL PATTERNS -->
+  <!-- ================================================================ -->
+  <section id="sql" class="section-anim">
+    <h2>3. SQL — <span class="underline">The Patterns You Write Every Week</span></h2>
+    <div class="h2-sub">QUALIFY &middot; MERGE &middot; CTEs &middot; LAG/LEAD &middot; Window Functions</div>
+
+    <p><strong>These four patterns cover ~80% of production SQL.</strong> Master them and you're ahead of most candidates claiming "5 years Snowflake experience." Each pattern below answers: what problem it solves, where it sits in the pipeline, and when NOT to use it.</p>
+
+    <div class="telugu">
+      <div class="tel">Window functions ante train lo seat numbers allocate chesinattu.</div>
+      <div class="en">Entire train = full dataset. Each coach = <code>PARTITION BY</code>. Inside each coach, seat order = <code>ORDER BY</code>. <code>ROW_NUMBER()</code> gives each passenger a rank without removing anyone. After ranks are assigned, <code>QUALIFY</code> says “each coach lo first seat only ivvu.”</div>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-label">⚠ YEPPUDU CONFUSE AITAV — WHERE vs HAVING vs QUALIFY</div>
+      <strong>Order gurthu pettuko:</strong> <strong>WHERE</strong> filters rows before grouping, <strong>HAVING</strong> filters after grouping, <strong>QUALIFY</strong> filters after window functions. Writing trick: write WHERE first, then ask “aggregate condition aa?” → HAVING, “window rank condition aa?” → QUALIFY.
+    </div>
+
+    <div class="mnote mnote-gold">
+      <div class="mnote-label">🧠 MEMORY AID</div>
+      <strong>WHQ Ladder:</strong> <strong>W</strong>HERE (raw rows) → <strong>H</strong>AVING (group result) → <strong>Q</strong>UALIFY (window result). Interview lo quick line: “Q comes last because window comes late in logical execution.”
+    </div>
+
+    <div class="highlight-box">
+      <div class="label">[ 30s INTERVIEW FRAME + REAL NUMBERS ]</div>
+      “For weekly dedup + CDC pipelines, I use QUALIFY ROW_NUMBER for latest-record selection, LAG for change detection, MERGE for atomic upsert, and CTEs for readability. Example: in a 180M-row order table, QUALIFY-based dedup reduced output to 132M unique orders before downstream joins, cutting runtime from 19 min to 7 min on a Medium warehouse.”
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-label">[ WHEN NOT TO USE — QUICK GRID ]</div>
+      Dedup with QUALIFY: don’t use when full history is needed. LAG-based CDC: don’t use if source already ships reliable CDC flags. MERGE: don’t use for pure append-only loads. Long CTE chains: don’t use when same intermediate output is reused by multiple downstream jobs — materialize once.
+    </div>
+
+    <div class="code-wrap">
+      <button class="copy-ghost" onclick="copyCode(this)">Copy</button>
+      <div class="code-block"><span class="code-lbl">[ PATTERN 001: DEDUPLICATION — LATEST ROW PER ENTITY ]</span><span class="cm">-- Problem: raw_orders has duplicates (same order_id loaded multiple times)</span>
+<span class="cm">-- Solution: keep only the latest version per order_id</span>
+
+<span class="sn">SELECT</span> * <span class="kw">FROM</span> raw_orders
+<span class="sn">QUALIFY</span> <span class="sn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+  <span class="sn">PARTITION BY</span> order_id
+  <span class="sn">ORDER BY</span> loaded_ts <span class="kw">DESC</span>
+) = <span class="num">1</span>;
+
+<span class="cm">-- QUALIFY = WHERE for window functions</span>
+<span class="cm">-- Snowflake + BigQuery support it. For other DBs, wrap in CTE + WHERE rn=1.</span>
+<span class="cm">-- When NOT to use: if you need ALL versions (SCD Type 2), use LAG() instead.</span></div>
+    </div>
+
+    <div class="code-wrap">
+      <button class="copy-ghost" onclick="copyCode(this)">Copy</button>
+      <div class="code-block"><span class="code-lbl">[ PATTERN 002: CHANGE DETECTION — CDC WITH LAG() ]</span><span class="cm">-- Problem: which customers changed their address?</span>
+<span class="cm">-- Solution: compare current row to previous row per customer</span>
+
+<span class="sn">SELECT</span> customer_id, address, effective_date,
+  <span class="sn">LAG</span>(address) <span class="kw">OVER</span> (
+    <span class="sn">PARTITION BY</span> customer_id <span class="sn">ORDER BY</span> effective_date
+  ) <span class="kw">AS</span> prev_address,
+  <span class="sn">CASE WHEN</span> address <span class="kw">IS DISTINCT FROM</span>
+    <span class="sn">LAG</span>(address) <span class="kw">OVER</span> (<span class="sn">PARTITION BY</span> customer_id <span class="sn">ORDER BY</span> effective_date)
+    <span class="kw">THEN</span> <span class="str">'CHANGED'</span> <span class="kw">ELSE</span> <span class="str">'SAME'</span> <span class="kw">END</span> <span class="kw">AS</span> status
+<span class="kw">FROM</span> customer_history;
+<span class="cm">-- Only rows with status='CHANGED' &rarr; feed into SCD Type 2 MERGE</span>
+<span class="cm">-- When NOT to use: if source already provides CDC flags (use those instead)</span></div>
+    </div>
+
+    <div class="code-wrap">
+      <button class="copy-ghost" onclick="copyCode(this)">Copy</button>
+      <div class="code-block"><span class="code-lbl">[ PATTERN 003: MERGE — UPSERT (MATCHED&rarr;UPDATE, NOT MATCHED&rarr;INSERT) ]</span><span class="sn">MERGE INTO</span> dim_customer <span class="kw">AS</span> t
+<span class="kw">USING</span> stg_customer_updates <span class="kw">AS</span> s
+  <span class="kw">ON</span> t.customer_id = s.customer_id
+<span class="kw">WHEN MATCHED THEN</span> <span class="sn">UPDATE SET</span>
+  t.name=s.name, t.address=s.address, t.updated_ts=<span class="sn">CURRENT_TIMESTAMP</span>()
+<span class="kw">WHEN NOT MATCHED THEN</span> <span class="sn">INSERT</span>
+  (customer_id, name, address, created_ts, updated_ts)
+  <span class="sn">VALUES</span> (s.customer_id, s.name, s.address,
+    <span class="sn">CURRENT_TIMESTAMP</span>(), <span class="sn">CURRENT_TIMESTAMP</span>());
+
+<span class="cm">-- MERGE is atomic (all-or-nothing). Max 3 WHEN clauses.</span>
+<span class="cm">-- When NOT to use: if you only INSERT (use INSERT), only UPDATE (use UPDATE)</span></div>
+    </div>
+
+    <div class="code-wrap">
+      <button class="copy-ghost" onclick="copyCode(this)">Copy</button>
+      <div class="code-block"><span class="code-lbl">[ PATTERN 004: CTE PIPELINE — STAGE-BY-STAGE TRANSFORMATION ]</span><span class="kw">WITH</span>
+source <span class="kw">AS</span> (
+  <span class="sn">SELECT</span> * <span class="kw">FROM</span> raw.orders
+  <span class="kw">WHERE</span> status <span class="kw">IS NOT NULL AND</span> amount > <span class="num">0</span>
+),
+deduped <span class="kw">AS</span> (
+  <span class="sn">SELECT</span> * <span class="kw">FROM</span> source
+  <span class="sn">QUALIFY</span> <span class="sn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+    <span class="sn">PARTITION BY</span> order_id <span class="sn">ORDER BY</span> loaded_ts <span class="kw">DESC</span>
+  ) = <span class="num">1</span>
+),
+enriched <span class="kw">AS</span> (
+  <span class="sn">SELECT</span> d.date_key, c.customer_key, p.product_key, o.amount, o.qty
+  <span class="kw">FROM</span> deduped o
+  <span class="kw">LEFT JOIN</span> dim_date d <span class="kw">ON</span> o.order_date = d.date
+  <span class="kw">LEFT JOIN</span> dim_customer c <span class="kw">ON</span> o.customer_id = c.customer_key
+  <span class="kw">LEFT JOIN</span> dim_product p <span class="kw">ON</span> o.product_id = p.product_key
+)
+<span class="sn">SELECT</span> date_key, customer_key, <span class="sn">COUNT</span>(*) <span class="kw">AS</span> orders,
+       <span class="sn">SUM</span>(amount) <span class="kw">AS</span> revenue
+<span class="kw">FROM</span> enriched <span class="sn">GROUP BY</span> date_key, customer_key;
+
+<span class="cm">-- CTEs make pipelines readable. Each block = one stage.</span>
+<span class="cm">-- When NOT to use: if intermediate results used by 3+ downstream queries</span>
+<span class="cm">--   &rarr; materialize as a temp table instead (CTE runs once per reference)</span></div>
+    </div>
+  </section>
+
+  <!-- FIG_004: SQL Execution Order SVG -->
+  <section class="section-anim">
+  <figure class="fig">
+    <div class="fig-lbl">FIG_004</div>
+    <svg viewBox="0 0 720 90" xmlns="http://www.w3.org/2000/svg" style="max-width:720px;">
+      <defs>
+        <marker id="a4" markerWidth="5" markerHeight="4" refX="5" refY="2" orient="auto"><polygon points="0,0 5,2 0,4" fill="#a89a83"/></marker>
+      </defs>
+
+      <rect x="5" y="24" width="52" height="30" rx="4" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.15" stroke-width="1"/>
+      <text x="31" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">FROM</text>
+      <line x1="59" y1="39" x2="67" y2="39" stroke="#a89a83" stroke-width="1" marker-end="url(#a4)"/>
+
+      <rect x="70" y="24" width="56" height="30" rx="4" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.15" stroke-width="1"/>
+      <text x="98" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">WHERE</text>
+      <line x1="128" y1="39" x2="136" y2="39" stroke="#a89a83" stroke-width="1" marker-end="url(#a4)"/>
+
+      <rect x="139" y="24" width="64" height="30" rx="4" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.15" stroke-width="1"/>
+      <text x="171" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">GROUP BY</text>
+      <line x1="205" y1="39" x2="213" y2="39" stroke="#a89a83" stroke-width="1" marker-end="url(#a4)"/>
+
+      <rect x="216" y="24" width="52" height="30" rx="4" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.15" stroke-width="1"/>
+      <text x="242" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">HAVING</text>
+      <line x1="270" y1="39" x2="278" y2="39" stroke="#a89a83" stroke-width="1" marker-end="url(#a4)"/>
+
+      <!-- WINDOW is highlighted -->
+      <rect x="281" y="24" width="64" height="30" rx="4" fill="#e8f0e8" stroke="#2d7d46" stroke-opacity="0.55" stroke-width="1.5"/>
+      <text x="313" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#2d7d46">WINDOW</text>
+      <line x1="347" y1="39" x2="355" y2="39" stroke="#a89a83" stroke-width="1" marker-end="url(#a4)"/>
+
+      <rect x="358" y="24" width="56" height="30" rx="4" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.15" stroke-width="1"/>
+      <text x="386" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">SELECT</text>
+      <line x1="416" y1="39" x2="424" y2="39" stroke="#a89a83" stroke-width="1" marker-end="url(#a4)"/>
+
+      <rect x="427" y="24" width="64" height="30" rx="4" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.15" stroke-width="1"/>
+      <text x="459" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">QUALIFY</text>
+      <line x1="493" y1="39" x2="501" y2="39" stroke="#a89a83" stroke-width="1" marker-end="url(#a4)"/>
+
+      <rect x="504" y="24" width="64" height="30" rx="4" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.15" stroke-width="1"/>
+      <text x="536" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">ORDER BY</text>
+      <line x1="570" y1="39" x2="578" y2="39" stroke="#a89a83" stroke-width="1" marker-end="url(#a4)"/>
+
+      <rect x="581" y="24" width="52" height="30" rx="4" fill="#ebe4d4" stroke="#1a1612" stroke-opacity="0.15" stroke-width="1"/>
+      <text x="607" y="43" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#3d3528">LIMIT</text>
+      <line x1="635" y1="39" x2="643" y2="39" stroke="#a89a83" stroke-width="1" marker-end="url(#a4)"/>
+
+      <text x="360" y="80" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#6b5d49">SQL Logical Execution Order: FROM &rarr; WHERE &rarr; GROUP BY &rarr; HAVING &rarr; WINDOW &rarr; SELECT &rarr; QUALIFY &rarr; ORDER BY &rarr; LIMIT</text>
+    </svg>
+    <div class="fig-cap">[ SQL EXECUTION ORDER — WINDOW FUNCTIONS EXECUTE BETWEEN HAVING AND SELECT ]</div>
+  </figure>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- 4. DATA MODELING -->
+  <!-- ================================================================ -->
+  <section id="model" class="section-anim">
+    <h2>4. Data Modeling — <span class="underline">Design for Queryability</span></h2>
+    <div class="h2-sub">Star Schema &middot; SCD Types &middot; Clustering Keys &middot; Naming Conventions</div>
+
+    <div class="telugu">
+      <div class="tel">Star schema = మన లైబ్రరీలో పుస్తకాల అమరిక లా ఉంటది.</div>
+      <div class="en">Fact table = the checkout register recording every book borrowed (many rows, tall). Dimension tables = the shelves sorted by genre (history shelf, science shelf, Telugu shelf — short, wide). Queries are fast because you know exactly which shelf to look at. No need to scan the entire library.</div>
+    </div>
+
+    <div class="content-grid">
+    <div class="content-main">
+
+    <h3>Star Schema Basics</h3>
+    <p><strong>Fact tables</strong> contain measures (amount, qty, count) and foreign keys to dimensions. They grow tall — billions of rows. <strong>Dimension tables</strong> contain descriptive attributes (customer name, address, product category). They grow wide — dozens of columns, fewer rows.</p>
+
+    <div class="callout callout-success">
+      <div class="callout-label">[ SNOWFLAKE-SPECIFIC: CLUSTERING KEYS ]</div>
+      Snowflake automatically partitions data into micro-partitions. But if your fact table has random date distribution, every query will scan everything. A <strong>clustering key</strong> enforces physical sort order, improving partition pruning. Example: <code>ALTER TABLE fact_orders CLUSTER BY (order_date)</code>. Re-clustering costs credits — only cluster large tables (&gt;1 TB) with selective queries.<br><br>
+      <strong>When to use:</strong> Tables &gt;1 TB, queries have highly selective WHERE clauses on a date/region column.<br>
+      <strong>When NOT to use:</strong> Small tables (&lt;100 GB), tables queried without filters, tables that are constantly bulk-loaded.
+    </div>
+
+    <h3>SCD Type 2 in Snowflake</h3>
+    <p>Slowly Changing Dimension Type 2 tracks history by creating a new row for every change. Snowflake makes this easier with <strong>Streams + Tasks</strong> and <strong>QUALIFY + LAG</strong> for change detection.</p>
+
+    <div class="telugu">
+      <div class="tel">SCD types ni ration card address update laga think cheyyi.</div>
+      <div class="en">Type 1 = old address erase చేసి కొత్తది రాయడం (no history). Type 2 = every move ki new page open చేసి old page archive చెయ్యడం (full history). Type 3 = current + previous address మాత్రమే ఉంచడం (limited history columns).</div>
+    </div>
+
+    <div class="callout callout-danger">
+      <div class="callout-label">⚠ YEPPUDU CONFUSE AITAV — CLUSTERING vs PARTITIONING</div>
+      Traditional partitioning physically splits data into explicit partitions/files you define. Snowflake mainly uses automatic micro-partitions; clustering just improves data locality within those micro-partitions. So design decisions are different: you tune clustering depth, not manual partition DDL.
+    </div>
+
+    <div class="mnote">
+      <div class="mnote-label">🧠 SCD MEMORY AID</div>
+      <strong>SCD = 1/2/3</strong> → <strong>1=Replace</strong>, <strong>2=History</strong>, <strong>3=Selected columns</strong>. Quick interview line: “If compliance asks ‘as-of report’, Type 2 is default.”
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-label">[ WHEN NOT TO USE ]</div>
+      <strong>Type 1:</strong> don’t use when audits require historical truth. <strong>Type 2:</strong> don’t use for ultra-high-churn attributes unless storage/query plan supports growth (e.g., 50M customers × 20 changes/year). <strong>Type 3:</strong> don’t use if business asks for more than “current + previous” versions.
+    </div>
+
+    <div class="highlight-box">
+      <div class="label">[ 30s INTERVIEW FRAME + REAL NUMBERS ]</div>
+      “I model reporting marts in star schema: facts at transaction grain, dimensions for attributes, and SCD type based on history needs. In one pipeline, customer dimension grew from 12M to 38M rows in 18 months due to Type 2 history, but enabled accurate month-end re-statement reports and reduced reconciliation defects by ~60%.”
+    </div>
+
+    <div class="code-wrap">
+      <button class="copy-ghost" onclick="copyCode(this)">Copy</button>
+      <div class="code-block"><span class="code-lbl">[ PATTERN 005: SCD TYPE 2 — TRACK HISTORY ]</span><span class="sn">MERGE INTO</span> dim_customer_scd2 <span class="kw">AS</span> t
+<span class="kw">USING</span> (
+  <span class="sn">SELECT</span> customer_id, name, address,
+    <span class="sn">LAG</span>(address) <span class="kw">OVER</span> (
+      <span class="sn">PARTITION BY</span> customer_id <span class="sn">ORDER BY</span> loaded_ts
+    ) <span class="kw">AS</span> prev_address
+  <span class="kw">FROM</span> stg_customer
+) s <span class="kw">ON</span> t.customer_id = s.customer_id
+   <span class="kw">AND</span> t.is_current = <span class="sn">TRUE</span>
+<span class="kw">WHEN MATCHED AND</span> s.address <span class="kw">IS DISTINCT FROM</span> t.address
+  <span class="kw">THEN</span> <span class="sn">UPDATE SET</span>
+    t.is_current = <span class="sn">FALSE</span>,
+    t.end_date = <span class="sn">CURRENT_DATE</span>();
+
+<span class="cm">-- Then insert the new version (separate INSERT for clarity)</span>
+<span class="sn">INSERT INTO</span> dim_customer_scd2
+  (customer_id, name, address, is_current, start_date, end_date)
+<span class="sn">SELECT</span> customer_id, name, address, <span class="sn">TRUE</span>,
+  <span class="sn">CURRENT_DATE</span>, <span class="sn">NULL</span>
+<span class="kw">FROM</span> stg_customer s
+<span class="kw">WHERE NOT EXISTS</span> (
+  <span class="sn">SELECT</span> <span class="num">1</span> <span class="kw">FROM</span> dim_customer_scd2 t
+  <span class="kw">WHERE</span> t.customer_id = s.customer_id
+    <span class="kw">AND</span> t.address = s.address
+    <span class="kw">AND</span> t.is_current = <span class="sn">TRUE</span>
+);</div>
+    </div>
+
+    </div>
+    <aside class="content-margin">
+      <div class="mnote mnote-acca">
+        <div class="mnote-label">&#x26A0; SCD COST</div>
+        SCD Type 2 grows dimension tables without bound. A customer with 200 changes creates 200 rows. Plan for this: partition history by year, archive old rows.
+      </div>
+      <div class="mnote">
+        <div class="mnote-label">&#x1F4A1; INTERVIEW FRAME</div>
+        "I use SCD Type 2 for slowly changing attributes when business needs historical reporting. Type 1 for reference data that doesn't need history."
+      </div>
+    </aside>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- 5. PERFORMANCE -->
+  <!-- ================================================================ -->
+  <section id="perf" class="section-anim">
+    <h2>5. Performance — <span class="underline">Faster Queries, Lower Cost</span></h2>
+    <div class="h2-sub">Warehouse Sizing &middot; Query Profiling &middot; Materialized Views &middot; Search Optimization</div>
+
+    <div class="telugu">
+      <div class="tel">Query optimization = కూరగాయలు కోసేటప్పుడు కత్తి పదును చెక్ చేసుకోవడం లా ఉంటది.</div>
+      <div class="en">A blunt knife cuts vegetables slowly — you apply more force, get tired, waste energy. A sharp knife cuts clean. Similarly, bad SQL + bigger warehouse = still slow, just more expensive. Sharpen the query first, THEN scale. Snowflake's <strong>query profile</strong> is your whetstone.</div>
+    </div>
+
+    <div class="content-grid">
+    <div class="content-main">
+
+    <h3>Warehouse Sizing Tradeoffs</h3>
+    <div class="table-wrap">
+    <table class="reft">
+      <thead>
+        <tr><th>Size</th><th>Nodes</th><th>Credits/hr</th><th>Best For</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>X-Small</td><td>1</td><td>1</td><td>Dev, light ad-hoc queries</td></tr>
+        <tr><td>Small</td><td>2</td><td>2</td><td>BI dashboards, small ETL</td></tr>
+        <tr><td>Medium</td><td>4</td><td>4</td><td>Production ETL, moderate joins</td></tr>
+        <tr><td>Large</td><td>8</td><td>8</td><td>Large transformations, heavy queries</td></tr>
+        <tr><td>X-Large</td><td>16</td><td>16</td><td>Very large scans, complex aggregations</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="highlight-box">
+      <div class="label">&#x26A0; CRITICAL: Warehouses scale horizontally, not vertically</div>
+      Doubling warehouse size (XS &rarr; S) doubles nodes. It <strong>does not</strong> make a single-threaded query faster. Queries must use parallel operators (scan across partitions, distributed joins) to benefit. Always check query profile first.
+    </div>
+
+    <h3>Query Profiling: The First Thing To Do</h3>
+    <p>After running a slow query, click <strong>Query Profile</strong> in Snowsight. Look for:</p>
+
+    <ol>
+      <li><strong>Full table scans</strong> on large tables — indicates poor partition pruning. Check clustering.</li>
+      <li><strong>Join spill</strong> — data exceeds memory, spills to remote disk. Increase warehouse size or add cluster key.</li>
+      <li><strong>Heavy aggregation</strong> — GROUP BY on high-cardinality column. Pre-aggregate with materialized views.</li>
+      <li><strong>Excessive data spilling</strong> — warehouse is too small for the data volume.</li>
+    </ol>
+
+    <div class="pros-cons">
+      <div class="pro">&#x2713; Profile first, then size up</div>
+      <div class="con">&#x2717; Sizing up without profiling wastes credits</div>
+      <div class="pro">&#x2713; Clustering helps selective queries</div>
+      <div class="con">&#x2717; Clustering costs credits to maintain</div>
+    </div>
+
+    <h3>Materialized Views</h3>
+    <p>Snowflake's materialized views store pre-computed results and auto-refresh when base data changes. Use them for:</p>
+    <ul>
+      <li>Pre-aggregated summaries (daily totals, counts by category)</li>
+      <li>Filtered subsets of large tables</li>
+      <li>Expensive joins across stable data</li>
+    </ul>
+
+    <div class="code-wrap">
+      <button class="copy-ghost" onclick="copyCode(this)">Copy</button>
+      <div class="code-block"><span class="code-lbl">[ LISTING 006: MATERIALIZED VIEW — PRE-AGGREGATE DAILY SALES ]</span><span class="sn">CREATE MATERIALIZED VIEW</span> daily_sales_mv <span class="kw">AS</span>
+<span class="sn">SELECT</span> order_date, <span class="sn">SUM</span>(amount) <span class="kw">AS</span> total_revenue,
+       <span class="sn">COUNT</span>(*) <span class="kw">AS</span> order_count
+<span class="kw">FROM</span> fact_orders
+<span class="sn">GROUP BY</span> order_date;
+
+<span class="cm">-- MV is auto-refreshed when fact_orders changes</span>
+<span class="cm">-- Limitations: only a single table, no WHERE, no JOIN, no HAVING</span>
+<span class="cm">-- Cost: credits for refresh. Only worth it for large tables with expensive aggregations.</span></div>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-label">⚠ YEPPUDU CONFUSE AITAV — WAREHOUSE SIZE MYTH</div>
+      Doubling warehouse size doesn't guarantee a single-threaded query gets faster. Idi supermarket lo extra checkout counters add chesinattu — queue unte chala help, oka customer maatrame unte use ledu. Scale helps parallel workloads, not fundamentally poor plan shapes.
+    </div>
+
+    <div class="mnote mnote-gold">
+      <div class="mnote-label">🧠 PROFILE CHECKLIST</div>
+      <strong>FJHA mnemonic:</strong> <strong>F</strong>ilter pushdown unda? <strong>J</strong>oin spill jaruguthunda? <strong>H</strong>eavy aggregation ekkada? <strong>A</strong>mount scanned entha? Start here before resizing warehouses.
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-label">[ WHEN NOT TO USE ]</div>
+      <strong>Bigger warehouse:</strong> don’t use as first fix for unfiltered scans. <strong>Materialized View:</strong> don’t use for rapidly changing base tables where refresh cost exceeds query savings. <strong>Search Optimization:</strong> don’t enable on low-selectivity predicates (you pay maintenance without gains).
+    </div>
+
+    <div class="highlight-box">
+      <div class="label">[ 30s INTERVIEW FRAME + REAL NUMBERS ]</div>
+      “My performance workflow is profile-first: FJHA checklist, then SQL rewrite, then storage tuning, and only then warehouse resize. In one workload scanning ~4.6 TB/query, adding selective filters + clustering cut scan to ~620 GB and runtime from 11m to 2m40s; we kept warehouse at Medium instead of scaling to XL, saving ~70% credits.”
+    </div>
+
+    </div>
+    <aside class="content-margin">
+      <div class="mnote">
+        <div class="mnote-label">&#x1F50D; QUERY PROFILE</div>
+        Run <code>EXPLAIN USING JSON</code> before the query to see the plan without executing.
+      </div>
+      <div class="mnote mnote-acca">
+        <div class="mnote-label">&#x26A0; MV LIMITS</div>
+        Materialized views in Snowflake are limited: single table, no JOIN, no WHERE, no HAVING, no window functions. Use them only for simple aggregations.
+      </div>
+    </aside>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- 6. KNOWLEDGE CHECK -->
+  <!-- ================================================================ -->
+  <section id="quiz" class="section-anim">
+    <h2>Knowledge <span class="underline">Check</span></h2>
+    <div class="h2-sub">Test your understanding of Snowflake concepts</div>
+
+    <div class="score-bar">
+      <div class="score-stat">Score: <strong id="scoreNum">0</strong>/<strong id="scoreTotal">0</strong></div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+      <button class="btn btn-sm btn-ghost" onclick="resetQuiz()">Reset</button>
+    </div>
+
+    <div id="quizContainer" class="poll-wrap">
+      <div class="poll-card" data-answer="B" data-qid="0">
+        <div class="poll-q-num">Q1</div>
+        <div class="poll-q">What happens when you run the same query twice within 24 hours on an active warehouse?</div>
+        <div class="poll-options">
+          <div class="poll-opt" onclick="selectPoll(this, 'A', 0)"><span class="letter">A</span><span class="txt">Full rescan of all micro-partitions</span></div>
+          <div class="poll-opt" onclick="selectPoll(this, 'B', 0)"><span class="letter">B</span><span class="txt">Cached result from service layer — zero compute cost</span></div>
+          <div class="poll-opt" onclick="selectPoll(this, 'C', 0)"><span class="letter">C</span><span class="txt">Error — duplicate query not allowed</span></div>
+          <div class="poll-opt" onclick="selectPoll(this, 'D', 0)"><span class="letter">D</span><span class="txt">Result from warehouse SSD cache</span></div>
+        </div>
+        <div class="poll-reveal" id="reveal0"></div>
+      </div>
+
+      <div class="poll-card" data-answer="B" data-qid="1">
+        <div class="poll-q-num">Q2</div>
+        <div class="poll-q">What's the difference between Snowpipe and Snowpipe Streaming?</div>
+        <div class="poll-options">
+          <div class="poll-opt" onclick="selectPoll(this, 'A', 1)"><span class="letter">A</span><span class="txt">Same thing, different names</span></div>
+          <div class="poll-opt" onclick="selectPoll(this, 'B', 1)"><span class="letter">B</span><span class="txt">Snowpipe is file-based (S3 event → load). Snowpipe Streaming is row-based (Java SDK → low latency).</span></div>
+          <div class="poll-opt" onclick="selectPoll(this, 'C', 1)"><span class="letter">C</span><span class="txt">Snowpipe is faster but more expensive</span></div>
+          <div class="poll-opt" onclick="selectPoll(this, 'D', 1)"><span class="letter">D</span><span class="txt">Snowpipe Streaming only works on AWS</span></div>
+        </div>
+        <div class="poll-reveal" id="reveal1"></div>
+      </div>
+
+      <div class="poll-card" data-answer="B" data-qid="2">
+        <div class="poll-q-num">Q3</div>
+        <div class="poll-q">Which SQL pattern deduplicates rows keeping the latest version per key?</div>
+        <div class="poll-options">
+          <div class="poll-opt" onclick="selectPoll(this, 'A', 2)"><span class="letter">A</span><span class="txt">GROUP BY with MAX()</span></div>
+          <div class="poll-opt" onclick="selectPoll(this, 'B', 2)"><span class="letter">B</span><span class="txt">ROW_NUMBER() with QUALIFY = 1</span></div>
+          <div class="poll-opt" onclick="selectPoll(this, 'C', 2)"><span class="letter">C</span><span class="txt">SELECT DISTINCT</span></div>
+          <div class="poll-opt" onclick="selectPoll(this, 'D', 2)"><span class="letter">D</span><span class="txt">MERGE with DELETE</span></div>
+        </div>
+        <div class="poll-reveal" id="reveal2"></div>
+      </div>
+
+      <div class="poll-card" data-answer="B" data-qid="3">
+        <div class="poll-q-num">Q4</div>
+        <div class="poll-q">When should you add a clustering key to a Snowflake table?</div>
+        <div class="poll-options">
+          <div class="poll-opt" onclick="selectPoll(this, 'A', 3)"><span class="letter">A</span><span class="txt">On every table, always</span></div>
+          <div class="poll-opt" onclick="selectPoll(this, 'B', 3)"><span class="letter">B</span><span class="txt">Only on tables &gt; 1TB with selective WHERE clause filters</span></div>
+          <div class="poll-opt" onclick="selectPoll(this, 'C', 3)"><span class="letter">C</span><span class="txt">Only on tables &lt; 100GB</span></div>
+          <div class="poll-opt" onclick="selectPoll(this, 'D', 3)"><span class="letter">D</span><span class="txt">Never — micro-partitions are enough</span></div>
+        </div>
+        <div class="poll-reveal" id="reveal3"></div>
+      </div>
+    </div>
+  </section>
+
+</div> <!-- /main-inner -->
+</div> <!-- /main -->
+
+<script>
+/* ============================================================
+   JAVASCRIPT
+   ============================================================ */
+
+/* --- Dark Mode --- */
+function toggleDark() {
+  var html = document.documentElement;
+  if (html.getAttribute('data-theme') === 'dark') {
+    html.removeAttribute('data-theme');
+    localStorage.setItem('theme', 'light');
+  } else {
+    html.setAttribute('data-theme', 'dark');
+    localStorage.setItem('theme', 'dark');
+  }
+}
+(function() {
+  if (localStorage.getItem('theme') === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+})();
+
+function changeFontSize(delta) {
+  var el = document.querySelector('.main-inner');
+  var current = parseFloat(getComputedStyle(el).fontSize) || 15;
+  var newSize = Math.min(Math.max(current + delta, 12), 20);
+  el.style.fontSize = newSize + 'px';
+  localStorage.setItem('snowflake-font-size', newSize);
+}
+// Restore saved font size
+(function() {
+  var saved = localStorage.getItem('snowflake-font-size');
+  if (saved) document.querySelector('.main-inner').style.fontSize = saved + 'px';
+})();
+
+/* --- Sidebar Toggle --- */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+document.querySelectorAll('#sidebar a').forEach(function(a) {
+  a.addEventListener('click', function() {
+    document.getElementById('sidebar').classList.remove('open');
+  });
+});
+
+/* --- Nav Filter --- */
+function filterNav() {
+  var q = document.getElementById('sbSearchInput').value.toLowerCase();
+  document.querySelectorAll('#sbNav a').forEach(function(a) {
+    a.style.display = a.textContent.toLowerCase().includes(q) ? 'flex' : 'none';
+  });
+}
+
+/* --- Active Nav Highlight on Scroll --- */
+(function() {
+  var sections = document.querySelectorAll('.section-anim[id]');
+  var navLinks = document.querySelectorAll('#sbNav a[href^="#"]');
+
+  function highlightNav() {
+    var scrollY = window.scrollY + 120;
+    var current = '';
+    sections.forEach(function(s) {
+      if (s.offsetTop <= scrollY && s.offsetTop + s.offsetHeight > scrollY) {
+        current = s.getAttribute('id');
+      }
+    });
+    navLinks.forEach(function(a) {
+      a.classList.remove('active');
+      if (a.getAttribute('href') === '#' + current) a.classList.add('active');
+    });
+  }
+  window.addEventListener('scroll', highlightNav, { passive: true });
+})();
+
+/* --- Intersection Observer Animations --- */
+(function() {
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.section-anim').forEach(function(el) { observer.observe(el); });
+})();
+
+/* --- Copy Code --- */
+function copyCode(btn) {
+  var block = btn.nextElementSibling;
+  var text = block.textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() {
+      var orig = btn.textContent;
+      btn.textContent = '\u2713 Copied';
+      btn.style.color = '#b5bd68';
+      setTimeout(function() {
+        btn.textContent = orig;
+        btn.style.color = '';
+      }, 1500);
+    });
+  }
+}
+
+/* --- Quiz State --- */
+var quizState = { answered: 0, correct: 0, total: document.querySelectorAll('.poll-card').length };
+var quizExplanations = {
+  0: 'Result Cache is in the Service Layer, persists 24h, works across warehouses. Same byte-for-byte SQL = instant result, zero credits.',
+  1: 'Snowpipe watches cloud storage for new files. Snowpipe Streaming ingests row-by-row via SDK — lower latency, higher cost. Choose based on source pattern.',
+  2: 'ROW_NUMBER() OVER (PARTITION BY key ORDER BY ts DESC) + QUALIFY = 1 is the standard dedup pattern. QUALIFY filters after window functions execute.',
+  3: 'Clustering is optional and costs credits. Use it when: table > 1TB, queries have highly selective filters on a column, and partition pruning alone isn\'t enough.'
+};
+
+function selectPoll(row, selected, qid) {
+  var card = row.closest('.poll-card');
+  var answer = card.dataset.answer;
+  var reveal = document.getElementById('reveal' + qid);
+
+  // If already answered, skip
+  if (card.dataset.answered === 'true') return;
+  card.dataset.answered = 'true';
+
+  // Disable all options
+  card.querySelectorAll('.poll-opt').forEach(function(o) { o.style.pointerEvents = 'none'; });
+
+  var isCorrect = (selected === answer);
+
+  if (isCorrect) {
+    row.style.borderColor = 'var(--green)';
+    row.querySelector('.letter').style.background = 'var(--green)';
+    row.querySelector('.letter').style.color = '#fff';
+    row.querySelector('.letter').style.borderColor = 'var(--green)';
+    quizState.correct++;
+  } else {
+    row.style.borderColor = 'var(--accent)';
+    row.querySelector('.letter').style.background = 'var(--accent)';
+    row.querySelector('.letter').style.color = '#fff';
+    row.querySelector('.letter').style.borderColor = 'var(--accent)';
+    // Highlight correct answer
+    card.querySelectorAll('.poll-opt').forEach(function(o) {
+      var l = o.querySelector('.letter');
+      if (l.textContent === answer) {
+        o.style.borderColor = 'var(--green)';
+        l.style.background = 'var(--green)';
+        l.style.color = '#fff';
+        l.style.borderColor = 'var(--green)';
+      }
+    });
+  }
+
+  // Show reveal
+  var explanation = quizExplanations[qid] || '';
+  var txt = isCorrect
+    ? '<span class="corr">&#x2713; Correct!</span> ' + explanation
+    : '<span style="color:var(--accent);font-weight:600;">&#x2717; Incorrect.</span> Correct answer: ' + answer + '. ' + explanation;
+
+  reveal.innerHTML = txt;
+  reveal.classList.add('show');
+
+  quizState.answered++;
+  document.getElementById('scoreNum').textContent = quizState.correct;
+  document.getElementById('scoreTotal').textContent = quizState.answered;
+  var pct = quizState.answered > 0 ? (quizState.correct / quizState.answered) * 100 : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function resetQuiz() {
+  quizState.answered = 0;
+  quizState.correct = 0;
+
+  document.querySelectorAll('.poll-card').forEach(function(card) {
+    card.dataset.answered = 'false';
+    card.querySelectorAll('.poll-opt').forEach(function(o) {
+      o.style.pointerEvents = '';
+      o.style.borderColor = '';
+      o.querySelector('.letter').style.background = '';
+      o.querySelector('.letter').style.color = '';
+      o.querySelector('.letter').style.borderColor = '';
+    });
+    var reveal = card.querySelector('.poll-reveal');
+    reveal.classList.remove('show');
+    reveal.innerHTML = '';
+  });
+
+  document.getElementById('scoreNum').textContent = '0';
+  document.getElementById('scoreTotal').textContent = '0';
+  document.getElementById('progressFill').style.width = '0%';
+}
+</script>
+
+</div> <!-- /wrapper -->
+
+</body>
+</html>
