@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snowflake: Time Travel &amp; Zero-Copy Cloning</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   NOTEBOOK AESTHETIC × GOLDEN HOUR THEME
+   web-artifacts-builder (structure) + theme-factory (colors)
+   ============================================================ */
+
+:root {
+  --paper: #f3eee4;  --paper-2: #ebe4d4;
+  --ink: #2a2520;     --ink-2: #4a403a;
+  --ink-dim: #7a7068; --ink-faint: #b0a69a;
+  --rule: #d4c9b8;
+  --accent: #f4a900;
+  --accent-2: #c1666b;
+  --green: #5a8f6a;
+  --blue: #5a7fbf;
+  --purple: #8a6a9f;
+  --teal: #4a9f9f;
+  --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --sidebar-w: 260px;
+}
+
+[data-theme="dark"] {
+  --paper: #1b1917;  --paper-2: #242220;
+  --ink: #f0ece9;    --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430;
+  --accent: #f4a900;
+  --accent-2: #d47a7a;
+  --green: #6aaf7a;
+  --blue: #7a9fd5;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.7;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 25% 15%, rgba(200,180,140,.12) 0%, transparent 40%),
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(200,180,140,.06) 27px, rgba(200,180,140,.06) 28px);
+}
+
+/* ==================== LAYOUT ==================== */
+#wrapper { display: flex; min-height: 100vh; }
+
+/* --- Sidebar --- */
+#sidebar {
+  position: fixed; top: 0; left: 0;
+  width: var(--sidebar-w); height: 100vh;
+  background: var(--paper-2); border-right: 1px solid var(--rule);
+  overflow-y: auto; z-index: 40;
+  transition: transform .35s ease;
+  display: flex; flex-direction: column;
+}
+
+.sb-header { padding: 18px 20px; border-bottom: 1px solid var(--rule); }
+.sb-brand {
+  font-family: var(--serif); font-size: 17px; font-weight: 400;
+  color: var(--ink); text-decoration: none; display: block;
+}
+.sb-brand em { color: var(--accent-2); font-style: italic; }
+.sb-brand small {
+  display: block; font-size: 9px; font-weight: 400;
+  color: var(--ink-faint); margin-top: 1px;
+  text-transform: uppercase; letter-spacing: .1em;
+}
+
+.sb-search { margin: 12px 0 4px; }
+.sb-search input {
+  width: 100%; background: var(--paper); border: 1px solid var(--rule);
+  padding: 8px 10px; font-family: var(--mono); font-size: 10px;
+  color: var(--ink); outline: none; transition: border-color .2s;
+}
+.sb-search input:focus { border-color: var(--accent); }
+.sb-search input::placeholder { color: var(--ink-faint); }
+
+.sb-nav { padding: 10px 0; flex: 1; }
+
+.sb-nav .label {
+  padding: 14px 20px 4px;
+  font-family: var(--mono); font-size: 8px;
+  text-transform: uppercase; letter-spacing: .2em;
+  color: var(--ink-faint);
+}
+
+.sb-nav a {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 20px;
+  font-family: var(--mono); font-size: 10px;
+  color: var(--ink-dim); text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: all .2s;
+}
+.sb-nav a:hover { background: var(--paper); color: var(--ink); border-left-color: var(--accent); }
+.sb-nav a.active { color: var(--ink); border-left-color: var(--accent-2); background: var(--paper); }
+
+.sb-footer {
+  padding: 12px 20px; border-top: 1px solid var(--rule);
+  font-family: var(--mono); font-size: 9px; color: var(--ink-faint);
+}
+
+/* --- Main --- */
+#main { flex: 1; margin-left: var(--sidebar-w); min-height: 100vh; }
+.main-inner { max-width: 880px; margin: 0 auto; padding: 28px 36px 100px; }
+
+/* --- Top Bar --- */
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0 16px; border-bottom: 1px solid var(--rule);
+  margin-bottom: 28px;
+  position: sticky; top: 0; z-index: 30;
+  background: var(--paper);
+  backdrop-filter: blur(10px);
+  margin-left: -36px; margin-right: -36px;
+  padding-left: 36px; padding-right: 36px;
+}
+
+.topbar-path { font-family: var(--mono); font-size: 9px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: .1em; }
+.topbar-path a { color: var(--ink); text-decoration: none; }
+.topbar-path a:hover { color: var(--accent-2); }
+
+#darkToggle {
+  background: var(--paper-2); border: 1px solid var(--ink);
+  padding: 6px 12px; font-size: 16px; cursor: pointer;
+  transition: all .2s; font-family: var(--mono); line-height: 1; color: var(--ink);
+}
+#darkToggle:hover { transform: scale(1.05); border-color: var(--accent); }
+
+#sidebarToggle {
+  display: none;
+  position: fixed; top: 12px; left: 12px; z-index: 50;
+  background: var(--paper-2); border: 1px solid var(--ink);
+  padding: 6px 10px; font-size: 18px; cursor: pointer; line-height: 1; color: var(--ink);
+}
+
+/* ==================== TYPOGRAPHY ==================== */
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(30px, 4vw, 44px); font-weight: 700;
+  line-height: 1.1; margin-bottom: 4px;
+}
+h1 .italic { font-style: italic; color: var(--accent-2); }
+h1 + .subtitle {
+  font-family: var(--serif); font-style: italic;
+  color: var(--ink-dim); font-size: 16px; margin-bottom: 20px;
+}
+
+h2 {
+  font-family: var(--serif);
+  font-size: clamp(22px, 3vw, 32px); font-weight: 600;
+  line-height: 1.15; margin-top: 44px; margin-bottom: 6px;
+}
+h2 .uline {
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 4px;
+}
+h2 + .h2-sub {
+  font-family: var(--serif); font-style: italic;
+  color: var(--ink-dim); font-size: 15px; margin-bottom: 20px;
+}
+
+h3 { font-family: var(--serif); font-size: 21px; font-weight: 500; margin-top: 26px; margin-bottom: 8px; }
+h4 {
+  font-family: var(--mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: .15em;
+  color: var(--ink-dim); margin-top: 16px; margin-bottom: 6px;
+}
+
+p { margin-bottom: 12px; color: var(--ink-2); max-width: 740px; }
+p strong { color: var(--ink); }
+a { color: var(--accent-2); text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: var(--accent); }
+
+code {
+  font-family: var(--mono); font-size: .88em;
+  background: var(--paper-2); padding: 2px 5px;
+  border: 1px solid var(--rule); border-radius: 2px;
+  color: var(--ink);
+}
+
+ul, ol { margin: 8px 0 12px 24px; }
+li { margin-bottom: 4px; }
+
+/* ==================== PILLS ==================== */
+.pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.pill {
+  background: var(--paper-2); border: 1px solid var(--ink);
+  padding: 3px 10px; font-family: var(--mono); font-size: 9px;
+  text-transform: uppercase; letter-spacing: .1em; display: inline-block;
+}
+.pill.accent { border-color: var(--accent); color: var(--accent); }
+.pill.a2 { border-color: var(--accent-2); color: var(--accent-2); }
+.pill.green { border-color: var(--green); color: var(--green); }
+
+/* ==================== CARDS ==================== */
+.card {
+  background: var(--paper-2); border: 1px solid var(--ink);
+  padding: 18px 22px;
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: all .3s; margin-bottom: 16px;
+}
+.card:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+.card-label {
+  font-family: var(--mono); font-size: 9px;
+  text-transform: uppercase; letter-spacing: .2em;
+  color: var(--accent-2); margin-bottom: 6px;
+}
+.card.gold { border-left: 3px solid var(--accent); }
+.card.rose { border-left: 3px solid var(--accent-2); }
+.card.green { border-left: 3px solid var(--green); }
+.card.blue { border-left: 3px solid var(--blue); }
+
+/* ==================== CALLOUT ==================== */
+.callout {
+  padding: 14px 18px; margin: 14px 0;
+  border: 1px solid var(--ink);
+  border-left: 3px solid;
+  font-size: 14px;
+  background: var(--paper);
+}
+.callout.info { border-left-color: var(--blue); }
+.callout.info strong { color: var(--blue); }
+.callout.success { border-left-color: var(--green); }
+.callout.success strong { color: var(--green); }
+.callout.warn { border-left-color: var(--accent); }
+.callout.warn strong { color: var(--accent); }
+.callout.analogy {
+  background: var(--paper-2);
+  border-left-color: var(--accent-2);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+/* ==================== CODE BLOCKS ==================== */
+.code-block {
+  background: #1a1816; border: 1px solid var(--rule);
+  margin: 12px 0 16px; overflow: hidden;
+}
+.code-hdr {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 14px;
+  background: #252220; border-bottom: 1px solid #3a3530;
+  font-family: var(--mono); font-size: 10px; color: var(--ink-faint);
+}
+.code-copy {
+  background: none; border: 1px solid #4a4540;
+  color: var(--ink-faint); padding: 2px 8px;
+  font-family: var(--mono); font-size: 9px;
+  cursor: pointer; transition: all .2s;
+}
+.code-copy:hover { border-color: var(--accent); color: var(--accent); }
+.code-copy.copied { border-color: var(--green); color: var(--green); }
+
+pre {
+  padding: 14px 16px; overflow-x: auto;
+  font-family: var(--mono); font-size: 12px;
+  line-height: 1.55; color: #d0c8c0;
+}
+pre .cm { color: #7a7068; font-style: italic; }
+pre .kw { color: #f4a900; }
+pre .fn { color: #6aaf7a; }
+pre .str { color: #d47a7a; }
+pre .op { color: #c0b0a0; }
+pre .num { color: #7a9fd5; }
+pre .tp { color: #8aafcf; }
+
+/* ==================== SVG / DIAGRAM ==================== */
+.diagram {
+  background: #1a1816; border: 1px solid var(--rule);
+  padding: 20px 24px; margin: 14px 0;
+  font-family: var(--mono); font-size: 12px;
+  line-height: 1.6; color: #c0b8b0;
+  overflow-x: auto; white-space: pre;
+}
+.diagram .hl { color: var(--accent); }
+.diagram .hl2 { color: var(--accent-2); }
+.diagram .hlg { color: var(--green); }
+.diagram .arrow { color: #7a7068; }
+
+/* ==================== TELUGU BLOCK ==================== */
+.telugu {
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  border-left: 3px solid var(--accent-2);
+  padding: 16px 20px; margin: 14px 0;
+  font-size: 14px; line-height: 1.7;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.telugu-tag {
+  font-family: var(--mono); font-size: 9px;
+  text-transform: uppercase; letter-spacing: .15em;
+  color: var(--accent); display: block; margin-bottom: 6px;
+}
+
+/* ==================== DETAILS / ACCORDION ==================== */
+details.concept {
+  background: var(--paper-2); border: 1px solid var(--ink);
+  margin: 10px 0; padding: 0;
+}
+details.concept summary {
+  padding: 12px 16px; cursor: pointer;
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  color: var(--accent-2); transition: color .2s;
+  list-style: none;
+}
+details.concept summary::before {
+  content: "▶ "; color: var(--ink-faint);
+  transition: transform .2s;
+}
+details.concept[open] summary::before { content: "▼ "; }
+details.concept summary:hover { color: var(--accent); }
+details.concept .body {
+  padding: 0 16px 14px;
+  border-top: 1px solid var(--rule);
+  padding-top: 10px; font-size: 14px;
+}
+
+/* ==================== INTERVIEW BOX ==================== */
+.iv-box {
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  border-left: 3px solid var(--accent);
+  padding: 16px 20px; margin: 10px 0;
+}
+.iv-box.green { border-left-color: var(--green); }
+.iv-box.rose { border-left-color: var(--accent-2); }
+.iv-box h4 { margin-top: 0; color: var(--accent); }
+
+/* ==================== TABLE ==================== */
+table {
+  width: 100%; border-collapse: collapse;
+  margin: 12px 0 18px; font-size: 13px;
+}
+th {
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  padding: 9px 12px;
+  font-family: var(--mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: .1em;
+  text-align: left;
+}
+td {
+  padding: 8px 12px; border: 1px solid var(--rule);
+}
+td:first-child { font-weight: 500; }
+
+/* ==================== QUIZ ==================== */
+.quiz {
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  padding: 20px 24px; margin: 16px 0;
+}
+.q-txt {
+  font-size: 14px; font-weight: 500;
+  margin-bottom: 10px;
+}
+.q-opts { display: flex; flex-direction: column; gap: 6px; }
+.q-opt {
+  text-align: left;
+  padding: 8px 14px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  cursor: pointer; font-size: 13px;
+  font-family: var(--sans);
+  transition: all .15s;
+}
+.q-opt:hover { border-color: var(--ink); }
+.q-opt.selected { border-color: var(--ink); background: var(--paper-2); }
+.q-opt.correct { border-color: var(--green); background: #eaf5ee; }
+.q-opt.wrong { border-color: var(--accent-2); background: #fce8ea; }
+.q-exp {
+  margin-top: 8px; padding: 10px 14px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  font-size: 13px; display: none;
+}
+
+/* ==================== ANIMATION ==================== */
+.anim {
+  opacity: 0; transform: translateY(16px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+.anim.in { opacity: 1; transform: translateY(0); }
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-100%); width: 240px; }
+  #sidebar.open { transform: translateX(0); }
+  #main { margin-left: 0; }
+  .main-inner { padding: 20px 16px 80px; }
+  .topbar { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
+  #sidebarToggle { display: flex !important; align-items: center; justify-content: center; }
+}
+
+/* ==================== FOOTER ==================== */
+.ftr {
+  margin-top: 48px; padding-top: 20px;
+  border-top: 1px solid var(--rule);
+  font-size: 12px; color: var(--ink-faint); text-align: center;
+  font-family: var(--mono);
+}
+</style>
+</head>
+<body>
+
+<div id="sidebarToggle" onclick="togSide()">&#x2630;</div>
+
+<div id="wrapper">
+
+  <!-- ========== SIDEBAR ========== -->
+  <aside id="sidebar">
+    <div class="sb-header">
+      <a href="#" class="sb-brand"><em>Time Travel</em> &amp; Clone <small>Snowflake DE</small></a>
+      <div class="sb-search">
+        <input type="text" id="sbf" placeholder="Filter nav..." oninput="filt()">
+      </div>
+    </div>
+    <nav class="sb-nav" id="sbn">
+      <div class="label">Foundation</div>
+      <a href="#analogy" class="active">Telugu Analogy</a>
+      <a href="#time">&nbsp;&nbsp;Time Travel</a>
+      <a href="#clone">Zero-Copy Clone</a>
+      <div class="label">Core</div>
+      <a href="#syntax">SQL Syntax</a>
+      <a href="#mistakes">Mistakes + Fixes</a>
+      <a href="#failsafe">Fail-Safe</a>
+      <div class="label">Interview</div>
+      <a href="#answers">Interview Answers</a>
+      <a href="#compare">Snowflake vs BigQuery</a>
+      <a href="#quiz">Quiz</a>
+    </nav>
+    <div class="sb-footer">web-artifacts-builder · theme-factory</div>
+  </aside>
+
+  <!-- ========== MAIN ========== -->
+  <div id="main">
+    <div class="main-inner">
+
+      <!-- TOPBAR -->
+      <div class="topbar">
+        <div class="topbar-path"><a href="#">Snowflake DE</a> / Time Travel &amp; Zero-Copy Cloning</div>
+        <button id="darkToggle" onclick="togDark()">&#x263E;</button>
+      </div>
+
+      <!-- HERO -->
+      <section class="anim" style="border-bottom:1px solid var(--rule);padding-bottom:24px;margin-bottom:28px">
+        <div class="pill-row">
+          <span class="pill a2">Snowflake</span>
+          <span class="pill accent">Data Engineering</span>
+          <span class="pill">Interview Prep</span>
+        </div>
+        <h1>Time Travel &amp; <span class="italic">Zero-Copy Cloning</span></h1>
+        <p class="subtitle">The two Snowflake features that no other warehouse has — and every interviewer asks about.</p>
+      </section>
+
+      <!-- ==================== 1. TELUGU ANALOGY ==================== -->
+      <section id="analogy" class="anim">
+        <h2>1. <span class="uline">Telugu Analogy</span></h2>
+        <p class="h2-sub">Mana oorilo concept ardham cheskundam.</p>
+
+        <div class="telugu">
+          <span class="telugu-tag">Time Travel</span>
+          <strong>Time Travel = Cmd+Z, 90 days valid.</strong> Nuvvu Word lo delete chestav, Cmd+Z back — ade Snowflake Time Travel. Kani 90 days back varaku matrame.<br><br>
+          Table delete chesina, data modify chesina — anni 90 days undo history lo untayi. <em>"2 hours back data kavali"</em> ante, direct ga aa point ki travel chesi query kottachu. No backup restore.
+        </div>
+
+        <div class="telugu">
+          <span class="telugu-tag">Zero-Copy Cloning</span>
+          <strong>Clone = WhatsApp Forward.</strong> Photo forward chesina duplicate storage avadu — just reference. Adе Snowflake clone. 10GB table ni clone chestene <strong>0 bytes</strong> extra.<br><br>
+          Nuvvu clone lo oka column modify cheste, <em>danike</em> storage vestundi. Migata 9.9GB shared. Changes cheyakapote, clone free.
+        </div>
+
+        <div class="card gold">
+          <div class="card-label">Frame This</div>
+          <em>"Time Travel is like Google Photos version history for your data. Cloning is like forking a GitHub repo — zero copy until you commit changes."</em>
+        </div>
+      </section>
+
+      <!-- ==================== 2. TIME TRAVEL ==================== -->
+      <section id="time" class="anim">
+        <h2>2. <span class="uline">Time Travel</span> — 90 Days Back</h2>
+        <p class="h2-sub">Any point. Query. Clone. Undrop. Without backup restore.</p>
+
+        <p>Production deploy ayyaka bug kanipistadi. Yesterday's state kavali. Developer ki prod data kavali but direct query kottalemu. Time Travel = go back in time <strong>without restoring from backup</strong>.</p>
+
+        <div class="diagram">
+  ┌──────────────────────────────────────────────────────┐
+  │              Time Travel Window (90 days)            │
+  │  ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐    │
+  │  │  T-90  │→│  T-30  │→│  T-7   │→│  NOW   │    │
+  │  └────────┘  └────────┘  └────────┘  └────────┘    │
+  │     ▲            ▲           ▲          ▲           │
+  │     │            │           │          │           │
+  │  <span class="hl">AT(TS)</span>     <span class="hl">AT(OFFSET)</span>  <span class="hl">AT(STMT)</span>  <span class="hl">CURRENT</span>        │
+  │                                                      │
+  │  <span class="arrow">━━━━━━━━━━━━━ Query-able ━━━━━━━━━━━━━━━━━━━━</span>    │
+  │                                                      │
+  │  <span class="hl2">Fail-Safe (7 days, NOT queryable)</span>              │
+  └──────────────────────────────────────────────────────┘
+        </div>
+
+        <h3>Edition Limits</h3>
+        <table>
+          <tr><th>Edition</th><th>Time Travel</th><th>Fail-safe</th></tr>
+          <tr><td>Standard</td><td>1 day</td><td>7 days</td></tr>
+          <tr><td>Enterprise</td><td>90 days</td><td>7 days</td></tr>
+          <tr><td>Business Critical</td><td>90 days</td><td>7 days</td></tr>
+        </table>
+
+        <h3>How It Works</h3>
+        <p>Snowflake uses <strong>immutable micro-partitions</strong> — 16MB compressed columnar files. UPDATE or DELETE chestene? Snowflake doesn't touch existing files. It creates <strong>new partitions</strong> and marks old ones <strong>inactive</strong>.</p>
+
+        <div class="diagram">
+  Before UPDATE:   ████ ████ ████ ████  (4 active)
+                   │
+  UPDATE salary → │  UPDATE never mutates — it appends
+                   ▼
+  After:    ████ ████ ████ ████  ██████
+            └───── active ─────┘ └─ new ┘
+            ░░░░ ░░░░ ░░░░       (old = Time Travel)
+        </div>
+
+        <p>Time Travel period = how long before Snowflake <strong>garbage-collects</strong> inactive partitions. Fail-safe = extra grace period for Snowflake's internal recovery.</p>
+
+        <details class="concept">
+          <summary>Micro-partition internals — why Time Travel costs storage</summary>
+          <div class="body">
+            Each micro-partition stores ~16MB of uncompressed data per column. Metadata (min, max, null count) stored per partition for pruning. When you UPDATE, Snowflake creates new micro-partitions only for changed columns. Unchanged columns remain shared. So Time Travel storage cost depends on <em>how much data you modified</em>, not total table size.
+          </div>
+        </details>
+      </section>
+
+      <!-- ==================== 3. ZERO-COPY CLONE ==================== -->
+      <section id="clone" class="anim">
+        <h2>3. <span class="uline">Zero-Copy Cloning</span> — Instant, No-Cost</h2>
+        <p class="h2-sub">10TB table ni 0 bytes storage lo clone. Seconds lo ready.</p>
+
+        <div class="diagram">
+  ┌──────────────┐
+  │  Original    │── data blocks ──┐
+  │  (10GB)      │                 │
+  └──────────────┘                 │  Shared
+        │                          │  Immutable
+        │ CLONE (instant, 0 bytes)  │  Blocks
+        ▼                          │
+  ┌──────────────┐                 │
+  │  Clone       │── writes →      │  New blocks for
+  │  (0GB start) │    new blocks   │  changed data only
+  └──────────────┘                 │
+                                   ▼
+  ════════════════════════════════════════════════
+  ▓▓ Shared micro-partitions (unchanged) ▓▓
+  ░░ New partitions (clone's writes only) ░░
+        </div>
+
+        <div class="code-block">
+          <div class="code-hdr"><span>clone-patterns.sql</span><button class="code-copy" onclick="cc(this)">copy</button></div>
+<pre><span class="cm">-- Clone a table (zero storage cost)</span>
+<span class="kw">CREATE TABLE</span> prod_backup <span class="kw">CLONE</span> prod_table;
+
+<span class="cm">-- Clone a schema</span>
+<span class="kw">CREATE SCHEMA</span> dev_schema <span class="kw">CLONE</span> prod_schema;
+
+<span class="cm">-- Clone as-of specific time (most powerful pattern)</span>
+<span class="kw">CREATE TABLE</span> before_deploy <span class="kw">CLONE</span> orders
+  <span class="kw">AT</span> (<span class="tp">TIMESTAMP</span> => <span class="str">'2026-06-01 08:00:00'</span>);
+</pre>
+        </div>
+
+        <h3>Use Cases</h3>
+        <ul>
+          <li><strong>Dev/Test</strong> — clone prod, zero storage, real data</li>
+          <li><strong>Backup before risky ops</strong> — clone before DDL, rollback instantly</li>
+          <li><strong>CI/CD pipeline</strong> — <code>CREATE DATABASE dev CLONE prod;</code> → migrate → validate → drop</li>
+          <li><strong>Point-in-time analysis</strong> — clone + AT together</li>
+        </ul>
+
+        <div class="callout info">
+          <strong>Storage Detail:</strong> Clone = <strong>0 bytes</strong> initially. Billed only when data diverges (new micro-partitions for changed data). Shared partitions remain shared until changed.
+        </div>
+      </section>
+
+      <!-- ==================== 4. SQL SYNTAX ==================== -->
+      <section id="syntax" class="anim">
+        <h2>4. <span class="uline">SQL Syntax</span> — Three Ways to Travel</h2>
+        <p class="h2-sub">AT + TIMESTAMP / OFFSET / STATEMENT. Each for a different scenario.</p>
+
+        <div class="code-block">
+          <div class="code-hdr"><span>01-travel-syntax.sql</span><button class="code-copy" onclick="cc(this)">copy</button></div>
+<pre><span class="cm">-- 1. Exact point in time</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> orders
+  <span class="kw">AT</span> (<span class="tp">TIMESTAMP</span> => <span class="str">'2026-06-01 10:00:00'</span>);
+
+<span class="cm">-- 2. Relative offset (negative seconds from now)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> orders
+  <span class="kw">AT</span> (<span class="tp">OFFSET</span> => <span class="num">-3600</span>);  <span class="cm">-- 1 hour ago</span>
+
+<span class="cm">-- 3. By statement ID (from Query History)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> orders
+  <span class="kw">AT</span> (<span class="tp">STATEMENT</span> => <span class="str">'0190a5a5-0000-...'</span>);
+</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-hdr"><span>02-recovery-patterns.sql</span><button class="code-copy" onclick="cc(this)">copy</button></div>
+<pre><span class="cm">-- Recover a dropped table (easiest)</span>
+<span class="kw">UNDROP TABLE</span> orders;
+
+<span class="cm">-- Restore table as it was 1 day ago</span>
+<span class="kw">CREATE TABLE</span> orders_restored <span class="kw">AS</span>
+  <span class="kw">SELECT</span> * <span class="kw">FROM</span> orders
+  <span class="kw">AT</span> (<span class="tp">OFFSET</span> => <span class="num">-86400</span>);
+
+<span class="cm">-- Row-level restore: merge specific rows</span>
+<span class="kw">MERGE INTO</span> orders t
+<span class="kw">USING</span> (<span class="kw">SELECT</span> * <span class="kw">FROM</span> orders <span class="kw">AT</span> (<span class="tp">OFFSET</span> => <span class="num">-3600</span>)) s
+  <span class="kw">ON</span> t.id = s.id
+<span class="kw">WHEN MATCHED AND</span> t.status = <span class="str">'bad'</span>
+  <span class="kw">THEN UPDATE SET</span> t.status = s.status;
+</pre>
+        </div>
+
+        <div class="callout warn">
+          <strong>AT vs BEFORE — Confusion Point</strong><br>
+          <code>AT (STATEMENT => 'id')</code> = data at the time the statement completed (includes its changes).<br>
+          <code>BEFORE (STATEMENT => 'id')</code> = data immediately before the statement ran (excludes its changes).<br>
+          Use BEFORE when you want to <em>undo</em> a specific operation.
+        </div>
+      </section>
+
+      <!-- ==================== 5. MISTAKES ==================== -->
+      <section id="mistakes" class="anim">
+        <h2>5. <span class="uline">Common Mistakes</span> + Fixes</h2>
+        <p class="h2-sub">Interview traps and production gotchas.</p>
+
+        <div class="code-block">
+          <div class="code-hdr"><span>mistake-1-dropped-table.sql</span><button class="code-copy" onclick="cc(this)">copy</button></div>
+<pre><span class="cm">-- ❌ WRONG: Direct clone on dropped table</span>
+<span class="kw">CREATE TABLE</span> restored <span class="kw">CLONE</span> my_table;
+<span class="cm">-- Error: Object 'my_table' does not exist.</span>
+
+<span class="cm">-- ✅ RIGHT: Clone from time BEFORE drop</span>
+<span class="kw">CREATE TABLE</span> restored <span class="kw">CLONE</span> my_table
+  <span class="kw">AT</span> (<span class="tp">TIMESTAMP</span> => <span class="str">'2026-05-15 14:30:00'</span>);
+
+<span class="cm">-- Or simpler:</span>
+<span class="kw">UNDROP TABLE</span> my_table;
+</pre>
+        </div>
+
+        <div class="code-block">
+          <div class="code-hdr"><span>mistake-2-clone-cost.sql</span><button class="code-copy" onclick="cc(this)">copy</button></div>
+<pre><span class="cm">-- ❌ WRONG: Clone is NOT free forever</span>
+<span class="kw">CREATE DATABASE</span> prod_copy <span class="kw">CLONE</span> prod_db;
+<span class="cm">-- ...30 days later, storage bill spikes.
+-- Clone stays free only until you WRITE to it.</span>
+
+<span class="cm">-- ✅ RIGHT: Short-lived clones, drop when done</span>
+<span class="kw">CREATE DATABASE</span> temp_analytics <span class="kw">CLONE</span> prod_db;
+<span class="cm">-- Run analysis...</span>
+<span class="kw">DROP DATABASE IF EXISTS</span> temp_analytics;
+</pre>
+        </div>
+
+        <div class="callout warn">
+          <strong>When NOT to Clone</strong>
+          <ul style="margin-top:6px">
+            <li>Only need subset of rows? Use <code>CREATE TABLE ... AS SELECT</code> with WHERE</li>
+            <li>PII masking needed? Clone then apply masking policy</li>
+            <li>Long-lived copies? Budget for storage if you modify data</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ==================== 6. FAIL-SAFE ==================== -->
+      <section id="failsafe" class="anim">
+        <h2>6. <span class="uline">Fail-Safe</span> — Last Resort</h2>
+        <p class="h2-sub">7 extra days. But you can't query it. Snowflake support only.</p>
+
+        <table>
+          <tr><th>Feature</th><th>Time Travel</th><th>Fail-safe</th></tr>
+          <tr><td>Duration</td><td>0–90 days</td><td>7 days</td></tr>
+          <tr><td>Self-service</td><td>Yes (AT/BEFORE syntax)</td><td>No (support ticket)</td></tr>
+          <tr><td>Queryable</td><td>Yes</td><td>No</td></tr>
+          <tr><td>Cost</td><td>Storage</td><td>Included</td></tr>
+        </table>
+
+        <div class="callout danger" style="border-left-color:var(--accent-2);border-left-width:3px">
+          <strong>Don't rely on Fail-safe.</strong> It exists for Snowflake's internal DR, not as a user backup feature. Always use Time Travel + cloning for your recovery strategy.
+        </div>
+      </section>
+
+      <!-- ==================== 7. INTERVIEW ANSWERS ==================== -->
+      <section id="answers" class="anim">
+        <h2>7. <span class="uline">Interview Answers</span></h2>
+        <p class="h2-sub">Three depths — 30s / 90s STAR / 3-min walkthrough.</p>
+
+        <div class="iv-box">
+          <h4>30-Second Pitch</h4>
+          <p>"Snowflake Time Travel lets me query or restore data as it existed up to 90 days ago using AT/BEFORE syntax. Zero-Copy Cloning creates instant copies without duplicating storage — charges start only when the clone's data changes. Together, they're the fastest recovery path for data accidents."</p>
+        </div>
+
+        <div class="iv-box green">
+          <h4>90-Second STAR</h4>
+          <p><strong>Situation:</strong> Production orders table had incorrect status updates from a buggy scheduled task. 6 hours of damage.<br>
+          <strong>Task:</strong> Restore 45,000 orders to correct state without losing valid updates in the same window.<br>
+          <strong>Action:</strong> Created a zero-copy clone as-of the timestamp before the bug:</p>
+          <pre style="font-size:12px;background:var(--paper);padding:8px 12px;margin:6px 0;overflow-x:auto"><code>CREATE TABLE orders_clean CLONE orders
+  AT (TIMESTAMP => '2026-05-20 01:59:59');</code></pre>
+          <p>Identified affected IDs by diffing current vs snapshot. Used MERGE to update only the status column for affected rows — preserving all other changes from the 6-hour window.<br>
+          <strong>Result:</strong> 45,000 orders corrected, zero data loss. Recovery time: ~2 minutes vs 4+ hours traditional restore. Documented as standard recovery playbook.</p>
+        </div>
+
+        <div class="iv-box rose">
+          <h4>3-Minute Walkthrough</h4>
+          <p><strong>"Here's how Time Travel works under the hood..."</strong></p>
+          <p>Snowflake stores data in <strong>immutable micro-partitions</strong> — ~16MB compressed columnar chunks each. When you UPDATE, Snowflake doesn't touch existing files. It creates <strong>new micro-partitions</strong> and marks old ones <strong>inactive</strong>. Those inactive partitions <em>are</em> your Time Travel data.</p>
+          <p>The retention window (1–90 days) controls how long before Snowflake's background process garbage-collects them.</p>
+          <p><strong>Zero-copy cloning</strong> works the same way — a clone initially points at the <em>exact same</em> micro-partitions as the source. Write to it? Snowflake creates new partitions for <em>only the changed data</em>. The shared 90%+ remains shared.</p>
+          <p><strong>Common interview question:</strong> "You accidentally DROP a table. How do you recover it?"<br>
+          Answer: <code>UNDROP TABLE tablename;</code> — one command. If Time Travel expired, file a support ticket for fail-safe.</p>
+        </div>
+      </section>
+
+      <!-- ==================== 8. COMPARISON ==================== -->
+      <section id="compare" class="anim">
+        <h2>8. <span class="uline">Snowflake vs BigQuery</span> Time Travel</h2>
+        <p class="h2-sub">Interviewers love this comparison.</p>
+
+        <table>
+          <tr><th>Feature</th><th>Snowflake</th><th>BigQuery</th></tr>
+          <tr><td>Retention</td><td>1–90 days</td><td>7 days default</td></tr>
+          <tr><td>Syntax</td><td>AT (TIMESTAMP / OFFSET / STATEMENT)<br>BEFORE (STATEMENT)</td><td>FOR SYSTEM_TIME AS OF</td></tr>
+          <tr><td>UNDROP</td><td>Yes — tables, schemas, databases</td><td>No</td></tr>
+          <tr><td>Zero-copy clone</td><td>Yes — instant, 0 bytes</td><td>No (full storage cost)</td></tr>
+          <tr><td>Fail-safe</td><td>7 days (support recovery)</td><td>N/A</td></tr>
+          <tr><td>Storage model</td><td>Immutable micro-partitions</td><td>Columnar + timestamps in metadata</td></tr>
+        </table>
+
+        <div class="card rose">
+          <div class="card-label">Interview Tip</div>
+          When they ask "How is Snowflake different from BigQuery?" — start with <strong>zero-copy cloning</strong> and <strong>UNDROP</strong>. Those are Snowflake's unique advantages.
+        </div>
+      </section>
+
+      <!-- ==================== 9. QUIZ ==================== -->
+      <section id="quiz" class="anim">
+        <h2>9. <span class="uline">Quiz</span> — Test Yourself</h2>
+        <p class="h2-sub">5 questions. Click to check your answer.</p>
+
+        <div class="quiz" id="qz1">
+          <div class="q-txt">1. What does <code>AT (BEFORE STATEMENT 'id')</code> return?</div>
+          <div class="q-opts">
+            <button class="q-opt" onclick="cq(this,0,'qz1')">Data at the time the statement ran</button>
+            <button class="q-opt" onclick="cq(this,1,'qz1')">Data immediately <em>before</em> the statement's changes</button>
+            <button class="q-opt" onclick="cq(this,2,'qz1')">Data excluding only that statement</button>
+            <button class="q-opt" onclick="cq(this,3,'qz1')">Syntax error</button>
+          </div>
+          <div class="q-exp" id="qz1e"><strong>Correct: B</strong> — BEFORE returns data prior to the statement's changes. AT includes them.</div>
+        </div>
+
+        <div class="quiz" id="qz2">
+          <div class="q-txt">2. Clone a 50GB table. Storage billed immediately?</div>
+          <div class="q-opts">
+            <button class="q-opt" onclick="cq(this,0,'qz2')">50GB</button>
+            <button class="q-opt" onclick="cq(this,1,'qz2')">100GB (original + clone)</button>
+            <button class="q-opt" onclick="cq(this,2,'qz2')">0GB extra</button>
+            <button class="q-opt" onclick="cq(this,3,'qz2')">50GB + 50GB</button>
+          </div>
+          <div class="q-exp" id="qz2e"><strong>Correct: C</strong> — Zero-copy clone = 0 bytes. Storage billed only on diverged data.</div>
+        </div>
+
+        <div class="quiz" id="qz3">
+          <div class="q-txt">3. Time Travel expired yesterday. Can you still query data from 5 days ago?</div>
+          <div class="q-opts">
+            <button class="q-opt" onclick="cq(this,0,'qz3')">Yes, AT (OFFSET => -432000)</button>
+            <button class="q-opt" onclick="cq(this,1,'qz3')">Yes, via Fail-safe</button>
+            <button class="q-opt" onclick="cq(this,2,'qz3')">No — expired. Fail-safe exists but NOT queryable</button>
+            <button class="q-opt" onclick="cq(this,3,'qz3')">Yes, but only SELECT, not UNDROP</button>
+          </div>
+          <div class="q-exp" id="qz3e"><strong>Correct: C</strong> — Fail-safe exists but requires Snowflake support to recover. Not self-service.</div>
+        </div>
+
+        <div class="quiz" id="qz4">
+          <div class="q-txt">4. Which does NOT consume Time Travel storage?</div>
+          <div class="q-opts">
+            <button class="q-opt" onclick="cq(this,0,'qz4')">INSERT</button>
+            <button class="q-opt" onclick="cq(this,1,'qz4')">UPDATE</button>
+            <button class="q-opt" onclick="cq(this,2,'qz4')">SELECT</button>
+            <button class="q-opt" onclick="cq(this,3,'qz4')">DROP TABLE</button>
+          </div>
+          <div class="q-exp" id="qz4e"><strong>Correct: C</strong> — SELECT is read-only. INSERT/UPDATE/DROP create inactive micro-partitions.</div>
+        </div>
+
+        <div class="quiz" id="qz5">
+          <div class="q-txt">5. Time Travel retention: Standard vs Enterprise?</div>
+          <div class="q-opts">
+            <button class="q-opt" onclick="cq(this,0,'qz5')">1 day vs 90 days</button>
+            <button class="q-opt" onclick="cq(this,1,'qz5')">1 day vs 7 days</button>
+            <button class="q-opt" onclick="cq(this,2,'qz5')">7 days vs 90 days</button>
+            <button class="q-opt" onclick="cq(this,3,'qz5')">90 days vs unlimited</button>
+          </div>
+          <div class="q-exp" id="qz5e"><strong>Correct: A</strong> — Standard = 1 day. Enterprise = 90 days. Both have 7 days fail-safe.</div>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <div class="ftr">web-artifacts-builder (structure) · theme-factory Golden Hour · editorial-notebook (aesthetic)</div>
+
+    </div><!-- /main-inner -->
+  </div><!-- /main -->
+</div><!-- /wrapper -->
+
+<script>
+function togSide() { document.getElementById('sidebar').classList.toggle('open'); }
+
+function filt() {
+  const q = document.getElementById('sbf').value.toLowerCase();
+  document.querySelectorAll('#sbn a').forEach(a => {
+    a.style.display = a.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+// Nav active tracking
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    document.querySelectorAll('.sb-nav a').forEach(a => a.classList.remove('active'));
+    const link = document.querySelector(`.sb-nav a[href="#${e.target.id}"]`);
+    if (link) link.classList.add('active');
+  });
+}, { threshold: 0.3, rootMargin: '-60px 0px 0px 0px' });
+document.querySelectorAll('section[id]').forEach(s => obs.observe(s));
+
+// Section fade-in
+const aobs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('in');
+    aobs.unobserve(e.target);
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.anim').forEach(el => aobs.observe(el));
+
+// Dark mode
+let dm = true;
+function togDark() {
+  dm = !dm;
+  const r = document.documentElement;
+  r.setAttribute('data-theme', dm ? 'light' : 'dark');
+}
+
+// Code copy
+function cc(btn) {
+  const code = btn.closest('.code-block').querySelector('pre').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// Quiz
+const ANSWERS = { qz1: 1, qz2: 2, qz3: 2, qz4: 2, qz5: 0 };
+
+function cq(btn, idx, qid) {
+  const card = btn.closest('.quiz');
+  const opts = card.querySelectorAll('.q-opt');
+  const exp = document.getElementById(qid + 'e');
+  const correct = ANSWERS[qid];
+
+  opts.forEach((o, i) => {
+    o.disabled = true;
+    o.style.cursor = 'default';
+    o.classList.remove('selected', 'correct', 'wrong');
+    if (i === correct) o.classList.add('correct');
+    if (i === idx && idx !== correct) o.classList.add('wrong');
+    if (i === idx) o.classList.add('selected');
+  });
+
+  exp.style.display = 'block';
+}
+</script>
+
+</body>
+</html>
