@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neelima — Snowflake Developer Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CAREER-PROFILE — Notebook Aesthetic × Professional Blue
+   Based on: krishna-html-go editorial-notebook template
+   Palette: Blue accent (#1a56db) for professional tone
+   ============================================================ */
+
+:root {
+  --paper: #f3eee4;  --paper-2: #ebe4d4;  --paper-3: #e3dcc8;
+  --ink: #1a1612;     --ink-2: #3d3528;
+  --ink-dim: #6b5d49; --ink-faint: #a89a83;
+  --rule: #c8b99e;
+  --accent: #1a56db;  --accent2: #1642b0;
+  --green: #2d7d46;   --blue: #1a56db;
+  --gold: #b8860b;    --purple: #7b4d8c;  --teal: #2a9d8f;
+  --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --sidebar-w: 280px;
+}
+
+[data-theme="dark"] {
+  --paper: #1b1917;  --paper-2: #242220;  --paper-3: #2d2a26;
+  --ink: #f0ece9;    --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430;
+  --accent: #5b8fbd;  --accent2: #4a7dab;
+  --green: #5bbd6b;   --blue: #5b8fbd;
+  --gold: #d4a84b;    --purple: #b47bc4;  --teal: #5bbfb5;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.65;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 25% 15%, rgba(200,180,140,.12) 0%, transparent 40%),
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(200,180,140,.08) 27px, rgba(200,180,140,.08) 28px);
+}
+
+/* ==================== LAYOUT ==================== */
+#wrapper { display: flex; min-height: 100vh; }
+
+/* --- Sidebar --- */
+#sidebar {
+  position: fixed; top: 0; left: 0;
+  width: var(--sidebar-w); height: 100vh;
+  background: var(--paper-2); border-right: 1px solid var(--rule);
+  overflow-y: auto; z-index: 40;
+  transition: transform .35s ease;
+  display: flex; flex-direction: column;
+}
+
+.sb-header { padding: 18px 20px; border-bottom: 1px solid var(--rule); }
+.sb-brand {
+  font-family: var(--serif); font-size: 18px; font-weight: 600;
+  color: var(--ink); text-decoration: none; display: block;
+}
+.sb-brand em { color: var(--accent); font-style: italic; }
+.sb-brand small {
+  display: block; font-size: 9px; font-weight: 400;
+  color: var(--ink-faint); margin-top: 2px;
+  text-transform: uppercase; letter-spacing: .1em;
+}
+
+.sb-search { margin: 12px 0 4px; }
+.sb-search input {
+  width: 100%; background: var(--paper); border: 1px solid var(--rule);
+  padding: 8px 10px; font-family: var(--mono); font-size: 10px;
+  color: var(--ink); outline: none; transition: border-color .2s;
+}
+.sb-search input:focus { border-color: var(--accent); }
+.sb-search input::placeholder { color: var(--ink-faint); }
+
+.sb-nav { padding: 10px 0; flex: 1; }
+.sb-nav .sb-section-label {
+  padding: 14px 20px 4px;
+  font-family: var(--mono); font-size: 8px;
+  text-transform: uppercase; letter-spacing: .2em;
+  color: var(--ink-faint);
+}
+.sb-nav a {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 20px;
+  font-family: var(--mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--ink-dim); text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: all .2s;
+}
+.sb-nav a:hover { background: var(--paper); color: var(--ink); border-left-color: var(--accent); }
+.sb-nav a.active { color: var(--ink); border-left-color: var(--accent); background: var(--paper); }
+
+.sb-footer {
+  padding: 12px 20px; border-top: 1px solid var(--rule);
+  font-family: var(--mono); font-size: 9px; color: var(--ink-faint);
+}
+
+/* --- Main --- */
+#main { flex: 1; margin-left: var(--sidebar-w); min-height: 100vh; }
+.main-inner { max-width: 920px; margin: 0 auto; padding: 32px 36px 100px; }
+
+/* --- Top Bar --- */
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0 16px; border-bottom: 1px solid var(--rule);
+  margin-bottom: 32px;
+  position: sticky; top: 0; z-index: 30;
+  background: var(--paper);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  margin-left: -36px; margin-right: -36px;
+  padding-left: 36px; padding-right: 36px;
+}
+.topbar-path { font-family: var(--mono); font-size: 9px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: .1em; }
+.topbar-path a { color: var(--ink); text-decoration: none; }
+.topbar-path a:hover { color: var(--accent); }
+
+.topbar-actions { display: flex; gap: 8px; align-items: center; }
+#darkToggle {
+  background: var(--paper-2); border: 1px solid var(--ink);
+  padding: 6px 12px; font-size: 16px; cursor: pointer;
+  transition: all .2s; font-family: var(--mono); line-height: 1; color: var(--ink);
+}
+#darkToggle:hover { transform: scale(1.05); border-color: var(--accent); }
+
+#sidebarToggle {
+  display: none;
+  position: fixed; top: 12px; left: 12px; z-index: 50;
+  background: var(--paper-2); border: 1px solid var(--ink);
+  padding: 6px 10px; font-size: 18px; cursor: pointer; line-height: 1; color: var(--ink);
+}
+
+/* --- Collapse Sidebar --- */
+#wrapper.collapsed #sidebar { transform: translateX(-300px); }
+#wrapper.collapsed #main { margin-left: 0; }
+.sidebar-collapse {
+  position: absolute; top: 50%; right: -28px; transform: translateY(-50%);
+  width: 28px; height: 60px;
+  background: var(--paper-2); border: 1px solid var(--rule); border-left: none;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: var(--ink-dim); transition: all .2s;
+  z-index: 45; border-radius: 0 4px 4px 0;
+}
+.sidebar-collapse:hover { color: var(--accent); background: var(--paper); }
+.sb-collapse-link {
+  display: block; padding: 8px 20px 4px;
+  font-family: var(--mono); font-size: 9px;
+  color: var(--ink-faint); cursor: pointer;
+  transition: color .2s;
+}
+.sb-collapse-link:hover { color: var(--accent); }
+
+/* ==================== TYPOGRAPHY ==================== */
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(32px, 4vw, 48px); font-weight: 700;
+  line-height: 1.1; margin-bottom: 2px;
+}
+h1 .italic { font-style: italic; color: var(--accent); }
+h1 + .subtitle {
+  font-family: var(--serif); font-style: italic;
+  color: var(--ink-dim); font-size: 17px; margin-bottom: 18px;
+}
+
+h2 {
+  font-family: var(--serif);
+  font-size: clamp(24px, 3vw, 34px); font-weight: 600;
+  line-height: 1.15; margin-top: 48px; margin-bottom: 6px;
+}
+h2 .underline {
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 4px;
+}
+h2 + .h2-sub {
+  font-family: var(--serif); font-style: italic;
+  color: var(--ink-dim); font-size: 16px; margin-bottom: 22px;
+}
+
+h3 { font-family: var(--serif); font-size: 22px; font-weight: 500; margin-top: 28px; margin-bottom: 8px; }
+h4 {
+  font-family: var(--mono); font-size: 11px;
+  text-transform: uppercase; letter-spacing: .15em;
+  color: var(--ink-dim); margin-top: 18px; margin-bottom: 6px;
+}
+p { margin-bottom: 12px; color: var(--ink-2); }
+p strong { color: var(--ink); }
+a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: var(--accent2); }
+code {
+  font-family: var(--mono); font-size: 12px;
+  background: var(--paper-2); padding: 2px 5px;
+  border: 1px solid var(--rule);
+}
+ul, ol { margin: 8px 0 12px 20px; }
+li { margin-bottom: 4px; }
+
+/* ==================== COMPONENTS ==================== */
+
+/* --- Pills --- */
+.eyebrow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.pill {
+  background: var(--paper-2); border: 1px solid var(--ink);
+  padding: 3px 10px; font-family: var(--mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: .1em; display: inline-block;
+}
+.pill.accent { border-color: var(--accent); color: var(--accent); }
+.pill.green { border-color: var(--green); color: var(--green); }
+.pill.blue { border-color: var(--blue); color: var(--blue); }
+.pill.gold { border-color: var(--gold); color: var(--gold); }
+.pill.teal { border-color: var(--teal); color: var(--teal); }
+
+/* --- Hero Card --- */
+.hero-card {
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 28px 30px;
+  box-shadow: 4px 4px 0 var(--ink);
+  margin-bottom: 20px;
+  position: relative;
+}
+.hero-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: var(--accent);
+}
+.hc-name { font-family: var(--serif); font-size: clamp(28px, 3.5vw, 40px); font-weight: 700; }
+.hc-name em { color: var(--accent); font-style: italic; }
+.hc-title { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--ink-dim); margin-bottom: 14px; }
+
+/* --- Hero Stats --- */
+.hero-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.hero-stat {
+  background: var(--paper); border: 1px solid var(--rule);
+  padding: 14px; text-align: center;
+  transition: all .2s;
+}
+.hero-stat:hover { transform: translateY(-2px); box-shadow: 2px 2px 0 var(--rule); }
+.hero-stat .num { font-family: var(--serif); font-size: clamp(22px, 2.5vw, 30px); color: var(--accent); font-weight: 600; }
+.hero-stat .num.gold { color: var(--gold); }
+.hero-stat .num.green { color: var(--green); }
+.hero-stat .lbl { font-family: var(--mono); font-size: 9px; text-transform: uppercase; color: var(--ink-dim); letter-spacing: .12em; }
+
+/* --- Cards --- */
+.card {
+  background: var(--paper-2);
+  border: 1px solid var(--ink);
+  padding: 18px 22px;
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: all .3s;
+  margin-bottom: 16px;
+}
+.card:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+.card-label {
+  font-family: var(--mono); font-size: 9px;
+  text-transform: uppercase; letter-spacing: .2em;
+  color: var(--accent); margin-bottom: 6px;
+}
+.card.blue { border-left: 3px solid var(--blue); }
+.card.gold { border-left: 3px solid var(--gold); }
+.card.green { border-left: 3px solid var(--green); }
+.card.purple { border-left: 3px solid var(--purple); }
+.card.teal { border-left: 3px solid var(--teal); }
+
+/* --- Key Grid --- */
+.key-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.key-item {
+  background: var(--paper-2); border: 1px solid var(--ink);
+  padding: 14px; box-shadow: 2px 2px 0 var(--ink);
+}
+.key-item .kt {
+  font-family: var(--mono); font-size: 9px;
+  text-transform: uppercase; letter-spacing: .15em;
+  color: var(--ink-dim); margin-bottom: 4px;
+}
+.key-item .kv { font-size: 14px; font-weight: 500; }
+
+/* --- Timeline --- */
+.timeline { position: relative; padding-left: 32px; margin: 16px 0; }
+.timeline::before {
+  content: ''; position: absolute; left: 10px; top: 4px; bottom: 4px;
+  width: 2px; background: var(--rule);
+}
+.timeline-item { position: relative; margin-bottom: 24px; padding-left: 20px; }
+.timeline-item::before {
+  content: ''; position: absolute; left: -26px; top: 6px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--paper); border: 2px solid var(--ink);
+}
+.timeline-item.accent::before { background: var(--accent); border-color: var(--accent); }
+.timeline-item.green::before { background: var(--green); border-color: var(--green); }
+.timeline-item.gold::before { background: var(--gold); border-color: var(--gold); }
+.tl-date { font-family: var(--mono); font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .1em; }
+.tl-title { font-size: 16px; font-weight: 600; color: var(--ink); }
+.tl-sub { font-family: var(--serif); font-style: italic; font-size: 13px; color: var(--ink-dim); margin-bottom: 4px; }
+.tl-desc { font-size: 13px; color: var(--ink-2); line-height: 1.6; }
+.tl-stat { font-family: var(--mono); font-size: 10px; color: var(--accent); margin-top: 2px; }
+
+/* --- Callouts / Highlight Boxes --- */
+.highlight-box {
+  background: var(--paper-2);
+  padding: 16px 20px;
+  border-left: 3px solid var(--accent);
+  margin: 16px 0;
+  font-size: 14px;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.highlight-box .label {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: .15em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 4px;
+}
+.highlight-box.green { border-left-color: var(--green); }
+.highlight-box.blue { border-left-color: var(--blue); }
+.highlight-box.gold { border-left-color: var(--gold); }
+.highlight-box.teal { border-left-color: var(--teal); }
+
+/* --- Skill Tags --- */
+.skill-tag {
+  display: inline-block;
+  background: var(--paper); border: 1px solid var(--rule);
+  padding: 4px 14px; font-family: var(--mono); font-size: 10px;
+  margin: 3px 4px; text-transform: uppercase; letter-spacing: .05em;
+  transition: all .2s;
+}
+.skill-tag:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+.skill-tag.accent { border-color: var(--accent); color: var(--accent); }
+
+/* --- Feature Grid --- */
+.feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+.feature-card {
+  background: var(--paper-2); border: 1px solid var(--ink);
+  padding: 16px 18px; box-shadow: 2px 2px 0 var(--ink);
+  transition: all .2s;
+}
+.feature-card:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--ink); }
+.feature-card .fc-icon { font-size: 24px; margin-bottom: 6px; display: block; }
+.feature-card h3 { font-size: 16px; margin: 0 0 4px; font-weight: 600; }
+.feature-card p { font-size: 12px; color: var(--ink-dim); margin: 0; }
+
+/* --- Tables --- */
+.table-wrap { overflow-x: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }
+thead th {
+  font-family: var(--mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: .1em;
+  background: var(--paper-2); padding: 10px;
+  border: 1px solid var(--rule); text-align: left;
+}
+tbody td { padding: 8px 10px; border: 1px solid var(--rule); vertical-align: top; }
+tbody tr:hover { background: rgba(200,180,140,.1); }
+
+/* --- Contact Row --- */
+.contact-row {
+  display: flex; gap: 18px; flex-wrap: wrap;
+  font-family: var(--mono); font-size: 10px;
+  color: var(--ink-dim); text-transform: uppercase;
+  margin-top: 10px; padding-top: 14px;
+  border-top: 1px solid var(--rule);
+  letter-spacing: .05em;
+}
+.contact-row span { display: flex; align-items: center; gap: 4px; }
+
+/* --- Selling Points (numbered) --- */
+.sp-list { list-style: none; margin: 12px 0; padding: 0; }
+.sp-list li { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.sp-list li:last-child { border-bottom: none; }
+.sp-list .sp-num { flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; color: var(--accent); font-weight: 600; }
+.sp-list .sp-content strong { display: block; font-size: 14px; color: var(--ink); }
+.sp-list .sp-content span { font-size: 13px; color: var(--ink-dim); display: block; margin-top: 2px; }
+
+/* --- Story Card (STAR) --- */
+.story-card {
+  background: var(--paper-2); border: 1px solid var(--ink);
+  padding: 20px 22px; box-shadow: 3px 3px 0 var(--ink);
+  margin-bottom: 16px; transition: all .3s;
+}
+.story-card:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+.story-card .story-label {
+  font-family: var(--mono); font-size: 9px;
+  text-transform: uppercase; letter-spacing: .2em;
+  color: var(--accent); margin-bottom: 8px;
+}
+.story-card .story-q {
+  font-family: var(--serif); font-style: italic;
+  font-size: 15px; color: var(--ink-2);
+  margin-bottom: 10px; padding-left: 12px;
+  border-left: 2px solid var(--accent);
+}
+.story-card .story-a { font-size: 13px; color: var(--ink-2); line-height: 1.7; }
+.story-card .story-a strong { color: var(--ink); }
+
+/* --- Section Animations --- */
+.section-anim {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+.section-anim.in { opacity: 1; transform: translateY(0); }
+
+/* --- Utility --- */
+.mt-2 { margin-top: 16px; }
+.mb-2 { margin-bottom: 16px; }
+.text-dim { color: var(--ink-dim); }
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-100%); width: 240px; }
+  #sidebar.open { transform: translateX(0); }
+  #main { margin-left: 0; }
+  .main-inner { padding: 24px 18px 80px; }
+  .topbar { margin-left: -18px; margin-right: -18px; padding-left: 18px; padding-right: 18px; }
+  #sidebarToggle { display: inline-flex; align-items: center; justify-content: center; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .hero-stats { grid-template-columns: 1fr 1fr; }
+}
+
+/* ==================== PRINT ==================== */
+@media print {
+  body { background: white !important; color: black !important; }
+  #sidebar, #sidebarToggle, #darkToggle, .topbar { display: none !important; }
+  #main { margin-left: 0 !important; }
+  .main-inner { padding: 0.5in !important; max-width: none !important; }
+  .section-anim { opacity: 1 !important; transform: none !important; }
+  .hero-card, .card, .feature-card, .story-card, .highlight-box { box-shadow: none !important; border: 1px solid #ccc !important; }
+  .hero-card, .card, .highlight-box, .timeline-item, .sp-list li, .story-card { break-inside: avoid; }
+  .hero-stat { border: 1px solid #ddd; }
+  h1, h2, h3 { page-break-after: avoid; }
+  @page { margin: 0.8in; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== MOBILE TOGGLE ===== -->
+<div id="sidebarToggle" onclick="toggleSidebar()">&#x2630;</div>
+
+<!-- ===== SIDEBAR ===== -->
+<aside id="sidebar">
+  <div class="sb-header" style="position:relative;">
+    <a href="#" class="sb-brand"><em>Neelima</em> Profile <small>Snowflake Developer · TCS</small></a>
+    <div class="sb-search">
+      <input type="text" id="sbSearchInput" placeholder="Filter nav..." oninput="filterNav()">
+    </div>
+  </div>
+  <nav class="sb-nav" id="sbNav">
+    <div class="sb-section-label">Profile</div>
+    <a href="#hero" class="active">Overview</a>
+    <a href="#objective">Objective</a>
+    <a href="#skills">Skills</a>
+
+    <div class="sb-section-label">Background</div>
+    <a href="#education">Education</a>
+    <a href="#timeline">Timeline</a>
+
+    <div class="sb-section-label">Resources</div>
+    <a href="#snapshot">Quick Snapshot</a>
+  </nav>
+  <div class="sb-collapse-link" onclick="toggleCollapse()">&#x25C0; Collapse sidebar</div>
+  <div class="sb-footer">Ready for Snowflake Developer Role</div>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<div id="main">
+<div class="main-inner">
+
+  <!-- ===== TOP BAR ===== -->
+  <div class="topbar">
+    <div class="topbar-path">
+      <a href="#">Home</a> / <span>Snowflake Developer</span> / <span>Neelima</span>
+    </div>
+    <div class="topbar-actions">
+      <button id="darkToggle" onclick="toggleDark()" title="Toggle theme">&#x263E;</button>
+    </div>
+  </div>
+
+  <!-- ===== HERO ===== -->
+  <section id="hero" class="section-anim">
+    <div class="hero-card">
+      <div class="hc-name">Myreddy <em>Neelima</em></div>
+      <div class="hc-title">B.Tech in Information Technology · First Class with Distinction</div>
+      <div class="contact-row">
+        <span>&#x1F4C5; DOB: 9th July 1993</span>
+        <span>&#x1F468; Father: My Reddy Lakshmi Narsimhulu</span>
+        <span>&#x1F4CB; Snowflake Developer · TCS through Kaushalam</span>
+      </div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="num">87.8%</div>
+        <div class="lbl">SSC (10th) · 2008</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num gold">68.2%</div>
+        <div class="lbl">Intermediate · 2010</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num green">70%</div>
+        <div class="lbl">B.Tech IT · JNTUA · 2014</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">2014</div>
+        <div class="lbl">Graduation Year</div>
+      </div>
+    </div>
+
+    <div class="eyebrow">
+      <span class="pill accent">Snowflake</span>
+      <span class="pill blue">Data Engineering</span>
+      <span class="pill green">ETL</span>
+      <span class="pill gold">SQL</span>
+      <span class="pill teal">Python</span>
+    </div>
+
+    <div class="highlight-box blue">
+      <div class="label">Position</div>
+      <p><strong>Snowflake Developer</strong> — TCS hiring through Kaushalam (Government of Andhra Pradesh's employability platform). 4–10 years experience range. This profile is tailored for the Snowflake Developer track.</p>
+    </div>
+  </section>
+
+  <!-- ===== OBJECTIVE ===== -->
+  <section id="objective" class="section-anim">
+    <h2><span class="underline">Objective</span></h2>
+    <div class="h2-sub">Professional summary — who she is and what she brings</div>
+
+    <div class="card blue">
+      <div class="card-label">Professional Summary</div>
+      <p><strong>B.Tech graduate in Information Technology</strong> from JNTUA (70% aggregate, First Class with Distinction) with a strong foundation in data engineering concepts, SQL, and Python. Eager to apply academic knowledge to real-world Snowflake development, data pipeline design, and cloud-based ETL workflows. Quick learner with solid analytical and problem-solving skills developed through 4 years of undergraduate training in IT systems and database management.</p>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <span class="fc-icon">&#x1F4CA;</span>
+        <h3>Data Fundamentals</h3>
+        <p>Strong grasp of relational databases, SQL queries, data modeling, and normalization — directly applicable to Snowflake's SQL-based architecture.</p>
+      </div>
+      <div class="feature-card">
+        <span class="fc-icon">&#x26A1;</span>
+        <h3>Analytical Mindset</h3>
+        <p>Problem-solving approach developed through IT curriculum — debugging, optimization, and systematic testing of data pipelines.</p>
+      </div>
+      <div class="feature-card">
+        <span class="fc-icon">&#x1F504;</span>
+        <h3>Quick to Upskill</h3>
+        <p>Proven ability to learn new technologies rapidly. Currently building hands-on Snowflake skills: Time Travel, Zero-Copy Cloning, Stages, COPY INTO patterns.</p>
+      </div>
+      <div class="feature-card">
+        <span class="fc-icon">&#x1F310;</span>
+        <h3>Cloud Ready</h3>
+        <p>Familiar with cloud data warehouse concepts. Snowflake's separation of storage and compute, micro-partition architecture, and virtual warehouse model map directly to coursework.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SKILLS ===== -->
+  <section id="skills" class="section-anim">
+    <h2>Skills &amp; <span class="underline">Expertise</span></h2>
+    <div class="h2-sub">Core competencies for the Snowflake Developer role</div>
+
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th style="width:200px">Category</th><th>Skills</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Data Warehousing</strong></td>
+          <td>
+            <span class="skill-tag accent">Snowflake</span>
+            <span class="skill-tag">Star Schema</span>
+            <span class="skill-tag">Snowflake Schema</span>
+            <span class="skill-tag">Dimensional Modeling</span>
+            <span class="skill-tag">Data Marts</span>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>SQL &amp; Databases</strong></td>
+          <td>
+            <span class="skill-tag accent">SQL (Advanced)</span>
+            <span class="skill-tag">CTEs</span>
+            <span class="skill-tag">Window Functions</span>
+            <span class="skill-tag">Joins &amp; Aggregations</span>
+            <span class="skill-tag">Query Optimization</span>
+            <span class="skill-tag">Stored Procedures</span>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Snowflake Specific</strong></td>
+          <td>
+            <span class="skill-tag accent">Time Travel</span>
+            <span class="skill-tag accent">Zero-Copy Clone</span>
+            <span class="skill-tag">Virtual Warehouses</span>
+            <span class="skill-tag">Micro-Partitions</span>
+            <span class="skill-tag">COPY INTO</span>
+            <span class="skill-tag">Stages (Internal/External)</span>
+            <span class="skill-tag">Snowpipe</span>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Programming</strong></td>
+          <td>
+            <span class="skill-tag">Python</span>
+            <span class="skill-tag">Pandas</span>
+            <span class="skill-tag">ETL Scripting</span>
+            <span class="skill-tag">Shell Scripting</span>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Tools &amp; Platforms</strong></td>
+          <td>
+            <span class="skill-tag">Snowsight</span>
+            <span class="skill-tag">Git</span>
+            <span class="skill-tag">VS Code</span>
+            <span class="skill-tag">Jupyter</span>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Core Competencies</strong></td>
+          <td>
+            <span class="skill-tag">Data Quality</span>
+            <span class="skill-tag">Data Validation</span>
+            <span class="skill-tag">Documentation</span>
+            <span class="skill-tag">Debugging</span>
+            <span class="skill-tag">Problem Solving</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="highlight-box gold mt-2">
+      <div class="label">Snowflake Learning Path</div>
+      <p>Actively upskilling on Snowflake-specific features: Clustering Keys, Streams &amp; Tasks for ELT automation, and Data Sharing / Data Marketplace. Hands-on practice with Snowflake's UI (Snowsight) and CLI (snowsql).</p>
+    </div>
+  </section>
+
+  <!-- ===== EDUCATION ===== -->
+  <section id="education" class="section-anim">
+    <h2><span class="underline">Education</span> History</h2>
+    <div class="h2-sub">Complete academic record — verified and consolidated</div>
+
+    <table>
+      <thead>
+        <tr><th>Qualification</th><th>Board / University</th><th>Year</th><th>Marks</th><th>Percentage</th><th>Result</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SSC (10th Class)</strong></td>
+          <td>Board of Secondary Education, AP</td>
+          <td>2008</td>
+          <td>527 / 600</td>
+          <td><strong>87.83%</strong></td>
+          <td>Pass</td>
+        </tr>
+        <tr>
+          <td><strong>Intermediate (BIEAP)</strong></td>
+          <td>Board of Intermediate Education, AP</td>
+          <td>2010</td>
+          <td>682 / 1000</td>
+          <td><strong>68.20%</strong></td>
+          <td>First Class</td>
+        </tr>
+        <tr>
+          <td><strong>B.Tech — Information Technology</strong></td>
+          <td>JNTUA (Jawaharlal Nehru Technological University Anantapur)</td>
+          <td>2014</td>
+          <td>70% Aggregate</td>
+          <td><strong>70.00%</strong></td>
+          <td>First Class with Distinction</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="card green">
+      <div class="card-label">Key Highlights</div>
+      <ul>
+        <li><strong>SSC (2008):</strong> 527/600 = <strong>87.83%</strong> — strong academic foundation</li>
+        <li><strong>Intermediate (2010):</strong> 682/1000 = <strong>68.20%</strong> — First Class in Board of Intermediate, AP</li>
+        <li><strong>B.Tech IT (2014):</strong> 70% aggregate from JNTUA — <strong>First Class with Distinction</strong></li>
+        <li>Provisional certificate issued. Consolidated marksheet verified.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== TIMELINE ===== -->
+  <section id="timeline" class="section-anim">
+    <h2>Academic <span class="underline">Timeline</span></h2>
+    <div class="h2-sub">The journey from 10th through graduation</div>
+
+    <div class="timeline">
+      <div class="timeline-item accent">
+        <div class="tl-date">2008</div>
+        <div class="tl-title">SSC (10th Class)</div>
+        <div class="tl-sub">Board of Secondary Education, AP</div>
+        <div class="tl-stat">527 / 600 — 87.83%</div>
+      </div>
+
+      <div class="timeline-item gold">
+        <div class="tl-date">2008 — 2010</div>
+        <div class="tl-title">Intermediate Education</div>
+        <div class="tl-sub">Board of Intermediate Education, AP (BIEAP)</div>
+        <div class="tl-stat">682 / 1000 — 68.20% — First Class</div>
+      </div>
+
+      <div class="timeline-item green">
+        <div class="tl-date">2010 — 2014</div>
+        <div class="tl-title">B.Tech in Information Technology</div>
+        <div class="tl-sub">JNTUA — Jawaharlal Nehru Technological University Anantapur</div>
+        <div class="tl-stat">70% Aggregate — First Class with Distinction</div>
+      </div>
+
+      <div class="timeline-item accent">
+        <div class="tl-date">2026</div>
+        <div class="tl-title">Snowflake Developer — TCS via Kaushalam</div>
+        <div class="tl-sub">Government of Andhra Pradesh's employability platform</div>
+        <div class="tl-stat">Actively applying · Profile ready</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== QUICK SNAPSHOT ===== -->
+  <section id="snapshot" class="section-anim">
+    <h2>Quick <span class="underline">Snapshot</span></h2>
+    <div class="h2-sub">Everything at a glance — for the form filler</div>
+
+    <div class="key-grid">
+      <div class="key-item">
+        <div class="kt">Full Name</div>
+        <div class="kv">Myreddy Neelima</div>
+      </div>
+      <div class="key-item">
+        <div class="kt">Father's Name</div>
+        <div class="kv">My Reddy Lakshmi Narsimhulu</div>
+      </div>
+      <div class="key-item">
+        <div class="kt">Date of Birth</div>
+        <div class="kv">9th July 1993</div>
+      </div>
+      <div class="key-item">
+        <div class="kt">SSC (10th) — 2008</div>
+        <div class="kv">527 / 600 (87.83%)</div>
+      </div>
+      <div class="key-item">
+        <div class="kt">Intermediate — 2010</div>
+        <div class="kv">682 / 1000 (68.20%) — First Class</div>
+      </div>
+      <div class="key-item">
+        <div class="kt">B.Tech IT — 2014</div>
+        <div class="kv">70% Aggregate — First Class with Distinction</div>
+      </div>
+      <div class="key-item">
+        <div class="kt">University</div>
+        <div class="kv">JNTUA (Jawaharlal Nehru Technological University Anantapur)</div>
+      </div>
+      <div class="key-item">
+        <div class="kt">Target Role</div>
+        <div class="kv">Snowflake Developer @ TCS (via Kaushalam)</div>
+      </div>
+    </div>
+
+    <div class="highlight-box green">
+      <div class="label">Form Fill Reference</div>
+      <p>All details needed for the Google Form application are consolidated above. Education marks with exact totals and percentages are calculated. Ready to copy-paste into: <a href="https://forms.gle/YawcCx2wVN9sD1baA" target="_blank">Kaushalam Application Form</a></p>
+    </div>
+
+    <div class="highlight-box gold" style="margin-top:12px;">
+      <div class="label">Tip for Application</div>
+      <p><strong>SSC:</strong> Board of Secondary Education, AP — 527/600 = 87.83%<br>
+      <strong>Intermediate:</strong> BIEAP — 682/1000 = 68.20% (First Class)<br>
+      <strong>B.Tech:</strong> JNTUA, Information Technology — 70% Aggregate (First Class with Distinction)<br>
+      <strong>Overall academic trend:</strong> Strong (87.8% in 10th) → consistent (68-70% through graduation).</p>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <div style="margin-top:60px; padding-top:20px; border-top:1px solid var(--rule); font-family:var(--mono); font-size:10px; color:var(--ink-faint); text-align:center;">
+    Profile designed for Snowflake Developer role · TCS through Kaushalam · Government of Andhra Pradesh<br>
+    Generated with krishna-html-go · Notebook Aesthetic · Blue Professional Theme
+  </div>
+
+</div> <!-- /main-inner -->
+</div> <!-- /main -->
+
+<script>
+/* ============================================================
+   CAREER-PROFILE — JavaScript
+   ============================================================ */
+
+/* --- Dark Mode --- */
+function toggleDark() {
+  var html = document.documentElement;
+  if (html.getAttribute('data-theme') === 'dark') {
+    html.removeAttribute('data-theme');
+    localStorage.setItem('theme', 'light');
+  } else {
+    html.setAttribute('data-theme', 'dark');
+    localStorage.setItem('theme', 'dark');
+  }
+}
+(function() {
+  if (localStorage.getItem('theme') === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+})();
+
+/* --- Sidebar Toggle --- */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+document.querySelectorAll('#sidebar a').forEach(function(a) {
+  a.addEventListener('click', function() {
+    document.getElementById('sidebar').classList.remove('open');
+  });
+});
+
+/* --- Sidebar Collapse --- */
+function toggleCollapse() {
+  document.getElementById('wrapper').classList.toggle('collapsed');
+}
+
+/* --- Nav Filter --- */
+function filterNav() {
+  var q = document.getElementById('sbSearchInput').value.toLowerCase();
+  document.querySelectorAll('#sbNav a').forEach(function(a) {
+    a.style.display = a.textContent.toLowerCase().includes(q) ? 'flex' : 'none';
+  });
+}
+
+/* --- Active Nav Highlight --- */
+(function() {
+  var sections = document.querySelectorAll('.section-anim[id]');
+  var navLinks = document.querySelectorAll('#sbNav a[href^="#"]');
+  function highlightNav() {
+    var scrollY = window.scrollY + 120;
+    var current = '';
+    sections.forEach(function(s) {
+      if (s.offsetTop <= scrollY && s.offsetTop + s.offsetHeight > scrollY) {
+        current = s.getAttribute('id');
+      }
+    });
+    navLinks.forEach(function(a) {
+      a.classList.remove('active');
+      if (a.getAttribute('href') === '#' + current) a.classList.add('active');
+    });
+  }
+  window.addEventListener('scroll', highlightNav, { passive: true });
+})();
+
+/* --- Scroll Animations --- */
+(function() {
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.section-anim').forEach(function(el) {
+    observer.observe(el);
+  });
+})();
+</script>
+
+</body>
+</html>
