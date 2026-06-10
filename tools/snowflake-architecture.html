@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snowflake — Architecture Explorer</title>
+<script>
+  (function () {
+    const saved = localStorage.getItem('theme');
+    const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.classList.toggle('dark', dark);
+  })();
+</script>
+<style>
+  :root {
+    --bg: #FAF9F5; --surface: #FFFFFF; --surface2: #F0EEE6;
+    --ink: #141413; --body: #3D3D3A; --muted: #87867F;
+    --line: #D1CFC5; --line-soft: #E6E3DA;
+    --clay: #D97757; --clay-soft: rgba(217,119,87,0.10);
+    --olive: #788C5D; --olive-soft: rgba(120,140,93,0.12);
+    --gold: #C9A45C; --gold-soft: rgba(201,164,92,0.12);
+    --blue: #5B7E96; --blue-soft: rgba(91,126,150,0.10);
+    --sky: #7FA3BC;
+    --zone: rgba(20,20,19,0.025); --zone-line: #D1CFC5;
+    --serif: ui-serif, Georgia, "Times New Roman", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --radius: 10px;
+  }
+  html.dark {
+    --bg: #141413; --surface: #1F1F1D; --surface2: #2A2A28;
+    --ink: #FAF9F5; --body: #D1CFC5; --muted: #87867F;
+    --line: #3D3D3A; --line-soft: #2A2A28;
+    --clay: #E48A6E; --clay-soft: rgba(228,138,110,0.14);
+    --olive: #9DB07C; --olive-soft: rgba(157,176,124,0.16);
+    --gold: #D4B36F; --gold-soft: rgba(212,179,111,0.14);
+    --blue: #7FA3BC; --blue-soft: rgba(127,163,188,0.14);
+    --sky: #7FA3BC;
+    --zone: rgba(250,249,245,0.03); --zone-line: #3D3D3A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--body); font-family: var(--sans);
+    -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; overflow: hidden;
+  }
+
+  .bar {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    padding: 14px 20px; border-bottom: 1px solid var(--line-soft); flex: none;
+  }
+  .bar h1 { font-family: var(--serif); font-weight: 500; font-size: 20px; color: var(--ink); letter-spacing: -0.01em; }
+  .bar .sub { font-family: var(--mono); font-size: 10.5px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+  .spacer { flex: 1; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+    padding: 5px 11px; border: 1px solid var(--line); border-radius: 999px;
+    background: transparent; color: var(--muted); cursor: pointer; transition: all .15s ease;
+  }
+  .chip:hover { color: var(--ink); border-color: var(--muted); }
+  .chip.on { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+  #themeToggle {
+    font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px;
+    background: transparent; color: var(--muted); cursor: pointer;
+  }
+  #themeToggle:hover { color: var(--ink); border-color: var(--muted); }
+
+  .stage { flex: 1; position: relative; min-height: 0; }
+  .stage svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+  /* zones */
+  .zone rect { fill: var(--zone); stroke: var(--zone-line); stroke-width: 1; stroke-dasharray: 5 5; rx: 16; }
+  .zone, .info-panel { transition: opacity .35s ease; }
+  .zone .ztitle { font-family: var(--serif); font-size: 16px; font-weight: 500; fill: var(--ink); }
+  .zone .zsub { font-family: var(--mono); font-size: 10px; fill: var(--muted); }
+  .zone-header { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; fill: var(--ink); font-weight: 600; }
+
+  /* nodes */
+  .node { cursor: pointer; transition: opacity .35s ease; }
+  .node rect { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; rx: var(--radius); transition: stroke .15s ease, filter .15s ease; }
+  .node:hover rect { stroke: var(--muted); }
+  .node.sel rect { stroke: var(--clay) !important; stroke-width: 2; }
+  .node .t  { font-family: var(--sans); font-size: 14px; font-weight: 600; fill: var(--ink); pointer-events: none; }
+  .node .m  { font-family: var(--mono); font-size: 10.5px; fill: var(--muted); pointer-events: none; }
+  .node .k  { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; fill: var(--clay); pointer-events: none; }
+  .node .small { font-size: 12px; }
+  .node .tiny { font-size: 10px; }
+
+  /* layer coloring */
+  .node.services rect { fill: var(--blue-soft); }
+  .node.compute rect { fill: var(--olive-soft); }
+  .node.storage rect { fill: var(--gold-soft); }
+  .node.gate rect { fill: var(--clay-soft); stroke: var(--clay); }
+  .node.ext rect { stroke-dasharray: 6 3; fill: var(--surface2); }
+
+  /* edges */
+  .edge { stroke: var(--muted); stroke-width: 1.8; fill: none; marker-end: url(#a-mut); transition: opacity .35s ease, stroke .2s ease; }
+  .edge.thick { stroke-width: 2.5; }
+  .edge.dash { stroke-dasharray: 6 5; }
+  .elbl { font-family: var(--mono); font-size: 10px; fill: var(--muted); transition: opacity .35s ease; }
+
+  /* flow highlighting */
+  .stage.flowing .edge { opacity: 0.02; }
+  .stage.flowing .elbl { opacity: 0.02; }
+  .stage.flowing .node { opacity: 0.02; }
+  .stage.flowing .zone { opacity: 0.03; }
+  .stage.flowing .info-panel { opacity: 0.03; }
+  .stage.flowing .edge.lit {
+    opacity: 1; stroke: var(--clay); marker-end: url(#a-clay);
+    stroke-dasharray: 7 5; animation: march 0.9s linear infinite;
+  }
+  .stage.flowing .elbl.lit { opacity: 1; fill: var(--clay); }
+  .stage.flowing .node.lit { opacity: 1; }
+  .stage.flowing .node.lit rect { stroke: var(--clay); }
+  .stage.flowing .node.lit.gate rect { fill: var(--clay-soft); }
+  @keyframes march { to { stroke-dashoffset: -12; } }
+  @media (prefers-reduced-motion: reduce) { .stage.flowing .edge.lit { animation: none; } }
+
+  .card {
+    position: absolute; max-width: 380px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 14px 16px; box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+    transition: opacity .35s ease;
+  }
+  #detail { right: 16px; bottom: 16px; width: 340px; }
+  #detail h3 { font-family: var(--serif); font-weight: 500; font-size: 17px; color: var(--ink); margin-bottom: 2px; }
+  #detail .meta { font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-bottom: 8px; }
+  #detail p { font-size: 12.5px; line-height: 1.55; }
+  #detail p code { font-family: var(--mono); font-size: 11px; color: var(--clay); }
+
+  /* flow explanation panel — below the diagram, not floating on top */
+  #flow-panel {
+    display: none; flex: none; width: 100%;
+    border-top: 1px solid var(--line-soft); background: var(--surface);
+    padding: 10px 20px 14px; max-height: 160px; overflow-y: auto;
+  }
+  #flow-panel.show { display: block; }
+  #flow-panel .fname {
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--clay); margin-bottom: 8px;
+  }
+  #flow-panel ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+  #flow-panel li {
+    font-size: 13px; line-height: 1.5; color: var(--body);
+  }
+  #flow-panel li b { color: var(--ink); }
+  #flow-panel li code {
+    font-family: var(--mono); font-size: 11.5px; color: var(--clay); background: var(--clay-soft);
+    padding: 0 4px; border-radius: 3px;
+  }
+  .src { position: absolute; top: 10px; right: 16px; font-family: var(--mono); font-size: 10px; color: var(--muted); opacity: 0.8; }
+
+  @media (max-width: 900px) {
+    body { overflow: auto; }
+    .stage { min-height: 80vh; }
+    #detail { position: static; width: auto; margin: 10px 16px; }
+    #flowcap { position: static; margin: 0 16px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div>
+    <h1>Snowflake — stacked architecture</h1>
+    <div class="sub">three layers stacked vertically · official Snowflake layout</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="chips" id="chips">
+    <button class="chip on" data-flow="all">Overview</button>
+    <button class="chip" data-flow="query">Query execution</button>
+    <button class="chip" data-flow="dataload">COPY INTO</button>
+    <button class="chip" data-flow="auto_cluster">Auto-clustering</button>
+    <button class="chip" data-flow="cache">Cache layers</button>
+    <button class="chip" data-flow="concurrent">Concurrent queries</button>
+  </div>
+  <button id="themeToggle">Theme</button>
+</div>
+
+<div class="stage" id="stage">
+<svg viewBox="0 0 1400 1000" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Snowflake stacked architecture diagram">
+  <defs>
+    <marker id="a-mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" style="fill: var(--muted)"/>
+    </marker>
+    <marker id="a-clay" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" style="fill: var(--clay)"/>
+    </marker>
+  </defs>
+
+  <!-- ══════════ ZONES (stacked vertically) ══════════ -->
+  <!-- Clients & Integration → Cloud Services → Compute → Storage -->
+
+  <!-- Top: Clients row -->
+  <g class="zone" id="z-clients">
+    <rect x="60" y="50" width="1280" height="100"/>
+    <text class="ztitle" x="80" y="76">Clients & Integration</text>
+    <text class="zsub" x="80" y="94">same SQL surface for all connectors</text>
+  </g>
+
+  <!-- Layer 1: Cloud Services -->
+  <g class="zone" id="z-services">
+    <rect x="60" y="190" width="1280" height="250"/>
+    <text class="ztitle" x="80" y="218">Cloud Services Layer</text>
+    <text class="zsub" x="80" y="236">auto-scaled · shared across all warehouses · zero compute cost</text>
+  </g>
+
+  <!-- Layer 2: Compute -->
+  <g class="zone" id="z-compute">
+    <rect x="60" y="480" width="1280" height="180"/>
+    <text class="ztitle" x="80" y="508">Compute Layer</text>
+    <text class="zsub" x="80" y="526">Virtual Warehouses · XS to 6XL · independently elastic · billed per second</text>
+  </g>
+
+  <!-- Layer 3: Storage -->
+  <g class="zone" id="z-storage">
+    <rect x="60" y="700" width="1280" height="240"/>
+    <text class="ztitle" x="80" y="728">Storage Layer</text>
+    <text class="zsub" x="80" y="746">compressed, columnar, encrypted · auto micro-partitioned · cloud-agnostic</text>
+  </g>
+
+  <!-- ══════════ NODES: CLIENTS ══════════ -->
+  <g class="node ext" data-k="snowsight">
+    <rect x="100" y="75" width="190" height="55"/>
+    <text class="t" x="120" y="100">Snowsight</text>
+    <text class="m" x="120" y="118">web UI · worksheets</text>
+  </g>
+  <g class="node ext" data-k="sqlclient">
+    <rect x="330" y="75" width="190" height="55"/>
+    <text class="t" x="350" y="100">SQL Clients</text>
+    <text class="m" x="350" y="118">JDBC · ODBC · Python</text>
+  </g>
+  <g class="node ext" data-k="apis">
+    <rect x="560" y="75" width="190" height="55"/>
+    <text class="t" x="580" y="100">REST APIs / SDK</text>
+    <text class="m" x="580" y="118">Python · Spark · Kafka</text>
+  </g>
+  <g class="node ext" data-k="stageing">
+    <rect x="790" y="75" width="190" height="55"/>
+    <text class="t" x="810" y="100">Staging</text>
+    <text class="m" x="810" y="118">internal · external stages</text>
+  </g>
+  <g class="node ext" data-k="bi">
+    <rect x="1020" y="75" width="190" height="55"/>
+    <text class="t" x="1040" y="100">BI Tools</text>
+    <text class="m" x="1040" y="118">Tableau · Power BI · Looker</text>
+  </g>
+
+  <!-- ══════════ NODES: CLOUD SERVICES ══════════ -->
+  <g class="node services gate" data-k="auth">
+    <rect x="120" y="225" width="420" height="60"/>
+    <text class="t" x="140" y="251">Authentication & Access Control</text>
+    <text class="m" x="140" y="269">RBAC · OAuth · SCIM · network policies</text>
+  </g>
+  <g class="node services" data-k="optimizer">
+    <rect x="600" y="225" width="460" height="60"/>
+    <text class="t" x="620" y="251">Query Optimizer & Compiler</text>
+    <text class="k" x="620" y="269">the brain</text>
+    <text class="m" x="620" y="283">stats-based · partition pruning · auto-join-order</text>
+  </g>
+  <g class="node services" data-k="metadata">
+    <rect x="120" y="320" width="280" height="50"/>
+    <text class="t" x="140" y="344">Metadata</text>
+    <text class="m" x="140" y="360">table DDL · stats · history</text>
+  </g>
+  <g class="node services" data-k="txn">
+    <rect x="440" y="320" width="280" height="50"/>
+    <text class="t" x="460" y="344">Transaction Manager</text>
+    <text class="m" x="460" y="360">ACID · MVCC · snapshot isolation</text>
+  </g>
+  <g class="node services" data-k="resultcache">
+    <rect x="760" y="320" width="280" height="50"/>
+    <text class="t" x="780" y="344">Result Set Cache</text>
+    <text class="m" x="780" y="360">24h · zero compute</text>
+  </g>
+
+  <!-- ══════════ NODES: COMPUTE ══════════ -->
+  <g class="node compute" data-k="wh-xs">
+    <rect x="120" y="510" width="560" height="65"/>
+    <text class="t" x="140" y="538">Virtual Warehouse (XS — 6XL)</text>
+    <text class="m" x="140" y="558">independent MPP compute cluster · auto-suspend/resume</text>
+  </g>
+  <g class="node compute" data-k="caches">
+    <rect x="730" y="510" width="480" height="65"/>
+    <text class="t" x="750" y="538">Warehouse-local Caches</text>
+    <text class="m" x="750" y="558">metadata free · result set 24h · SSD/local while alive</text>
+  </g>
+  <g class="node compute" data-k="multicluster">
+    <rect x="120" y="595" width="1160" height="40"/>
+    <text class="t small" x="140" y="618">Multi-cluster warehouse: automatically adds more clusters when concurrency spikes · 1–10 clusters · max is configurable</text>
+  </g>
+
+  <!-- ══════════ NODES: STORAGE ══════════ -->
+  <g class="node storage" data-k="micro">
+    <rect x="120" y="735" width="500" height="85"/>
+    <text class="t" x="140" y="762">Micro-partitions</text>
+    <text class="m" x="140" y="780">50–500 MB each · columnar compressed · immutable</text>
+    <text class="m" x="140" y="798">auto-split/merge · min/max metadata per column for pruning</text>
+  </g>
+  <g class="node storage" data-k="cloudstore">
+    <rect x="120" y="845" width="500" height="65"/>
+    <text class="t" x="140" y="872">Cloud blob storage</text>
+    <text class="m" x="140" y="890">S3 · Azure Blob · GCS · encrypted at rest + in transit</text>
+  </g>
+  <g class="node storage" data-k="clustering">
+    <rect x="670" y="735" width="420" height="65"/>
+    <text class="t" x="690" y="762">Auto-clustering (background)</text>
+    <text class="m" x="690" y="780">re-organizes overlapping partitions</text>
+    <text class="m" x="690" y="796">credit cost · best for tables >1TB</text>
+  </g>
+  <g class="node storage info-panel" data-k="infoschema" style="pointer-events:auto;">
+    <rect x="670" y="825" width="420" height="85" fill="var(--surface2)" stroke="var(--line)" stroke-width="1.5" rx="12"/>
+    <text class="t" x="690" y="850" font-size="12px" fill="var(--ink)">Metadata & Information Schema</text>
+    <text class="m" x="690" y="870" font-size="10px">SHOW / DESCRIBE / INFORMATION_SCHEMA</text>
+    <text class="m" x="690" y="886" font-size="10px">ACCOUNT_USAGE · QUERY_HISTORY</text>
+    <text class="m" x="690" y="900" font-size="10px" fill="var(--muted)" font-style="italic">all queryable without a warehouse</text>
+  </g>
+
+  <!-- ══════════ EDGE CONNECTORS (vertical flows) ══════════ -->
+  <!--
+    Every arrow connects directly from one node edge to another.
+    No arrow ends in empty space — each endpoint touches a node boundary.
+    Horizontal segments run in the gap zones (between layer rows).
+  -->
+
+  <!-- Client → Cloud Services (SQL enters services) -->
+  <path class="edge" id="e-client-sql" d="M 195,130 L 195,170 L 330,170 L 330,225"/>
+  <path class="edge" id="e-client-opt" d="M 425,130 L 425,170 L 830,170 L 830,225"/>
+
+  <!-- Cloud Services internal (Auth → Optimizer → Result Cache) -->
+  <path class="edge" id="e-auth-opt"  d="M 540,255 L 600,255"/>
+  <path class="edge" id="e-opt-cache" d="M 1060,255 L 1060,290 L 900,290 L 900,320"/>
+
+  <!-- Cloud Services → Compute (plan + metadata dispatch) -->
+  <!-- Routes through 40px gap between Txn (R=720) and Result Cache (L=760) at x=740 -->
+  <!-- Then left at y=440 (services bottom) into VW top -->
+  <path class="edge" id="e-plan"     d="M 830,285 L 830,295 L 740,295 L 740,440 L 600,440 L 600,510"/>
+  <path class="edge" id="e-metacache" d="M 260,370 L 260,510"/>
+  <path class="edge" id="e-txn-vw"    d="M 580,370 L 580,542"/>
+
+  <!-- Compute internal -->
+  <path class="edge" id="e-vw-cache" d="M 680,542 L 730,542"/>
+
+  <!-- Compute → Storage (vertical down) -->
+  <path class="edge" id="e-scan"    d="M 370,575 L 370,735"/>
+  <path class="edge" id="e-write"   d="M 500,575 L 500,845"/>
+
+  <!-- Storage internal -->
+  <path class="edge dash" id="e-compact" d="M 620,777 L 670,777"/>
+  <path class="edge" id="e-meta-info"   d="M 620,820 L 670,820 L 670,825"/>
+
+  <!-- Return: Storage → Compute (data read) -->
+  <path class="edge" id="e-data-up" d="M 500,735 L 500,575"/>
+
+  <!-- Return: Compute → Cloud Services → Client (results) -->
+  <!-- Starts from VW bottom (not Caches — Caches isn't lit in query flow) -->
+  <!-- Routes right to x=1100 (past all services), then up, then left into RC -->
+  <path class="edge" id="e-result-up" d="M 600,575 L 1100,575 L 1100,440 L 970,440 L 970,370"/>
+  <path class="edge" id="e-serve"     d="M 900,320 L 1100,320 L 1100,170 L 195,170 L 195,130"/>
+
+  <!-- External data path: Stage → VW (for COPY INTO) -->
+  <!-- Routes RIGHT to x=1100 (past Optimizer R=1060), then down, then left into VW -->
+  <path class="edge" id="e-stage-vw" d="M 885,130 L 885,140 L 1100,140 L 1100,440 L 600,440 L 600,510"/>
+
+  <!-- Edge labels -->
+  <text class="elbl" data-e="e-client-sql" x="310" y="148" text-anchor="middle">SQL queries</text>
+  <text class="elbl" data-e="e-client-opt" x="620" y="148" text-anchor="middle">worksheets</text>
+  <text class="elbl" data-e="e-auth-opt"   x="560" y="242" text-anchor="start">identity verified</text>
+  <text class="elbl" data-e="e-plan"       x="720" y="360" text-anchor="middle">compiled plan dispatched</text>
+  <text class="elbl" data-e="e-scan"       x="385" y="640" text-anchor="start">scan micro-partitions</text>
+  <text class="elbl" data-e="e-write"      x="515" y="700" text-anchor="start">write new partitions</text>
+  <text class="elbl" data-e="e-data-up"    x="515" y="680" text-anchor="start">columnar data decompressed</text>
+  <text class="elbl" data-e="e-result-up"  x="850" y="500" text-anchor="middle">result set cached</text>
+  <text class="elbl" data-e="e-serve"      x="980" y="200" text-anchor="middle">results to client</text>
+  <text class="elbl" data-e="e-stage-vw"  x="950" y="260" text-anchor="middle">files to warehouse</text>
+  <text class="elbl" data-e="e-vw-cache"  x="700" y="530" text-anchor="start">local caching</text>
+  <text class="elbl" data-e="e-compact"   x="640" y="765" text-anchor="start">reorganize</text>
+  <text class="elbl" data-e="e-meta-info"  x="640" y="810" text-anchor="start">prune metadata</text>
+  <text class="elbl" data-e="e-opt-cache"  x="980" y="290" text-anchor="middle">result cache hit</text>
+  <text class="elbl" data-e="e-metacache"  x="275" y="430" text-anchor="start">metadata cache</text>
+  <text class="elbl" data-e="e-txn-vw"    x="595" y="460" text-anchor="start">consistent snapshot</text>
+</svg>
+
+  <div class="src">Snowflake stacked architecture · official 3-layer layout · click any node</div>
+
+  <div class="card" id="detail">
+    <h3 id="d-title">Click anything</h3>
+    <div class="meta" id="d-meta">node detail</div>
+    <p id="d-body">Every box is clickable. The chips up top light up request paths through the vertical stack — top to bottom, results back up the right side.</p>
+  </div>
+</div>
+
+<div id="flow-panel">
+  <div class="fname" id="f-name"></div>
+  <ol id="f-steps"></ol>
+</div>
+
+<script>
+const DETAIL = {
+  snowsight:   { t:"Snowsight", m:"web UI · session-based", b:"The Snowflake web interface. Runs worksheets, visualizes results, manages warehouses/users/roles. Every click generates the same SQL you'd write in a client." },
+  sqlclient:   { t:"SQL Clients", m:"JDBC · ODBC · Python", b:"Direct warehouse access from BI tools (Tableau, Power BI), programming languages, and CLI. Same SQL surface as Snowsight but with connection pooling and batch support." },
+  apis:        { t:"REST APIs / SDK", m:"Python · Spark · Kafka", b:"Programmatic access. The Python connector is the most common — works with pandas, handles warehouse management, and supports write_pandas for bulk ingest. Kafka connector streams rows in near-real-time." },
+  stageing:    { t:"Staging", m:"internal / external", b:"Where raw files sit before ingest. Internal stages live in Snowflake storage; external stages point at S3/GCS/Azure. <code>LIST @stage</code> to see files. <code>REMOVE</code> to clean up after loading." },
+  bi:          { t:"BI Tools", m:"Tableau · Power BI · Looker", b:"Business intelligence tools connect via JDBC/ODBC. They issue the same SQL as any other client. Best practice: route BI queries through a dedicated warehouse to avoid contention with ETL workloads." },
+  auth:        { t:"Authentication & Access Control", m:"RBAC · OAuth · SCIM", b:"ROLES → privileges on objects. <b>Always-on even before a query starts</b> — every request is authenticated at this layer. Network policies, MFA, and SCIM sync from your IdP. Zero compute cost." },
+  optimizer:   { t:"Query Optimizer & Compiler", m:"the brain of Snowflake", b:"Transforms SQL into an execution plan. Stats-based: uses micro-partition metadata (min/max per column) to prune partitions. Produces a compiled plan that the warehouse executes. <b>No actual data touched here</b> — pure decision-making." },
+  metadata:    { t:"Metadata", m:"table DDL · stats · history", b:"All schema definitions, column types, clustering keys, and historical query data. Lives in cloud services layer. Queryable via INFORMATION_SCHEMA and ACCOUNT_USAGE — no warehouse needed." },
+  txn:         { t:"Transaction Manager", m:"ACID · MVCC", b:"Enforces <b>snapshot isolation</b>. Each query sees a consistent snapshot of data at the moment of execution. Writes create new micro-partitions. Concurrent readers never block writers, writers never block readers." },
+  resultcache: { t:"Result Set Cache", m:"24h · zero compute credits", b:"If the exact same SQL query (same text, same data) ran within the last 24 hours, the result is served from cache instantly. Zero warehouse needed. This is why dashboards are fast. <b>Invalidated</b> when data changes (DML on the table)." },
+  "wh-xs":     { t:"Virtual Warehouse", m:"size XS → 6XL", b:"The compute engine. Each warehouse is an independent MPP cluster. Sizing: XS=1 node, XL=16 nodes, 6XL=256 nodes. Auto-suspend (60s default) and auto-resume. Cache dies on suspend. <b>You pay only for running time.</b>" },
+  caches:      { t:"Warehouse-local Caches", m:"three layers", b:"<b>Metadata cache</b>: avoids re-reading INFORMATION_SCHEMA. <b>Result set cache</b>: identical query returns instantly. <b>SSD cache</b>: scanned blocks on local SSDs while warehouse is alive. All lost on suspend/resume." },
+  multicluster: { t:"Multi-cluster Warehouse", m:"auto-scaling", b:"When concurrency spikes, a multi-cluster warehouse automatically adds more compute clusters (up to the configured max, default 10). Each cluster has its own cache. Queued queries get routed to new clusters. Extra clusters = extra credits." },
+  micro:       { t:"Micro-partitions", m:"50–500 MB each", b:"The fundamental storage unit. Each table is a growing set of micro-partitions. <b>Columnar</b>: only scanned columns are read. <b>Immutable</b>: DML creates new partitions, old ones are eventually GC'd. <b>Metadata</b>: each partition stores min/max/null-count per column for pruning." },
+  cloudstore:  { t:"Cloud blob storage", m:"S3 · Azure Blob · GCS", b:"The actual bytes live in your cloud provider's blob storage. Encrypted at rest (AES-256) and in transit (TLS). Compute reads them over high-bandwidth internal networking. <b>Decoupled</b>: suspend your warehouse, data stays intact." },
+  clustering:  { t:"Auto-clustering", m:"background partition reorganization", b:"Without clustering, micro-partition key ranges overlap. Auto-clustering runs in background to re-sort and merge partitions so <b>min-max ranges don't overlap</b>. Costs credits. Best for large tables (>1TB) with selective filters." },
+  infoschema:  { t:"Metadata & Information Schema", m:"SHOW · DESCRIBE · ACCOUNT_USAGE", b:"All metadata about tables, columns, stages, warehouses, and query history. Lives in the Cloud Services layer. Queryable via <code>INFORMATION_SCHEMA</code> and <code>ACCOUNT_USAGE</code> views — <b>no warehouse needed</b>. Zero compute cost." }
+};
+
+const FLOWS = {
+  all: {},
+  query: {
+    name: "Query execution — top to bottom, results back up the right",
+    edges: ["e-client-sql","e-auth-opt","e-plan","e-scan","e-data-up","e-result-up","e-serve","e-opt-cache"],
+    nodes: ["snowsight","sqlclient","bi","auth","optimizer","wh-xs","micro","cloudstore","resultcache"],
+    steps: ["<b>Client → Auth + Optimizer</b>: SQL enters Cloud Services. Auth verifies identity. Optimizer compiles plan using partition metadata — <b>zero compute credits</b>.",
+            "<b>Plan → VW</b>: Compiled plan dispatched to Virtual Warehouse. Plan specifies exactly which micro-partitions to scan (min/max pruning).",
+            "<b>VW → Storage (scan)</b>: Warehouse scans only pruned micro-partitions from cloud blob storage, decompressing only requested columns — <b>columnar = fast</b>.",
+            "<b>Data → VW → Result Cache</b>: Decompressed columnar data flows back into VW for processing. Results cached in Cloud Services Result Set Cache (24h TTL).",
+            "<b>Cache → Client</b>: Result served to client. Repeat identical SQL within 24h → cache hit. Zero warehouse needed, zero credits."]
+  },
+  dataload: {
+    name: "COPY INTO — files in, partitioned out",
+    edges: ["e-stage-vw","e-write"],
+    nodes: ["stageing","wh-xs","micro","cloudstore"],
+    steps: ["<b>Stage files</b>: Raw files in internal/external stage (S3/GCS/Azure). <code>LIST @stage</code> to verify.",
+            "<b>VW reads files</b>: <code>COPY INTO table</code> runs on VW. Reads files from stage, parses format (CSV/JSON/Parquet/Avro), validates rows.",
+            "<b>New micro-partitions</b>: Validated rows written as new compressed, columnar micro-partitions to cloud blob storage. Old partitions marked for GC.",
+            "<b>Snowpipe</b>: Same COPY INTO runs serverlessly on file arrival. No warehouse needed. Billed per-second."]
+  },
+  auto_cluster: {
+    name: "Auto-clustering — reorganizing partition overlaps",
+    edges: ["e-compact","e-meta-info"],
+    nodes: ["micro","cloudstore","clustering","infoschema"],
+    steps: ["<b>Overlapping partitions</b>: DML creates micro-partitions with overlapping key ranges. Clustering depth increases = more partitions scanned.",
+            "<b>Background reorg</b>: Auto-clustering runs in Storage layer as background process. Merges overlapping partitions, splits oversized ones, re-sorts.",
+            "<b>Clean ranges</b>: Result = non-overlapping key ranges. Query pruning becomes aggressive. <code>SYSTEM$CLUSTERING_DEPTH('table')</code> shows the score.",
+            "<b>When to use</b>: >1TB tables with selective filters. Credit cost varies with depth-reduction work. Metadata trackable via Info Schema."]
+  },
+  cache: {
+    name: "Three cache layers — where they sit, how they work",
+    edges: ["e-metacache","e-opt-cache","e-vw-cache","e-serve"],
+    nodes: ["snowsight","metadata","resultcache","caches","optimizer","wh-xs"],
+    steps: ["<b>Metadata cache</b> (Services layer, always on, free): Column names, partition stats — cached on the warehouse. Never re-queries INFORMATION_SCHEMA. Zero credit cost.",
+            "<b>Result set cache</b> (Services layer, 24h TTL): Exact same SQL + same data = instant result served. Zero compute credits. Invalidated on DML.",
+            "<b>SSD/compute cache</b> (Warehouse-local): Scanned blocks stay on local SSDs while warehouse is alive. Lost on suspend/resume.",
+            "Cold query: all 3 caches miss. Warehouse reads cloud storage directly. This is where sizing matters."]
+  },
+  concurrent: {
+    name: "Concurrent queries — decoupled compute, shared storage",
+    edges: ["e-client-sql","e-client-opt","e-plan","e-scan"],
+    nodes: ["snowsight","sqlclient","bi","auth","optimizer","wh-xs","multicluster","micro","cloudstore"],
+    steps: ["<b>Two warehouses, same table</b>: XS for ETL, XL for BI — both query the same data simultaneously. Each has independent compute + private cache.",
+            "<b>MVCC isolation</b>: Transaction Manager gives each warehouse its own consistent snapshot. Readers see data as-of query-start time.",
+            "<b>Zero lock contention</b>: Writers and readers never block each other. A MERGE doesn't block a SELECT.",
+            "<b>Auto-scale</b>: Multi-cluster warehouses add more clusters when queue builds. Each cluster gets same plan, scans different partitions."]
+  }
+};
+
+const stage = document.getElementById('stage');
+const fp = document.getElementById('flow-panel');
+const nodes = document.querySelectorAll('.node');
+const edges = document.querySelectorAll('.edge');
+const elbls = document.querySelectorAll('.elbl');
+const chips = document.querySelectorAll('.chip');
+
+function setFlow(key) {
+  chips.forEach(c => c.classList.toggle('on', c.dataset.flow === key));
+  edges.forEach(e => e.classList.remove('lit'));
+  elbls.forEach(l => l.classList.remove('lit'));
+  nodes.forEach(n => n.classList.remove('lit'));
+  if (key === 'all') { stage.classList.remove('flowing'); fp.classList.remove('show'); return; }
+  const f = FLOWS[key];
+  stage.classList.add('flowing');
+  if (f.edges) f.edges.forEach(id => document.getElementById(id)?.classList.add('lit'));
+  elbls.forEach(l => { if (f.edges && f.edges.includes(l.dataset.e)) l.classList.add('lit'); });
+  if (f.nodes) f.nodes.forEach(k => document.querySelector(`.node[data-k="${k}"]`)?.classList.add('lit'));
+  document.getElementById('f-name').textContent = f.name || key;
+  if (f.steps) document.getElementById('f-steps').innerHTML = f.steps.map(s => `<li>${s}</li>`).join('');
+  fp.classList.add('show');
+}
+chips.forEach(c => c.addEventListener('click', () => setFlow(c.dataset.flow)));
+
+nodes.forEach(n => n.addEventListener('click', function() {
+  nodes.forEach(x => x.classList.remove('sel'));
+  this.classList.add('sel');
+  const d = DETAIL[this.dataset.k];
+  if (!d) return;
+  document.getElementById('d-title').textContent = d.t;
+  document.getElementById('d-meta').textContent = d.m;
+  document.getElementById('d-body').innerHTML = d.b;
+}));
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const dark = !document.documentElement.classList.contains('dark');
+  document.documentElement.classList.toggle('dark', dark);
+  localStorage.setItem('theme', dark ? 'dark' : 'light');
+});
+</script>
+</body>
+</html>
