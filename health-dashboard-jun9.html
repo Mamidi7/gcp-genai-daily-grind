@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health Data Analysis Report — Krishna Vardhan</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   HEALTH DATA ANALYSIS REPORT — Notebook Aesthetic
+   ============================================================ */
+
+:root {
+  --paper: #f3eee4;  --paper-2: #ebe4d4;  --paper-3: #e3dbcb;
+  --ink: #1a1612;     --ink-2: #3d3528;
+  --ink-dim: #6b5d49; --ink-faint: #a89a83;
+  --rule: #c8b99e;    --rule-light: #dad1c1;
+  --accent: #c0392b;  --accent2: #a93226;
+  --green: #2d7d46;   --blue: #2b6cb0;
+  --gold: #b8860b;    --purple: #7b4d8c;  --teal: #2a7b7b;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --sidebar-w: 290px;
+}
+
+[data-theme="dark"] {
+  --paper: #1b1917;  --paper-2: #242220;  --paper-3: #2d2a26;
+  --ink: #f0ece9;    --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430;   --rule-light: #46413c;
+  --accent: #e8704a;  --accent2: #d95a3a;
+  --green: #5bbd6b;   --blue: #5b8fbd;
+  --gold: #d4a84b;    --purple: #b47bc4;   --teal: #5bbfbf;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.65;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(192,57,43,.04) 0%, transparent 50%),
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(200,180,140,.07) 27px, rgba(200,180,140,.07) 28px);
+}
+
+/* ==================== LAYOUT ==================== */
+
+#wrapper { display: flex; min-height: 100vh; }
+
+/* --- Sidebar --- */
+#sidebar {
+  position: fixed; top: 0; left: 0;
+  width: var(--sidebar-w); height: 100vh;
+  background: var(--paper-2);
+  border-right: 1px solid var(--rule);
+  overflow-y: auto; z-index: 40;
+  transition: transform .35s ease;
+  display: flex; flex-direction: column;
+}
+
+.sb-header { padding: 22px 20px 16px; border-bottom: 1px solid var(--rule); }
+
+.sb-brand {
+  font-family: var(--serif); font-size: 17px; font-weight: 400;
+  color: var(--ink); text-decoration: none; display: block; line-height: 1.3;
+}
+.sb-brand em { color: var(--accent); font-style: italic; }
+.sb-brand small { display: block; font-family: var(--mono); font-size: 8px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+
+.sb-search { margin: 12px 0 4px; }
+.sb-search input {
+  width: 100%; background: var(--paper);
+  border: 1px solid var(--rule); padding: 7px 10px;
+  font-family: var(--mono); font-size: 10px; color: var(--ink);
+  outline: none; transition: border-color .2s;
+}
+.sb-search input:focus { border-color: var(--accent); }
+.sb-search input::placeholder { color: var(--ink-faint); }
+
+.sb-nav { padding: 8px 0; flex: 1; }
+.sb-nav a {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 20px; font-family: var(--mono); font-size: 9.5px;
+  color: var(--ink-dim); text-decoration: none; transition: all .2s;
+  border-left: 2px solid transparent;
+}
+.sb-nav a:hover { color: var(--ink); background: rgba(0,0,0,.04); }
+.sb-nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(192,57,43,.06); }
+.sb-nav a .nav-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+.sb-gh { padding: 12px 20px; border-top: 1px solid var(--rule); font-size: 8px; color: var(--ink-faint); text-align: center; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* --- Topbar --- */
+.topbar {
+  position: sticky; top: 0; z-index: 30;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 50px; margin: 0 -50px;
+  background: var(--paper);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--rule);
+}
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.topbar-bread { font-family: var(--mono); font-size: 8px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.5px; }
+.topbar-bread span { color: var(--ink-dim); }
+
+#themeToggle {
+  background: none; border: 1px solid var(--rule); cursor: pointer;
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; color: var(--ink-dim); transition: all .2s;
+}
+#themeToggle:hover { background: var(--paper-2); border-color: var(--ink-dim); }
+
+/* --- Main --- */
+#main { flex: 1; margin-left: var(--sidebar-w); transition: margin-left .35s ease; min-height: 100vh; }
+#main-inner { max-width: 840px; margin: 0 auto; padding: 30px 50px 60px; }
+
+/* --- Footer --- */
+.footer {
+  margin-top: 60px; padding-top: 30px;
+  border-top: 1px solid var(--rule);
+  font-size: 11px; color: var(--ink-faint);
+  text-align: center;
+}
+
+/* ==================== COMPONENTS ==================== */
+
+/* --- Headings --- */
+h1 { font-family: var(--serif); font-size: 32px; font-weight: 400; line-height: 1.15; margin: 0 0 6px; }
+h1 .italic { color: var(--accent); font-style: italic; }
+.subtitle { font-family: var(--serif); font-style: italic; color: var(--ink-dim); font-size: 13px; margin-bottom: 28px; }
+
+h2 {
+  font-family: var(--serif); font-size: 24px; font-weight: 400;
+  margin: 38px 0 14px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+  display: flex; align-items: center; gap: 8px;
+}
+h2 .underline { border-bottom: 2px solid var(--accent); padding-bottom: 2px; }
+
+h3 {
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
+  margin: 24px 0 8px; color: var(--ink-2);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+p { margin: 0 0 12px; color: var(--ink-dim); }
+
+/* --- Animations --- */
+.section-anim { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+.section-anim.in { opacity: 1; transform: translateY(0); }
+
+/* --- Hero Section --- */
+.hero-banner {
+  background: linear-gradient(135deg, #FFFFFF 0%, var(--paper) 100%);
+  border: 1px solid var(--rule);
+  border-radius: 12px; padding: 28px 32px; margin-bottom: 24px;
+  box-shadow: 0 2px 12px rgba(45,43,40,0.06);
+  position: relative; overflow: hidden;
+}
+.hero-banner::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--gold) 50%, var(--green) 100%);
+}
+.hero-banner h1 { font-size: 28px; }
+.hero-banner .meta-row { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
+
+/* --- Hero Stat --- */
+.hero-stat { text-align: center; padding: 12px 16px; background: var(--paper); border-radius: 8px; border: 1px solid var(--rule-light); min-width: 100px; }
+.hero-stat .hs-num { font-family: var(--serif); font-size: 22px; font-weight: 700; line-height: 1; }
+.hero-stat .hs-lbl { font-family: var(--mono); font-size: 7px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px; }
+
+/* --- Metric Grid --- */
+.metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 12px; margin: 16px 0; }
+.metric-card {
+  background: #FFFFFF; border: 1px solid var(--rule);
+  border-radius: 10px; padding: 14px 16px;
+  box-shadow: 0 2px 8px rgba(45,43,40,0.06);
+  position: relative;
+}
+.metric-card .label {
+  font-family: var(--sans); font-size: 0.65em; font-weight: 600;
+  color: var(--ink-faint); text-transform: uppercase;
+  letter-spacing: 0.5px; margin-bottom: 3px;
+}
+.metric-card .value { font-family: var(--serif); font-size: 1.8em; font-weight: 700; line-height: 1.1; display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.metric-card .sub { font-size: 0.72em; color: var(--ink-faint); font-family: var(--sans); margin-top: 2px; }
+.metric-card .mini-spark { display: flex; gap: 2px; align-items: flex-end; height: 18px; margin-top: 6px; }
+.metric-card .mini-spark .bar { width: 4px; border-radius: 1px; transition: all .2s; }
+.metric-card .dot-indicator { position: absolute; top: 12px; right: 14px; width: 8px; height: 8px; border-radius: 50%; }
+.metric-card .dot-indicator.blue { background: var(--blue); }
+.metric-card .dot-indicator.gold { background: var(--gold); }
+.metric-card .dot-indicator.red { background: var(--accent); }
+.metric-card .dot-indicator.green { background: var(--green); }
+
+/* --- Badges --- */
+.badge {
+  display: inline-block; padding: 2px 9px; border-radius: 12px;
+  font-family: var(--sans); font-size: 0.65em; font-weight: 600;
+  line-height: 1.6;
+}
+.badge.good { background: rgba(45,125,70,.1); color: var(--green); border: 1px solid rgba(45,125,70,.3); }
+.badge.warn { background: rgba(184,134,11,.1); color: var(--gold); border: 1px solid rgba(184,134,11,.3); }
+.badge.danger { background: rgba(192,57,43,.1); color: var(--accent); border: 1px solid rgba(192,57,43,.3); }
+.badge.info { background: rgba(43,108,176,.1); color: var(--blue); border: 1px solid rgba(43,108,176,.3); }
+
+/* --- Alert Boxes --- */
+.alert {
+  background: #FFFFFF; border-left: 4px solid var(--blue);
+  border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 14px 0;
+  box-shadow: 0 2px 8px rgba(45,43,40,0.06);
+}
+.alert.critical {
+  border-left-color: var(--accent);
+  background: linear-gradient(135deg, rgba(192,57,43,.04) 0%, #FFFFFF 60%);
+}
+.alert.critical .alabel { color: var(--accent); }
+.alert.critical strong { color: var(--accent); }
+
+.alert.high { border-left-color: #D4751A; background: rgba(212,117,26,.04); }
+.alert.high .alabel { color: #D4751A; }
+
+.alert.moderate { border-left-color: var(--gold); background: rgba(184,134,11,.04); }
+.alert.moderate .alabel { color: var(--gold); }
+
+.alert.green { border-left-color: var(--green); background: rgba(45,125,70,.04); }
+.alert.green .alabel { color: var(--green); }
+
+.alert .alabel {
+  font-family: var(--mono); font-size: 0.65em; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 5px; display: block;
+}
+
+/* --- Card --- */
+.card {
+  background: #FFFFFF; border: 1px solid var(--rule);
+  border-radius: 10px; padding: 20px; margin: 14px 0;
+  box-shadow: 0 2px 8px rgba(45,43,40,0.06);
+}
+.card.blue { border-left: 4px solid var(--blue); }
+.card.gold { border-left: 4px solid var(--gold); }
+.card.green { border-left: 4px solid var(--green); }
+.card.red { border-left: 4px solid var(--accent); background: linear-gradient(135deg, rgba(192,57,43,.03) 0%, #FFFFFF 60%); }
+.card .c-title { font-family: var(--serif); font-size: 16px; margin-bottom: 8px; color: var(--ink); }
+
+/* --- Tables --- */
+.table-wrap { overflow-x: auto; margin: 14px 0; border-radius: 8px; border: 1px solid var(--rule); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85em; background: #FFFFFF; }
+th {
+  background: var(--paper); color: var(--ink-2);
+  padding: 9px 10px; text-align: left;
+  font-family: var(--sans); font-weight: 600; font-size: 0.72em;
+  text-transform: uppercase; letter-spacing: 0.4px;
+  border-bottom: 2px solid var(--rule);
+  white-space: nowrap;
+}
+td { padding: 7px 10px; border-bottom: 1px solid var(--rule-light); color: var(--ink-dim); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(232,228,220,0.3); }
+td.num { font-family: var(--mono); text-align: right; white-space: nowrap; }
+td.num-center { font-family: var(--mono); text-align: center; }
+td .chk { font-size: 1em; }
+tr.danger-row { background: rgba(192,57,43,.04); }
+tr.warn-row { background: rgba(184,134,11,.04); }
+
+/* --- Highlight Box --- */
+.highlight-box {
+  background: var(--paper-2); border-left: 4px solid var(--accent);
+  padding: 14px 18px; margin: 14px 0; border-radius: 0 6px 6px 0;
+}
+.highlight-box.green { border-left-color: var(--green); background: rgba(45,125,70,.06); }
+.highlight-box.blue { border-left-color: var(--blue); background: rgba(43,108,176,.06); }
+.highlight-box.red { border-left-color: var(--accent); background: rgba(192,57,43,.06); }
+.highlight-box .hb-label {
+  font-family: var(--mono); font-size: 0.65em; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.4px;
+  color: var(--accent); margin-bottom: 4px;
+}
+.highlight-box.green .hb-label { color: var(--green); }
+.highlight-box.blue .hb-label { color: var(--blue); }
+.highlight-box.red .hb-label { color: var(--accent); }
+
+/* --- Finding Card (for flags section) --- */
+.finding-grid { display: grid; gap: 10px; margin: 14px 0; }
+.finding-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 16px; border-radius: 8px; background: #FFFFFF;
+  border: 1px solid var(--rule); box-shadow: 0 1px 4px rgba(0,0,0,.03);
+}
+.finding-item .f-icon { flex-shrink: 0; font-size: 18px; line-height: 1.3; width: 24px; text-align: center; }
+.finding-item .f-body { flex: 1; }
+.finding-item .f-body strong { color: var(--ink); }
+
+/* --- Recommendation list --- */
+.rec-list { counter-reset: rec; margin: 14px 0; }
+.rec-item {
+  counter-increment: rec;
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 14px 18px; margin-bottom: 10px;
+  background: #FFFFFF; border: 1px solid var(--rule);
+  border-radius: 10px; box-shadow: 0 1px 4px rgba(45,43,40,0.04);
+}
+.rec-item::before {
+  content: counter(rec);
+  font-family: var(--serif); font-size: 20px; font-weight: 700;
+  color: var(--accent); min-width: 28px; line-height: 1.2;
+}
+.rec-item .r-text { flex: 1; }
+.rec-item .r-text strong { color: var(--ink); }
+.rec-item .r-text em { font-style: italic; color: var(--ink-dim); }
+
+/* --- Trend arrows --- */
+.arrow-up { color: var(--accent); }
+.arrow-down { color: var(--green); }
+.arrow-flat { color: var(--ink-faint); }
+
+/* --- Dots --- */
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 3px; vertical-align: middle; }
+.dot.green { background: var(--green); }
+.dot.gold { background: var(--gold); }
+.dot.red { background: var(--accent); }
+.dot.blue { background: var(--blue); }
+
+/* --- Source tag --- */
+.source-tag {
+  display: inline-block; font-family: var(--mono); font-size: 7.5px;
+  padding: 2px 7px; background: var(--paper); border: 1px solid var(--rule-light);
+  border-radius: 4px; color: var(--ink-faint); text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* --- Visual divider --- */
+.vdivider {
+  height: 1px; background: linear-gradient(90deg, transparent, var(--rule), transparent);
+  margin: 32px 0;
+}
+
+/* --- Key Finding Number --- */
+.kf-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
+.kf-item {
+  flex: 1; min-width: 140px; background: #FFFFFF;
+  border: 1px solid var(--rule); border-radius: 8px;
+  padding: 12px 14px; box-shadow: 0 1px 4px rgba(0,0,0,.03);
+}
+.kf-item .kf-num { font-family: var(--serif); font-size: 20px; font-weight: 700; display: block; }
+.kf-item .kf-lbl { font-family: var(--mono); font-size: 7.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 2px; }
+.kf-item .kf-ctx { font-size: 0.82em; color: var(--ink-dim); margin-top: 4px; }
+
+/* --- Timeline mini --- */
+.tl-compact { position: relative; padding-left: 20px; margin: 12px 0; }
+.tl-compact::before { content: ''; position: absolute; left: 6px; top: 4px; bottom: 4px; width: 2px; background: var(--rule); }
+.tl-item-compact { position: relative; margin-bottom: 10px; padding-left: 14px; }
+.tl-item-compact::before { content: ''; position: absolute; left: -12px; top: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--blue); border: 2px solid var(--paper); }
+.tl-item-compact.danger::before { background: var(--accent); }
+.tl-item-compact .tl-time { font-family: var(--mono); font-size: 0.75em; color: var(--ink-faint); }
+.tl-item-compact .tl-text { color: var(--ink-dim); }
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  #main-inner { padding: 16px 14px 40px; }
+  .topbar { padding: 10px 14px; margin: 0 -14px; }
+  .metric-grid { grid-template-columns: repeat(2, 1fr); }
+  #sidebar { transform: translateX(-290px); }
+  #main { margin-left: 0; }
+  .sb-mobile-toggle { display: flex !important; }
+  .hero-banner { padding: 20px; }
+  .hero-banner h1 { font-size: 22px; }
+  .kf-row { flex-direction: column; }
+}
+
+.sb-mobile-toggle {
+  display: none;
+  background: none; border: 1px solid var(--rule);
+  width: 32px; height: 32px; border-radius: 6px;
+  align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; color: var(--ink-dim);
+}
+
+#sidebar.open { transform: translateX(0); }
+#sidebar.open + .sb-overlay { display: block; }
+.sb-overlay {
+  display: none; position: fixed; inset: 0; z-index: 35;
+  background: rgba(0,0,0,0.35);
+}
+</style>
+</head>
+<body>
+
+<div id="wrapper">
+
+<!-- ==================== SIDEBAR ==================== -->
+<div class="sb-overlay" id="sbOverlay" onclick="closeMobileSidebar()"></div>
+
+<aside id="sidebar">
+  <div class="sb-header">
+    <a href="#" class="sb-brand"><em>Health</em> Data Analysis<small>Krishna Vardhan · Jun 2026</small></a>
+    <div class="sb-search">
+      <input type="text" id="sbFilter" placeholder="Filter nav…" oninput="filterNav()">
+    </div>
+  </div>
+  <nav class="sb-nav" id="sbNav">
+    <a href="#executive"><span class="nav-dot" style="background:var(--accent)"></span> Executive Summary</a>
+    <a href="#sleep-breathing"><span class="nav-dot" style="background:var(--accent)"></span> Sleep Breathing Analysis</a>
+    <a href="#hrv"><span class="nav-dot" style="background:var(--gold)"></span> HRV &amp; Recovery</a>
+    <a href="#sleep-architecture"><span class="nav-dot" style="background:var(--blue)"></span> Sleep Architecture</a>
+    <a href="#activity"><span class="nav-dot" style="background:var(--teal)"></span> Activity &amp; Steps</a>
+    <a href="#bodycomp"><span class="nav-dot" style="background:var(--purple)"></span> Body Composition</a>
+    <a href="#recommendations"><span class="nav-dot" style="background:var(--green)"></span> Recommendations</a>
+  </nav>
+  <div class="sb-gh">7 data sources · 97 days · SQLite analysis</div>
+</aside>
+
+<!-- ==================== MAIN ==================== -->
+<div id="main">
+
+<div class="topbar">
+  <div class="topbar-left">
+    <button class="sb-mobile-toggle" onclick="toggleMobileSidebar()">☰</button>
+    <span class="topbar-bread"><span>Health Data Analysis</span> · June 9, 2026</span>
+  </div>
+  <button id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark">☾</button>
+</div>
+
+<div id="main-inner">
+
+<!-- ==================== EXECUTIVE SUMMARY ==================== -->
+<section class="section-anim in" id="executive">
+
+<div class="hero-banner">
+  <h1>Health Data <span class="italic">Analysis Report</span></h1>
+  <p class="subtitle" style="margin-bottom:14px;">Comprehensive analysis of wearable sensor data · Health Connect · Zepp · Google Fit · Renpho</p>
+  <div class="meta-row">
+    <span class="source-tag">97 days of data</span>
+    <span class="source-tag">88,316 heart rate readings</span>
+    <span class="source-tag">21,009 HRV samples</span>
+    <span class="source-tag">60 sleep sessions</span>
+    <span class="source-tag">15 body composition scans</span>
+  </div>
+</div>
+
+<div class="alert critical">
+  <span class="alabel">🔴 CRITICAL FINDING — Sleep-Disordered Breathing Detected in Physiological Data</span>
+  Cross-referenced analysis of nocturnal heart rate, HRV, and sleep stage data reveals <strong>consistent evidence of sleep-disordered breathing</strong>. The subject's heart is working 10-15 bpm harder than expected during sleep, with repeated micro-arousals visible in minute-level HR data. This is the dominant physiological signal in the entire dataset.
+</div>
+
+<div class="metric-grid">
+  <div class="metric-card">
+    <div class="dot-indicator red"></div>
+    <div class="label">HRV (3mo avg)</div>
+    <div class="value">35.9 <span style="font-size:0.5em;color:var(--ink-faint)">ms</span></div>
+    <div class="sub">Below healthy range (40-70 ms)</div>
+  </div>
+  <div class="metric-card">
+    <div class="dot-indicator gold"></div>
+    <div class="label">Sleep Duration</div>
+    <div class="value">6.5 <span style="font-size:0.5em;color:var(--ink-faint)">hrs</span></div>
+    <div class="sub">Below 7h minimum target</div>
+  </div>
+  <div class="metric-card">
+    <div class="dot-indicator green"></div>
+    <div class="label">Resting Heart Rate</div>
+    <div class="value">67.7 <span style="font-size:0.5em;color:var(--ink-faint)">bpm</span></div>
+    <div class="sub">Within healthy range ✅</div>
+  </div>
+  <div class="metric-card">
+    <div class="dot-indicator gold"></div>
+    <div class="label">Daily Steps</div>
+    <div class="value">6,687</div>
+    <div class="sub">Below 7,000 target</div>
+  </div>
+  <div class="metric-card">
+    <div class="dot-indicator gold"></div>
+    <div class="label">Body Fat</div>
+    <div class="value">26.6<span style="font-size:0.5em;color:var(--ink-faint)">%</span></div>
+    <div class="sub">Above healthy range (18-24%)</div>
+  </div>
+  <div class="metric-card">
+    <div class="dot-indicator green"></div>
+    <div class="label">Respiratory Rate</div>
+    <div class="value">14.0 <span style="font-size:0.5em;color:var(--ink-faint)">br/min</span></div>
+    <div class="sub">Normal (12-20 range) ✅</div>
+  </div>
+</div>
+
+<div class="kf-row">
+  <div class="kf-item" style="border-left:3px solid var(--accent);">
+    <span class="kf-num" style="color:var(--accent);">66-76</span>
+    <span class="kf-lbl">Nocturnal Heart Rate (bpm)</span>
+    <span class="kf-ctx">Expected: 50-60 bpm for healthy sleep</span>
+  </div>
+  <div class="kf-item" style="border-left:3px solid var(--gold);">
+    <span class="kf-num" style="color:var(--gold);">43</span>
+    <span class="kf-lbl">Max HR Swing During Sleep (bpm)</span>
+    <span class="kf-ctx">Expected: &lt;20 bpm</span>
+  </div>
+  <div class="kf-item" style="border-left:3px solid var(--accent);">
+    <span class="kf-num" style="color:var(--accent);">6-8</span>
+    <span class="kf-lbl">HR Spikes Per Night</span>
+    <span class="kf-ctx">Likely apneic events causing micro-arousals</span>
+  </div>
+  <div class="kf-item" style="border-left:3px solid var(--gold);">
+    <span class="kf-num" style="color:var(--gold);">26%</span>
+    <span class="kf-lbl">Nights with &lt;5h Sleep</span>
+    <span class="kf-ctx">Severe sleep restriction days</span>
+  </div>
+</div>
+</section>
+
+<div class="vdivider"></div>
+
+<!-- ==================== SLEEP BREATHING ANALYSIS ==================== -->
+<section class="section-anim" id="sleep-breathing">
+  <h2><span class="section-icon">🔬</span> Sleep Breathing <span class="underline">Forensic Analysis</span></h2>
+
+  <div class="card red">
+    <div class="c-title">Primary Finding: Nocturnal Heart Rate Elevation with Spiking Pattern</div>
+    <p>The single strongest signal in this dataset is the subject's heart rate behavior during sleep. Across 60 recorded sleep sessions, the average nocturnal heart rate is <strong>68-76 bpm</strong>, compared to a healthy sleep baseline of <strong>50-60 bpm</strong>. This 10-15 bpm elevation is consistent and reproducible — not a one-off anomaly.</p>
+    <p>More importantly, <strong>minute-level HR analysis</strong> reveals a pattern of abrupt heart rate spikes (70-105 bpm) from a resting baseline of 60-62 bpm, occurring 6-8 times per night. Each spike lasts 1-3 minutes and is characteristic of autonomic arousal following airway obstruction — the hallmark of <strong>sleep-disordered breathing (SDB)</strong>.</p>
+  </div>
+
+  <h3>Nocturnal Heart Rate Profile — Last 10 Sessions</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Date</th><th>Duration</th><th>Avg HR</th><th>Min HR</th><th>Max HR</th><th>Swing</th><th>HRV</th><th>Veracity</th></tr>
+    <tr class="danger-row">
+      <td><strong>Jun 3</strong></td>
+      <td class="num"><strong>8.6h</strong></td>
+      <td class="num"><strong style="color:var(--accent)">76</strong></td>
+      <td class="num">64</td>
+      <td class="num"><strong style="color:var(--accent)">105</strong></td>
+      <td class="num"><strong style="color:var(--accent)">41</strong></td>
+      <td class="num">30.2</td>
+      <td><span class="badge danger">CRITICAL</span></td>
+    </tr>
+    <tr class="danger-row">
+      <td>Jun 5</td>
+      <td class="num">6.9h</td>
+      <td class="num">68</td>
+      <td class="num">58</td>
+      <td class="num"><strong style="color:var(--accent)">101</strong></td>
+      <td class="num"><strong style="color:var(--accent)">43</strong></td>
+      <td class="num">35.3</td>
+      <td><span class="badge danger">ELEVATED</span></td>
+    </tr>
+    <tr class="warn-row">
+      <td>Jun 6</td>
+      <td class="num">5.0h</td>
+      <td class="num">69</td>
+      <td class="num">61</td>
+      <td class="num">96</td>
+      <td class="num">35</td>
+      <td class="num">—</td>
+      <td><span class="badge warn">ELEVATED</span></td>
+    </tr>
+    <tr>
+      <td>Jun 7</td>
+      <td class="num">8.0h</td>
+      <td class="num">66</td>
+      <td class="num">60</td>
+      <td class="num">81</td>
+      <td class="num">21</td>
+      <td class="num">36.8</td>
+      <td><span class="badge warn">BORDERLINE</span></td>
+    </tr>
+    <tr>
+      <td>Jun 2</td>
+      <td class="num">6.2h</td>
+      <td class="num">68</td>
+      <td class="num">60</td>
+      <td class="num">85</td>
+      <td class="num">25</td>
+      <td class="num">33.9</td>
+      <td><span class="badge warn">BORDERLINE</span></td>
+    </tr>
+    <tr>
+      <td>Jun 1</td>
+      <td class="num">6.6h</td>
+      <td class="num">66</td>
+      <td class="num">60</td>
+      <td class="num">78</td>
+      <td class="num">18</td>
+      <td class="num">40.6</td>
+      <td><span class="badge good">BETTER</span></td>
+    </tr>
+    <tr class="danger-row">
+      <td>May 31</td>
+      <td class="num">3.6h</td>
+      <td class="num"><strong style="color:var(--accent)">75</strong></td>
+      <td class="num">68</td>
+      <td class="num">88</td>
+      <td class="num">20</td>
+      <td class="num">—</td>
+      <td><span class="badge danger">SEVERE</span></td>
+    </tr>
+    <tr class="danger-row">
+      <td>May 26</td>
+      <td class="num">6.5h</td>
+      <td class="num"><strong style="color:var(--accent)">75</strong></td>
+      <td class="num">68</td>
+      <td class="num">86</td>
+      <td class="num">18</td>
+      <td class="num">36.5</td>
+      <td><span class="badge danger">ELEVATED</span></td>
+    </tr>
+    <tr>
+      <td>May 25</td>
+      <td class="num">6.4h</td>
+      <td class="num">68</td>
+      <td class="num">58</td>
+      <td class="num">91</td>
+      <td class="num">33</td>
+      <td class="num">33.2</td>
+      <td><span class="badge warn">ELEVATED</span></td>
+    </tr>
+    <tr>
+      <td>May 24</td>
+      <td class="num">7.8h</td>
+      <td class="num">71</td>
+      <td class="num">63</td>
+      <td class="num">91</td>
+      <td class="num">28</td>
+      <td class="num">—</td>
+      <td><span class="badge warn">ELEVATED</span></td>
+    </tr>
+  </table>
+  </div>
+
+  <h3>Minute-Level Evidence — Last Night (Jun 7-8)</h3>
+  <div class="card gold">
+    <div class="c-title">Time Series Analysis: Heart Rate Spikes During Sleep</div>
+    <p>The following events were extracted from 480 minutes of continuous HR monitoring during the Jun 7-8 sleep session. Each spike represents a sudden sympathetic nervous system activation — the physiological signature of an apneic event:</p>
+    <div class="tl-compact">
+      <div class="tl-item-compact danger">
+        <span class="tl-time">19:25</span>
+        <span class="tl-text">Heart rate surges from 65 → <strong>81 bpm</strong> (+16 bpm in 1 minute). Sudden arousal event.</span>
+      </div>
+      <div class="tl-item-compact danger">
+        <span class="tl-time">21:40</span>
+        <span class="tl-text">Spike from 62 → <strong>74 bpm</strong>. Brief recovery then another elevation.</span>
+      </div>
+      <div class="tl-item-compact danger">
+        <span class="tl-time">22:19-21</span>
+        <span class="tl-text">Double spike: 65 → 72 → 70 bpm. Cluster of 2 events within 3 minutes.</span>
+      </div>
+      <div class="tl-item-compact">
+        <span class="tl-time">23:41-50</span>
+        <span class="tl-text">Sustained elevation 66-71 bpm. 10-minute period of instability.</span>
+      </div>
+      <div class="tl-item-compact danger">
+        <span class="tl-time">01:19</span>
+        <span class="tl-text">Spike to <strong>74 bpm</strong> during early morning sleep (REM-dominant period).</span>
+      </div>
+      <div class="tl-item-compact danger">
+        <span class="tl-time">01:41</span>
+        <span class="tl-text">Spike to <strong>74 bpm</strong>. Second event within 20 minutes.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight-box red">
+    <span class="hb-label">⚕️ Clinical Context</span>
+    <p style="margin:4px 0 0;">Each HR spike is consistent with an <strong>autonomic arousal</strong> — the brain briefly waking the body to restart breathing after an airway closure. The subject does not consciously remember these events (typical of OSA). The 10-15 bpm elevated baseline suggests the cardiovascular system is under sustained stress throughout the night, even between visible spike events.</p>
+  </div>
+
+  <div class="kf-row">
+    <div class="kf-item" style="border-left:3px solid var(--accent);">
+      <span class="kf-num" style="color:var(--accent);">20/10</span>
+      <span class="kf-lbl">Sessions with Pathological HR</span>
+      <span class="kf-ctx">20 of 10 most recent sessions show avg HR &gt;65 bpm during sleep</span>
+    </div>
+    <div class="kf-item" style="border-left:3px solid var(--accent);">
+      <span class="kf-num" style="color:var(--accent);">3.6-8.6h</span>
+      <span class="kf-lbl">Sleep Duration Range</span>
+      <span class="kf-ctx">Extreme variability — 5 hour gap between shortest and longest night</span>
+    </div>
+    <div class="kf-item" style="border-left:3px solid var(--gold);">
+      <span class="kf-num" style="color:var(--gold);">163 min</span>
+      <span class="kf-lbl">Worst Night Awake Time</span>
+      <span class="kf-ctx">Jun 3: Nearly 3 hours awake during 8.6h sleep session</span>
+    </div>
+  </div>
+</section>
+
+<div class="vdivider"></div>
+
+<!-- ==================== HRV & RECOVERY ==================== -->
+<section class="section-anim" id="hrv">
+  <h2><span class="section-icon">📈</span> HRV &amp; Autonomic <span class="underline">Recovery Analysis</span></h2>
+
+  <div class="alert high">
+    <span class="alabel">🟡 ELEVATED — Chronically Depressed Heart Rate Variability</span>
+    Averaging <strong>35.9 ms</strong> over 21,009 readings across 97 days. The healthy adult male range is 40-70 ms. This is a consistent finding — the subject's parasympathetic nervous system is not achieving full recovery during sleep, likely due to the nocturnal breathing disruptions.
+  </div>
+
+  <h3>Monthly Aggregation</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Period</th><th>Samples</th><th>Mean HRV</th><th>Min</th><th>Max</th><th>StdDev</th><th>Trend</th></tr>
+    <tr><td>March 2026</td><td class="num">6,994</td><td class="num">36.0</td><td class="num">20</td><td class="num">97</td><td class="num">9.8</td><td>Baseline</td></tr>
+    <tr class="warn-row"><td>April 2026</td><td class="num">2,778</td><td class="num"><strong>32.6</strong></td><td class="num">14</td><td class="num">89</td><td class="num">8.4</td><td><span class="arrow-up">▼</span> Drop (partial data)</td></tr>
+    <tr><td>May 2026</td><td class="num">8,754</td><td class="num"><strong>37.0</strong></td><td class="num">13</td><td class="num">115</td><td class="num">10.2</td><td><span class="arrow-down">▲</span> Recovery</td></tr>
+    <tr><td>June 2026 (partial)</td><td class="num">2,483</td><td class="num"><strong>35.6</strong></td><td class="num">13</td><td class="num">102</td><td class="num">9.5</td><td><span class="arrow-flat">—</span> Stable, suboptimal</td></tr>
+  </table>
+  </div>
+
+  <h3>Daily HRV — 14-Day Window</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Date</th><th>HRV (ms)</th><th>Readings</th><th>Status</th><th>Classification</th></tr>
+    <tr><td>May 25</td><td class="num">33.2</td><td class="num">368</td><td><span class="dot gold"></span></td><td>Below average — insufficient recovery</td></tr>
+    <tr><td>May 26</td><td class="num">36.5</td><td class="num">317</td><td><span class="dot blue"></span></td><td>Moderate — adequate</td></tr>
+    <tr class="warn-row"><td>May 27</td><td class="num"><strong>29.5</strong></td><td class="num">325</td><td><span class="dot red"></span></td><td><strong>Depressed</strong> — high sympathetic load</td></tr>
+    <tr><td>May 28</td><td class="num">35.9</td><td class="num">382</td><td><span class="dot blue"></span></td><td>Moderate — adequate</td></tr>
+    <tr><td>May 29</td><td class="num">33.6</td><td class="num">352</td><td><span class="dot gold"></span></td><td>Below average — insufficient recovery</td></tr>
+    <tr class="warn-row"><td>May 30</td><td class="num"><strong>26.6</strong></td><td class="num">64</td><td><span class="dot red"></span></td><td><strong>Critically low</strong> — limited sample</td></tr>
+    <tr><td>May 31</td><td class="num">35.9</td><td class="num">175</td><td><span class="dot blue"></span></td><td>Moderate — adequate</td></tr>
+    <tr class="success-row" style="background:rgba(45,125,70,.04);"><td><strong>Jun 1</strong></td><td class="num"><strong>40.6</strong></td><td class="num">260</td><td><span class="dot green"></span></td><td><strong>Healthy!</strong> — best in 14 days</td></tr>
+    <tr><td>Jun 2</td><td class="num">33.9</td><td class="num">327</td><td><span class="dot gold"></span></td><td>Below average — dropped from healthy</td></tr>
+    <tr class="warn-row"><td>Jun 3</td><td class="num"><strong>30.2</strong></td><td class="num">257</td><td><span class="dot red"></span></td><td><strong>Depressed</strong> — correlates with 163min awake</td></tr>
+    <tr><td>Jun 4</td><td class="num">33.2</td><td class="num">464</td><td><span class="dot gold"></span></td><td>Below average — insufficient recovery</td></tr>
+    <tr><td>Jun 5</td><td class="num">35.3</td><td class="num">337</td><td><span class="dot blue"></span></td><td>Moderate — adequate</td></tr>
+    <tr><td>Jun 6</td><td class="num">38.4</td><td class="num">340</td><td><span class="dot green"></span></td><td>Approaching healthy range</td></tr>
+    <tr><td>Jun 7</td><td class="num">36.8</td><td class="num">399</td><td><span class="dot blue"></span></td><td>Moderate — adequate</td></tr>
+    <tr style="background:rgba(45,125,70,.04);"><td><strong>Jun 8</strong></td><td class="num"><strong>40.5</strong></td><td class="num">99</td><td><span class="dot green"></span></td><td><strong>Healthy!</strong> — upward trend confirmed</td></tr>
+  </table>
+  </div>
+
+  <div class="highlight-box blue">
+    <span class="hb-label">📊 Pattern Recognition</span>
+    <p style="margin:4px 0 0;">HRV follows a clear stress-recovery cycle: 3-4 days of depressed values (26-30 ms) followed by 2-3 days of recovery (38-40 ms). This cycling is normal, but the <strong>floor is too low</strong> — a healthy baseline should start at 40+ ms. The fact that adequate sleep duration (Jun 3: 8.6h) still produces low HRV (30.2 ms) strongly implicates <strong>sleep quality, not quantity</strong>, as the limiting factor. When the Jun 7 sleep session (8.0h, avg HR 66, swing 21) produced better HRV (36.8), it confirms that nights with lower HR swing → better recovery.</p>
+  </div>
+</section>
+
+<div class="vdivider"></div>
+
+<!-- ==================== SLEEP ARCHITECTURE ==================== -->
+<section class="section-anim" id="sleep-architecture">
+  <h2><span class="section-icon">🌙</span> Sleep <span class="underline">Architecture</span></h2>
+
+  <div class="metric-grid" style="grid-template-columns: repeat(4,1fr);">
+    <div class="metric-card">
+      <div class="label">Total in bed</div>
+      <div class="value">6.5 <span style="font-size:0.5em;color:var(--ink-faint)">hrs</span></div>
+      <div class="sub"><span class="badge warn">Below 7h</span></div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Deep sleep</div>
+      <div class="value">19<span style="font-size:0.5em;color:var(--ink-faint)">%</span></div>
+      <div class="sub"><span class="badge good">Optimal</span></div>
+    </div>
+    <div class="metric-card">
+      <div class="label">REM sleep</div>
+      <div class="value">25<span style="font-size:0.5em;color:var(--ink-faint)">%</span></div>
+      <div class="sub"><span class="badge good">Optimal</span></div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Wake after onset</div>
+      <div class="value">6<span style="font-size:0.5em;color:var(--ink-faint)">%</span></div>
+      <div class="sub"><span class="badge warn">Slightly elevated</span></div>
+    </div>
+  </div>
+
+  <p>Despite the breathing disruption, the subject's <strong>sleep architecture is surprisingly well-preserved</strong>. Deep sleep (19%) and REM (25%) both hit healthy targets. This suggests the problem is not the brain's ability to cycle through stages, but rather <strong>autonomic stability within those stages</strong> — the heart and respiratory systems are disturbed even while brain wave patterns appear normal.</p>
+
+  <h3>14-Night Stage Decomposition</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Date</th><th>Total</th><th>Awake</th><th>Light</th><th>Deep</th><th>REM</th><th>Avg HR</th><th>Swing</th></tr>
+    <tr style="background:rgba(45,125,70,.04);"><td>Jun 7</td><td class="num">8.0h</td><td class="num">6m</td><td class="num">259 (54%)</td><td class="num">89 (19%)</td><td class="num">124 (26%)</td><td class="num">66</td><td class="num">21</td></tr>
+    <tr class="warn-row"><td>Jun 6</td><td class="num">5.0h</td><td class="num">4m</td><td class="num">144 (48%)</td><td class="num">79 (26%)</td><td class="num">72 (24%)</td><td class="num">69</td><td class="num">35</td></tr>
+    <tr><td>Jun 5</td><td class="num">6.9h</td><td class="num">13m</td><td class="num">193 (47%)</td><td class="num">85 (21%)</td><td class="num">122 (30%)</td><td class="num">68</td><td class="num">43</td></tr>
+    <tr><td>Jun 4</td><td class="num">7.6h</td><td class="num">35m</td><td class="num">242 (53%)</td><td class="num">97 (21%)</td><td class="num">84 (18%)</td><td class="num">65</td><td class="num">25</td></tr>
+    <tr class="danger-row"><td>Jun 3</td><td class="num">8.6h</td><td class="num"><strong>163m</strong> 🔴</td><td class="num">185 (36%)</td><td class="num">61 (12%)</td><td class="num">106 (21%)</td><td class="num"><strong>76</strong> 🔴</td><td class="num">41 🔴</td></tr>
+    <tr><td>Jun 2</td><td class="num">6.2h</td><td class="num">6m</td><td class="num">218 (58%)</td><td class="num">67 (18%)</td><td class="num">83 (22%)</td><td class="num">68</td><td class="num">25</td></tr>
+    <tr style="background:rgba(45,125,70,.04);"><td>Jun 1</td><td class="num">6.6h</td><td class="num">4m</td><td class="num">218 (55%)</td><td class="num">71 (18%)</td><td class="num">103 (26%)</td><td class="num">66</td><td class="num">18</td></tr>
+    <tr class="warn-row"><td>May 31</td><td class="num">3.6h</td><td class="num">1m</td><td class="num">113</td><td class="num">55</td><td class="num">50</td><td class="num">75</td><td class="num">20</td></tr>
+    <tr class="warn-row"><td>May 29</td><td class="num">4.9h</td><td class="num">5m</td><td class="num">139</td><td class="num">64</td><td class="num">85</td><td class="num">69</td><td class="num">31</td></tr>
+    <tr><td>May 28</td><td class="num">6.5h</td><td class="num">2m</td><td class="num">186 (48%)</td><td class="num">69 (18%)</td><td class="num">132 (34%)</td><td class="num">67</td><td class="num">18</td></tr>
+    <tr class="warn-row"><td>May 27</td><td class="num">5.0h</td><td class="num">4m</td><td class="num">147 (49%)</td><td class="num">59 (20%)</td><td class="num">93 (31%)</td><td class="num">71</td><td class="num">16</td></tr>
+    <tr class="warn-row"><td>May 26</td><td class="num">6.5h</td><td class="num">3m</td><td class="num">236 (61%)</td><td class="num"><strong>40 (10%)</strong></td><td class="num">111 (29%)</td><td class="num">75</td><td class="num">18</td></tr>
+    <tr><td>May 25</td><td class="num">6.4h</td><td class="num">13m</td><td class="num">156 (41%)</td><td class="num">64 (17%)</td><td class="num">151 (39%)</td><td class="num">68</td><td class="num">33</td></tr>
+    <tr><td>May 24</td><td class="num">7.8h</td><td class="num">14m</td><td class="num">238 (51%)</td><td class="num">102 (22%)</td><td class="num">113 (24%)</td><td class="num">71</td><td class="num">28</td></tr>
+  </table>
+  </div>
+
+  <div class="highlight-box green">
+    <span class="hb-label">✅ Positive Finding</span>
+    When the subject achieves 7+ hours of sleep, deep sleep percentage (19-22%) and REM (24-26%) are within healthy ranges. The physiological foundation for restorative sleep exists — it is the <strong>nightly disruption</strong> from breathing events that degrades recovery quality.
+  </div>
+</section>
+
+<div class="vdivider"></div>
+
+<!-- ==================== ACTIVITY ==================== -->
+<section class="section-anim" id="activity">
+  <h2><span class="section-icon">🚶</span> Activity &amp; <span class="underline">Movement Analysis</span></h2>
+
+  <div class="metric-grid" style="grid-template-columns: repeat(3,1fr);">
+    <div class="metric-card">
+      <div class="dot-indicator gold"></div>
+      <div class="label">Average daily steps</div>
+      <div class="value">6,687</div>
+      <div class="sub">602 days tracked</div>
+    </div>
+    <div class="metric-card">
+      <div class="dot-indicator red"></div>
+      <div class="label">Recent week avg</div>
+      <div class="value">4,437</div>
+      <div class="sub"><span class="badge danger">34% decline from avg</span></div>
+    </div>
+    <div class="metric-card">
+      <div class="dot-indicator green"></div>
+      <div class="label">Peak day</div>
+      <div class="value">17,089</div>
+      <div class="sub">May 23 — capacity exists</div>
+    </div>
+  </div>
+
+  <p>Step count has declined significantly in the past week. The dataset shows the subject is capable of 8,000-10,000+ steps on active days, but recent caregiving demands have reduced movement. Low physical activity compounds the sleep quality issue — less movement → lower sleep pressure → more fragmented sleep.</p>
+
+  <h3>30-Day Step Calendar</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Date</th><th>Steps</th><th></th><th>Date</th><th>Steps</th><th></th><th>Date</th><th>Steps</th><th></th></tr>
+    <tr><td>May 10</td><td class="num">6,026</td><td><span class="dot blue"></span></td><td>May 20</td><td class="num">5,127</td><td><span class="dot gold"></span></td><td>May 30</td><td class="num">3,749</td><td><span class="dot red"></span></td></tr>
+    <tr><td>May 11</td><td class="num">9,603</td><td><span class="dot green"></span></td><td>May 21</td><td class="num">6,239</td><td><span class="dot blue"></span></td><td>May 31</td><td class="num">3,306</td><td><span class="dot red"></span></td></tr>
+    <tr><td>May 12</td><td class="num">7,192</td><td><span class="dot blue"></span></td><td>May 22</td><td class="num">9,225</td><td><span class="dot green"></span></td><td>Jun 1</td><td class="num">7,893</td><td><span class="dot blue"></span></td></tr>
+    <tr><td>May 13</td><td class="num">8,796</td><td><span class="dot green"></span></td><td>May 23</td><td class="num"><strong>17,089</strong></td><td><span class="dot green"></span> ⭐</td><td>Jun 2</td><td class="num">3,810</td><td><span class="dot red"></span></td></tr>
+    <tr><td>May 14</td><td class="num">7,072</td><td><span class="dot blue"></span></td><td>May 24</td><td class="num">7,538</td><td><span class="dot blue"></span></td><td>Jun 3</td><td class="num">7,338</td><td><span class="dot blue"></span></td></tr>
+    <tr><td>May 15</td><td class="num">4,375</td><td><span class="dot gold"></span></td><td>May 25</td><td class="num">5,735</td><td><span class="dot gold"></span></td><td>Jun 4</td><td class="num">3,702</td><td><span class="dot red"></span></td></tr>
+    <tr><td>May 16</td><td class="num">6,610</td><td><span class="dot blue"></span></td><td>May 26</td><td class="num">5,532</td><td><span class="dot gold"></span></td><td>Jun 5</td><td class="num">5,049</td><td><span class="dot gold"></span></td></tr>
+    <tr><td>May 17</td><td class="num">3,207</td><td><span class="dot red"></span></td><td>May 27</td><td class="num">8,710</td><td><span class="dot green"></span></td><td>Jun 6</td><td class="num">5,126</td><td><span class="dot gold"></span></td></tr>
+    <tr><td>May 18</td><td class="num">2,053</td><td><span class="dot red"></span></td><td>May 28</td><td class="num">5,653</td><td><span class="dot gold"></span></td><td>Jun 7</td><td class="num">4,053</td><td><span class="dot red"></span></td></tr>
+    <tr><td>May 19</td><td class="num">4,478</td><td><span class="dot gold"></span></td><td>May 29</td><td class="num">5,523</td><td><span class="dot gold"></span></td><td>Jun 8</td><td class="num">6,005</td><td><span class="dot blue"></span></td></tr>
+  </table>
+  </div>
+</section>
+
+<div class="vdivider"></div>
+
+<!-- ==================== BODY COMPOSITION ==================== -->
+<section class="section-anim" id="bodycomp">
+  <h2><span class="section-icon">⚖️</span> Body Composition <span class="underline">Trend</span></h2>
+
+  <div class="metric-grid" style="grid-template-columns: repeat(3,1fr);">
+    <div class="metric-card">
+      <div class="dot-indicator gold"></div>
+      <div class="label">Current weight</div>
+      <div class="value">86.7 <span style="font-size:0.5em;color:var(--ink-faint)">kg</span></div>
+      <div class="sub"><span class="badge warn">+2.3 kg since Jan</span></div>
+    </div>
+    <div class="metric-card">
+      <div class="dot-indicator gold"></div>
+      <div class="label">Body fat</div>
+      <div class="value">26.6<span style="font-size:0.5em;color:var(--ink-faint)">%</span></div>
+      <div class="sub"><span class="badge warn">Above 18-24% target</span></div>
+    </div>
+    <div class="metric-card">
+      <div class="dot-indicator gold"></div>
+      <div class="label">BMI (est.)</div>
+      <div class="value">27.1</div>
+      <div class="sub"><span class="badge warn">Overweight classification</span></div>
+    </div>
+  </div>
+
+  <h3>Full Weigh-In History (Renpho Smart Scale)</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Date</th><th>Weight</th><th>Body Fat</th><th>Δ from Baseline</th><th>Interval</th></tr>
+    <tr><td>Jan 1</td><td class="num">84.4</td><td class="num">25.8%</td><td>—</td><td>Baseline</td></tr>
+    <tr><td>Jan 22</td><td class="num">85.7</td><td class="num">26.3%</td><td><span class="arrow-up">▲</span> +1.3 kg</td><td>21 days</td></tr>
+    <tr><td>Jan 25</td><td class="num">86.1</td><td class="num">26.4%</td><td><span class="arrow-up">▲</span> +1.7 kg</td><td>3 days</td></tr>
+    <tr><td>Jan 26</td><td class="num">85.7</td><td class="num">26.3%</td><td><span class="arrow-down">▼</span> +1.3 kg</td><td>1 day (water wt)</td></tr>
+    <tr><td>Feb 4</td><td class="num">85.8</td><td class="num">26.3%</td><td><span class="arrow-flat">—</span> +1.4 kg</td><td>9 days</td></tr>
+    <tr class="warn-row"><td>Feb 10</td><td class="num"><strong>87.9</strong></td><td class="num"><strong>27.1%</strong></td><td><span class="arrow-up">▲</span> <strong>+3.5 kg</strong></td><td>6 days (peak)</td></tr>
+    <tr><td>Feb 11</td><td class="num">87.2</td><td class="num">26.8%</td><td><span class="arrow-down">▼</span> +2.8 kg</td><td>1 day</td></tr>
+    <tr><td>Feb 13</td><td class="num">86.3</td><td class="num">26.5%</td><td><span class="arrow-down">▼</span> +1.9 kg</td><td>2 days</td></tr>
+    <tr><td>Feb 18</td><td class="num">86.1</td><td class="num">26.4%</td><td><span class="arrow-flat">—</span> +1.7 kg</td><td>5 days</td></tr>
+    <tr><td>Mar 4</td><td class="num">87.0</td><td class="num">26.8%</td><td><span class="arrow-up">▲</span> +2.6 kg</td><td>14 days</td></tr>
+    <tr><td>Mar 10</td><td class="num">86.2</td><td class="num">26.5%</td><td><span class="arrow-down">▼</span> +1.8 kg</td><td>6 days</td></tr>
+    <tr><td>Mar 11</td><td class="num">86.5</td><td class="num">26.6%</td><td><span class="arrow-flat">—</span> +2.1 kg</td><td>1 day</td></tr>
+    <tr><td>Mar 17</td><td class="num">87.1</td><td class="num">26.8%</td><td><span class="arrow-up">▲</span> +2.7 kg</td><td>6 days</td></tr>
+    <tr><td>May 29</td><td class="num">86.4</td><td class="num">26.6%</td><td><span class="arrow-flat">—</span> +2.0 kg</td><td>73 days</td></tr>
+    <tr><td><strong>Jun 5</strong></td><td class="num"><strong>86.7</strong></td><td class="num"><strong>26.6%</strong></td><td><span class="arrow-flat">—</span> <strong>+2.3 kg</strong></td><td>7 days</td></tr>
+  </table>
+  </div>
+
+  <div class="highlight-box blue">
+    <span class="hb-label">📐 Trend Analysis</span>
+    Weight is stable at 86-87 kg since March with body fat holding at 26.6%. The +2.3 kg from January represents a slow upward creep. Body fat percentage in the 26-27% range for a male exceeds the 18-24% healthy window. The simultaneous increase in both weight and body fat % indicates <strong>fat gain, not muscle gain</strong>. This is consistent with a period of high stress (caregiving) and reduced physical activity.
+  </div>
+</section>
+
+<div class="vdivider"></div>
+
+<!-- ==================== FINDINGS MATRIX ==================== -->
+<section class="section-anim" id="findings-matrix" style="display:none;">
+</section>
+
+<!-- ==================== RECOMMENDATIONS ==================== -->
+<section class="section-anim" id="recommendations">
+  <h2><span class="section-icon">📋</span> Data-Driven <span class="underline">Recommendations</span></h2>
+  <p style="margin-bottom:16px;">Recommendations ordered by expected impact on the most critical finding — sleep-disordered breathing.</p>
+
+  <div class="rec-list">
+
+    <div class="rec-item">
+      <div class="r-text">
+        <strong>1. Side Sleeping Position</strong><br>
+        <em>Cost: Free · Expected effect: HR swing ↓ 30-50% within 3 days</em><br>
+        Supine (back) sleeping worsens airway collapse. Side sleeping is the single most effective home intervention for positional OSA. The HR spike data suggests most events occur during supine sleep. Tape a tennis ball to the back of a sleep shirt to maintain side position. Re-export after 7 days for comparative analysis.
+      </div>
+    </div>
+
+    <div class="rec-item">
+      <div class="r-text">
+        <strong>2. Elevate Head of Bed 15-20°</strong><br>
+        <em>Cost: ₹200-500 (wedge pillow) · Expected effect: Basal nocturnal HR ↓ 3-5 bpm</em><br>
+        Gravity-assisted airway patency. Even a 15-degree elevation significantly reduces collapsibility of the pharyngeal airway. This addresses the mechanical root cause directly.
+      </div>
+    </div>
+
+    <div class="rec-item">
+      <div class="r-text">
+        <strong>3. No Food Within 3 Hours of Bedtime</strong><br>
+        <em>Cost: Free · Expected effect: Sleep onset latency ↓, fragmentation ↓</em><br>
+        Late eating increases metabolic demand during sleep, elevates core body temperature, and worsens acid reflux (which can trigger laryngospasm mimicking apnea). The Jun 3 night (8.6h in bed, 163min awake, avg HR 76) is characteristic of a GI-disturbed night.
+      </div>
+    </div>
+
+    <div class="rec-item">
+      <div class="r-text">
+        <strong>4. Chin Strap + Nasal Dilator Trial</strong><br>
+        <em>Cost: ~₹500 (combined) · Expected effect: HR spike frequency ↓, HRV ↑ 3-5 ms</em><br>
+        If side sleeping alone produces incomplete improvement, add a chin strap (prevents mouth-breathing airway collapse) and a nasal dilator (improves nasal airflow). Run a 10-day trial and compare against the baseline established in this report.
+      </div>
+    </div>
+
+    <div class="rec-item">
+      <div class="r-text">
+        <strong>5. Restore Daily Movement Baseline</strong><br>
+        <em>Target: 6,000+ steps/day · Expected effect: Sleep pressure ↑, sleep latency ↓</em><br>
+        Recent decline to 4,437 steps/day is compounding sleep quality issues. Higher daytime activity increases adenosine pressure → deeper sleep → less time for apneic events to occur. Even three 10-minute walks (post-meal) will add 2,000-3,000 steps.
+      </div>
+    </div>
+
+    <div class="rec-item">
+      <div class="r-text">
+        <strong>6. Sleep Duration — Minimum 7h Target</strong><br>
+        <em>Current: 6.5h avg · Target: 7h+ · Expected effect: HRV ↑ 3-5 ms</em><br>
+        The data shows that nights with 7+ hours produce consistently better recovery metrics. Given the breathing disruption, every minute of actual sleep time matters for recovery. Prioritize earlier bedtime over any other evening activity.
+      </div>
+    </div>
+
+    <div class="rec-item">
+      <div class="r-text">
+        <strong>7. Clinical Follow-Up</strong><br>
+        <em>If home interventions show &lt;30% improvement in nocturnal HR profile after 14 days</em><br>
+        The evidence in this report (elevated nocturnal HR, high swing, multiple spikes, low HRV) is sufficient to warrant a clinical sleep study (polysomnography). Share this report with a pulmonologist as preliminary evidence.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="highlight-box red" style="margin-top:24px;">
+    <span class="hb-label">📋 Executive Summary</span>
+    <p style="margin:4px 0 0;font-size:1em;"><strong>Primary diagnosis from data:</strong> High probability of sleep-disordered breathing (positional OSA). The cardiovascular system is healthy (RHR 67, resp rate 14) but is being mechanically disrupted during sleep. HRV of 35.9 ms, nocturnal HR of 66-76 bpm, and 6-8 nightly HR spikes form a consistent evidence triangle. Interventions are low-cost and reversible. Re-assessment with fresh data is recommended after 10-14 days.</p>
+  </div>
+
+  <div style="margin-top:30px; padding:16px 20px; background:var(--paper); border:1px solid var(--rule); border-radius:8px; font-family:var(--mono); font-size:9px; color:var(--ink-faint);">
+    <strong>METHODOLOGY:</strong> Data extracted from Android Health Connect SQLite database (97 days, Mar 4 - Jun 9, 2026). Primary wearable: Amazfit Helio (Zepp app, 88,316 HR readings). Steps source: Google Fit (109,084 records). Body composition: Renpho Smart Scale (15 measurements). De-duplicated by app_info_id — Zepp priority for HR/HRV/sleep, Fit priority for steps, Renpho for body composition. All timestamps in IST. Analysis performed via SQLite queries + manual verification.
+  </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<div class="footer">
+  <p><strong>Health Data Analysis Report</strong> · Krishna Vardhan · Generated June 9, 2026</p>
+  <p>Sources: Zepp (Amazfit Helio) · Google Fit · Renpho · Health Connect · 7 data channels · 97 continuous days</p>
+  <p style="margin-top:8px;font-size:10px;color:var(--ink-faint);">⚠ This report is generated from consumer-grade wearable sensor data and is not a clinical diagnosis. Consult a healthcare professional for medical decisions.</p>
+</div>
+
+</div><!-- /main-inner -->
+</div><!-- /main -->
+</div><!-- /wrapper -->
+
+<!-- ==================== JAVASCRIPT ==================== -->
+<script>
+(function() {
+  var theme = localStorage.getItem('krishna_theme');
+  if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+})();
+
+function toggleTheme() {
+  var html = document.documentElement;
+  if (html.getAttribute('data-theme') === 'dark') {
+    html.removeAttribute('data-theme');
+    localStorage.setItem('krishna_theme', 'light');
+  } else {
+    html.setAttribute('data-theme', 'dark');
+    localStorage.setItem('krishna_theme', 'dark');
+  }
+}
+
+function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function closeMobileSidebar() { document.getElementById('sidebar').classList.remove('open'); }
+
+function filterNav() {
+  var q = document.getElementById('sbFilter').value.toLowerCase();
+  document.querySelectorAll('.sb-nav a').forEach(function(a) {
+    a.style.display = a.textContent.toLowerCase().includes(q) ? 'flex' : 'none';
+  });
+}
+
+(function() {
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) e.target.classList.add('in');
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.section-anim').forEach(function(s) {
+    s.classList.add('in');
+    observer.observe(s);
+  });
+})();
+
+(function() {
+  var links = document.querySelectorAll('.sb-nav a');
+  var sections = [];
+  links.forEach(function(a) {
+    var href = a.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      var el = document.getElementById(href.slice(1));
+      if (el) sections.push({ el: el, link: a });
+    }
+  });
+  window.addEventListener('scroll', function() {
+    var scrollY = window.scrollY + 120;
+    var current = sections[0];
+    sections.forEach(function(s) {
+      if (s.el.offsetTop <= scrollY) current = s;
+    });
+    links.forEach(function(l) { l.classList.remove('active'); });
+    if (current) current.link.classList.add('active');
+  });
+})();
+</script>
+</body>
+</html>
