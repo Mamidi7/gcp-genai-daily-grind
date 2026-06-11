@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snowflake Architecture — 3-Layer Stack Explained</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f3eee4;  --paper-2: #ebe4d4; --card: #ffffff;
+  --ink: #1a1612;     --ink-2: #3d3528;
+  --ink-dim: #6b5d49; --ink-faint: #a89a83;
+  --rule: #c8b99e;
+  --accent: #c0392b;  --accent2: #a93226;
+  --green: #2d7d46;   --blue: #2b6cb0;
+  --gold: #b8860b;    --purple: #7b4d8c; --teal: #2c7a6b;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --sidebar-w: 300px;
+}
+[data-theme="dark"] {
+  --paper: #1b1917;  --paper-2: #242220; --card: #2d2826;
+  --ink: #f0ece9;    --ink-2: #c5bbb2;
+  --ink-dim: #9a9088; --ink-faint: #6b625c;
+  --rule: #3a3430;
+  --accent: #e8704a;  --accent2: #d95a3a;
+  --green: #5bbd6b;   --blue: #5b8fbd;
+  --gold: #d4a84b;    --purple: #b47bc4; --teal: #4db896;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--paper); color: var(--ink); font-family: var(--sans);
+  font-size: 15px; line-height: 1.65; min-height: 100vh;
+  background-image: radial-gradient(circle at 25% 15%, rgba(200,180,140,.12) 0%, transparent 40%),
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(200,180,140,.08) 27px, rgba(200,180,140,.08) 28px);
+}
+#wrapper { display: flex; min-height: 100vh; }
+#sidebar {
+  position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh;
+  background: var(--paper-2); border-right: 1px solid var(--rule);
+  overflow-y: auto; z-index: 40; transition: transform .35s ease;
+  display: flex; flex-direction: column;
+}
+.sb-header { padding: 18px 20px; border-bottom: 1px solid var(--rule); }
+.sb-brand { font-family: var(--serif); font-size: 18px; font-weight: 400; color: var(--ink); text-decoration: none; display: block; }
+.sb-brand em { color: var(--accent); font-style: italic; }
+.sb-search input { width: 100%; background: var(--paper); border: 1px solid var(--rule); padding: 8px 10px; font-family: var(--mono); font-size: 10px; color: var(--ink); outline: none; }
+.sb-search input:focus { border-color: var(--accent); }
+.sb-nav { padding: 10px 0; flex: 1; }
+.sb-nav a {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 20px; font-family: var(--mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--ink-dim); text-decoration: none;
+  border-left: 3px solid transparent; transition: all .2s;
+}
+.sb-nav a:hover, .sb-nav a.active { background: var(--paper); color: var(--ink); border-left-color: var(--accent); }
+.sb-nav .sb-section-label { padding: 14px 20px 4px; font-family: var(--mono); font-size: 8px; text-transform: uppercase; letter-spacing: .2em; color: var(--ink-faint); }
+.sb-footer { padding: 12px 20px; border-top: 1px solid var(--rule); font-family: var(--mono); font-size: 9px; color: var(--ink-faint); }
+#main { flex: 1; margin-left: var(--sidebar-w); min-height: 100vh; }
+.main-inner { max-width: 980px; margin: 0 auto; padding: 32px 36px 100px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 0 16px; border-bottom: 1px solid var(--rule); margin-bottom: 32px; }
+.topbar-path { font-family: var(--mono); font-size: 9px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: .1em; }
+.topbar-path a { color: var(--ink); text-decoration: none; }
+#darkToggle { background: var(--paper-2); border: 1px solid var(--ink); padding: 6px 12px; font-size: 16px; cursor: pointer; transition: all .2s; font-family: var(--mono); line-height: 1; color: var(--ink); }
+#darkToggle:hover { transform: scale(1.05); }
+#sidebarToggle { display: none; background: var(--paper-2); border: 1px solid var(--ink); padding: 6px 10px; font-size: 18px; cursor: pointer; position: fixed; top: 12px; left: 12px; z-index: 50; }
+
+h1 { font-family: var(--serif); font-size: clamp(32px, 4vw, 48px); font-weight: 400; line-height: 1.1; margin-bottom: 4px; }
+h1 .italic { font-style: italic; color: var(--accent); }
+h1 + .subtitle { font-family: var(--serif); font-style: italic; color: var(--ink-dim); font-size: 17px; margin-bottom: 20px; }
+h2 { font-family: var(--serif); font-size: clamp(24px, 3vw, 34px); font-weight: 400; line-height: 1.15; margin-top: 48px; margin-bottom: 6px; }
+h2 .underline { text-decoration: underline; text-decoration-style: wavy; text-decoration-color: var(--accent); text-underline-offset: 4px; }
+h2 + .h2-sub { font-family: var(--serif); font-style: italic; color: var(--ink-dim); font-size: 16px; margin-bottom: 22px; }
+h3 { font-family: var(--serif); font-size: 22px; font-weight: 400; margin-top: 28px; margin-bottom: 8px; }
+p { margin-bottom: 12px; }
+code { font-family: var(--mono); font-size: 12px; background: var(--paper-2); padding: 2px 5px; border: 1px solid var(--rule); }
+ul, ol { margin: 8px 0 12px 20px; }
+li { margin-bottom: 4px; }
+strong { font-weight: 600; }
+
+.eyebrow { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.pill { background: var(--paper-2); border: 1px solid var(--ink); padding: 3px 10px; font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; display: inline-block; }
+.pill.accent { border-color: var(--accent); color: var(--accent); }
+.pill.blue { border-color: var(--blue); color: var(--blue); }
+.pill.green { border-color: var(--green); color: var(--green); }
+
+.card { background: var(--paper-2); border: 1px solid var(--ink); padding: 18px 22px; box-shadow: 3px 3px 0 var(--ink); transition: all .3s; margin-bottom: 16px; }
+.card:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--ink); }
+.card.blue { border-color: var(--blue); }
+.card.green { border-color: var(--green); }
+.card.purple { border-color: var(--purple); }
+
+.key-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.key-item { background: var(--paper-2); border: 1px solid var(--ink); padding: 14px; box-shadow: 2px 2px 0 var(--ink); }
+.key-item .kt { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .15em; color: var(--ink-dim); margin-bottom: 4px; }
+.key-item .kv { font-size: 14px; font-weight: 500; }
+
+.highlight-box { background: #f0e0cc; padding: 14px 18px; border-left: 3px solid var(--accent); margin: 16px 0; }
+[data-theme="dark"] .highlight-box { background: #3d3530; }
+.highlight-box .label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .15em; color: var(--accent); margin-bottom: 4px; }
+.highlight-box.green { border-left-color: var(--green); }
+.highlight-box.blue { border-left-color: var(--blue); }
+.highlight-box.gold { border-left-color: var(--gold); }
+
+.table-wrap { overflow-x: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }
+thead th { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; background: var(--paper-2); padding: 10px; border: 1px solid var(--rule); text-align: left; }
+tbody td { padding: 8px 10px; border: 1px solid var(--rule); }
+
+.feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+.feature-card { background: var(--paper-2); border: 1px solid var(--ink); padding: 16px 18px; box-shadow: 2px 2px 0 var(--ink); transition: all .2s; }
+.feature-card:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--ink); }
+.feature-card .fc-icon { font-size: 24px; margin-bottom: 6px; display: block; }
+.feature-card h3 { font-size: 16px; margin: 0 0 4px; font-family: var(--serif); }
+.feature-card p { font-size: 12px; color: var(--ink-dim); margin: 0; }
+
+.section-anim { opacity: 0; transform: translateY(20px); transition: opacity .5s ease, transform .5s ease; }
+.section-anim.in { opacity: 1; transform: translateY(0); }
+
+.code-wrap { position: relative; margin: 8px 0 16px; }
+.code-block { background: #1a1612; color: #e8d9c0; font-family: var(--mono); font-size: 13px; padding: 18px 22px; overflow-x: auto; line-height: 1.6; white-space: pre; }
+.code-block .kw { color: #f0c674; }
+.code-block .fn { color: #81a2be; }
+.code-block .str { color: #b5bd68; }
+.code-block .cm { color: #6b5d49; font-style: italic; }
+.code-block .hl { color: #cc6666; }
+.code-block .num { color: #de935f; }
+.copy-ghost { position: absolute; top: 6px; right: 6px; background: transparent; border: none; color: #a89a83; cursor: pointer; font-size: 15px; z-index: 2; opacity: 0.5; }
+.copy-ghost:hover { opacity: 1; color: #e8d9c0; }
+.code-annotation { background: var(--paper-2); border: 1px solid var(--rule); padding: 12px 16px; font-size: 12px; color: var(--ink-dim); border-left: 3px solid var(--accent); margin: -8px 0 14px; }
+
+.btn { display: inline-block; padding: 8px 18px; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; border: 1px solid var(--ink); background: var(--paper-2); color: var(--ink); cursor: pointer; transition: all .2s; }
+.btn:hover { transform: translate(-1px, -1px); box-shadow: 2px 2px 0 var(--ink); }
+.btn-sm { padding: 5px 12px; font-size: 9px; }
+.btn-ghost { background: transparent; border-color: var(--rule); }
+
+/* === EXCALIDRAW-STYLE SVG (shapes only — standard fonts) === */
+.ex-wrap { background: var(--paper-2); border: 1px solid var(--rule); padding: 16px; margin: 20px 0; overflow-x: auto; position: relative; }
+.ex-wrap svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+.ex-wrap .ex-bg-dots { position: absolute; inset: 0; opacity: 0.1; background-image: radial-gradient(circle, var(--ink-dim) 1px, transparent 1px); background-size: 20px 20px; pointer-events: none; }
+.ex-caption { font-family: var(--serif); font-style: italic; font-size: 12px; color: var(--ink-dim); text-align: center; margin-top: 8px; }
+
+/* SVG animations — works on SVG elements */
+@keyframes fadeUp { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes drawLine { 0% { stroke-dashoffset: 1600; } 100% { stroke-dashoffset: 0; } }
+
+.sv-anim .sv-box { animation: fadeUp .5s ease both; }
+.sv-anim .sv-d1 { animation-delay: 0.1s; }
+.sv-anim .sv-d2 { animation-delay: 0.25s; }
+.sv-anim .sv-d3 { animation-delay: 0.4s; }
+.sv-anim .sv-d4 { animation-delay: 0.55s; }
+.sv-anim .sv-d5 { animation-delay: 0.7s; }
+
+.sv-anim .sv-line { stroke-dasharray: 1600; stroke-dashoffset: 1600; animation: drawLine 1s ease forwards; }
+.sv-anim .sv-l1 { animation-delay: 0.3s; }
+.sv-anim .sv-l2 { animation-delay: 0.6s; }
+.sv-anim .sv-l3 { animation-delay: 0.9s; }
+
+/* Flow chip bar */
+.bar { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 12px; }
+.chip { font-size: 13px; padding: 6px 16px; border: 1px solid var(--rule); background: var(--card); cursor: pointer; transition: all .2s; color: var(--ink-dim); font-family: var(--mono); }
+.chip:hover { border-color: var(--ink); color: var(--ink); }
+.chip.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+#flow-panel { border-top: 1px solid var(--rule); margin: 12px 0 0; padding: 12px 14px; max-height: 160px; overflow-y: auto; background: var(--paper); display: none; font-size: 14px; }
+#flow-panel.show { display: block; }
+#flow-panel p { margin-bottom: 6px; line-height: 1.5; }
+
+/* === QUIZ === */
+@keyframes slideInQ { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.q-card { animation: slideInQ .35s ease-out forwards; opacity: 0; margin-bottom: 14px; border: 1px solid var(--ink); background: var(--paper-2); }
+.q-card:nth-child(1) { animation-delay: 0s; }
+.q-card:nth-child(2) { animation-delay: .04s; }
+.q-card:nth-child(3) { animation-delay: .08s; }
+.q-card:nth-child(4) { animation-delay: .12s; }
+.q-header { display: flex; gap: 8px; align-items: center; padding: 12px 16px 4px; }
+.q-num { font-family: var(--mono); font-size: 10px; color: var(--ink-dim); }
+.cat-badge { font-family: var(--mono); font-size: 8px; padding: 2px 8px; border: 1px solid var(--rule); text-transform: uppercase; }
+.cat-arch { border-color: var(--purple); color: var(--purple); }
+.cat-storage { border-color: var(--teal); color: var(--teal); }
+.cat-compute { border-color: var(--green); color: var(--green); }
+.q-text { padding: 4px 16px 10px; font-size: 14px; font-weight: 500; }
+.opts-grid { padding: 0 16px 10px; }
+.opt-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; cursor: pointer; border: 1px solid transparent; transition: all .2s; }
+.opt-row:hover { background: var(--paper); border-color: var(--rule); transform: translateX(3px); }
+.opt-letter { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 9px; flex-shrink: 0; background: var(--paper); }
+.opt-row.correct .opt-letter { background: var(--green); color: var(--paper); border-color: var(--green); }
+.opt-row.correct .opt-text { color: var(--green); font-weight: 500; }
+.opt-row.wrong .opt-letter { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+.opt-row.wrong .opt-text { color: var(--accent); }
+.opt-row.disabled { pointer-events: none; opacity: .7; }
+
+.score-bar { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; padding: 14px 18px; background: var(--paper-2); border: 1px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+.score-stat { font-family: var(--mono); font-size: 10px; color: var(--ink-dim); }
+.score-stat strong { color: var(--ink); font-size: 13px; }
+.progress-bar-wrap { height: 18px; background: var(--paper); border: 1px solid var(--ink); flex: 1; min-width: 100px; }
+.progress-bar-fill { height: 100%; background: var(--green); transition: width .3s; }
+
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-100%); }
+  #sidebar.open { transform: translateX(0); }
+  #main { margin-left: 0; }
+  .main-inner { padding: 24px 18px 80px; }
+  #sidebarToggle { display: inline-flex; }
+  .feature-grid { grid-template-columns: 1fr; }
+}
+@media print {
+  body { background: white; color: black; }
+  #sidebar { display: none; }
+  #main { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+<body>
+<div id="sidebarToggle" onclick="toggleSidebar()">&#x2630;</div>
+<aside id="sidebar">
+  <div class="sb-header">
+    <a href="#" class="sb-brand">Snowflake <em>Architecture</em></a>
+    <div class="sb-search"><input type="text" id="sbSearchInput" placeholder="Filter nav..." oninput="filterNav()"></div>
+  </div>
+  <nav class="sb-nav" id="sbNav">
+    <div class="sb-section-label">Overview</div>
+    <a href="#intro" class="active">Architecture Intro</a>
+    <a href="#diagram">Interactive Diagram</a>
+    <a href="#workflow">Excalidraw Workflow</a>
+    <div class="sb-section-label">Deep Dive</div>
+    <a href="#layers">The 3 Layers</a>
+    <a href="#sql">SQL Walkthrough</a>
+    <a href="#quiz">Knowledge Check</a>
+  </nav>
+  <div class="sb-footer">Built with Excalidraw shapes + HTML</div>
+</aside>
+
+<div id="main"><div class="main-inner">
+  <div class="topbar">
+    <div class="topbar-path"><a href="#">Home</a> / <a href="#">Snowflake</a> / <span>Architecture</span></div>
+    <div class="topbar-actions"><button id="darkToggle" onclick="toggleDark()">&#x263E;</button></div>
+  </div>
+
+  <section id="intro" class="section-anim">
+    <div class="eyebrow">
+      <span class="pill accent">Snowflake</span>
+      <span class="pill blue">Cloud Data Warehouse</span>
+      <span class="pill green">SaaS</span>
+    </div>
+    <h1>Snowflake Architecture: <span class="italic">The 3-Layer Stack</span></h1>
+    <p class="subtitle">Storage, Compute, and Services — separated, elastic, pay-per-use</p>
+
+    <div class="card blue">
+      <p><strong>In one line:</strong> Snowflake separates storage and compute so you can scale each independently — pay only for what you use, never for idle compute.</p>
+    </div>
+
+    <div class="key-grid">
+      <div class="key-item"><div class="kt">Storage</div><div class="kv">Compressed columnar, cloud blob store</div></div>
+      <div class="key-item"><div class="kt">Compute</div><div class="kv">Virtual Warehouses (elastic, multi-cluster)</div></div>
+      <div class="key-item"><div class="kt">Services</div><div class="kv">Auth, Optimizer, Metadata, Cache (global)</div></div>
+    </div>
+  </section>
+
+  <section id="diagram" class="section-anim">
+    <h2>Interactive <span class="underline">Architecture Diagram</span></h2>
+    <div class="h2-sub">Click a flow chip to highlight a specific data path through the stack</div>
+
+    <div class="highlight-box blue">
+      <div class="label">Excalidraw Shapes + HTML Power</div>
+      <p>This SVG uses Excalidraw-style shapes — double-stroke borders, grid dot background, chunky arrow markers, rounded corners. The interactivity (clickable flow chips, animations, quiz) is pure HTML/CSS/JS layered on top. <strong>Best of both worlds.</strong></p>
+    </div>
+
+    <div class="bar" id="chipBar">
+      <div class="chip active" id="chip-overview" onclick="setFlow('overview', document.getElementById('chip-overview'))">&#x25B6; Overview</div>
+      <div class="chip" id="chip-query" onclick="setFlow('query', document.getElementById('chip-query'))">&#x2699; Query Execution</div>
+      <div class="chip" id="chip-copy" onclick="setFlow('copy', document.getElementById('chip-copy'))">&#x1F4E5; COPY INTO</div>
+      <div class="chip" id="chip-cache" onclick="setFlow('cache', document.getElementById('chip-cache'))">&#x26A1; Cache Layers</div>
+      <div class="chip" id="chip-concurrent" onclick="setFlow('concurrent', document.getElementById('chip-concurrent'))">&#x1F500; Multi-VW</div>
+    </div>
+
+    <div class="ex-wrap sv-anim" id="diagramWrap">
+      <div class="ex-bg-dots"></div>
+      <svg viewBox="0 0 900 660" xmlns="http://www.w3.org/2000/svg" style="font-family:Georgia,serif;">
+        <defs>
+          <pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse">
+            <circle cx="2" cy="2" r="1" fill="#6b5d49" opacity=".08"/>
+          </pattern>
+          <marker id="a" markerWidth="12" markerHeight="9" refX="10" refY="4.5" orient="auto">
+            <path d="M0,0 L12,4.5 L0,9 Z" fill="#6b5d49"/>
+          </marker>
+        </defs>
+        <rect width="900" height="660" fill="var(--paper)" rx="8"/>
+        <rect width="900" height="660" fill="url(#g)" rx="8"/>
+        <text x="450" y="30" text-anchor="middle" fill="var(--ink)" font-size="18" font-weight="600" class="sv-box sv-d1">Snowflake 3-Layer Architecture</text>
+
+        <!-- CLIENTS ZONE -->
+        <rect x="50" y="48" width="800" height="80" rx="10" fill="#a5d8ff" opacity=".18" stroke="#4a9eed" stroke-width="1.5" class="zone zone-all"/>
+        <rect x="52" y="50" width="796" height="76" rx="9" fill="none" stroke="#4a9eed" stroke-width="1" opacity=".12"/>
+        <text x="68" y="68" fill="#4a9eed" font-size="12">Clients &amp; Integration</text>
+
+        <rect x="90" y="76" width="175" height="42" rx="7" fill="#a5d8ff" opacity=".85" stroke="#4a9eed" stroke-width="2" class="sv-box sv-d1 node n-all"/>
+        <rect x="92" y="78" width="171" height="38" rx="6" fill="none" stroke="#4a9eed" stroke-width="1" opacity=".2"/>
+        <text x="177" y="93" text-anchor="middle" fill="#1e1e1e" font-size="12" font-weight="600">Snowsight</text>
+        <text x="177" y="108" text-anchor="middle" fill="#1e1e1e" font-size="10">Browser SQL</text>
+
+        <rect x="360" y="76" width="175" height="42" rx="7" fill="#a5d8ff" opacity=".85" stroke="#4a9eed" stroke-width="2" class="sv-box sv-d2 node n-all"/>
+        <rect x="362" y="78" width="171" height="38" rx="6" fill="none" stroke="#4a9eed" stroke-width="1" opacity=".2"/>
+        <text x="447" y="93" text-anchor="middle" fill="#1e1e1e" font-size="12" font-weight="600">SDK / APIs</text>
+        <text x="447" y="108" text-anchor="middle" fill="#1e1e1e" font-size="10">Python, JDBC</text>
+
+        <rect x="635" y="76" width="175" height="42" rx="7" fill="#a5d8ff" opacity=".85" stroke="#4a9eed" stroke-width="2" class="sv-box sv-d3 node n-all"/>
+        <rect x="637" y="78" width="171" height="38" rx="6" fill="none" stroke="#4a9eed" stroke-width="1" opacity=".2"/>
+        <text x="722" y="93" text-anchor="middle" fill="#1e1e1e" font-size="12" font-weight="600">BI Tools</text>
+        <text x="722" y="108" text-anchor="middle" fill="#1e1e1e" font-size="10">Tableau, Power BI</text>
+
+        <line x1="450" y1="128" x2="450" y2="165" stroke="#6b5d49" stroke-width="2" marker-end="url(#a)" class="sv-line sv-l1 edge e-all e-query"/>
+        <text x="378" y="152" fill="#6b5d49" font-size="11">SQL Queries</text>
+
+        <!-- CLOUD SERVICES ZONE -->
+        <rect x="50" y="170" width="800" height="140" rx="10" fill="#d0bfff" opacity=".18" stroke="#8b5cf6" stroke-width="1.5" class="zone zone-all"/>
+        <rect x="52" y="172" width="796" height="136" rx="9" fill="none" stroke="#8b5cf6" stroke-width="1" opacity=".12"/>
+        <text x="68" y="192" fill="#8b5cf6" font-size="12">Cloud Services Layer (global, stateless)</text>
+
+        <rect x="65" y="206" width="230" height="52" rx="7" fill="#d0bfff" opacity=".85" stroke="#8b5cf6" stroke-width="2" class="sv-box sv-d2 node n-all"/>
+        <rect x="67" y="208" width="226" height="48" rx="6" fill="none" stroke="#8b5cf6" stroke-width="1" opacity=".2"/>
+        <text x="180" y="225" text-anchor="middle" fill="#1e1e1e" font-size="13" font-weight="600">Auth + Query Optimizer</text>
+        <text x="180" y="243" text-anchor="middle" fill="#1e1e1e" font-size="10">Parse, plan, authenticate</text>
+
+        <rect x="335" y="206" width="230" height="52" rx="7" fill="#d0bfff" opacity=".85" stroke="#8b5cf6" stroke-width="2" class="sv-box sv-d3 node n-all"/>
+        <rect x="337" y="208" width="226" height="48" rx="6" fill="none" stroke="#8b5cf6" stroke-width="1" opacity=".2"/>
+        <text x="450" y="225" text-anchor="middle" fill="#1e1e1e" font-size="13" font-weight="600">Metadata + Txn Manager</text>
+        <text x="450" y="243" text-anchor="middle" fill="#1e1e1e" font-size="10">Catalog, locking, concurrency</text>
+
+        <rect x="605" y="206" width="200" height="52" rx="7" fill="#d0bfff" opacity=".85" stroke="#8b5cf6" stroke-width="2" class="sv-box sv-d4 node n-all n-cache"/>
+        <rect x="607" y="208" width="196" height="48" rx="6" fill="none" stroke="#8b5cf6" stroke-width="1" opacity=".2"/>
+        <text x="705" y="225" text-anchor="middle" fill="#1e1e1e" font-size="13" font-weight="600">Result Cache</text>
+        <text x="705" y="243" text-anchor="middle" fill="#1e1e1e" font-size="10">24hr query cache</text>
+
+        <line x1="450" y1="310" x2="450" y2="348" stroke="#6b5d49" stroke-width="2" marker-end="url(#a)" class="sv-line sv-l2 edge e-all e-query"/>
+        <text x="380" y="336" fill="#6b5d49" font-size="11">Query Plan</text>
+
+        <!-- COMPUTE ZONE -->
+        <rect x="50" y="355" width="800" height="95" rx="10" fill="#b2f2bb" opacity=".18" stroke="#22c55e" stroke-width="1.5" class="zone zone-all"/>
+        <rect x="52" y="357" width="796" height="91" rx="9" fill="none" stroke="#22c55e" stroke-width="1" opacity=".12"/>
+        <text x="68" y="377" fill="#22c55e" font-size="12">Compute Layer (Virtual Warehouse)</text>
+
+        <rect x="150" y="390" width="600" height="48" rx="7" fill="#b2f2bb" opacity=".85" stroke="#22c55e" stroke-width="2" class="sv-box sv-d3 node n-all"/>
+        <rect x="152" y="392" width="596" height="44" rx="6" fill="none" stroke="#22c55e" stroke-width="1" opacity=".2"/>
+        <text x="450" y="408" text-anchor="middle" fill="#1e1e1e" font-size="14" font-weight="600">Virtual Warehouse (X-Small to 6X-Large)</text>
+        <text x="450" y="425" text-anchor="middle" fill="#1e1e1e" font-size="10">Elastic CPU + RAM + SSD cache | Multi-cluster | Suspend when idle = $0</text>
+
+        <line x1="450" y1="450" x2="450" y2="488" stroke="#6b5d49" stroke-width="2" marker-end="url(#a)" class="sv-line sv-l3 edge e-all e-query e-copy"/>
+        <text x="380" y="476" fill="#6b5d49" font-size="11">Scan / Write</text>
+
+        <!-- STORAGE ZONE -->
+        <rect x="50" y="495" width="800" height="120" rx="10" fill="#fff3bf" opacity=".18" stroke="#f59e0b" stroke-width="1.5" class="zone zone-all"/>
+        <rect x="52" y="497" width="796" height="116" rx="9" fill="none" stroke="#f59e0b" stroke-width="1" opacity=".12"/>
+        <text x="68" y="518" fill="#f59e0b" font-size="12">Storage Layer (compressed, columnar, cloud blob)</text>
+
+        <rect x="85" y="530" width="330" height="72" rx="7" fill="#fff3bf" opacity=".85" stroke="#f59e0b" stroke-width="2" class="sv-box sv-d4 node n-all"/>
+        <rect x="87" y="532" width="326" height="68" rx="6" fill="none" stroke="#f59e0b" stroke-width="1" opacity=".2"/>
+        <text x="250" y="553" text-anchor="middle" fill="#1e1e1e" font-size="13" font-weight="600">Cloud Blob Storage</text>
+        <text x="250" y="572" text-anchor="middle" fill="#1e1e1e" font-size="10">S3 / GCS / Azure Blob</text>
+        <text x="250" y="588" text-anchor="middle" fill="#1e1e1e" font-size="10">Compressed columnar files</text>
+
+        <rect x="485" y="530" width="330" height="72" rx="7" fill="#fff3bf" opacity=".85" stroke="#f59e0b" stroke-width="2" class="sv-box sv-d5 node n-all n-part"/>
+        <rect x="487" y="532" width="326" height="68" rx="6" fill="none" stroke="#f59e0b" stroke-width="1" opacity=".2"/>
+        <text x="650" y="553" text-anchor="middle" fill="#1e1e1e" font-size="13" font-weight="600">Micro-partitions + Clustering</text>
+        <text x="650" y="572" text-anchor="middle" fill="#1e1e1e" font-size="10">50-500MB each, columnar</text>
+        <text x="650" y="588" text-anchor="middle" fill="#1e1e1e" font-size="10">Pruning metadata = fast scan</text>
+
+        <text x="450" y="640" text-anchor="middle" fill="var(--ink-faint)" font-size="11">Click a flow chip above to highlight a specific data path</text>
+      </svg>
+    </div>
+
+    <div id="flow-panel">
+      <p><b>Overview:</b> Snowflake's 3-layer stack. Clients connect via Snowsight/SDK/BI tools. Cloud Services handles auth, optimization, metadata. VW executes queries against cloud storage. Storage stores compressed columnar data in micro-partitions. <b>Separation of storage and compute = elastic scaling.</b></p>
+    </div>
+  </section>
+
+  <section id="workflow" class="section-anim">
+    <h2>The <span class="underline">Excalidraw Shapes</span> Workflow</h2>
+    <div class="h2-sub">How Excalidraw-style SVGs integrate into your teaching HTMLs</div>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <span class="fc-icon">&#x270F;</span>
+        <h3>1. Design in Excalidraw</h3>
+        <p>Drag-drop shapes, text, arrows. Hand-drawn look built-in. Save as .excalidraw JSON. Use community libraries for AWS/GCP icons.</p>
+      </div>
+      <div class="feature-card">
+        <span class="fc-icon">&#x1F504;</span>
+        <h3>2. Export as SVG</h3>
+        <p>Open excalidraw.com, drag your .excalidraw file, export as SVG. Preserves the hand-drawn aesthetic.</p>
+      </div>
+      <div class="feature-card">
+        <span class="fc-icon">&#x1F4D6;</span>
+        <h3>3. Embed + Enhance</h3>
+        <p>Drop SVG into any krishna-html-go notebook. Add flow chips, animations, quizzes around it. Standard editorial fonts, Excalidraw shapes.</p>
+      </div>
+      <div class="feature-card">
+        <span class="fc-icon">&#x2728;</span>
+        <h3>4. Interactive Layer</h3>
+        <p>CSS animations (fade-in boxes, draw-path arrows) + JS interactivity (click to highlight flows, quiz engine). What Excalidraw alone cannot do.</p>
+      </div>
+    </div>
+  </section>
+  <section id="layers" class="section-anim">
+    <h2>The 3 <span class="underline">Layers</span> Explained</h2>
+    <div class="h2-sub">What each layer does and why it matters for interviews</div>
+
+    <h3>1. Cloud Services Layer</h3>
+    <p>The <strong>brain</strong> of Snowflake. Global, stateless, always running. Handles authentication, query optimization, metadata management, MVCC transactions, and the Result Cache (24-hour storage of query results). <strong>You never pay for this layer</strong> — it's included in Snowflake's pricing.</p>
+
+    <div class="highlight-box blue">
+      <div class="label">Interview 30s Answer</div>
+      <p><strong>Q: "How does Snowflake optimize queries without compute?"</strong> — Cloud Services is a global stateless layer handling auth, parsing, optimization, and metadata. The optimizer reads micro-partition metadata to prune files. <b>Zero compute credits for planning.</b></p>
+    </div>
+
+    <h3>2. Compute Layer (Virtual Warehouse)</h3>
+    <p>The <strong>muscle</strong>. VWs are elastic compute clusters (X-Small to 6X-Large). Multi-cluster auto-scaling for concurrency. Local SSD cache for hot data. Auto-suspend on idle (default 10min, zero cost when suspended). <strong>This is what you pay for</strong> — per-second billing while running.</p>
+
+    <div class="highlight-box gold">
+      <div class="label">Common Confusion</div>
+      <p>"Does the VW store data permanently?" — No. Local SSD cache helps hot queries, but the <strong>source of truth is always cloud blob storage</strong>. Suspend one VW, resume another — it reads from storage fresh.</p>
+    </div>
+
+    <h3>3. Storage Layer</h3>
+    <p>The <strong>memory</strong>. Data stored in cloud blob store (S3/GCS/Azure Blob) in compressed columnar format. <strong>Micro-partitions</strong> (50-500MB, self-contained, immutable). <strong>Clustering</strong> defines sort order for pruning. <strong>Time Travel</strong> (1-90 days of point-in-time queries). <strong>Fail-safe</strong> (7 days, Snowflake-managed).</p>
+  </section>
+
+  <section id="sql" class="section-anim">
+    <h2>SQL <span class="underline">Walkthrough</span></h2>
+    <div class="h2-sub">Key Snowflake SQL patterns — staging to query</div>
+
+    <h3>1. Create Warehouse + Database</h3>
+    <div class="code-wrap">
+      <button class="copy-ghost" onclick="copyCode(this)">&#x2398;</button>
+      <div class="code-block"><span class="kw">CREATE</span> WAREHOUSE my_wh
+  WAREHOUSE_SIZE = <span class="str">'XSMALL'</span>
+  AUTO_SUSPEND = <span class="num">300</span>
+  AUTO_RESUME = <span class="kw">TRUE</span>
+  INITIALLY_SUSPENDED = <span class="kw">TRUE</span>;
+<span class="kw">CREATE</span> DATABASE analytics_db;
+<span class="kw">CREATE</span> SCHEMA staging;</div>
+    </div>
+
+    <h3>2. Stage + File Format</h3>
+    <div class="code-wrap">
+      <button class="copy-ghost" onclick="copyCode(this)">&#x2398;</button>
+      <div class="code-block"><span class="kw">CREATE</span> FILE FORMAT csv_format
+  TYPE = <span class="str">'CSV'</span>
+  FIELD_DELIMITER = <span class="str">'|'</span>
+  SKIP_HEADER = <span class="num">1</span>;
+<span class="kw">CREATE</span> STAGE my_stage
+  URL = <span class="str">'s3://my-bucket/data/'</span>
+  FILE_FORMAT = csv_format;</div>
+    </div>
+
+    <h3>3. COPY INTO</h3>
+    <div class="code-wrap">
+      <button class="copy-ghost" onclick="copyCode(this)">&#x2398;</button>
+      <div class="code-block"><span class="kw">COPY INTO</span> analytics_db.staging.orders
+<span class="kw">FROM</span> @my_stage/orders/
+FILE_FORMAT = csv_format
+<span class="hl">ON_ERROR</span> = <span class="str">'CONTINUE'</span>
+PURGE = <span class="kw">TRUE</span>;</div>
+    </div>
+    <div class="code-annotation"><code>ON_ERROR = 'CONTINUE'</code> is production-critical. Without it, one bad row fails the entire batch. With it, bad rows are skipped — inspect via <code>VALIDATION_MODE</code>.</div>
+  </section>
+
+  <section id="quiz" class="section-anim">
+    <h2>Knowledge <span class="underline">Check</span></h2>
+    <div class="h2-sub">Test your understanding of Snowflake architecture</div>
+
+    <div class="score-bar" id="scoreBar">
+      <div class="score-stat">Score: <strong id="scoreNum">0</strong>/<strong id="scoreTotal">0</strong></div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+      <button class="btn btn-sm btn-ghost" onclick="resetQuiz()">Reset</button>
+    </div>
+
+    <div id="quizContainer">
+      <div class="q-card" data-answer="B" data-qid="0">
+        <div class="q-header"><span class="q-num">Q1</span><span class="cat-badge cat-arch">Architecture</span></div>
+        <div class="q-text">Snowflake separates storage and compute. What does this mean in practice?</div>
+        <div class="opts-grid">
+          <div class="opt-row" onclick="selOpt(this,'A',0)"><span class="opt-letter">A</span><span class="opt-text">Storage and compute always run on the same server</span></div>
+          <div class="opt-row" onclick="selOpt(this,'B',0)"><span class="opt-letter">B</span><span class="opt-text">Scale storage and compute independently — pay only for what you use</span></div>
+          <div class="opt-row" onclick="selOpt(this,'C',0)"><span class="opt-letter">C</span><span class="opt-text">Compute is free, only storage costs money</span></div>
+          <div class="opt-row" onclick="selOpt(this,'D',0)"><span class="opt-letter">D</span><span class="opt-text">Storage is on-premise, compute in cloud</span></div>
+        </div>
+        <div class="q-footer"><span class="result"></span></div>
+      </div>
+
+      <div class="q-card" data-answer="C" data-qid="1">
+        <div class="q-header"><span class="q-num">Q2</span><span class="cat-badge cat-arch">Architecture</span></div>
+        <div class="q-text">Which layer handles authentication and query optimization?</div>
+        <div class="opts-grid">
+          <div class="opt-row" onclick="selOpt(this,'A',1)"><span class="opt-letter">A</span><span class="opt-text">Virtual Warehouse (Compute)</span></div>
+          <div class="opt-row" onclick="selOpt(this,'B',1)"><span class="opt-letter">B</span><span class="opt-text">Storage Layer</span></div>
+          <div class="opt-row" onclick="selOpt(this,'C',1)"><span class="opt-letter">C</span><span class="opt-text">Cloud Services Layer</span></div>
+          <div class="opt-row" onclick="selOpt(this,'D',1)"><span class="opt-letter">D</span><span class="opt-text">All three layers equally</span></div>
+        </div>
+        <div class="q-footer"><span class="result"></span></div>
+      </div>
+
+      <div class="q-card" data-answer="A" data-qid="2">
+        <div class="q-header"><span class="q-num">Q3</span><span class="cat-badge cat-storage">Storage</span></div>
+        <div class="q-text">What is a micro-partition in Snowflake?</div>
+        <div class="opts-grid">
+          <div class="opt-row" onclick="selOpt(this,'A',2)"><span class="opt-letter">A</span><span class="opt-text">50-500MB self-contained columnar chunk with pruning metadata</span></div>
+          <div class="opt-row" onclick="selOpt(this,'B',2)"><span class="opt-letter">B</span><span class="opt-text">A row-level B-Tree index</span></div>
+          <div class="opt-row" onclick="selOpt(this,'C',2)"><span class="opt-letter">C</span><span class="opt-text">A compressed copy of the entire table</span></div>
+          <div class="opt-row" onclick="selOpt(this,'D',2)"><span class="opt-letter">D</span><span class="opt-text">A table partitioned by date only</span></div>
+        </div>
+        <div class="q-footer"><span class="result"></span></div>
+      </div>
+
+      <div class="q-card" data-answer="D" data-qid="3">
+        <div class="q-header"><span class="q-num">Q4</span><span class="cat-badge cat-compute">Compute</span></div>
+        <div class="q-text">When a Virtual Warehouse is suspended, what happens to the data?</div>
+        <div class="opts-grid">
+          <div class="opt-row" onclick="selOpt(this,'A',3)"><span class="opt-letter">A</span><span class="opt-text">All data is deleted from Snowflake</span></div>
+          <div class="opt-row" onclick="selOpt(this,'B',3)"><span class="opt-letter">B</span><span class="opt-text">Data stays in VW's local SSD cache</span></div>
+          <div class="opt-row" onclick="selOpt(this,'C',3)"><span class="opt-letter">C</span><span class="opt-text">Data moves to Cloud Services layer</span></div>
+          <div class="opt-row" onclick="selOpt(this,'D',3)"><span class="opt-letter">D</span><span class="opt-text">Data stays safe in cloud blob storage — VW cache is lost but storage is source of truth</span></div>
+        </div>
+        <div class="q-footer"><span class="result"></span></div>
+      </div>
+    </div>
+  </section>
+</div></div>
+
+<script>
+function toggleDark() {
+  var h = document.documentElement;
+  if (h.getAttribute('data-theme') === 'dark') { h.removeAttribute('data-theme'); localStorage.setItem('theme','light'); }
+  else { h.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
+}
+(function(){ if (localStorage.getItem('theme')==='dark') document.documentElement.setAttribute('data-theme','dark'); })();
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+document.querySelectorAll('#sidebar a').forEach(function(a){ a.addEventListener('click',function(){ document.getElementById('sidebar').classList.remove('open'); }); });
+
+function filterNav() {
+  var q = document.getElementById('sbSearchInput').value.toLowerCase();
+  document.querySelectorAll('#sbNav a').forEach(function(a){ a.style.display = a.textContent.toLowerCase().includes(q) ? 'flex' : 'none'; });
+}
+
+(function(){
+  var secs = document.querySelectorAll('.section-anim[id]');
+  var links = document.querySelectorAll('#sbNav a[href^="#"]');
+  function highlight(){
+    var y = window.scrollY + 120, cur = '';
+    secs.forEach(function(s){ if(s.offsetTop<=y && s.offsetTop+s.offsetHeight>y) cur=s.getAttribute('id'); });
+    links.forEach(function(a){ a.classList.remove('active'); if(a.getAttribute('href')==='#'+cur) a.classList.add('active'); });
+  }
+  window.addEventListener('scroll', highlight, {passive:true});
+})();
+
+(function(){
+  document.querySelectorAll('.section-anim').forEach(function(e){ e.classList.add('in'); });
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); } });
+  }, {threshold:0.01, rootMargin:'0px 0px 100px 0px'});
+  document.querySelectorAll('.section-anim:not(.in)').forEach(function(e){ obs.observe(e); });
+})();
+
+function copyCode(btn) {
+  var t = btn.nextElementSibling.textContent;
+  if (navigator.clipboard) navigator.clipboard.writeText(t).then(function(){
+    var o=btn.textContent; btn.textContent='\u2713'; btn.style.color='#b5bd68';
+    setTimeout(function(){ btn.textContent=o; btn.style.color=''; },1500);
+  });
+}
+
+/* === FLOW CHIPS === */
+function setFlow(flow, el) {
+  document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
+  if (el) el.classList.add('active');
+
+  document.querySelectorAll('.edge').forEach(function(e){ e.style.opacity = '0.03'; });
+  document.querySelectorAll('.node').forEach(function(n){ n.style.opacity = '0.04'; });
+  document.querySelectorAll('.zone').forEach(function(z){ z.style.opacity = '0.03'; });
+
+  var p = document.getElementById('flow-panel');
+  p.classList.add('show');
+
+  switch(flow) {
+    case 'overview':
+      document.querySelectorAll('.e-all').forEach(function(e){ e.style.opacity='0.7'; });
+      document.querySelectorAll('.node').forEach(function(n){ n.style.opacity='0.85'; });
+      document.querySelectorAll('.zone').forEach(function(z){ z.style.opacity='0.18'; });
+      p.innerHTML = '<p><b>Overview:</b> Snowflake\'s 3-layer stack. Clients connect via Snowsight/SDK/BI. Cloud Services handles auth, optimization, metadata. VW queries cloud storage. <b>Separation = elastic scaling.</b></p>';
+      break;
+    case 'query':
+      document.querySelectorAll('.e-query').forEach(function(e){ e.style.opacity='1'; });
+      document.querySelectorAll('.e-all').forEach(function(e){ e.style.opacity='0.08'; });
+      document.querySelectorAll('.node').forEach(function(n){ n.style.opacity='0.85'; });
+      document.querySelectorAll('.zone').forEach(function(z){ z.style.opacity='0.18'; });
+      p.innerHTML = '<p><b>Client => Auth+Optimizer:</b> SQL hits Cloud Services. Auth verifies, optimizer plans. <b>Zero compute credits.</b></p><p><b>Services => VW:</b> Plan sent to VW. Cold start if suspended (1-10s).</p><p><b>VW => Storage:</b> VW scans pruned micro-partitions. Columnar = read only needed columns.</p><p><b>Storage => Client:</b> Results stream back. Same query within 24h hits <b>Result Cache</b>.</p>';
+      break;
+    case 'copy':
+      document.querySelectorAll('.e-copy').forEach(function(e){ e.style.opacity='1'; });
+      document.querySelectorAll('.e-all').forEach(function(e){ e.style.opacity='0.08'; });
+      document.querySelectorAll('.n-cache').forEach(function(n){ n.style.opacity='0.1'; });
+      document.querySelectorAll('.n-part').forEach(function(n){ n.style.opacity='0.4'; });
+      document.querySelectorAll('.node').forEach(function(n){ n.style.opacity='0.85'; });
+      document.querySelectorAll('.zone').forEach(function(z){ z.style.opacity='0.18'; });
+      p.innerHTML = '<p><b>Files => Stage:</b> Data files land in cloud bucket. Snowflake stage references location.</p><p><b>Stage => VW:</b> <code>COPY INTO</code> instructs VW to read files. VW parses and transforms.</p><p><b>VW => Storage:</b> Parsed rows written as new micro-partitions. Compressed, columnar, immutable.</p>';
+      break;
+    case 'cache':
+      document.querySelectorAll('.node').forEach(function(n){ n.style.opacity='0.1'; });
+      document.querySelectorAll('.n-cache').forEach(function(n){ n.style.opacity='0.85'; });
+      document.querySelectorAll('.n-part').forEach(function(n){ n.style.opacity='0.08'; });
+      document.querySelectorAll('.e-all').forEach(function(e){ e.style.opacity='0.08'; });
+      document.querySelectorAll('.zone').forEach(function(z){ z.style.opacity='0.18'; });
+      p.innerHTML = '<p><b>Result Cache (Services):</b> Same query within 24h = instant response, no compute.</p><p><b>SSD Cache (VW local):</b> Recently read micro-partitions stay hot on VW local SSD.</p><p><b>Three cache layers:</b> 1) Metadata Cache (free), 2) Result Cache (24h), 3) SSD Cache (VW-local).</p>';
+      break;
+    case 'concurrent':
+      document.querySelectorAll('.node').forEach(function(n){ n.style.opacity='0.85'; });
+      document.querySelectorAll('.zone').forEach(function(z){ z.style.opacity='0.18'; });
+      document.querySelectorAll('.e-all').forEach(function(e){ e.style.opacity='0.08'; });
+      document.querySelectorAll('.edge').forEach(function(e){ e.style.opacity='0.2'; });
+      p.innerHTML = '<p><b>Multi-VW concurrency:</b> Multiple VWs query same storage without contention.</p><p><b>MVCC isolation:</b> Each query sees consistent snapshot. Writes don\'t block reads.</p><p><b>Typical pattern:</b> ETL warehouse (large, auto-suspend=5min) + BI warehouse (medium, always on).</p>';
+      break;
+  }
+}
+
+/* === QUIZ === */
+var Q = { answered:0, correct:0, total:document.querySelectorAll('.q-card').length, locked:false };
+function selOpt(row, sel, qid) {
+  if (Q.locked) return;
+  var card = row.closest('.q-card');
+  if (card.dataset.answered === 'true') return;
+  var ans = card.dataset.answer;
+  var opts = card.querySelectorAll('.opt-row');
+  var r = card.querySelector('.result');
+  opts.forEach(function(o){ o.classList.add('disabled'); });
+  card.dataset.answered = 'true';
+  if (sel === ans) { row.classList.add('correct'); r.textContent='\u2713 Correct!'; r.style.color='var(--green)'; Q.correct++; }
+  else {
+    row.classList.add('wrong');
+    opts.forEach(function(o){ if(o.querySelector('.opt-letter').textContent===ans) o.classList.add('correct'); });
+    r.textContent='\u2717 Incorrect'; r.style.color='var(--accent)';
+  }
+  Q.answered++;
+  document.getElementById('scoreNum').textContent = Q.correct;
+  document.getElementById('scoreTotal').textContent = Q.answered;
+  document.getElementById('progressFill').style.width = (Q.answered>0 ? (Q.correct/Q.answered)*100 : 0)+'%';
+  if (Q.answered === Q.total) Q.locked = true;
+}
+function resetQuiz() {
+  Q.answered=0; Q.correct=0; Q.locked=false;
+  document.querySelectorAll('.q-card').forEach(function(c){
+    c.dataset.answered='false';
+    c.querySelectorAll('.opt-row').forEach(function(o){ o.classList.remove('correct','wrong','disabled'); });
+    c.querySelector('.result').textContent='';
+  });
+  document.getElementById('scoreNum').textContent='0';
+  document.getElementById('scoreTotal').textContent='0';
+  document.getElementById('progressFill').style.width='0%';
+}
+</script>
+</body>
+</html>
